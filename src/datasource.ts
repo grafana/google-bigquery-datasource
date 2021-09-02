@@ -7,7 +7,7 @@ import { v4 as generateID } from 'uuid';
 
 const Shifted = '_shifted';
 function sleep(ms) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
 }
@@ -56,7 +56,11 @@ export class BigQueryDatasource {
       if (field === -1) {
         field = splitFrom[i].length;
       }
-      col = splitFrom[i].substring(0, field).trim().replace('`', '').replace('`', '');
+      col = splitFrom[i]
+        .substring(0, field)
+        .trim()
+        .replace('`', '')
+        .replace('`', '');
       col = col.replace(/\$__timeGroupAlias\(/g, '');
       col = col.replace(/\$__timeGroup\(/g, '');
       col = col.replace(/\$__timeFilter\(/g, '');
@@ -196,9 +200,9 @@ export class BigQueryDatasource {
   }
 
   public async query(options) {
-    const queries = _.filter(options.targets, (target) => {
+    const queries = _.filter(options.targets, target => {
       return target.hide !== true;
-    }).map((target) => {
+    }).map(target => {
       const queryModel = new BigQueryQuery(target, this.templateSrv, options.scopedVars);
       this.queryModel = queryModel;
       return {
@@ -222,14 +226,14 @@ export class BigQueryDatasource {
     if (queries.length === 0) {
       return this.$q.when({ data: [] });
     }
-    _.map(queries, (query) => {
+    _.map(queries, query => {
       const newQuery = BigQueryDatasource._createTimeShiftQuery(query);
       if (newQuery) {
         queries.push(newQuery);
       }
     });
     let modOptions;
-    const allQueryPromise = _.map(queries, (query) => {
+    const allQueryPromise = _.map(queries, query => {
       const tmpQ = this.queryModel.target.rawSql;
       if (this.queryModel.target.rawQuery === false) {
         this.queryModel.target.metricColumn = query.metricColumn;
@@ -244,7 +248,7 @@ export class BigQueryDatasource {
         const q = this.setUpQ(modOptions, options, query);
         console.log(q);
         this.queryModel.target.rawSql = q;
-        return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then((response) => {
+        return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then(response => {
           return ResponseParser.parseDataQuery(response, query.format);
         });
       } else {
@@ -252,20 +256,20 @@ export class BigQueryDatasource {
         const sqlWithNoVariables = this.templateSrv.replace(tmpQ, options.scopedVars, this.interpolateVariable);
         const [project, dataset, table] = BigQueryDatasource._extractFromClause(sqlWithNoVariables);
         this.getDateFields(project, dataset, table)
-          .then((dateFields) => {
+          .then(dateFields => {
             const tm = BigQueryDatasource._FindTimeField(tmpQ, dateFields);
             this.queryModel.target.timeColumn = tm.text;
             this.queryModel.target.timeColumnType = tm.value;
             this.queryModel.target.table = table;
           })
-          .catch((err) => {
+          .catch(err => {
             console.log(err);
           });
         this.queryModel.target.rawSql = query.rawSql;
         modOptions = BigQueryDatasource._setupTimeShiftQuery(query, options);
         const q = this.setUpQ(modOptions, options, query);
         console.log(q);
-        return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then((response) => {
+        return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then(response => {
           return ResponseParser.parseDataQuery(response, query.format);
         });
       }
@@ -291,7 +295,9 @@ export class BigQueryDatasource {
           const shiftPeriod = res[0];
           const shiftVal = res[1];
           for (let i = 0; i < d.datapoints.length; i++) {
-            d.datapoints[i][1] = moment(d.datapoints[i][1]).subtract(shiftVal, shiftPeriod).valueOf();
+            d.datapoints[i][1] = moment(d.datapoints[i][1])
+              .subtract(shiftVal, shiftPeriod)
+              .valueOf();
           }
         }
       }
@@ -311,7 +317,7 @@ export class BigQueryDatasource {
       refId,
     };
     return this.doQuery(interpolatedQuery.rawSql, refId, query.queryPriority).then(metricData =>
-      ResponseParser.parseDataQuery(metricData, "var")
+      ResponseParser.parseDataQuery(metricData, 'var')
     );
   }
   public async testDatasource() {
@@ -434,7 +440,7 @@ export class BigQueryDatasource {
         requestId: options.annotation.name,
         url,
       })
-      .then((data) => this.responseParser.transformAnnotationResponse(options, data));
+      .then(data => this.responseParser.transformAnnotationResponse(options, data));
   }
   private setUpQ(modOptions, options, query) {
     let q = this.queryModel.expend_macros(modOptions);
@@ -467,7 +473,7 @@ export class BigQueryDatasource {
    */
   private setUpPartition(query, isPartitioned, partitionedField, options) {
     partitionedField = partitionedField ? partitionedField : '_PARTITIONTIME';
-    if (isPartitioned && !query.match(new RegExp(partitionedField, "i"))) {
+    if (isPartitioned && !query.match(new RegExp(partitionedField, 'i'))) {
       const fromD = BigQueryQuery.convertToUtc(options.range.from._d);
       const toD = BigQueryQuery.convertToUtc(options.range.to._d);
       const from = `${partitionedField} >= '${BigQueryQuery.formatDateToString(fromD, '-', true)}'`;
@@ -487,7 +493,7 @@ export class BigQueryDatasource {
       .datasourceRequest({
         method: 'GET',
         requestId: generateID(),
-        url: this.url + url
+        url: this.url + url,
       })
       .then(result => {
         if (result.status !== 200) {
@@ -527,7 +533,7 @@ export class BigQueryDatasource {
         requestId,
         url,
       })
-      .then((result) => {
+      .then(result => {
         if (result.status !== 200) {
           if (result.status >= 500 && maxRetries > 0) {
             return this.doQueryRequest(query, requestId, priority, maxRetries - 1);
@@ -536,7 +542,7 @@ export class BigQueryDatasource {
         }
         return result;
       })
-      .catch((error) => {
+      .catch(error => {
         if (maxRetries > 0) {
           return this.doQueryRequest(query, requestId, priority, maxRetries - 1);
         }
@@ -589,7 +595,7 @@ export class BigQueryDatasource {
       };
     }
     let notReady = false;
-    ['-- time --', '-- value --'].forEach((element) => {
+    ['-- time --', '-- value --'].forEach(element => {
       if (query.indexOf(element) !== -1) {
         notReady = true;
       }
@@ -647,7 +653,7 @@ export class BigQueryDatasource {
       return value;
     }
 
-    const quotedValues = _.map(value, (v) => {
+    const quotedValues = _.map(value, v => {
       return BigQueryQuery.quoteLiteral(v);
     });
     return quotedValues.join(',');

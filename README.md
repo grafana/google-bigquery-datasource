@@ -179,7 +179,7 @@ The build works with Yarn:
 #### Development Build
 
 ```
-yarn run build:dev
+yarn dev
 ```
 
 #### Production Build
