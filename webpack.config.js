@@ -4,7 +4,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 module.exports = (base, options) => {
-  console.log(options);
   const plugins = [
     ...base.plugins,
     new CleanWebpackPlugin('doitintl-bigquery-datasource/', { allowExternal: true }),

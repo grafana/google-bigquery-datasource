@@ -146,3 +146,6 @@ TEST-results.xml
 package-lock.json
 /todo.txt
 todo.txt
+
+# dist directory
+dist/
