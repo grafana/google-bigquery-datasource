@@ -196,7 +196,7 @@ describe('BigQueryQuery', () => {
     query.templateSrv.timeRange = time;
     const whereClause = query.buildWhereClause();
     expect(whereClause).toBe(
-      "\nWHERE\n  _PARTITIONTIME >= '1987-06-30 03:00:00' AND\n  _PARTITIONTIME < '1987-06-30 03:00:00'"
+      "\nWHERE\n  _PARTITIONTIME >= '1987-06-30 00:00:00' AND\n  _PARTITIONTIME < '1987-06-30 00:00:00'"
     );
     query.target.partitionedField = 't';
     expect(query.buildWhereClause()).toBe('');
@@ -366,7 +366,7 @@ describe('BigQueryQuery', () => {
     expect(query.getIntervalStr('1w', '1d', null)).toBe(
       'TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(`my_data`), 604800) * 604800) AS time'
     );
-    expect(query.getIntervalStr('1m', '1d', null)).toBe(
+    expect(query.getIntervalStr('1M', '1d', null)).toBe(
       "TIMESTAMP(  (PARSE_DATE( \"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM `my_data`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `my_data`)) AS STRING),'-','01')))) AS time"
     );
     expect(query.getIntervalStr('1y', '2d', null)).toBe(
@@ -380,7 +380,7 @@ describe('BigQueryQuery', () => {
     expect(BigQueryQuery.getUnixSecondsFromString('1h')).toBe(3600);
     expect(BigQueryQuery.getUnixSecondsFromString('1d')).toBe(86400);
     expect(BigQueryQuery.getUnixSecondsFromString('1w')).toBe(604800);
-    expect(BigQueryQuery.getUnixSecondsFromString('1m')).toBe(2629743);
+    expect(BigQueryQuery.getUnixSecondsFromString('1M')).toBe(2629743);
     expect(BigQueryQuery.getUnixSecondsFromString('1y')).toBe(31536000);
     expect(BigQueryQuery.getUnixSecondsFromString('1z')).toBe(0);
   });

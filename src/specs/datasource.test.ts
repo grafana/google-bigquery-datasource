@@ -46,8 +46,9 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('metricFindQuery', () => {
-    beforeEach(() => ctx.backendSrv.datasourceRequest = jest.fn(() => Promise.resolve({ data: {}, status: 200 })));
-    const query = '', options = { variable: { name: 'refId' } };
+    beforeEach(() => (ctx.backendSrv.datasourceRequest = jest.fn(() => Promise.resolve({ data: {}, status: 200 }))));
+    const query = '',
+      options = { variable: { name: 'refId' } };
     it('should check response for empty query', async () => {
       const res = await ctx.ds.metricFindQuery(query, options);
       expect(res).toEqual([{ data: [] }]);
@@ -825,18 +826,10 @@ describe('BigQueryDatasource', () => {
       totalRows: '2',
       rows: [
         {
-          f: [
-            { v: 1 },
-            { v: 'text1' },
-            { v: 'tags1' },
-          ],
+          f: [{ v: 1 }, { v: 'text1' }, { v: 'tags1' }],
         },
         {
-          f: [
-            { v: 2 },
-            { v: 'text2' },
-            { v: 'tags2' },
-          ],
+          f: [{ v: 2 }, { v: 'text2' }, { v: 'tags2' }],
         },
       ],
       totalBytesProcessed: '23289520',
@@ -845,8 +838,18 @@ describe('BigQueryDatasource', () => {
     };
 
     const expectedResult = [
-      { annotation: { name: "Annotation test name", rawQuery: "select x from y where z" }, tags: ["tags1"], text: "text1", time: 1000 },
-      { annotation: { name: "Annotation test name", rawQuery: "select x from y where z" }, tags: ["tags2"], text: "text2", time: 2000 }
+      {
+        annotation: { name: 'Annotation test name', rawQuery: 'select x from y where z' },
+        tags: ['tags1'],
+        text: 'text1',
+        time: 1000,
+      },
+      {
+        annotation: { name: 'Annotation test name', rawQuery: 'select x from y where z' },
+        tags: ['tags2'],
+        text: 'text2',
+        time: 2000,
+      },
     ];
 
     beforeEach(() => {
@@ -858,18 +861,18 @@ describe('BigQueryDatasource', () => {
     const options = {
       annotation: {
         name: 'Annotation test name',
-        rawQuery: `select x from y where z`
+        rawQuery: `select x from y where z`,
       },
       scopedVars: {
         __interval: {
-          text: "600000",
-          value: 600000
-        }
+          text: '600000',
+          value: 600000,
+        },
       },
       range: {
         from: moment.utc('2018-04-25 10:00'),
         to: moment.utc('2018-04-25 11:00'),
-      }
+      },
     };
     it('should return expected data', async () => {
       const res = await ctx.ds.annotationQuery(options);
@@ -968,7 +971,7 @@ describe('BigQueryDatasource', () => {
       ];
       const options = { annotation: {} };
       const data = { data: { schema: { fields } } };
-      const p = new Promise((reject, resolve) => { });
+      const p = new Promise((reject, resolve) => {});
       const rp = new ResponseParser(p);
       const list = rp.transformAnnotationResponse(options, data);
       expect(list.length).toBe(0);
@@ -993,7 +996,7 @@ describe('BigQueryDatasource', () => {
       ];
       const options = { annotation: {} };
       const data = { data: { schema: { fields } } };
-      const p = new Promise((reject, resolve) => { });
+      const p = new Promise((reject, resolve) => {});
       const rp = new ResponseParser(p);
       const list = rp.transformAnnotationResponse(options, data);
       expect(list.length).toBe(0);
@@ -1001,46 +1004,46 @@ describe('BigQueryDatasource', () => {
     });
     it('transformAnnotationResponse results with 3 rows', () => {
       const rows = [
-        {
-          f: [
-            {
-              v: '1.521578851E9',
-            },
-            {
-              v: '37.7753058',
-            },
-            {
-              v: '42.7753058',
-            },
-          ],
-        },
-        {
-          f: [
-            {
-              v: '1.521578916E9',
-            },
-            {
-              v: '37.3322326',
-            },
-            {
-              v: '42.7753058',
-            },
-          ],
-        },
-        {
-          f: [
-            {
-              v: '1.521578927E9',
-            },
-            {
-              v: '37.781752',
-            },
-            {
-              v: '42.7753058',
-            },
-          ],
-        },
-      ],
+          {
+            f: [
+              {
+                v: '1.521578851E9',
+              },
+              {
+                v: '37.7753058',
+              },
+              {
+                v: '42.7753058',
+              },
+            ],
+          },
+          {
+            f: [
+              {
+                v: '1.521578916E9',
+              },
+              {
+                v: '37.3322326',
+              },
+              {
+                v: '42.7753058',
+              },
+            ],
+          },
+          {
+            f: [
+              {
+                v: '1.521578927E9',
+              },
+              {
+                v: '37.781752',
+              },
+              {
+                v: '42.7753058',
+              },
+            ],
+          },
+        ],
         fields = [
           {
             name: 'time',
@@ -1060,7 +1063,7 @@ describe('BigQueryDatasource', () => {
         ];
       const options = { annotation: {} };
       const data = { data: { schema: { fields }, rows } };
-      const p = new Promise((reject, resolve) => { });
+      const p = new Promise((reject, resolve) => {});
       const rp = new ResponseParser(p);
       const list = rp.transformAnnotationResponse(options, data);
       expect(list.length).toBe(3);

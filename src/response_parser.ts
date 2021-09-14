@@ -1,6 +1,4 @@
 import _ from 'lodash';
-import { each } from 'lodash-es';
-
 // API interfaces
 export interface IResultFormat {
   text: string;
@@ -52,7 +50,7 @@ export default class ResponseParser {
 
   public static parseDataQuery(results, format) {
     if (!results.rows) {
-      return [ { data: [] }];
+      return [{ data: [] }];
     }
     let res = null;
     if (format === 'time_series') {
@@ -172,7 +170,7 @@ export default class ResponseParser {
             targetName = metricName;
           }
           const bucket = ResponseParser.findOrCreateBucket(data, targetName, metricName);
-          const value = row.f[valueIndexes[i]].v === null ? null : Number(row.f[valueIndexes[i]].v)
+          const value = row.f[valueIndexes[i]].v === null ? null : Number(row.f[valueIndexes[i]].v);
           bucket.datapoints.push([value, epoch]);
         }
       }
@@ -199,16 +197,15 @@ export default class ResponseParser {
       });
     }
     const rows = [];
-    each(results.rows, ser => {
+    results.rows.forEach(row => {
       const r = [];
-      each(ser, v => {
-        for (let i = 0; i < v.length; i++) {
-          const val = v[i].v ? ResponseParser._convertValues(v[i].v, columns[i].type) : '';
-          r.push(val);
-        }
+      row.f.forEach((v, i) => {
+        const val = v.v ? ResponseParser._convertValues(v.v, columns[i].type) : '';
+        r.push(val);
       });
       rows.push(r);
     });
+
     return {
       columns,
       rows,
