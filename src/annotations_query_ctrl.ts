@@ -13,7 +13,6 @@ export class BigQueryAnnotationsQueryCtrl {
 
   public annotation: any;
 
-  /** @ngInject */
   constructor() {
     this.annotation.rawQuery = this.annotation.rawQuery || defaultQuery;
   }

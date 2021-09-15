@@ -1,4 +1,15 @@
 import BigQueryQuery from '../bigquery_query';
+import { escapeLiteral, formatDateToString, getUnixSecondsFromString, replaceTimeShift, getTimeShift } from '../utils';
+
+const templateSrvMock = {
+  replace: jest.fn(text => text),
+};
+
+jest.mock('@grafana/runtime', () => ({
+  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
+  getTemplateSrv: () => templateSrvMock,
+}));
+
 describe('BigQueryQuery', () => {
   const templateSrv = {
     replace: jest.fn(text => text),
@@ -6,7 +17,7 @@ describe('BigQueryQuery', () => {
 
   describe('When initializing', () => {
     it('should not be in SQL mode', () => {
-      const query = new BigQueryQuery({}, templateSrv);
+      const query = new BigQueryQuery({});
       expect(query.target.rawQuery).toBe(false);
     });
     it('should be in SQL mode for pre query builder queries', () => {
@@ -255,9 +266,9 @@ describe('BigQueryQuery', () => {
   });
 
   describe('escapeLiteral', () => {
-    const res = BigQueryQuery.escapeLiteral("'a");
+    const res = escapeLiteral("'a");
     expect(res).toBe("''a");
-    // expect(BigQueryQuery.escapeLiteral("'a")).toBe("''a");
+    // expect(escapeLiteral("'a")).toBe("''a");
   });
   describe('macros', () => {
     const target = {
@@ -330,7 +341,7 @@ describe('BigQueryQuery', () => {
 
   describe('formatDateToString', () => {
     const date1 = new Date('December 17, 1995 03:24:00');
-    expect(BigQueryQuery.formatDateToString(date1, '-', true)).toBe('1995-12-17 03:24:00');
+    expect(formatDateToString(date1, '-', true)).toBe('1995-12-17 03:24:00');
   });
 
   describe('getIntervalStr', () => {
@@ -375,21 +386,21 @@ describe('BigQueryQuery', () => {
   });
 
   describe('getUnixSecondsFromString', () => {
-    expect(BigQueryQuery.getUnixSecondsFromString('5s')).toBe(5);
-    expect(BigQueryQuery.getUnixSecondsFromString('2min')).toBe(120);
-    expect(BigQueryQuery.getUnixSecondsFromString('1h')).toBe(3600);
-    expect(BigQueryQuery.getUnixSecondsFromString('1d')).toBe(86400);
-    expect(BigQueryQuery.getUnixSecondsFromString('1w')).toBe(604800);
-    expect(BigQueryQuery.getUnixSecondsFromString('1M')).toBe(2629743);
-    expect(BigQueryQuery.getUnixSecondsFromString('1y')).toBe(31536000);
-    expect(BigQueryQuery.getUnixSecondsFromString('1z')).toBe(0);
+    expect(getUnixSecondsFromString('5s')).toBe(5);
+    expect(getUnixSecondsFromString('2min')).toBe(120);
+    expect(getUnixSecondsFromString('1h')).toBe(3600);
+    expect(getUnixSecondsFromString('1d')).toBe(86400);
+    expect(getUnixSecondsFromString('1w')).toBe(604800);
+    expect(getUnixSecondsFromString('1M')).toBe(2629743);
+    expect(getUnixSecondsFromString('1y')).toBe(31536000);
+    expect(getUnixSecondsFromString('1z')).toBe(0);
   });
 
   describe('replaceTimeShift', () => {
-    expect(BigQueryQuery.replaceTimeShift('$__timeShifting(1d)')).toBe('');
+    expect(replaceTimeShift('$__timeShifting(1d)')).toBe('');
   });
   describe('getTimeShift', () => {
-    expect(BigQueryQuery.getTimeShift('$__timeShifting(1d)')).toBe('1d');
-    expect(BigQueryQuery.getTimeShift('$__timeShifting(1d')).toBe(null);
+    expect(getTimeShift('$__timeShifting(1d)')).toBe('1d');
+    expect(getTimeShift('$__timeShifting(1d')).toBe(null);
   });
 });

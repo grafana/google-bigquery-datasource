@@ -224,7 +224,7 @@ export default class ResponseParser {
     });
   }
 
-  constructor(private $q) {}
+  constructor() {}
 
   public parseTabels(results): IResultFormat[] {
     return this._handelWildCardTables(
@@ -237,6 +237,7 @@ export default class ResponseParser {
     let timeColumnIndex = -1;
     let textColumnIndex = -1;
     let tagsColumnIndex = -1;
+
     for (let i = 0; i < data.data.schema.fields.length; i++) {
       if (data.data.schema.fields[i].name === 'time') {
         timeColumnIndex = i;
@@ -246,11 +247,13 @@ export default class ResponseParser {
         tagsColumnIndex = i;
       }
     }
+
     if (timeColumnIndex === -1) {
-      return this.$q.reject({
+      return Promise.reject({
         message: 'Missing mandatory time column in annotation query.',
       });
     }
+
     const list = [];
     if (table.rows && table.rows.length) {
       for (const row of table.rows) {
@@ -262,7 +265,8 @@ export default class ResponseParser {
         });
       }
     }
-    return list;
+
+    return Promise.resolve(list);
   }
   private _handelWildCardTables(tables) {
     let sorted = new Map();

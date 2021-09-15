@@ -4,6 +4,7 @@ import _ from 'lodash';
 import BigQueryQuery from './bigquery_query';
 import { SqlPart } from './sql_part';
 import sqlPart from './sql_part';
+import { getTemplateSrv } from '@grafana/runtime';
 
 export interface QueryMeta {
   sql: string;
@@ -43,9 +44,10 @@ export class BigQueryQueryCtrl extends QueryCtrl {
   public groupAdd: any;
 
   /** @ngInject */
-  constructor($scope, $injector, private templateSrv, private $q, private uiSegmentSrv) {
+  constructor($scope, $injector, private uiSegmentSrv) {
     super($scope, $injector);
-    this.queryModel = new BigQueryQuery(this.target, templateSrv, this.panel.scopedVars);
+
+    this.queryModel = new BigQueryQuery(this.target, this.panel.scopedVars);
     this.updateProjection();
     this.formats = [
       { text: 'Time series', value: 'time_series' },
@@ -330,7 +332,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
         this.updateProjection();
       }
     });
-    this.$q.all([task1, task2]).then(() => {
+    Promise.all([task1, task2]).then(() => {
       this.panelCtrl.refresh();
     });
   }
@@ -393,12 +395,15 @@ export class BigQueryQueryCtrl extends QueryCtrl {
         });
       });
       if (config.addTemplateVars) {
-        for (const variable of this.templateSrv.variables) {
+        for (const variable of getTemplateSrv().getVariables()) {
           let value;
           value = '$' + variable.name;
-          if (config.templateQuoter && variable.multi === false) {
+
+          // TODO: how to detect if it's a multi value variable? Is it needed?
+          if (config.templateQuoter && (variable as any).multi === false) {
             value = config.templateQuoter(value);
           }
+
           segments.unshift(
             this.uiSegmentSrv.newSegment({
               expandable: true,
@@ -584,7 +589,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
         break;
       }
       case 'get-part-actions': {
-        return this.$q.when([{ text: 'Remove', value: 'remove-part' }]);
+        return Promise.resolve([{ text: 'Remove', value: 'remove-part' }]);
       }
     }
   }
@@ -605,7 +610,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
         break;
       }
       case 'get-part-actions': {
-        return this.$q.when([{ text: 'Remove', value: 'remove-part' }]);
+        return Promise.resolve([{ text: 'Remove', value: 'remove-part' }]);
       }
     }
   }
@@ -660,9 +665,9 @@ export class BigQueryQueryCtrl extends QueryCtrl {
           case 'left':
             return this._getAllFields();
           case 'right':
-            return this.$q.when([]);
+            return Promise.resolve([]);
           case 'op':
-            return this.$q.when(
+            return Promise.resolve(
               this.uiSegmentSrv.newOperators([
                 '=',
                 '!=',
@@ -678,7 +683,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
               ])
             );
           default:
-            return this.$q.when([]);
+            return Promise.resolve([]);
         }
       }
       case 'part-param-changed': {
@@ -694,7 +699,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
         break;
       }
       case 'get-part-actions': {
-        return this.$q.when([{ text: 'Remove', value: 'remove-part' }]);
+        return Promise.resolve([{ text: 'Remove', value: 'remove-part' }]);
       }
     }
   }
@@ -705,7 +710,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     options.push(this.uiSegmentSrv.newSegment({ type: 'macro', value: '$__timeFrom' }));
     options.push(this.uiSegmentSrv.newSegment({ type: 'macro', value: '$__timeTo' }));
     options.push(this.uiSegmentSrv.newSegment({ type: 'expression', value: 'Expression' }));
-    return this.$q.when(options);
+    return Promise.resolve(options);
   }
 
   public setwWereParts(partModel) {
