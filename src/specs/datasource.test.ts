@@ -18,7 +18,7 @@ const templateSrvMock = {
 jest.mock('@grafana/runtime', () => ({
   ...((jest.requireActual('@grafana/runtime') as unknown) as object),
   getBackendSrv: () => ({
-    datasourceRequest: () => {
+    fetch: () => {
       return Promise.resolve(responseMock);
     },
   }),
@@ -30,14 +30,13 @@ describe('BigQueryDatasource', () => {
     restoreResponseMock();
   });
 
-  const instanceSettings = {
+  const instanceSettings: any = {
     name: 'bigquery',
     jsonData: {
       authenticationType: 'jwt',
       sendUsageData: false,
     },
   };
-  const backendSrv = {};
 
   const raw = {
     from: moment.utc('2018-04-25 10:00'),
@@ -55,7 +54,7 @@ describe('BigQueryDatasource', () => {
   } as any;
 
   beforeEach(() => {
-    ctx.ds = new BigQueryDatasource(instanceSettings, {});
+    ctx.ds = new BigQueryDatasource(instanceSettings);
     ctx.ds.projectName = 'my project';
   });
 

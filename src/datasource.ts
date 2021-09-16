@@ -1,11 +1,12 @@
 import _ from 'lodash';
 import moment from 'moment';
 import BigQueryQuery from './bigquery_query';
+import { map } from 'rxjs/operators';
 import ResponseParser, { IResultFormat } from './ResponseParser';
 import { BigQueryOptions, GoogleAuthType } from './types';
 import { v4 as generateID } from 'uuid';
 import { DataSourceApi, DataSourceInstanceSettings } from '@grafana/data';
-import { getBackendSrv, getTemplateSrv } from '@grafana/runtime';
+import { FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import {
   convertToUtc,
   createTimeShiftQuery,
@@ -273,7 +274,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     }
   }
 
-  annotationQuery(options) {
+  async annotationQuery(options) {
     const path = `v2/projects/${this.runInProject}/queries`;
     const url = this.url + `${this.baseUrl}${path}`;
     if (!options.annotation.rawQuery) {
@@ -292,7 +293,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     this.queryModel.target.rawSql = query.rawSql;
     query.rawSql = this.queryModel.expend_macros(options);
     return getBackendSrv()
-      .datasourceRequest({
+      .fetch({
         data: {
           priority: this.queryPriority,
           from: options.range.from.valueOf().toString(),
@@ -305,8 +306,15 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         requestId: options.annotation.name,
         url,
       })
-      .then(data => this.responseParser.transformAnnotationResponse(options, data));
+      .pipe(
+        map(async (res: FetchResponse) => {
+          const result = await this.responseParser.transformAnnotationResponse(options, res.data);
+          return result;
+        })
+      )
+      .toPromise();
   }
+
   private setUpQ(modOptions, options, query) {
     let q = this.queryModel.expend_macros(modOptions);
     if (q) {
@@ -356,17 +364,18 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
 
   private async doRequest(url, requestId = 'requestId', maxRetries = 3) {
     return getBackendSrv()
-      .datasourceRequest({
+      .fetch({
         method: 'GET',
         requestId: generateID(),
         url: this.url + url,
       })
+      .toPromise()
       .then(result => {
         if (result.status !== 200) {
           if (result.status >= 500 && maxRetries > 0) {
             return this.doRequest(url, requestId, maxRetries - 1);
           }
-          throw formatBigqueryError(result.data.error);
+          throw formatBigqueryError((result.data as any).error);
         }
         return result;
       })
@@ -393,18 +402,18 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     const path = `v2/projects/${this.runInProject}/${queryiesOrJobs}`;
     const url = this.url + `${this.baseUrl}${path}`;
     return getBackendSrv()
-      .datasourceRequest({
+      .fetch({
         data: data,
         method: 'POST',
         requestId,
         url,
-      })
+      }).toPromise()
       .then(result => {
         if (result.status !== 200) {
           if (result.status >= 500 && maxRetries > 0) {
             return this.doQueryRequest(query, requestId, priority, maxRetries - 1);
           }
-          throw formatBigqueryError(result.data.error);
+          throw formatBigqueryError((result.data as any).error);
         }
         return result;
       })
