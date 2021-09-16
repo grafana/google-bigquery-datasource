@@ -308,7 +308,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       })
       .pipe(
         map(async (res: FetchResponse) => {
-          const result = await this.responseParser.transformAnnotationResponse(options, res.data);
+          const result = await this.responseParser.transformAnnotationResponse(options, res);
           return result;
         })
       )
@@ -429,16 +429,13 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   }
   private async _waitForJobComplete(queryResults, requestId, jobId) {
     let sleepTimeMs = 100;
-    console.log('New job id: ', jobId);
     const location = this.queryModel.target.location || this.processingLocation || 'US';
     const path = `v2/projects/${this.runInProject}/queries/` + jobId + '?location=' + location;
     while (!queryResults.data.jobComplete) {
       await sleep(sleepTimeMs);
       sleepTimeMs *= 2;
       queryResults = await this.doRequest(`${this.baseUrl}${path}`, requestId);
-      console.log('wating for job to complete ', jobId);
     }
-    console.log('Job Done ', jobId);
     return queryResults;
   }
 
@@ -457,7 +454,6 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         return rows;
       }
       rows = rows.concat(queryResults.data.rows);
-      console.log('getting results for: ', jobId);
     }
     return rows;
   }
