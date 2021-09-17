@@ -47,6 +47,8 @@ export class BigQueryQueryCtrl extends QueryCtrl {
   constructor($scope, $injector, private uiSegmentSrv) {
     super($scope, $injector);
 
+    console.log(this.target);
+
     this.queryModel = new BigQueryQuery(this.target, this.panel.scopedVars);
     this.updateProjection();
     this.formats = [

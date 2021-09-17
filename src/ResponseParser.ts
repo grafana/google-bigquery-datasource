@@ -1,3 +1,4 @@
+import { MetricFindValue } from '@grafana/data';
 import _ from 'lodash';
 // API interfaces
 export interface IResultFormat {
@@ -59,8 +60,9 @@ export default class ResponseParser {
     if (format === 'table') {
       res = ResponseParser._toTable(results);
     }
+
     if (format === 'var') {
-      res = ResponseParser._toVar(results);
+      res = ResponseParser.toVar(results);
     }
     if (res === null) {
       res = [];
@@ -213,7 +215,7 @@ export default class ResponseParser {
     };
   }
 
-  private static _toVar(results) {
+  static toVar(results: any): MetricFindValue[] {
     const res = [];
     for (const row of results.rows) {
       res.push(row.f[0].v);

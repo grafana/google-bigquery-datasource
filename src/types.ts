@@ -27,7 +27,7 @@ export interface BigQueryOptions extends DataSourceJsonData {
   authenticationType: GoogleAuthType;
   flatRateProject?: string;
   processingLocation?: string;
-  queryPriority?: string;
+  queryPriority?: QueryPriority;
   tokenUri?: string;
   clientEmail?: string;
   defaultProject?: string;

@@ -65,7 +65,7 @@ export function findTimeField(sql, timeFields) {
   }
   return null;
 }
-export function handleError(error) {
+export function handleError(error: any) {
   if (error.cancelled === true) {
     return [];
   }
@@ -75,6 +75,7 @@ export function handleError(error) {
   }
   throw formatBigqueryError(msg);
 }
+
 export function createTimeShiftQuery(query) {
   const res = getTimeShift(query.rawSql);
   if (!res) {
@@ -93,6 +94,7 @@ export function createTimeShiftQuery(query) {
 }
 
 export function setupTimeShiftQuery(query, options) {
+  debugger;
   const index = query.format.indexOf('#');
   const copy = options.constructor();
   for (const attr in options) {
