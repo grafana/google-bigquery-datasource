@@ -13,7 +13,7 @@ import { BigQueryOptions, BigQuerySecureJsonData, GoogleAuthType, QueryPriority 
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 
-export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = props => {
+export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props) => {
   const { options, onOptionsChange } = props;
   const { jsonData, secureJsonFields, secureJsonData } = options;
 
@@ -54,7 +54,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = props =
           <RadioButtonGroup
             options={GOOGLE_AUTH_TYPE_OPTIONS}
             value={jsonData.authenticationType || GoogleAuthType.JWT}
-            onChange={v => {
+            onChange={(v) => {
               onOptionsChange({
                 ...options,
                 jsonData: { ...jsonData, authenticationType: v },
@@ -70,7 +70,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = props =
             <JWTForm options={options.jsonData} onReset={onResetApiKey} onChange={onJWTFormChange} />
           ) : (
             <JWTConfigEditor
-              onChange={jwt => {
+              onChange={(jwt) => {
                 onOptionsChange({
                   ...options,
                   secureJsonFields: { ...secureJsonFields, privateKey: true },
@@ -109,7 +109,12 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = props =
           description={
             <span>
               Read more about processing location{' '}
-              <a href="https://cloud.google.com/bigquery/docs/locations" className="external-link" target="_blank">
+              <a
+                href="https://cloud.google.com/bigquery/docs/locations"
+                rel="noreferrer"
+                className="external-link"
+                target="_blank"
+              >
                 here
               </a>
             </span>
@@ -133,6 +138,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = props =
               <a
                 href="https://cloud.google.com/bigquery/docs/query-overview#types_of_queries"
                 className="external-link"
+                rel="noreferrer"
                 target="_blank"
               >
                 here
@@ -143,7 +149,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = props =
           <RadioButtonGroup
             options={QUERY_PRIORITIES}
             value={jsonData.queryPriority || QueryPriority.Interactive}
-            onChange={v => {
+            onChange={(v) => {
               props.onOptionsChange({
                 ...options,
                 jsonData: { ...jsonData, queryPriority: v },

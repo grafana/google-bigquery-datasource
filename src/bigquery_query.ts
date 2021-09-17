@@ -13,14 +13,14 @@ import {
 } from 'utils';
 
 export default class BigQueryQuery {
-  public target: any;
-  public templateSrv: any;
-  public scopedVars: any;
-  public isWindow: boolean;
-  public isAggregate: boolean;
-  public hll: any;
-  public groupBy: string;
-  public tmpValue: string;
+  target: any;
+  templateSrv: any;
+  scopedVars: any;
+  isWindow: boolean;
+  isAggregate: boolean;
+  hll: any;
+  groupBy: string;
+  tmpValue: string;
 
   constructor(target, scopedVars?) {
     this.target = target;
@@ -50,7 +50,7 @@ export default class BigQueryQuery {
     this.interpolateQueryStr = this.interpolateQueryStr.bind(this);
   }
 
-  public getIntervalStr(interval: string, mininterval: string, options) {
+  getIntervalStr(interval: string, mininterval: string, options) {
     if (interval === 'auto') {
       interval = this._calcAutoInterval(options);
     }
@@ -81,15 +81,15 @@ export default class BigQueryQuery {
     return IntervalStr + ' AS time';
   }
 
-  public hasTimeGroup() {
+  hasTimeGroup() {
     return _.find(this.target.group, (g: any) => g.type === 'time');
   }
 
-  public hasMetricColumn() {
+  hasMetricColumn() {
     return this.target.metricColumn !== 'none';
   }
 
-  public interpolateQueryStr(value, variable, defaultFormatFn) {
+  interpolateQueryStr(value, variable, defaultFormatFn) {
     // if no multi or include all do not regexEscape
     if (!variable.multi && !variable.includeAll) {
       return escapeLiteral(value);
@@ -103,7 +103,7 @@ export default class BigQueryQuery {
     return escapedValues.join(',');
   }
 
-  public render(interpolate?) {
+  render(interpolate?) {
     const target = this.target;
     // new query with no table set yet
     if (!this.target.rawQuery && !('table' in this.target)) {
@@ -119,7 +119,7 @@ export default class BigQueryQuery {
     }
   }
 
-  public _buildTimeColumntimeGroup(alias, timeGroup) {
+  _buildTimeColumntimeGroup(alias, timeGroup) {
     let args;
     let macro = '$__timeGroup';
 
@@ -132,7 +132,7 @@ export default class BigQueryQuery {
     return macro + '(' + this.target.timeColumn + ',' + args + ')';
   }
 
-  public buildTimeColumn(alias = true) {
+  buildTimeColumn(alias = true) {
     const timeGroup = this.hasTimeGroup();
     let query;
     if (timeGroup) {
@@ -146,7 +146,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public buildMetricColumn() {
+  buildMetricColumn() {
     if (this.hasMetricColumn()) {
       return quoteFiledName(this.target.metricColumn) + ' AS metric';
     }
@@ -154,7 +154,7 @@ export default class BigQueryQuery {
     return '';
   }
 
-  public buildValueColumns() {
+  buildValueColumns() {
     let query = '';
     for (const column of this.target.select) {
       const c = this.buildValueColumn(column);
@@ -165,7 +165,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public buildHllOuterQuery() {
+  buildHllOuterQuery() {
     let query = 'time';
     let numOfColumns = 1;
     let hllInd = 0;
@@ -198,7 +198,7 @@ export default class BigQueryQuery {
     return { query, numOfColumns, hllInd };
   }
 
-  public _buildAggregate(aggregate, query) {
+  _buildAggregate(aggregate, query) {
     if (aggregate) {
       const func = aggregate.params[0];
       switch (aggregate.type) {
@@ -216,7 +216,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public buildValueColumn(column) {
+  buildValueColumn(column) {
     const columnName = _.find(column, (g: any) => g.type === 'column');
     let query = quoteFiledName(columnName.params[0]);
     const aggregate = _.find(column, (g: any) => g.type === 'aggregate' || g.type === 'percentile');
@@ -295,7 +295,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public buildWhereClause() {
+  buildWhereClause() {
     let query = '';
     const conditions = _.map(this.target.where, (tag, index) => {
       switch (tag.type) {
@@ -330,7 +330,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public buildGroupClause() {
+  buildGroupClause() {
     let query = '';
     let groupSection = '';
     for (let i = 0; i < this.target.group.length; i++) {
@@ -384,7 +384,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public buildQuery() {
+  buildQuery() {
     let query = '';
     let outerQuery = '';
     query += '\n' + 'SELECT';
@@ -442,7 +442,7 @@ export default class BigQueryQuery {
     return query;
   }
 
-  public expend_macros(options) {
+  expend_macros(options) {
     if (this.target.rawSql) {
       let q = this.target.rawSql;
       q = replaceTimeShift(q);
@@ -452,7 +452,7 @@ export default class BigQueryQuery {
       return q;
     }
   }
-  public replaceTimeFilters(q, options) {
+  replaceTimeFilters(q, options) {
     let fromD = options.range.from;
     let toD = options.range.to;
     if (this.target.convertToUTC === true) {
@@ -481,7 +481,7 @@ export default class BigQueryQuery {
     return q;
   }
 
-  public replacetimeGroupAlias(q, alias: boolean, options) {
+  replacetimeGroupAlias(q, alias: boolean, options) {
     const res = getInterval(q, alias);
     const interval = res[0];
     const mininterval = res[1];

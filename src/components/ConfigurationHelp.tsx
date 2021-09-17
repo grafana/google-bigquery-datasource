@@ -24,6 +24,7 @@ export const ConfigurationHelp = () => {
         <p>
           <a
             className="external-link"
+            rel="noreferrer"
             href="https://cloud.google.com/iam/docs/creating-managing-service-accounts"
             target="_blank"
           >
@@ -33,6 +34,7 @@ export const ConfigurationHelp = () => {
           <strong>Job User</strong> role provide all the permissions that Grafana needs.{' '}
           <a
             className="external-link"
+            rel="noreferrer"
             target="_blank"
             href="https://console.cloud.google.com/apis/library/bigquery.googleapis.com"
           >
@@ -41,7 +43,12 @@ export const ConfigurationHelp = () => {
           has to be enabled on GCP for the data source to work.
           <br />
           Find instructions on how to create a Service Account{' '}
-          <a className="external-link" target="_blank" href="https://doitintl.github.io/bigquery-grafana/">
+          <a
+            className="external-link"
+            rel="noreferrer"
+            target="_blank"
+            href="https://doitintl.github.io/bigquery-grafana/"
+          >
             here
           </a>
           .
