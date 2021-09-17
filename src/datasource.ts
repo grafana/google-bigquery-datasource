@@ -1,8 +1,9 @@
 import _ from 'lodash';
+// eslint-disable-next-line no-restricted-imports
 import moment from 'moment';
 import BigQueryQuery, { BigQueryQueryNG } from './bigquery_query';
 import { map } from 'rxjs/operators';
-import ResponseParser, { IResultFormat } from './ResponseParser';
+import ResponseParser, { ResultFormat } from './ResponseParser';
 import { BigQueryOptions, GoogleAuthType, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
 import {
@@ -252,19 +253,19 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     };
   }
 
-  async getProjects(): Promise<IResultFormat[]> {
+  async getProjects(): Promise<ResultFormat[]> {
     const path = `v2/projects`;
     const data = await this.paginatedResults(path, 'projects');
     return ResponseParser.parseProjects(data);
   }
 
-  async getDatasets(projectName: string): Promise<IResultFormat[]> {
+  async getDatasets(projectName: string): Promise<ResultFormat[]> {
     const path = `v2/projects/${projectName}/datasets`;
     const data = await this.paginatedResults(path, 'datasets');
     return ResponseParser.parseDatasets(data);
   }
 
-  async getTables(projectName: string, datasetName: string): Promise<IResultFormat[]> {
+  async getTables(projectName: string, datasetName: string): Promise<ResultFormat[]> {
     const path = `v2/projects/${projectName}/datasets/${datasetName}/tables`;
     const data = await this.paginatedResults(path, 'tables');
     return new ResponseParser().parseTabels(data);
@@ -275,7 +276,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     datasetName: string,
     tableName: string,
     filter: string[]
-  ): Promise<IResultFormat[]> {
+  ): Promise<ResultFormat[]> {
     const path = `v2/projects/${projectName}/datasets/${datasetName}/tables/${tableName}`;
     const data = await this.paginatedResults(path, 'schema.fields');
     return ResponseParser.parseTableFields(data, filter);
@@ -338,7 +339,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       })
       .pipe(
         map(async (res: FetchResponse) => {
-          const result = await this.responseParser.transformAnnotationResponse(options, res.data);
+          const result = await this.responseParser.transformAnnotationResponse(options, res);
           return result;
         })
       )
@@ -396,8 +397,9 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       const from = `${partitionedField} >= '${formatDateToString(fromD, '-', true)}'`;
       const to = `${partitionedField} < '${formatDateToString(toD, '-', true)}'`;
       const partition = `where ${from} AND ${to} AND `;
-      if (query.match(/where/i)) query = query.replace(/where/i, partition);
-      else {
+      if (query.match(/where/i)) {
+        query = query.replace(/where/i, partition);
+      } else {
         const reg = /from ('|`|"|){1}(.*?)('|`|"|){1} as ('|`|"|)(\S*)('|`|"|){1}|from ('|`|"|){1}(\S*)('|`|"|){1}/i;
         const fromMatch = query.match(reg);
         query = query.replace(reg, `${fromMatch} ${fromMatch}`);
@@ -478,16 +480,13 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   // @ts-ignore
   private async _waitForJobComplete(queryResults, requestId: string, jobId: string) {
     let sleepTimeMs = 100;
-    console.log('New job id: ', jobId);
     const location = this.queryModel.target.location || this.processingLocation || 'US';
     const path = `v2/projects/${this.runInProject}/queries/` + jobId + '?location=' + location;
     while (!queryResults.data.jobComplete) {
       await sleep(sleepTimeMs);
       sleepTimeMs *= 2;
       queryResults = await this.doRequest(`${this.baseUrl}${path}`, requestId);
-      console.log('wating for job to complete ', jobId);
     }
-    console.log('Job Done ', jobId);
     return queryResults;
   }
 
@@ -507,7 +506,6 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         return rows;
       }
       rows = rows.concat(queryResults.data.rows);
-      console.log('getting results for: ', jobId);
     }
     return rows;
   }
@@ -588,10 +586,14 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   private async paginatedResults(path: string, dataName: string) {
     let queryResults = await this.doRequest(`${this.baseUrl}${path}`);
     let data = queryResults.data;
-    if (!data) return data;
+    if (!data) {
+      return data;
+    }
     const dataList = dataName.split('.');
     dataList.forEach(element => {
-      if (data && data[element]) data = data[element];
+      if (data && data[element]) {
+        data = data[element];
+      }
     });
     while (queryResults && queryResults.data && queryResults.data.nextPageToken) {
       queryResults = await this.doRequest(`${this.baseUrl}${path}` + '?pageToken=' + queryResults.data.nextPageToken);

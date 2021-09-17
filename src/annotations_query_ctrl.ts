@@ -11,7 +11,7 @@ WHERE
 export class BigQueryAnnotationsQueryCtrl {
   static templateUrl = 'partials/annotations.editor.html';
 
-  public annotation: any;
+  annotation: any;
 
   constructor() {
     this.annotation.rawQuery = this.annotation.rawQuery || defaultQuery;

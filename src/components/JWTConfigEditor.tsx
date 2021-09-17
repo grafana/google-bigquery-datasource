@@ -19,7 +19,7 @@ export const JWTConfigEditor: React.FC<Props> = ({ onChange }) => {
   const theme = useTheme2();
 
   const onPasteClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(
-    e => {
+    (e) => {
       setError(null);
       setIsPasting(true);
     },
@@ -27,7 +27,7 @@ export const JWTConfigEditor: React.FC<Props> = ({ onChange }) => {
   );
 
   const onUploadClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(
-    e => {
+    (e) => {
       setIsPasting(null);
       setError(null);
     },
@@ -75,7 +75,7 @@ export const JWTConfigEditor: React.FC<Props> = ({ onChange }) => {
               <FileDropzone
                 options={{ multiple: false, accept: 'application/json' }}
                 readAs="readAsText"
-                onLoad={result => {
+                onLoad={(result) => {
                   readAndValidateJWT(result as string);
                   setIsPasting(false);
                 }}
@@ -97,7 +97,7 @@ export const JWTConfigEditor: React.FC<Props> = ({ onChange }) => {
               autoFocus
               invalid={Boolean(error)}
               placeholder="Paste Google JWT token here"
-              onBlur={e => readAndValidateJWT(e.currentTarget.value)}
+              onBlur={(e) => readAndValidateJWT(e.currentTarget.value)}
               rows={12}
             />
           )}
@@ -138,7 +138,7 @@ const validateJWT = (json: Record<string, string>): { isValid: boolean; error?: 
   if (!isObject(json)) {
     return { isValid: false, error: 'Invalid JWT token' };
   }
-  const missingKeys = configKeys.filter(key => !json[key]);
+  const missingKeys = configKeys.filter((key) => !json[key]);
   if (missingKeys.length > 0) {
     return { isValid: false, error: `Missing keys: ${missingKeys.join(', ')}` };
   }

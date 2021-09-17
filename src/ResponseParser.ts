@@ -1,12 +1,12 @@
 import { MetricFindValue } from '@grafana/data';
 import _ from 'lodash';
 // API interfaces
-export interface IResultFormat {
+export interface ResultFormat {
   text: string;
   value: string;
 }
 
-export interface IDataTarget {
+export interface DataTarget {
   target: string;
   datapoints: any[];
   refId: string;
@@ -14,16 +14,16 @@ export interface IDataTarget {
 }
 
 export default class ResponseParser {
-  public static parseProjects(results): IResultFormat[] {
+  static parseProjects(results): ResultFormat[] {
     return ResponseParser.parseData(results, 'id', 'id');
   }
 
-  public static parseDatasets(results): IResultFormat[] {
+  static parseDatasets(results): ResultFormat[] {
     return ResponseParser.parseData(results, 'datasetReference.datasetId', 'datasetReference.datasetId');
   }
 
-  public static parseTableFields(results, filter): IResultFormat[] {
-    const fields: IResultFormat[] = [];
+  static parseTableFields(results, filter): ResultFormat[] {
+    const fields: ResultFormat[] = [];
     if (!results || results.length === 0) {
       return fields;
     }
@@ -49,7 +49,7 @@ export default class ResponseParser {
     return fields;
   }
 
-  public static parseDataQuery(results, format) {
+  static parseDataQuery(results, format) {
     if (!results.rows) {
       return [{ data: [] }];
     }
@@ -70,7 +70,7 @@ export default class ResponseParser {
     return res;
   }
 
-  public static _convertValues(value, type) {
+  static _convertValues(value, type) {
     if (['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'].includes(type)) {
       return Number(value);
     }
@@ -81,8 +81,8 @@ export default class ResponseParser {
     return value;
   }
 
-  private static parseData(results, text, value): IResultFormat[] {
-    const data: IResultFormat[] = [];
+  private static parseData(results, text, value): ResultFormat[] {
+    const data: ResultFormat[] = [];
     if (!results || results.length === 0) {
       return data;
     }
@@ -180,7 +180,7 @@ export default class ResponseParser {
     return data;
   }
 
-  private static findOrCreateBucket(data, target, metric): IDataTarget {
+  private static findOrCreateBucket(data, target, metric): DataTarget {
     let dataTarget = _.find(data, ['target', target]);
     if (!dataTarget) {
       dataTarget = { target, datapoints: [], refId: metric, query: '' };
@@ -199,7 +199,7 @@ export default class ResponseParser {
       });
     }
     const rows = [];
-    results.rows.forEach(row => {
+    results.rows.forEach((row) => {
       const r = [];
       row.f.forEach((v, i) => {
         const val = v.v ? ResponseParser._convertValues(v.v, columns[i].type) : '';
@@ -221,20 +221,20 @@ export default class ResponseParser {
       res.push(row.f[0].v);
     }
 
-    return _.map(res, value => {
+    return _.map(res, (value) => {
       return { text: value };
     });
   }
 
   constructor() {}
 
-  public parseTabels(results): IResultFormat[] {
+  parseTabels(results): ResultFormat[] {
     return this._handelWildCardTables(
       ResponseParser.parseData(results, 'tableReference.tableId', 'tableReference.tableId')
     );
   }
 
-  public transformAnnotationResponse(options, data) {
+  transformAnnotationResponse(options, data) {
     const table = data.data;
     let timeColumnIndex = -1;
     let textColumnIndex = -1;

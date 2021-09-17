@@ -1,33 +1,23 @@
+// eslint-disable-next-line no-restricted-imports
 import moment from 'moment';
+import { of } from 'rxjs';
 import { BigQueryDatasource } from '../datasource';
 
-let responseMock = { data: {}, status: 200 };
-
-const mockResponse = (data, status: number = 200) => {
-  responseMock = { data, status };
-};
-
-const restoreResponseMock = () => {
-  responseMock = { data: {}, status: 200 };
-};
-
 const templateSrvMock = {
-  replace: jest.fn(text => text),
+  replace: jest.fn((text) => text),
 };
-
+const fetchMock = jest.fn().mockReturnValue(of({ data: {}, status: 200 }));
 jest.mock('@grafana/runtime', () => ({
-  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
+  ...(jest.requireActual('@grafana/runtime') as unknown as object),
   getBackendSrv: () => ({
-    fetch: () => {
-      return Promise.resolve(responseMock);
-    },
+    fetch: fetchMock,
   }),
   getTemplateSrv: () => templateSrvMock,
 }));
 
 describe('BigQueryDatasource', () => {
   afterEach(() => {
-    restoreResponseMock();
+    jest.clearAllMocks();
   });
 
   const instanceSettings: any = {
@@ -71,7 +61,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(() => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#queryResponse',
         schema: {
           fields: [
@@ -128,20 +118,19 @@ describe('BigQueryDatasource', () => {
         totalBytesProcessed: '23289520',
         jobComplete: true,
         cacheHit: false,
-      });
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
     });
 
     it('should return expected data', async () => {
-      await ctx.ds.doQuery('select * from table', 'id-1').then(data => {
-        results = data;
-      });
+      const results = await ctx.ds.doQuery('select * from table', 'id-1');
       expect(results.rows.length).toBe(3);
       expect(results.schema.fields.length).toBe(2);
     });
 
     it('should return expected data batch api', async () => {
       const priority = 'BATCH';
-      await ctx.ds.doQuery('select * from table', 'id-1', priority).then(data => {
+      await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data) => {
         results = data;
       });
       expect(results.rows.length).toBe(3);
@@ -149,7 +138,7 @@ describe('BigQueryDatasource', () => {
     });
     it('should return expected data interactive', async () => {
       const priority = 'INTERACTIVE';
-      await ctx.ds.doQuery('select * from table', 'id-1', priority).then(data => {
+      await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data) => {
         results = data;
       });
       expect(results.rows.length).toBe(3);
@@ -158,7 +147,7 @@ describe('BigQueryDatasource', () => {
 
     it('should return expected data interactive', async () => {
       const priority = 'INTERACTIVE';
-      await ctx.ds.doQueryRequest('select * from table', 'id-1', priority).then(data => {
+      await ctx.ds.doQueryRequest('select * from table', 'id-1', priority).then((data) => {
         results = data;
       });
       expect(results.data.rows.length).toBe(3);
@@ -177,7 +166,7 @@ describe('BigQueryDatasource', () => {
       },
     };
     beforeEach(() => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#queryResponse',
         schema: {
           fields: [
@@ -234,11 +223,12 @@ describe('BigQueryDatasource', () => {
         totalBytesProcessed: '23289520',
         jobComplete: true,
         cacheHit: false,
-      });
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
     });
 
     it('should return expected data', async () => {
-      await ctx.ds._waitForJobComplete(queryResults, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5').then(data => {
+      await ctx.ds._waitForJobComplete(queryResults, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5').then((data) => {
         results = data;
       });
       expect(results.data.rows.length).toBe(3);
@@ -248,7 +238,7 @@ describe('BigQueryDatasource', () => {
 
   describe('_getQueryResults', () => {
     let results;
-    const response = {
+    const mockResponse = {
       kind: 'bigquery#queryResponse',
       schema: {
         fields: [
@@ -369,13 +359,13 @@ describe('BigQueryDatasource', () => {
     };
 
     beforeEach(() => {
-      mockResponse(response);
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
     });
 
     it('should return expected data', async () => {
       await ctx.ds
-        ._getQueryResults(queryResults, response.rows, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5')
-        .then(data => {
+        ._getQueryResults(queryResults, mockResponse.rows, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5')
+        .then((data) => {
           results = data;
         });
       expect(results.length).toBe(6);
@@ -386,7 +376,7 @@ describe('BigQueryDatasource', () => {
     let queryResults;
 
     beforeEach(async () => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#projectList',
         etag: 'o48iuUgjDrXb++kcLl2yeQ==',
         projects: [
@@ -419,8 +409,9 @@ describe('BigQueryDatasource', () => {
           },
         ],
         totalItems: 3,
-      });
-      await ctx.ds.getProjects().then(data => {
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
+      await ctx.ds.getProjects().then((data) => {
         queryResults = data;
       });
     });
@@ -436,7 +427,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(async () => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#datasetList',
         etag: 'q6TrWWJHEC7v8Vt1T4+geg==',
         datasets: [
@@ -462,8 +453,9 @@ describe('BigQueryDatasource', () => {
             location: 'US',
           },
         ],
-      });
-      await ctx.ds.getDatasets('prj-1').then(data => {
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
+      await ctx.ds.getDatasets('prj-1').then((data) => {
         results = data;
       });
     });
@@ -479,7 +471,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(async () => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#tableList',
         etag: 'Qfgo3cWRRPb3c+XmsrC+OA==',
         tables: [
@@ -507,8 +499,9 @@ describe('BigQueryDatasource', () => {
           },
         ],
         totalItems: 2,
-      });
-      await ctx.ds.getTables('prj-1', 'ds-1').then(data => {
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
+      await ctx.ds.getTables('prj-1', 'ds-1').then((data) => {
         results = data;
       });
     });
@@ -524,7 +517,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(async () => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#table',
         etag: '3UHbvhc/35v2P8ZhsjrRtw==',
         id: 'ds-1:ds-1.newtable',
@@ -571,9 +564,9 @@ describe('BigQueryDatasource', () => {
         lastModifiedTime: '1551623603909',
         type: 'TABLE',
         location: 'US',
-      });
-
-      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', ['DATE', 'TIMESTAMP', 'DATETIME']).then(data => {
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
+      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', ['DATE', 'TIMESTAMP', 'DATETIME']).then((data) => {
         results = data;
       });
     });
@@ -590,7 +583,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(async () => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#table',
         etag: '3UHbvhc/35v2P8ZhsjrRtw==',
         id: 'ds-1:ds-1.newtable',
@@ -641,11 +634,11 @@ describe('BigQueryDatasource', () => {
         lastModifiedTime: '1551623603909',
         type: 'TABLE',
         location: 'US',
-      });
-
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
       await ctx.ds
         .getTableFields('prj-1', 'ds-1', 'newtable', ['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'])
-        .then(data => {
+        .then((data) => {
           results = data;
         });
     });
@@ -661,7 +654,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(async () => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#table',
         etag: '3UHbvhc/35v2P8ZhsjrRtw==',
         id: 'ds-1:ds-1.newtable',
@@ -712,9 +705,9 @@ describe('BigQueryDatasource', () => {
         lastModifiedTime: '1551623603909',
         type: 'TABLE',
         location: 'US',
-      });
-
-      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', []).then(data => {
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
+      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', []).then((data) => {
         results = data;
       });
     });
@@ -772,7 +765,7 @@ describe('BigQueryDatasource', () => {
 
   describe('annotationQuery', () => {
     beforeEach(() => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#queryResponse',
         schema: {
           fields: [
@@ -810,7 +803,8 @@ describe('BigQueryDatasource', () => {
         totalBytesProcessed: '23289520',
         jobComplete: true,
         cacheHit: false,
-      });
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
     });
 
     const options = {
@@ -855,7 +849,7 @@ describe('BigQueryDatasource', () => {
   describe('When performing testDatasource', () => {
     let results;
     beforeEach(() => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#datasetList',
         etag: 'q6TrWWJHEC7v8Vt1T4+geg==',
         datasets: [
@@ -881,11 +875,12 @@ describe('BigQueryDatasource', () => {
             location: 'US',
           },
         ],
-      });
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
     });
 
     it('should test datasource', async () => {
-      await ctx.ds.testDatasource().then(data => {
+      await ctx.ds.testDatasource().then((data) => {
         results = data;
       });
       expect(results.status).toBe('success');
@@ -896,7 +891,7 @@ describe('BigQueryDatasource', () => {
     let results;
 
     beforeEach(() => {
-      mockResponse({
+      const mockResponse = {
         kind: 'bigquery#datasetList',
         etag: 'q6TrWWJHEC7v8Vt1T4+geg==',
         datasets: [
@@ -922,7 +917,8 @@ describe('BigQueryDatasource', () => {
             location: 'US',
           },
         ],
-      });
+      };
+      fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
     });
 
     it('should return  default projects', () => {

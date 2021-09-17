@@ -2,8 +2,7 @@ import appEvents from 'grafana/app/core/app_events';
 import { QueryCtrl } from 'grafana/app/plugins/sdk';
 import _ from 'lodash';
 import BigQueryQuery from './bigquery_query';
-import { SqlPart } from './sql_part';
-import sqlPart from './sql_part';
+import sqlPart, { SqlPart } from './sql_part';
 import { getTemplateSrv } from '@grafana/runtime';
 
 export interface QueryMeta {
@@ -20,28 +19,28 @@ WHERE
 `;
 
 export class BigQueryQueryCtrl extends QueryCtrl {
-  public static templateUrl = 'partials/query.editor.html';
-  public formats: any[];
-  public orderByCols: any[];
-  public orderBySorts: any[];
-  public queryModel: BigQueryQuery;
-  public lastQueryMeta: QueryMeta;
-  public lastQueryError: string;
-  public locations: any[];
-  public showHelp: boolean;
-  public projectSegment: any;
-  public datasetSegment: any;
-  public tableSegment: any;
-  public tablesDataPromise: any;
-  public whereAdd: any;
-  public timeColumnSegment: any;
-  public metricColumnSegment: any;
-  public selectMenu: any[];
-  public selectParts: SqlPart[][];
-  public groupParts: SqlPart[];
-  public whereParts: SqlPart[];
-  public orderParts: SqlPart[];
-  public groupAdd: any;
+  static templateUrl = 'partials/query.editor.html';
+  formats: any[];
+  orderByCols: any[];
+  orderBySorts: any[];
+  queryModel: BigQueryQuery;
+  lastQueryMeta: QueryMeta;
+  lastQueryError: string;
+  locations: any[];
+  showHelp: boolean;
+  projectSegment: any;
+  datasetSegment: any;
+  tableSegment: any;
+  tablesDataPromise: any;
+  whereAdd: any;
+  timeColumnSegment: any;
+  metricColumnSegment: any;
+  selectMenu: any[];
+  selectParts: SqlPart[][];
+  groupParts: SqlPart[];
+  whereParts: SqlPart[];
+  orderParts: SqlPart[];
+  groupAdd: any;
 
   /** @ngInject */
   constructor($scope, $injector, private uiSegmentSrv) {
@@ -137,16 +136,16 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.panelCtrl.events.on('data-error', this.onDataError.bind(this), $scope);
   }
 
-  public updateProjection() {
+  updateProjection() {
     this.selectParts = _.map(this.target.select, (parts: any) => {
-      return _.map(parts, sqlPart.create).filter(n => n);
+      return _.map(parts, sqlPart.create).filter((n) => n);
     });
-    this.whereParts = _.map(this.target.where, sqlPart.create).filter(n => n);
-    this.groupParts = _.map(this.target.group, sqlPart.create).filter(n => n);
+    this.whereParts = _.map(this.target.where, sqlPart.create).filter((n) => n);
+    this.groupParts = _.map(this.target.group, sqlPart.create).filter((n) => n);
   }
 
-  public updatePersistedParts() {
-    this.target.select = _.map(this.selectParts, selectParts => {
+  updatePersistedParts() {
+    this.target.select = _.map(this.selectParts, (selectParts) => {
       return _.map(selectParts, (part: any) => {
         return {
           datatype: part.datatype,
@@ -172,7 +171,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     });
   }
 
-  public buildSelectMenu() {
+  buildSelectMenu() {
     this.selectMenu = [];
     const aggregates = {
       submenu: [
@@ -226,7 +225,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.selectMenu.push({ text: 'Time Shift', value: 'timeshift' });
   }
 
-  public toggleEditorMode() {
+  toggleEditorMode() {
     if (this.target.rawQuery) {
       appEvents.emit('confirm-modal', {
         icon: 'fa-exclamation',
@@ -242,20 +241,20 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public resetPlusButton(button) {
+  resetPlusButton(button) {
     const plusButton = this.uiSegmentSrv.newPlusButton();
     button.html = plusButton.html;
     button.value = plusButton.value;
   }
 
-  public getProjectSegments() {
+  getProjectSegments() {
     return this.datasource
       .getProjects()
       .then(this.uiSegmentSrv.transformToSegments(false))
       .catch(this.handleQueryError.bind(this));
   }
 
-  public projectChanged() {
+  projectChanged() {
     this.target.project = this.projectSegment.value;
     this.datasource.projectName = this.projectSegment.value;
     this.target.dataset = '';
@@ -264,14 +263,14 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.applySegment(this.timeColumnSegment, this.fakeSegment('-- time --'));
   }
 
-  public getDatasetSegments() {
+  getDatasetSegments() {
     return this.datasource
       .getDatasets(this.target.project)
       .then(this.uiSegmentSrv.transformToSegments(false))
       .catch(this.handleQueryError.bind(this));
   }
 
-  public datasetChanged() {
+  datasetChanged() {
     this.target.dataset = this.datasetSegment.value;
     this.target.sharded = false;
     this.target.partitioned = false;
@@ -280,20 +279,20 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.applySegment(this.timeColumnSegment, this.fakeSegment('-- time --'));
   }
 
-  public getTableSegments() {
+  getTableSegments() {
     this.tablesDataPromise = this.datasource.getTables(this.target.project, this.target.dataset);
     return this.tablesDataPromise
       .then(this.uiSegmentSrv.transformToSegments(false))
       .catch(this.handleQueryError.bind(this));
   }
 
-  public tableChanged() {
+  tableChanged() {
     this.target.sharded = false;
     this.target.partitioned = false;
     this.target.partitionedField = '';
     this.target.table = this.tableSegment.value;
-    this.tablesDataPromise.then(value => {
-      value.forEach(v => {
+    this.tablesDataPromise.then((value) => {
+      value.forEach((v) => {
         if (v.text === this.target.table) {
           const partitioned = v.value.indexOf('__partitioned');
           if (partitioned > -1) {
@@ -319,7 +318,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.metricColumnSegment.value = segment.value;
     this.target.metricColumn = 'none';
 
-    const task1 = this.getTimeColumnSegments().then(result => {
+    const task1 = this.getTimeColumnSegments().then((result) => {
       // check if time column is still valid
       if (result.length > 0 && !_.find(result, (r: any) => r.text === this.target.timeColumn)) {
         this.timeColumnSegment.html = this.uiSegmentSrv.newSegment(result[0].text).html;
@@ -328,7 +327,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
       return this.timeColumnChanged(false);
     });
 
-    const task2 = this.getValueColumnSegments().then(result => {
+    const task2 = this.getValueColumnSegments().then((result) => {
       if (result.length > 0) {
         this.target.select = [[{ type: 'column', params: [result[0].text] }]];
         this.updateProjection();
@@ -339,15 +338,15 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     });
   }
 
-  public getTimeColumnSegments() {
+  getTimeColumnSegments() {
     return this._getColumnSegments(['DATE', 'TIMESTAMP', 'DATETIME']);
   }
 
-  public getValueColumnSegments() {
+  getValueColumnSegments() {
     return this._getColumnSegments(['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER']);
   }
 
-  public async timeColumnChanged(refresh?: boolean) {
+  async timeColumnChanged(refresh?: boolean) {
     this.target.timeColumn = this.timeColumnSegment.value;
     this.target.timeColumnType = await this._getDateFieldType();
     const partModel = sqlPart.create({
@@ -362,23 +361,23 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public getMetricColumnSegments() {
+  getMetricColumnSegments() {
     return this.datasource
       .getTableFields(this.target.project, this.target.dataset, this.target.table, ['STRING', 'BYTES'])
       .then(this.uiSegmentSrv.transformToSegments(false))
       .catch(this.handleQueryError.bind(this));
   }
 
-  public metricColumnChanged() {
+  metricColumnChanged() {
     this.target.metricColumn = this.metricColumnSegment.value;
     this.panelCtrl.refresh();
   }
 
-  public onDataReceived(dataList) {
+  onDataReceived(dataList) {
     return;
   }
 
-  public onDataError(err) {
+  onDataError(err) {
     if (err.data && err.data.results) {
       const queryRes = err.data.results[this.target.refId];
       if (queryRes) {
@@ -388,9 +387,9 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public transformToSegments(config) {
-    return results => {
-      const segments = _.map(results, segment => {
+  transformToSegments(config) {
+    return (results) => {
+      const segments = _.map(results, (segment) => {
         return this.uiSegmentSrv.newSegment({
           value: segment.text,
           expandable: segment.expandable,
@@ -429,32 +428,32 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     };
   }
 
-  public findAggregateIndex(selectParts) {
+  findAggregateIndex(selectParts) {
     return _.findIndex(selectParts, (p: any) => p.def.type === 'aggregate' || p.def.type === 'percentile');
   }
 
-  public findWindowIndex(selectParts) {
+  findWindowIndex(selectParts) {
     return _.findIndex(selectParts, (p: any) => p.def.type === 'window' || p.def.type === 'moving_window');
   }
 
-  public findHllIndex(selectParts) {
+  findHllIndex(selectParts) {
     return _.findIndex(selectParts, (p: any) => p.def.type === 'hyperloglog' || p.def.type === 'hll_count.init');
   }
 
-  public findTimeShiftIndex(selectParts) {
+  findTimeShiftIndex(selectParts) {
     return _.findIndex(selectParts, (p: any) => p.def.type === 'timeshift');
   }
-  public applySegment(dst, src) {
+  applySegment(dst, src) {
     dst.value = src.value;
     dst.html = src.html || src.value;
     dst.fake = src.fake === undefined ? false : src.fake;
   }
 
-  public fakeSegment(value) {
+  fakeSegment(value) {
     return this.uiSegmentSrv.newSegment({ fake: true, value });
   }
 
-  public addSelectPart(selectParts, item, subItem) {
+  addSelectPart(selectParts, item, subItem) {
     let partType = item.value;
     if (subItem && subItem.type) {
       partType = subItem.type;
@@ -464,7 +463,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
       partModel.params[0] = subItem.value;
     }
     let addAlias = false;
-    const _addAlias = function() {
+    const _addAlias = function () {
       return !_.find(selectParts, (p: any) => p.def.type === 'alias');
     };
     switch (partType) {
@@ -555,7 +554,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.panelCtrl.refresh();
   }
 
-  public removeSelectPart(selectParts, part) {
+  removeSelectPart(selectParts, part) {
     if (part.def.type === 'column') {
       // remove all parts of column unless its last column
       if (this.selectParts.length > 1) {
@@ -570,7 +569,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.updatePersistedParts();
   }
 
-  public handleSelectPartEvent(selectParts, part, evt) {
+  handleSelectPartEvent(selectParts, part, evt) {
     switch (evt.name) {
       case 'get-param-options': {
         switch (part.def.type) {
@@ -596,7 +595,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public handleGroupPartEvent(part, index, evt) {
+  handleGroupPartEvent(part, index, evt) {
     switch (evt.name) {
       case 'get-param-options': {
         return this._getAllFields();
@@ -617,17 +616,17 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public addGroup(partType: string, value: string) {
+  addGroup(partType: string, value: string) {
     this._setGroupParts(partType, value);
     // add aggregates when adding group by
     for (const selectParts of this.selectParts) {
-      if (!selectParts.some(part => part.def.type === 'aggregate')) {
+      if (!selectParts.some((part) => part.def.type === 'aggregate')) {
         const aggregate = sqlPart.create({
           params: ['avg'],
           type: 'aggregate',
         });
         selectParts.splice(1, 0, aggregate);
-        if (!selectParts.some(part => part.def.type === 'alias')) {
+        if (!selectParts.some((part) => part.def.type === 'alias')) {
           const alias = sqlPart.create({
             params: [selectParts[0].part.params[0]],
             type: 'alias',
@@ -640,7 +639,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.updatePersistedParts();
   }
 
-  public removeGroup(part, index) {
+  removeGroup(part, index) {
     if (part.def.type === 'time') {
       // remove aggregations
       this.selectParts = _.map(this.selectParts, (s: any) => {
@@ -654,13 +653,13 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.updatePersistedParts();
   }
 
-  public _getAllFields() {
+  _getAllFields() {
     return this.datasource
       .getTableFields(this.target.project, this.target.dataset, this.target.table, [])
       .then(this.transformToSegments({}))
       .catch(this.handleQueryError.bind(this));
   }
-  public handleWherePartEvent(whereParts, part, evt, index) {
+  handleWherePartEvent(whereParts, part, evt, index) {
     switch (evt.name) {
       case 'get-param-options': {
         switch (evt.param.name) {
@@ -706,7 +705,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public getWhereOptions() {
+  getWhereOptions() {
     const options = [];
     options.push(this.uiSegmentSrv.newSegment({ type: 'macro', value: '$__timeFilter' }));
     options.push(this.uiSegmentSrv.newSegment({ type: 'macro', value: '$__timeFrom' }));
@@ -715,7 +714,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     return Promise.resolve(options);
   }
 
-  public setwWereParts(partModel) {
+  setwWereParts(partModel) {
     if (this.whereParts.length >= 1 && this.whereParts[0].def.type === 'macro') {
       // replace current macro
       this.whereParts[0] = partModel;
@@ -724,7 +723,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     }
   }
 
-  public addWhereAction(part, index) {
+  addWhereAction(part, index) {
     switch (this.whereAdd.type) {
       case 'macro': {
         const partModel = sqlPart.create({
@@ -750,9 +749,9 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.panelCtrl.refresh();
   }
 
-  public getGroupOptions() {
+  getGroupOptions() {
     return this.getMetricColumnSegments()
-      .then(tags => {
+      .then((tags) => {
         const options = [];
         if (!this.queryModel.hasTimeGroup()) {
           options.push(
@@ -770,7 +769,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
       .catch(this.handleQueryError.bind(this));
   }
 
-  public addGroupAction() {
+  addGroupAction() {
     switch (this.groupAdd.value) {
       default: {
         this.addGroup(this.groupAdd.type, this.groupAdd.value);
@@ -781,7 +780,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     this.panelCtrl.refresh();
   }
 
-  public handleQueryError(err) {
+  handleQueryError(err) {
     this.error = err.message || 'Failed to issue metric query';
     return [];
   }
@@ -809,7 +808,7 @@ export class BigQueryQueryCtrl extends QueryCtrl {
     let res = '';
     await this.datasource
       .getTableFields(this.target.project, this.target.dataset, this.target.table, ['DATE', 'TIMESTAMP', 'DATETIME'])
-      .then(result => {
+      .then((result) => {
         for (const f of result) {
           if (f.text === this.target.timeColumn) {
             res = f.value;
