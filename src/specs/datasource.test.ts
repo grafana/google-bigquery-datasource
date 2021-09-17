@@ -4,11 +4,11 @@ import { of } from 'rxjs';
 import { BigQueryDatasource } from '../datasource';
 
 const templateSrvMock = {
-  replace: jest.fn(text => text),
+  replace: jest.fn((text) => text),
 };
 const fetchMock = jest.fn().mockReturnValue(of({ data: {}, status: 200 }));
 jest.mock('@grafana/runtime', () => ({
-  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
+  ...(jest.requireActual('@grafana/runtime') as unknown as object),
   getBackendSrv: () => ({
     fetch: fetchMock,
   }),

@@ -1,3 +1,7 @@
+// @ts-nocheck
+// ------------------------------------------------------------------
+// No check for this file as it's to be migrated soon to React based query editor
+
 import appEvents from 'grafana/app/core/app_events';
 import { QueryCtrl } from 'grafana/app/plugins/sdk';
 import _ from 'lodash';

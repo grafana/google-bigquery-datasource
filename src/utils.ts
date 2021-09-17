@@ -49,11 +49,7 @@ export function findTimeField(sql: string, timeFields: any[]) {
     if (field === -1) {
       field = splitFrom[i].length;
     }
-    col = splitFrom[i]
-      .substring(0, field)
-      .trim()
-      .replace('`', '')
-      .replace('`', '');
+    col = splitFrom[i].substring(0, field).trim().replace('`', '').replace('`', '');
     col = col.replace(/\$__timeGroupAlias\(/g, '');
     col = col.replace(/\$__timeGroup\(/g, '');
     col = col.replace(/\$__timeFilter\(/g, '');

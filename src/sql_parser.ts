@@ -1,5 +1,5 @@
 export default class SqlParser {
-  public static getProjectDatasetTableFromSql = (sqlCode: string) => {
+  static getProjectDatasetTableFromSql = (sqlCode: string) => {
     const FULL_JOB_ID = SqlParser.getFullJobId(sqlCode);
     const DATASET = SqlParser.getDatasetId(FULL_JOB_ID);
     const PROJECT = SqlParser.getProjectIdFromFullId(FULL_JOB_ID);
@@ -16,7 +16,7 @@ export default class SqlParser {
 
       if (matchId && Array.isArray(matchId)) {
         //The from part
-        matchId.forEach(match => {
+        matchId.forEach((match) => {
           fullJobId = match.replace(/from|\n|;/gi, ' ').trim(); //remove from, newlines, spaces & ;
           if (fullJobId.match(/`|\[|\.|:/)) {
             fullJobId = fullJobId.replace(/`|\[|\]/g, '');

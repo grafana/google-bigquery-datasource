@@ -24,8 +24,8 @@ export interface BigQueryQueryNG extends DataQuery {
   timeColumnType?: 'TIMESTAMP' | 'DATE' | 'DATETIME' | 'int4';
   metricColumn: string;
   group?: Array<{ type: GroupType; params: string[] }>;
-  where?: Array<any>;
-  select?: Array<any>;
+  where?: any[];
+  select?: any[];
   rawQuery?: boolean;
   rawSql: string;
   partitioned?: boolean;
@@ -133,8 +133,6 @@ export default class BigQueryQuery {
 
   render(interpolate?: boolean) {
     const target = this.target;
-    console.log(target.rawQuery);
-    debugger;
     // new query with no table set yet
     if (!this.target.rawQuery && !('table' in this.target)) {
       return '';

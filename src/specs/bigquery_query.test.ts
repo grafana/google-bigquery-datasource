@@ -3,11 +3,11 @@ import BigQueryQuery from '../bigquery_query';
 import { escapeLiteral, formatDateToString, getUnixSecondsFromString, replaceTimeShift, getTimeShift } from '../utils';
 
 const templateSrvMock = {
-  replace: jest.fn(text => text),
+  replace: jest.fn((text) => text),
 };
 
 jest.mock('@grafana/runtime', () => ({
-  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
+  ...(jest.requireActual('@grafana/runtime') as unknown as object),
   getTemplateSrv: () => templateSrvMock,
 }));
 

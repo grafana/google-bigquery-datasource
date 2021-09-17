@@ -99,7 +99,7 @@ describe('ConfigEditor', () => {
     const { getByTestId } = render(
       <WrapInState
         defaultOptions={
-          ({
+          {
             jsonData: {
               clientEmail: 'test@grafana.com',
               tokenUri: 'https://accounts.google.com/o/oauth2/token',
@@ -108,7 +108,7 @@ describe('ConfigEditor', () => {
             secureJsonFields: {
               privateKey: true,
             },
-          } as unknown) as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
+          } as unknown as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
       >
         {({ options, setOptions }) => {
@@ -130,10 +130,10 @@ describe('ConfigEditor', () => {
   });
 
   it('renders JWT form when data is provided', () => {
-    const { getByTestId } = render(
+    render(
       <BigQueryConfigEditor
         options={
-          ({
+          {
             jsonData: {
               clientEmail: 'test@grafana.com',
               tokenUri: 'https://accounts.google.com/o/oauth2/token',
@@ -142,7 +142,7 @@ describe('ConfigEditor', () => {
             secureJsonFields: {
               privateKey: true,
             },
-          } as unknown) as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
+          } as unknown as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
         onOptionsChange={() => {}}
       />
