@@ -84,7 +84,7 @@ export default class SqlParser {
         SqlParser.errorMessage('First Regex', idString, '');
       }
       // Same as the first only that here instead of ':' we are looking for '.' and we want to make sure there is more than 1 (as in standard syntax)
-    } else if (idString.match(/\./g) && idString.match(/\./g).length === 2) {
+    } else if (idString.match(/\./g) && idString.match(/\./g)?.length === 2) {
       // Regex that checks if the format of the id match standard
       let matched = idString.match(/(`([^`]|``)*`)/g); // ? idString.match(/(`([^`]|``)*`)/g) : [idString];
       if (matched && matched[0]) {

@@ -21,7 +21,15 @@ export interface BigQueryOptions extends DataSourceJsonData {
 }
 
 export interface BigQuerySecureJsonData {
-  // apiKey?: string;
-  // jwt?: string;
   privateKey?: string;
+}
+
+export enum GroupType {
+  Time = 'time',
+  Column = 'column',
+}
+
+export enum QueryFormat {
+  Table = 'table',
+  Timeseries = 'time_series',
 }

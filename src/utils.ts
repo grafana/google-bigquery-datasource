@@ -1,8 +1,10 @@
+import { DataQueryRequest, DurationUnit } from '@grafana/data';
+import { BigQueryQueryNG, QueryFormat } from 'bigquery_query';
 import SqlParser from 'sql_parser';
 
 export const SHIFTED = '_shifted';
 
-export function formatBigqueryError(error) {
+export function formatBigqueryError(error: any) {
   let message = 'BigQuery: ';
   let status = '';
   let data = '';
@@ -20,21 +22,22 @@ export function formatBigqueryError(error) {
   };
 }
 
-export function getShiftPeriod(strInterval) {
-  const shift = strInterval.match(/\d+/)[0];
+export function getShiftPeriod(strInterval: string): [DurationUnit, string] {
+  const shift = strInterval.match(/\d+/)![0];
   strInterval = strInterval.substr(shift.length, strInterval.length);
 
   if (strInterval.trim() === 'min') {
     strInterval = 'm';
   }
-  return [strInterval, shift];
+  return [strInterval as DurationUnit, shift];
 }
 
 export function extractFromClause(sql: string) {
   return SqlParser.getProjectDatasetTableFromSql(sql);
 }
 
-export function findTimeField(sql, timeFields) {
+// TODO: fix any annotation
+export function findTimeField(sql: string, timeFields: any[]) {
   const select = sql.search(/select/i);
   const from = sql.search(/from/i);
   const fields = sql.substring(select + 6, from);
@@ -45,7 +48,11 @@ export function findTimeField(sql, timeFields) {
     if (field === -1) {
       field = splitFrom[i].length;
     }
-    col = splitFrom[i].substring(0, field).trim().replace('`', '').replace('`', '');
+    col = splitFrom[i]
+      .substring(0, field)
+      .trim()
+      .replace('`', '')
+      .replace('`', '');
     col = col.replace(/\$__timeGroupAlias\(/g, '');
     col = col.replace(/\$__timeGroup\(/g, '');
     col = col.replace(/\$__timeFilter\(/g, '');
@@ -72,15 +79,16 @@ export function handleError(error: any) {
   throw formatBigqueryError(msg);
 }
 
-export function createTimeShiftQuery(query) {
+export function createTimeShiftQuery(query: BigQueryQueryNG) {
   const res = getTimeShift(query.rawSql);
   if (!res) {
     return res;
   }
   const copy = query.constructor();
+
   for (const attr in query) {
     if (query.hasOwnProperty(attr)) {
-      copy[attr] = query[attr];
+      copy[attr] = query[attr as keyof BigQueryQueryNG];
     }
   }
   copy.rawSql = replaceTimeShift(copy.rawSql);
@@ -89,37 +97,39 @@ export function createTimeShiftQuery(query) {
   return copy;
 }
 
-export function setupTimeShiftQuery(query, options) {
-  debugger;
+export function setupTimeShiftQuery(query: BigQueryQueryNG, options: DataQueryRequest<BigQueryQueryNG>) {
   const index = query.format.indexOf('#');
   const copy = options.constructor();
+
   for (const attr in options) {
     if (options.hasOwnProperty(attr)) {
-      copy[attr] = options[attr];
+      copy[attr] = options[attr as keyof DataQueryRequest<BigQueryQueryNG>];
     }
   }
   if (index === -1) {
     return copy;
   }
-  let strInterval = query.format.substr(index + 1, query.format.len);
+
+  let strInterval = query.format.substr(index + 1);
   const res = getShiftPeriod(strInterval);
   strInterval = res[0];
+
   if (!['s', 'min', 'h', 'd', 'w', 'm', 'w', 'y', 'M'].includes(strInterval)) {
     return copy;
   }
-  query.format = query.format.substr(0, index);
+  query.format = query.format.substr(0, index) as QueryFormat;
   strInterval = res[0];
   const shift = res[1];
 
   if (strInterval === 'min') {
     strInterval = 'm';
   }
-  copy.range.from = options.range.from.subtract(parseInt(shift, 10), strInterval);
-  copy.range.to = options.range.to.subtract(parseInt(shift, 10), strInterval);
+  copy.range.from = options.range.from.subtract(parseInt(shift, 10), strInterval as DurationUnit);
+  copy.range.to = options.range.to.subtract(parseInt(shift, 10), strInterval as DurationUnit);
   return copy;
 }
 
-export function updatePartition(q, options) {
+export function updatePartition(q: string, options: DataQueryRequest<BigQueryQueryNG>) {
   if (q.indexOf('AND _PARTITIONTIME >= ') < 1) {
     return q;
   }
@@ -128,40 +138,40 @@ export function updatePartition(q, options) {
   }
   const from = q.substr(q.indexOf('AND _PARTITIONTIME >= ') + 22, 21);
 
-  const newFrom = "'" + formatDateToString(options.range.from._d, '-', true) + "'";
+  const newFrom = "'" + formatDateToString(options.range.from.toDate(), '-', true) + "'";
   q = q.replace(from, newFrom);
   const to = q.substr(q.indexOf('AND _PARTITIONTIME < ') + 21, 21);
-  const newTo = "'" + formatDateToString(options.range.to._d, '-', true) + "'";
+  const newTo = "'" + formatDateToString(options.range.to.toDate(), '-', true) + "'";
 
   q = q.replace(to, newTo) + '\n ';
   return q;
 }
 
-export function updateTableSuffix(q, options) {
+export function updateTableSuffix(q: string, options: DataQueryRequest<BigQueryQueryNG>) {
   const ind = q.indexOf('AND  _TABLE_SUFFIX BETWEEN ');
   if (ind < 1) {
     return q;
   }
   const from = q.substr(ind + 28, 8);
 
-  const newFrom = formatDateToString(options.range.from._d);
+  const newFrom = formatDateToString(options.range.from.toDate());
   q = q.replace(from, newFrom);
   const to = q.substr(ind + 43, 8);
-  const newTo = formatDateToString(options.range.to._d);
+  const newTo = formatDateToString(options.range.to.toDate());
   q = q.replace(to, newTo) + '\n ';
   return q;
 }
 
 // query utils
-export function quoteLiteral(value) {
+export function quoteLiteral(value: any) {
   return "'" + String(value).replace(/'/g, "''") + "'";
 }
 
-export function escapeLiteral(value) {
+export function escapeLiteral(value: any) {
   return String(value).replace(/'/g, "''");
 }
 
-export function quoteFiledName(value) {
+export function quoteFiledName(value: string) {
   const vals = value.split('.');
   let res = '';
   for (let i = 0; i < vals.length; i++) {
@@ -173,7 +183,7 @@ export function quoteFiledName(value) {
   return res;
 }
 
-export function formatDateToString(inputDate, separator = '', addtime = false) {
+export function formatDateToString(inputDate: Date, separator = '', addtime = false) {
   const date = new Date(inputDate);
   // 01, 02, 03, ... 29, 30, 31
   const DD = (date.getDate() < 10 ? '0' : '') + date.getDate();
@@ -190,7 +200,7 @@ export function formatDateToString(inputDate, separator = '', addtime = false) {
   return dateStr;
 }
 
-export function getInterval(q, alias: boolean) {
+export function getInterval(q: string, alias: boolean) {
   const interval: string[] = [];
   const res = alias
     ? q.match(/(\$__timeGroupAlias\(([\w._]+,)).*?(?=\))/g)
@@ -202,13 +212,14 @@ export function getInterval(q, alias: boolean) {
   return interval;
 }
 
-export function getUnixSecondsFromString(str) {
+export function getUnixSecondsFromString(str?: string) {
   if (str === undefined) {
     return 0;
   }
   const res = getShiftPeriod(str);
   const groupPeriod = res[0];
-  const groupVal = res[1];
+  const groupVal = parseInt(res[1], 10);
+
   switch (groupPeriod) {
     case 's':
       return 1 * groupVal;
@@ -228,19 +239,20 @@ export function getUnixSecondsFromString(str) {
   return 0;
 }
 
-export function getTimeShift(q) {
-  let res: string;
-  res = q.match(/(.*\$__timeShifting\().*?(?=\))/g);
+export function getTimeShift(q: string) {
+  let res = q.match(/(.*\$__timeShifting\().*?(?=\))/g);
+  let result = null;
+
   if (res) {
-    res = res[0].substr(1 + res[0].lastIndexOf('('));
+    result = res[0].substr(1 + res[0].lastIndexOf('('));
   }
-  return res;
+  return result;
 }
 
-export function replaceTimeShift(q) {
+export function replaceTimeShift(q: string) {
   return q.replace(/(\$__timeShifting\().*?(?=\))./g, '');
 }
 
-export function convertToUtc(d) {
+export function convertToUtc(d: Date) {
   return new Date(d.getTime() + d.getTimezoneOffset() * 60000);
 }

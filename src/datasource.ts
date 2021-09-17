@@ -1,16 +1,16 @@
 import _ from 'lodash';
 // eslint-disable-next-line no-restricted-imports
-import moment from 'moment';
 import BigQueryQuery, { BigQueryQueryNG } from './bigquery_query';
 import { map } from 'rxjs/operators';
 import ResponseParser, { ResultFormat } from './ResponseParser';
-import { BigQueryOptions, GoogleAuthType, QueryPriority } from './types';
+import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
 import {
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
+  dateTime,
   VariableModel,
 } from '@grafana/data';
 import { FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
@@ -55,6 +55,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
 
     this.baseUrl = `/bigquery/`;
     this.url = instanceSettings.url;
+    debugger;
     this.responseParser = new ResponseParser();
     this.queryModel = new BigQueryQuery({} as any);
 
@@ -113,6 +114,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         queries.push(newQuery);
       }
     });
+
     let modOptions;
     const allQueryPromise = _.map(queries, query => {
       const tmpQ = this.queryModel.target.rawSql;
@@ -182,13 +184,17 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         }
       }
 
+      debugger;
       for (const d of data) {
         if (typeof d.target !== 'undefined' && d.target.search(SHIFTED) > -1) {
           const res = getShiftPeriod(d.target.substring(d.target.lastIndexOf('_') + 1, d.target.length));
+
           const shiftPeriod = res[0];
-          const shiftVal = res[1];
+          const shiftVal = parseInt(res[1], 10);
+
+          debugger;
           for (let i = 0; i < d.datapoints.length; i++) {
-            d.datapoints[i][1] = moment(d.datapoints[i][1])
+            d.datapoints[i][1] = dateTime(d.datapoints[i][1])
               .subtract(shiftVal, shiftPeriod)
               .valueOf();
           }
@@ -212,7 +218,12 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       refId,
     };
 
-    return await this.doQuery(interpolatedQuery.rawSql, refId).then(metricData => ResponseParser.toVar(metricData));
+    return await this.doQuery(interpolatedQuery.rawSql, refId).then(metricData => {
+      if (!metricData.rows) {
+        return [];
+      }
+      return ResponseParser.toVar(metricData);
+    });
   }
 
   async testDatasource() {
@@ -313,12 +324,12 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     }
     const rawSql = getTemplateSrv().replace(options.annotation.rawQuery, options.scopedVars, this.interpolateVariable);
 
-    const query: BigQueryQueryNG = {
+    const query = {
       // datasourceId: this.id,
-      format: 'table',
+      format: QueryFormat.Table,
       rawSql,
       refId: options.annotation.name,
-    };
+    } as BigQueryQueryNG;
 
     this.queryModel.target.rawSql = query.rawSql;
     query.rawSql = this.queryModel.expend_macros(options);

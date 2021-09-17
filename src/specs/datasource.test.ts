@@ -4,11 +4,11 @@ import { of } from 'rxjs';
 import { BigQueryDatasource } from '../datasource';
 
 const templateSrvMock = {
-  replace: jest.fn((text) => text),
+  replace: jest.fn(text => text),
 };
 const fetchMock = jest.fn().mockReturnValue(of({ data: {}, status: 200 }));
 jest.mock('@grafana/runtime', () => ({
-  ...(jest.requireActual('@grafana/runtime') as unknown as object),
+  ...((jest.requireActual('@grafana/runtime') as unknown) as object),
   getBackendSrv: () => ({
     fetch: fetchMock,
   }),
@@ -51,14 +51,15 @@ describe('BigQueryDatasource', () => {
   describe('metricFindQuery', () => {
     const query = '',
       options = { variable: { name: 'refId' } };
+
     it('should check response for empty query', async () => {
       const res = await ctx.ds.metricFindQuery(query, options);
-      expect(res).toEqual([{ data: [] }]);
+      expect(res).toEqual([]);
     });
   });
 
   describe('When performing do request', () => {
-    let results;
+    let results: any;
 
     beforeEach(() => {
       const mockResponse = {
@@ -130,7 +131,7 @@ describe('BigQueryDatasource', () => {
 
     it('should return expected data batch api', async () => {
       const priority = 'BATCH';
-      await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data) => {
+      await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data: any) => {
         results = data;
       });
       expect(results.rows.length).toBe(3);
@@ -138,7 +139,7 @@ describe('BigQueryDatasource', () => {
     });
     it('should return expected data interactive', async () => {
       const priority = 'INTERACTIVE';
-      await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data) => {
+      await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data: any) => {
         results = data;
       });
       expect(results.rows.length).toBe(3);
@@ -147,7 +148,7 @@ describe('BigQueryDatasource', () => {
 
     it('should return expected data interactive', async () => {
       const priority = 'INTERACTIVE';
-      await ctx.ds.doQueryRequest('select * from table', 'id-1', priority).then((data) => {
+      await ctx.ds.doQueryRequest('select * from table', 'id-1', priority).then((data: any) => {
         results = data;
       });
       expect(results.data.rows.length).toBe(3);
@@ -156,7 +157,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('_waitForJobComplete', () => {
-    let results;
+    let results: any;
 
     const queryResults = {
       data: {
@@ -228,16 +229,18 @@ describe('BigQueryDatasource', () => {
     });
 
     it('should return expected data', async () => {
-      await ctx.ds._waitForJobComplete(queryResults, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5').then((data) => {
-        results = data;
-      });
+      await ctx.ds
+        ._waitForJobComplete(queryResults, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5')
+        .then((data: any) => {
+          results = data;
+        });
       expect(results.data.rows.length).toBe(3);
       expect(results.data.schema.fields.length).toBe(2);
     });
   });
 
   describe('_getQueryResults', () => {
-    let results;
+    let results: any;
     const mockResponse = {
       kind: 'bigquery#queryResponse',
       schema: {
@@ -365,7 +368,7 @@ describe('BigQueryDatasource', () => {
     it('should return expected data', async () => {
       await ctx.ds
         ._getQueryResults(queryResults, mockResponse.rows, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5')
-        .then((data) => {
+        .then((data: any) => {
           results = data;
         });
       expect(results.length).toBe(6);
@@ -373,7 +376,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing getProjects', () => {
-    let queryResults;
+    let queryResults: any;
 
     beforeEach(async () => {
       const mockResponse = {
@@ -411,7 +414,7 @@ describe('BigQueryDatasource', () => {
         totalItems: 3,
       };
       fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
-      await ctx.ds.getProjects().then((data) => {
+      await ctx.ds.getProjects().then((data: any) => {
         queryResults = data;
       });
     });
@@ -424,7 +427,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing getDatasets', () => {
-    let results;
+    let results: any;
 
     beforeEach(async () => {
       const mockResponse = {
@@ -455,7 +458,7 @@ describe('BigQueryDatasource', () => {
         ],
       };
       fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
-      await ctx.ds.getDatasets('prj-1').then((data) => {
+      await ctx.ds.getDatasets('prj-1').then((data: any) => {
         results = data;
       });
     });
@@ -468,7 +471,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing getTables', () => {
-    let results;
+    let results: any;
 
     beforeEach(async () => {
       const mockResponse = {
@@ -501,7 +504,7 @@ describe('BigQueryDatasource', () => {
         totalItems: 2,
       };
       fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
-      await ctx.ds.getTables('prj-1', 'ds-1').then((data) => {
+      await ctx.ds.getTables('prj-1', 'ds-1').then((data: any) => {
         results = data;
       });
     });
@@ -514,7 +517,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing getTableFields for Date Fields', () => {
-    let results;
+    let results: any;
 
     beforeEach(async () => {
       const mockResponse = {
@@ -566,7 +569,7 @@ describe('BigQueryDatasource', () => {
         location: 'US',
       };
       fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
-      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', ['DATE', 'TIMESTAMP', 'DATETIME']).then((data) => {
+      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', ['DATE', 'TIMESTAMP', 'DATETIME']).then((data: any) => {
         results = data;
       });
     });
@@ -580,7 +583,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing getTableFields for Numeric Fields', () => {
-    let results;
+    let results: any;
 
     beforeEach(async () => {
       const mockResponse = {
@@ -638,7 +641,7 @@ describe('BigQueryDatasource', () => {
       fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
       await ctx.ds
         .getTableFields('prj-1', 'ds-1', 'newtable', ['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'])
-        .then((data) => {
+        .then((data: any) => {
           results = data;
         });
     });
@@ -651,7 +654,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing getTableFields for All Fields', () => {
-    let results;
+    let results: any;
 
     beforeEach(async () => {
       const mockResponse = {
@@ -707,7 +710,7 @@ describe('BigQueryDatasource', () => {
         location: 'US',
       };
       fetchMock.mockImplementation(() => of({ data: mockResponse, status: 200 }));
-      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', []).then((data) => {
+      await ctx.ds.getTableFields('prj-1', 'ds-1', 'newtable', []).then((data: any) => {
         results = data;
       });
     });
@@ -847,7 +850,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing testDatasource', () => {
-    let results;
+    let results: any;
     beforeEach(() => {
       const mockResponse = {
         kind: 'bigquery#datasetList',
@@ -880,7 +883,7 @@ describe('BigQueryDatasource', () => {
     });
 
     it('should test datasource', async () => {
-      await ctx.ds.testDatasource().then((data) => {
+      await ctx.ds.testDatasource().then((data: any) => {
         results = data;
       });
       expect(results.status).toBe('success');
@@ -888,7 +891,7 @@ describe('BigQueryDatasource', () => {
   });
 
   describe('When performing testDatasource', () => {
-    let results;
+    let results: any;
 
     beforeEach(() => {
       const mockResponse = {

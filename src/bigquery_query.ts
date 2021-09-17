@@ -1,4 +1,4 @@
-import { getTemplateSrv } from '@grafana/runtime';
+import { getTemplateSrv, TemplateSrv } from '@grafana/runtime';
 import { DataQuery, ScopedVars, VariableModel } from '@grafana/data';
 import _ from 'lodash';
 import {
@@ -12,26 +12,22 @@ import {
   convertToUtc,
   getInterval,
 } from 'utils';
-
-enum GroupType {
-  Time = 'time',
-  Column = 'column',
-}
+import { GroupType, QueryFormat } from 'types';
 
 export interface BigQueryQueryNG extends DataQuery {
   dataset?: string;
-  format?: 'table' | 'time_series';
+  format: QueryFormat;
   orderByCol?: string;
   orderBySort?: string;
   location?: string;
-  timeColumn?: string;
-  timeColumnType?: 'TIMESTAMP' | 'DATE' | 'DATETIME';
-  metricColumn?: string;
+  timeColumn: string;
+  timeColumnType?: 'TIMESTAMP' | 'DATE' | 'DATETIME' | 'int4';
+  metricColumn: string;
   group?: Array<{ type: GroupType; params: string[] }>;
   where?: Array<any>;
   select?: Array<any>;
   rawQuery?: boolean;
-  rawSql?: string;
+  rawSql: string;
   partitioned?: boolean;
   partitionedField?: string;
   convertToUTC?: boolean;
@@ -42,7 +38,7 @@ export interface BigQueryQueryNG extends DataQuery {
 
 export default class BigQueryQuery {
   target: BigQueryQueryNG;
-  templateSrv: any;
+  templateSrv: TemplateSrv;
   scopedVars: any;
   isWindow: boolean;
   isAggregate: boolean;
@@ -79,7 +75,7 @@ export default class BigQueryQuery {
     this.interpolateQueryStr = this.interpolateQueryStr.bind(this);
   }
 
-  getIntervalStr(interval: string, mininterval: string, options: any) {
+  getIntervalStr(interval: string, mininterval: string | undefined, options: any) {
     if (interval === 'auto') {
       interval = this._calcAutoInterval(options);
     }
@@ -137,6 +133,8 @@ export default class BigQueryQuery {
 
   render(interpolate?: boolean) {
     const target = this.target;
+    console.log(target.rawQuery);
+    debugger;
     // new query with no table set yet
     if (!this.target.rawQuery && !('table' in this.target)) {
       return '';
@@ -347,19 +345,34 @@ export default class BigQueryQuery {
     if (this.target.partitioned) {
       const partitionedField = this.target.partitionedField ? this.target.partitionedField : '_PARTITIONTIME';
       if (this.target.timeColumn !== partitionedField) {
+        //  TODO: get rid of timeRange read from templateSrv
+        // @ts-ignore
         if (this.templateSrv.timeRange && this.templateSrv.timeRange.from) {
-          const from = `${partitionedField} >= '${formatDateToString(this.templateSrv.timeRange.from._d, '-', true)}'`;
+          const from = `${partitionedField} >= '${formatDateToString(
+            // @ts-ignore
+            this.templateSrv.timeRange.from.toDate(),
+            '-',
+            true
+          )}'`;
           conditions.push(from);
         }
+
+        //  TODO: get rid of timeRange read from templateSrv
+        // @ts-ignore
         if (this.templateSrv.timeRange && this.templateSrv.timeRange.to) {
-          const to = `${partitionedField} < '${formatDateToString(this.templateSrv.timeRange.to._d, '-', true)}'`;
+          // @ts-ignore
+          const to = `${partitionedField} < '${formatDateToString(this.templateSrv.timeRange.to.toDate(), '-', true)}'`;
           conditions.push(to);
         }
       }
     }
     if (this.target.sharded) {
-      const from = formatDateToString(this.templateSrv.timeRange.from._d);
-      const to = formatDateToString(this.templateSrv.timeRange.to._d);
+      //  TODO: get rid of timeRange read from templateSrv
+      // @ts-ignore
+      const from = formatDateToString(this.templateSrv.timeRange.from.toDate());
+      //  TODO: get rid of timeRange read from templateSrv
+      // @ts-ignore
+      const to = formatDateToString(this.templateSrv.timeRange.to.toDate());
       const sharded = "_TABLE_SUFFIX BETWEEN '" + from + "' AND '" + to + "' ";
       conditions.push(sharded);
     }
@@ -558,7 +571,8 @@ export default class BigQueryQuery {
   }
 
   private _calcAutoInterval(options: any) {
-    const seconds = (this.templateSrv.timeRange.to._d - this.templateSrv.timeRange.from._d) / 1000;
+    // @ts-ignore
+    const seconds = (this.templateSrv.timeRange.to.toDate() - this.templateSrv.timeRange.from.toDate()) / 1000;
     return Math.ceil(seconds / options.maxDataPoints) + 's';
   }
 
