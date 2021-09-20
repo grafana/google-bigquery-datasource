@@ -1,5 +1,8 @@
-import { MetricFindValue } from '@grafana/data';
+import { MetricFindValue, TableData, TimeSeries } from '@grafana/data';
+import BQTypes from '@google-cloud/bigquery/build/src/types';
 import _ from 'lodash';
+import { FetchResponse } from '@grafana/runtime';
+
 // API interfaces
 export interface ResultFormat {
   text: string;
@@ -14,46 +17,50 @@ export interface DataTarget {
 }
 
 export default class ResponseParser {
-  static parseProjects(results): ResultFormat[] {
+  static parseProjects(results: BQTypes.IProjectList['projects']): ResultFormat[] {
     return ResponseParser.parseData(results, 'id', 'id');
   }
 
-  static parseDatasets(results): ResultFormat[] {
+  static parseDatasets(results: BQTypes.IDatasetList['datasets']): ResultFormat[] {
     return ResponseParser.parseData(results, 'datasetReference.datasetId', 'datasetReference.datasetId');
   }
 
-  static parseTableFields(results, filter): ResultFormat[] {
+  static parseTableFields(results: BQTypes.ITableFieldSchema[], filter: string[]): ResultFormat[] {
     const fields: ResultFormat[] = [];
     if (!results || results.length === 0) {
       return fields;
     }
-    const res = [];
+    const res: ResultFormat[] = [];
+
     results = ResponseParser._handleRecordFields(results, res);
+
     for (const fl of results) {
       if (filter.length > 0) {
         for (const flt of filter) {
           if (flt === fl.type) {
             fields.push({
-              text: fl.name,
-              value: fl.type,
+              text: fl.name!,
+              value: fl.type!,
             });
           }
         }
       } else {
         fields.push({
-          text: fl.name,
-          value: fl.type,
+          text: fl.name!,
+          value: fl.type!,
         });
       }
     }
     return fields;
   }
 
-  static parseDataQuery(results, format) {
-    if (!results.rows) {
+  static parseDataQuery(results: BQTypes.IQueryResponse, format: string) {
+    if (!results.rows || !results.schema) {
       return [{ data: [] }];
     }
+
     let res = null;
+
     if (format === 'time_series') {
       res = ResponseParser._toTimeSeries(results);
     }
@@ -70,7 +77,7 @@ export default class ResponseParser {
     return res;
   }
 
-  static _convertValues(value, type) {
+  static _convertValues(value: any, type: string) {
     if (['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'].includes(type)) {
       return Number(value);
     }
@@ -81,8 +88,9 @@ export default class ResponseParser {
     return value;
   }
 
-  private static parseData(results, text, value): ResultFormat[] {
+  private static parseData(results: any[] | undefined, text: string, value: string): ResultFormat[] {
     const data: ResultFormat[] = [];
+
     if (!results || results.length === 0) {
       return data;
     }
@@ -106,7 +114,7 @@ export default class ResponseParser {
     return data;
   }
 
-  private static manipulateItem(item) {
+  private static manipulateItem(item: any) {
     if (item.kind === 'bigquery#table' && item.timePartitioning) {
       item.tableReference.tableId = item.tableReference.tableId + '__partitioned';
       if (item.timePartitioning.field) {
@@ -116,17 +124,19 @@ export default class ResponseParser {
     return item;
   }
 
-  private static _handleRecordFields(results, res) {
+  private static _handleRecordFields(results: BQTypes.ITableFieldSchema[], res: any[]) {
     for (const fl of results) {
-      if (fl.type === 'RECORD') {
+      if (fl.type === 'RECORD' && fl.fields) {
         for (const f of fl.fields) {
           if (f.type !== 'RECORD') {
             res.push({ name: fl.name + '.' + f.name, type: f.type });
           } else {
-            for (const ff of f.fields) {
-              ff.name = fl.name + '.' + f.name + '.' + ff.name;
+            if (f.fields) {
+              for (const ff of f.fields) {
+                ff.name = fl.name + '.' + f.name + '.' + ff.name;
+              }
+              res = ResponseParser._handleRecordFields(f.fields, res);
             }
-            res = ResponseParser._handleRecordFields(f.fields, res);
           }
         }
       } else {
@@ -135,18 +145,18 @@ export default class ResponseParser {
     }
     return res;
   }
-  private static _toTimeSeries(results) {
+  private static _toTimeSeries(results: BQTypes.IQueryResponse) {
     let timeIndex = -1;
     let metricIndex = -1;
     const valueIndexes = [];
-    for (let i = 0; i < results.schema.fields.length; i++) {
-      if (timeIndex === -1 && ['DATE', 'TIMESTAMP', 'DATETIME'].includes(results.schema.fields[i].type)) {
+    for (let i = 0; i < results.schema!.fields!.length; i++) {
+      if (timeIndex === -1 && ['DATE', 'TIMESTAMP', 'DATETIME'].includes(results.schema!.fields![i].type!)) {
         timeIndex = i;
       }
-      if (metricIndex === -1 && results.schema.fields[i].name === 'metric') {
+      if (metricIndex === -1 && results.schema!.fields![i].name === 'metric') {
         metricIndex = i;
       }
-      if (['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'].includes(results.schema.fields[i].type)) {
+      if (['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'].includes(results.schema!.fields![i].type!)) {
         valueIndexes.push(i);
       }
     }
@@ -156,23 +166,41 @@ export default class ResponseParser {
     return ResponseParser._buildDataPoints(results, timeIndex, metricIndex, valueIndexes);
   }
 
-  private static _buildDataPoints(results, timeIndex, metricIndex, valueIndexes) {
-    const data = [];
+  private static _buildDataPoints(
+    results: BQTypes.IQueryResponse,
+    timeIndex: number,
+    metricIndex: number,
+    valueIndexes: number[]
+  ) {
+    const data: TimeSeries[] = [];
     let targetName = '';
     let metricName = '';
     let i;
+
+    if (!results.rows || !results.schema) {
+      return data;
+    }
+
     for (const row of results.rows) {
       if (row) {
         for (i = 0; i < valueIndexes.length; i++) {
+          if (row.f === undefined) {
+            continue;
+          }
+
           const epoch = Number(row.f[timeIndex].v) * 1000;
-          const valueIndexName = results.schema.fields[valueIndexes[i]].name;
+          const valueIndexName = results.schema.fields![valueIndexes[i]].name;
+
           targetName = metricIndex > -1 ? row.f[metricIndex].v.concat(' ', valueIndexName) : valueIndexName;
           metricName = metricIndex > -1 ? row.f[metricIndex].v : valueIndexName;
+
           if (metricIndex > -1 && valueIndexes.length === 1) {
             targetName = metricName;
           }
+
           const bucket = ResponseParser.findOrCreateBucket(data, targetName, metricName);
-          const value = row.f[valueIndexes[i]].v === null ? null : Number(row.f[valueIndexes[i]].v);
+          const value = row.f![valueIndexes[i]].v === null ? null : Number(row.f[valueIndexes[i]].v);
+
           bucket.datapoints.push([value, epoch]);
         }
       }
@@ -180,28 +208,38 @@ export default class ResponseParser {
     return data;
   }
 
-  private static findOrCreateBucket(data, target, metric): DataTarget {
+  private static findOrCreateBucket(data: TimeSeries[], target: string, metric: string): TimeSeries {
     let dataTarget = _.find(data, ['target', target]);
     if (!dataTarget) {
-      dataTarget = { target, datapoints: [], refId: metric, query: '' };
+      dataTarget = { target, datapoints: [], refId: metric, query: '' } as TimeSeries;
       data.push(dataTarget);
     }
 
     return dataTarget;
   }
 
-  private static _toTable(results) {
-    const columns = [];
-    for (const fl of results.schema.fields) {
+  private static _toTable(results: BQTypes.IQueryResponse): TableData {
+    const columns: Array<{ text: string; type: string }> = [];
+    const rows: any[] = [];
+
+    if (!results.schema) {
+      return {
+        columns,
+        rows,
+        type: 'table',
+      };
+    }
+
+    for (const fl of results.schema!.fields!) {
       columns.push({
-        text: fl.name,
-        type: fl.type,
+        text: fl.name!,
+        type: fl.type!,
       });
     }
-    const rows = [];
-    results.rows.forEach((row) => {
-      const r = [];
-      row.f.forEach((v, i) => {
+
+    results.rows?.forEach((row) => {
+      const r: any[] = [];
+      row.f?.forEach((v, i) => {
         const val = v.v ? ResponseParser._convertValues(v.v, columns[i].type) : '';
         r.push(val);
       });
@@ -228,13 +266,13 @@ export default class ResponseParser {
 
   constructor() {}
 
-  parseTabels(results): ResultFormat[] {
+  parseTabels(results: BQTypes.ITableList['tables']): ResultFormat[] {
     return this._handelWildCardTables(
       ResponseParser.parseData(results, 'tableReference.tableId', 'tableReference.tableId')
     );
   }
 
-  transformAnnotationResponse(options, data) {
+  transformAnnotationResponse(options: any, data: FetchResponse) {
     const table = data.data;
     let timeColumnIndex = -1;
     let textColumnIndex = -1;
@@ -270,9 +308,10 @@ export default class ResponseParser {
 
     return Promise.resolve(list);
   }
-  private _handelWildCardTables(tables) {
+
+  private _handelWildCardTables(tables: ResultFormat[]) {
     let sorted = new Map();
-    let newTables = [];
+    let newTables: ResultFormat[] = [];
     for (const t of tables) {
       const partitioned = t.text.indexOf('__partitioned');
       if (partitioned > -1) {

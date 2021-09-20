@@ -1,3 +1,5 @@
+import { MetricFindValue, TableData, TimeSeries } from '@grafana/data';
+import { FetchResponse } from '@grafana/runtime';
 import ResponseParser from 'ResponseParser';
 
 describe('ResponseParser', () => {
@@ -20,7 +22,7 @@ describe('ResponseParser', () => {
       },
     ];
     const options = { annotation: {} };
-    const data = { data: { schema: { fields } } };
+    const data = { data: { schema: { fields } } } as FetchResponse;
     const rp = new ResponseParser();
     const list = await rp.transformAnnotationResponse(options, data);
 
@@ -45,7 +47,7 @@ describe('ResponseParser', () => {
       },
     ];
     const options = { annotation: {} };
-    const data = { data: { schema: { fields } } };
+    const data = { data: { schema: { fields } } } as FetchResponse;
     const rp = new ResponseParser();
     const list = await rp.transformAnnotationResponse(options, data);
 
@@ -113,7 +115,7 @@ describe('ResponseParser', () => {
         },
       ];
     const options = { annotation: {} };
-    const data = { data: { schema: { fields }, rows } };
+    const data = { data: { schema: { fields }, rows } } as FetchResponse;
     const rp = new ResponseParser();
     const list = await rp.transformAnnotationResponse(options, data);
 
@@ -181,18 +183,18 @@ describe('When performing parseDataQuery for table', () => {
     cacheHit: false,
   };
 
-  const results = ResponseParser.parseDataQuery(response, 'table');
+  const results = ResponseParser.parseDataQuery(response, 'table') as TableData;
 
   it('should return a table', () => {
     expect(results.columns.length).toBe(2);
     expect(results.rows.length).toBe(3);
     expect(results.columns[0].text).toBe('time');
-    expect(results.columns[0].type).toBe('TIMESTAMP');
+    expect((results.columns[0] as any).type).toBe('TIMESTAMP');
   });
 });
 
 describe('When performing parseDataQuery for time_series', () => {
-  let results;
+  let results: TimeSeries[];
   const response = {
     kind: 'bigquery#queryResponse',
     schema: {
@@ -252,7 +254,7 @@ describe('When performing parseDataQuery for time_series', () => {
     cacheHit: false,
   };
 
-  results = ResponseParser.parseDataQuery(response, 'time_series');
+  results = ResponseParser.parseDataQuery(response, 'time_series') as TimeSeries[];
   it('should return a time_series', () => {
     expect(results[0].datapoints.length).toBe(3);
     expect(results[0].datapoints[0][0]).toBe(null);
@@ -263,7 +265,7 @@ describe('When performing parseDataQuery for time_series', () => {
 });
 
 describe('When performing parseDataQuery for vars', () => {
-  let results;
+  let results: MetricFindValue[];
   const response = {
     kind: 'bigquery#queryResponse',
     schema: {
@@ -323,7 +325,8 @@ describe('When performing parseDataQuery for vars', () => {
     cacheHit: false,
   };
 
-  results = ResponseParser.parseDataQuery(response, 'var');
+  results = ResponseParser.parseDataQuery(response, 'var') as MetricFindValue[];
+
   it('should return a var', () => {
     expect(results.length).toBe(3);
     expect(results[0].text).toBe('1.521578851E9');

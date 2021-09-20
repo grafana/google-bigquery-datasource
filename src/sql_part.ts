@@ -61,22 +61,11 @@ export class SqlPart {
     part.params = part.params || _.clone(this.def.defaultParams);
     this.params = part.params;
   }
-
-  updateParam(strValue, index) {
-    // handle optional parameters
-    if (strValue === '' && this.def.params[index].optional) {
-      this.params.splice(index, 1);
-    } else {
-      this.params[index] = strValue;
-    }
-
-    this.part.params = this.params;
-  }
 }
 
-const index = [];
+const index: Record<string, SqlPartDef> = {};
 
-function createPart(part): any {
+function createPart(part: { params: string[]; type: string }): any {
   const def = index[part.type];
   if (!def) {
     return null;

@@ -14,8 +14,8 @@ export interface Props {
 const INVALID_JWT_TOKEN_ERROR = 'Invalid JWT token';
 
 export const JWTConfigEditor: React.FC<Props> = ({ onChange }) => {
-  const [error, setError] = useState<string>();
-  const [isPasting, setIsPasting] = useState(null);
+  const [error, setError] = useState<string | null>();
+  const [isPasting, setIsPasting] = useState<boolean | null>(null);
   const theme = useTheme2();
 
   const onPasteClick = useCallback<React.MouseEventHandler<HTMLButtonElement>>(

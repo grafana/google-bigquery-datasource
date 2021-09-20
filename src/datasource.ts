@@ -28,6 +28,7 @@ import {
   updateTableSuffix,
   SHIFTED,
 } from 'utils';
+import BQTypes from '@google-cloud/bigquery/build/src/types';
 
 function sleep(ms: number) {
   return new Promise((resolve) => {
@@ -272,7 +273,8 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
 
   async getTables(projectName: string, datasetName: string): Promise<ResultFormat[]> {
     const path = `v2/projects/${projectName}/datasets/${datasetName}/tables`;
-    const data = await this.paginatedResults(path, 'tables');
+    const data: BQTypes.ITableList['tables'] = await this.paginatedResults(path, 'tables');
+
     return new ResponseParser().parseTabels(data);
   }
 
@@ -344,8 +346,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       })
       .pipe(
         map(async (res: FetchResponse) => {
-          const result = await this.responseParser.transformAnnotationResponse(options, res);
-          return result;
+          return await this.responseParser.transformAnnotationResponse(options, res);
         })
       )
       .toPromise();
@@ -591,15 +592,18 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   private async paginatedResults(path: string, dataName: string) {
     let queryResults = await this.doRequest(`${this.baseUrl}${path}`);
     let data = queryResults.data;
+
     if (!data) {
       return data;
     }
+
     const dataList = dataName.split('.');
     dataList.forEach((element) => {
       if (data && data[element]) {
         data = data[element];
       }
     });
+
     while (queryResults && queryResults.data && queryResults.data.nextPageToken) {
       queryResults = await this.doRequest(`${this.baseUrl}${path}` + '?pageToken=' + queryResults.data.nextPageToken);
       dataList.forEach((element) => {
