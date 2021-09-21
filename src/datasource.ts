@@ -81,7 +81,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   async query(options: DataQueryRequest<BigQueryQueryNG>): Promise<DataQueryResponse> {
     const queries = _.filter(options.targets, (target) => {
       return target.hide !== true;
-    }).map((target) => {
+    }).map<BigQueryQueryNG>((target) => {
       const queryModel = new BigQueryQuery(target, options.scopedVars);
       this.queryModel = queryModel;
 
@@ -115,6 +115,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     });
 
     let modOptions;
+
     const allQueryPromise = _.map(queries, (query) => {
       const tmpQ = this.queryModel.target.rawSql;
 
@@ -131,12 +132,13 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
 
         const q = this.setUpQ(modOptions, options, query);
 
-        console.log(q);
         this.queryModel.target.rawSql = q;
 
-        // TODO: get rid of !
-        return this.doQuery(q!, options.panelId + query.refId, query.queryPriority).then((response) => {
-          return ResponseParser.parseDataQuery(response, query.format);
+        return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then((response) => {
+          if (!response) {
+            return null;
+          }
+          return ResponseParser.parseQueryResults(response, query);
         });
       } else {
         // Fix raw sql
@@ -162,39 +164,37 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         modOptions = setupTimeShiftQuery(query, options);
         const q = this.setUpQ(modOptions, options, query);
 
-        // TODO: get rid of !
         return this.doQuery(q!, options.panelId + query.refId, query.queryPriority).then((response) => {
-          return ResponseParser.parseDataQuery(response, query.format);
+          if (!response) {
+            return null;
+          }
+          return ResponseParser.parseQueryResults(response, query);
         });
       }
     });
 
     return Promise.all(allQueryPromise).then((responses): any => {
+      console.log(responses);
       const data = [];
       if (responses) {
         for (const response of responses) {
-          if ((response as any).type && (response as any).type === 'table') {
-            data.push(response);
-          } else {
-            for (const dp of response as any) {
-              data.push(dp);
-            }
-          }
+          data.push(response);
         }
       }
 
-      for (const d of data) {
-        if (typeof d.target !== 'undefined' && d.target.search(SHIFTED) > -1) {
-          const res = getShiftPeriod(d.target.substring(d.target.lastIndexOf('_') + 1, d.target.length));
+      // TODO: bring back timeshift
+      // for (const d of data) {
+      //   if (typeof d.target !== 'undefined' && d.target.search(SHIFTED) > -1) {
+      //     const res = getShiftPeriod(d.target.substring(d.target.lastIndexOf('_') + 1, d.target.length));
 
-          const shiftPeriod = res[0];
-          const shiftVal = parseInt(res[1], 10);
+      //     const shiftPeriod = res[0];
+      //     const shiftVal = parseInt(res[1], 10);
 
-          for (let i = 0; i < d.datapoints.length; i++) {
-            d.datapoints[i][1] = dateTime(d.datapoints[i][1]).subtract(shiftVal, shiftPeriod).valueOf();
-          }
-        }
-      }
+      //     for (let i = 0; i < d.datapoints.length; i++) {
+      //       d.datapoints[i][1] = dateTime(d.datapoints[i][1]).subtract(shiftVal, shiftPeriod).valueOf();
+      //     }
+      //   }
+      // }
 
       return { data };
     });
@@ -214,7 +214,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     };
 
     return await this.doQuery(interpolatedQuery.rawSql, refId).then((metricData) => {
-      if (!metricData.rows) {
+      if (!metricData) {
         return [];
       }
       return ResponseParser.toVar(metricData);
@@ -378,9 +378,9 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         }
       }
     }
-
     return q;
   }
+
   /**
    * Add partition to query unless it has one
    * @param query
@@ -416,8 +416,9 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
 
   // @ts-ignore
   private async doRequest(url: string, requestId = 'requestId', maxRetries = 3) {
+    console.log('[BigQuery doRequest]');
     return getBackendSrv()
-      .fetch({
+      .fetch<BQTypes.IQueryResponse>({
         method: 'GET',
         requestId: generateID(),
         url: this.url + url,
@@ -430,17 +431,21 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
           }
           throw formatBigqueryError((result.data as any).error);
         }
+
+        console.log('[BigQuery doReques]', result);
         return result;
-      })
-      .catch((error) => {
-        if (maxRetries > 0) {
-          return this.doRequest(url, requestId, maxRetries - 1);
-        }
-        if (error.cancelled === true) {
-          return [];
-        }
-        return handleError(error);
       });
+    // TODO: fix this
+    // .catch((error) => {
+    //   if (error.status === 500 && maxRetries > 0) {
+    //     return this.doRequest(url, requestId, maxRetries - 1);
+    //   }
+
+    //   if (error.cancelled === true) {
+    //     return [];
+    //   }
+    //   return handleError(error);
+    // });
   }
 
   // @ts-ignore
@@ -448,19 +453,23 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
     const location = this.queryModel.target.location || this.processingLocation || 'US';
     let data,
       queryiesOrJobs = 'queries';
-    data = { priority: priority, location, query, useLegacySql: false, useQueryCache: true }; //ExternalDataConfiguration
+    data = { priority, location, query, useLegacySql: false, useQueryCache: true }; //ExternalDataConfiguration
+
     if (priority.toUpperCase() === 'BATCH') {
       queryiesOrJobs = 'jobs';
       data = { configuration: { query: { query, priority } } };
     }
+
     const path = `v2/projects/${this.runInProject}/${queryiesOrJobs}`;
     const url = this.url + `${this.baseUrl}${path}`;
+
     return getBackendSrv()
-      .fetch({
+      .fetch<BQTypes.IQueryResponse>({
         data: data,
         method: 'POST',
         requestId,
         url,
+        retry: 3,
       })
       .toPromise()
       .then((result) => {
@@ -470,12 +479,13 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
           }
           throw formatBigqueryError((result.data as any).error);
         }
-        return result;
+        return result.data;
       })
       .catch((error) => {
-        if (maxRetries > 0) {
+        if (error.status === 500 && maxRetries > 0) {
           return this.doQueryRequest(query, requestId, priority, maxRetries - 1);
         }
+
         if (error.cancelled === true) {
           return [];
         }
@@ -483,12 +493,14 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       });
   }
 
-  // @ts-ignore
-  private async _waitForJobComplete(queryResults, requestId: string, jobId: string) {
+  private async _waitForJobComplete(queryResults: BQTypes.IQueryResponse, requestId: string, jobId: string) {
     let sleepTimeMs = 100;
+    console.log(`Waiting for job ${jobId} to complete...`, queryResults);
+
     const location = this.queryModel.target.location || this.processingLocation || 'US';
     const path = `v2/projects/${this.runInProject}/queries/` + jobId + '?location=' + location;
-    while (!queryResults.data.jobComplete) {
+
+    while (!queryResults.jobComplete) {
       await sleep(sleepTimeMs);
       sleepTimeMs *= 2;
       queryResults = await this.doRequest(`${this.baseUrl}${path}`, requestId);
@@ -497,76 +509,72 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   }
 
   // @ts-ignore
-  private async _getQueryResults(queryResults, rows, requestId: string, jobId: string) {
-    while (queryResults.data.pageToken) {
+  private async _getQueryResults(queryResults: BQTypes.IQueryResponse, rows, requestId: string, jobId: string) {
+    while (queryResults.pageToken) {
       const location = this.queryModel.target.location || this.processingLocation || 'US';
+
       const path =
         `v2/projects/${this.runInProject}/queries/` +
         jobId +
         '?pageToken=' +
-        queryResults.data.pageToken +
+        queryResults.pageToken +
         '&location=' +
         location;
-      queryResults = await this.doRequest(`${this.baseUrl}${path}`, requestId);
-      if (queryResults.length === 0) {
-        return rows;
+
+      const nextResult = await this.doRequest(`${this.baseUrl}${path}`, requestId);
+
+      if (nextResult.data.rows?.length === 0) {
+        return queryResults;
       }
-      rows = rows.concat(queryResults.data.rows);
+
+      queryResults.rows = queryResults.rows ? queryResults.rows.concat(nextResult.rows) : nextResult.rows;
     }
-    return rows;
+
+    return queryResults;
   }
 
-  private async doQuery(query: string, requestId: string, priority = QueryPriority.Interactive) {
+  private async doQuery(
+    query: string,
+    requestId: string,
+    priority = QueryPriority.Interactive
+  ): Promise<BQTypes.IQueryResponse | null> {
     if (!query) {
-      return {
-        rows: null,
-        schema: null,
-      };
+      return null;
     }
+
     let notReady = false;
+
     ['-- time --', '-- value --'].forEach((element) => {
       if (query.indexOf(element) !== -1) {
         notReady = true;
       }
     });
+
     if (notReady) {
-      return {
-        rows: null,
-        schema: null,
-      };
+      return null;
     }
-    let queryResults = await this.doQueryRequest(
-      //"tableDefinitions": {
-      //   string: {
-      //     object (ExternalDataConfiguration)
-      //   },
-      //   ...
-      // },
-      query,
-      requestId,
-      priority
-    );
+
+    let queryResults = await this.doQueryRequest(query, requestId, priority);
+
+    console.log('[BigQuery doQuery]', queryResults);
     if (queryResults.length === 0) {
-      return {
-        rows: null,
-        schema: null,
-      };
+      return {};
     }
-    const jobId = queryResults.data.jobReference.jobId;
+    const jobId = queryResults.jobReference.jobId;
+
     queryResults = await this._waitForJobComplete(queryResults, requestId, jobId);
-    if (queryResults.length === 0) {
-      return {
-        rows: null,
-        schema: null,
-      };
-    }
-    let rows = queryResults.data.rows;
-    const schema = queryResults.data.schema;
-    rows = await this._getQueryResults(queryResults, rows, requestId, jobId);
-    return {
-      rows,
-      schema,
-    };
+
+    console.log('queryResults', queryResults);
+
+    // if (queryResults.length === 0) {
+    //   return {
+    //     rows: null,
+    //     schema: null,
+    //   };
+    // }
+    let rows = queryResults.rows;
+    // const schema = queryResults.schema;
+    return await this._getQueryResults(queryResults, rows, requestId, jobId);
   }
 
   private interpolateVariable = (value: any, variable: VariableModel) => {

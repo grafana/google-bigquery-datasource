@@ -1,7 +1,9 @@
-import { MetricFindValue, TableData, TimeSeries } from '@grafana/data';
+import { ArrayVector, DataFrame, Field, FieldType, MetricFindValue } from '@grafana/data';
 import BQTypes from '@google-cloud/bigquery/build/src/types';
 import _ from 'lodash';
 import { FetchResponse } from '@grafana/runtime';
+import { BigQueryQueryNG } from 'bigquery_query';
+import { QueryFormat } from 'types';
 
 // API interfaces
 export interface ResultFormat {
@@ -9,12 +11,8 @@ export interface ResultFormat {
   value: string;
 }
 
-export interface DataTarget {
-  target: string;
-  datapoints: any[];
-  refId: string;
-  query: any;
-}
+const TIME_FIELD_SCHEMA_TYPES = ['DATE', 'TIMESTAMP', 'DATETIME'];
+const VALUE_FIELD_SCHEMA_TYPES = ['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER', 'BOOL', 'BOOLEAN'];
 
 export default class ResponseParser {
   static parseProjects(results: BQTypes.IProjectList['projects']): ResultFormat[] {
@@ -54,35 +52,24 @@ export default class ResponseParser {
     return fields;
   }
 
-  static parseDataQuery(results: BQTypes.IQueryResponse, format: string) {
-    if (!results.rows || !results.schema) {
-      return [{ data: [] }];
+  static parseQueryResults(results: BQTypes.IQueryResponse, query: BigQueryQueryNG): DataFrame {
+    if (query.format === QueryFormat.Timeseries) {
+      return ResponseParser._toTimeSeries(results, query);
+    }
+    if (query.format === QueryFormat.Table) {
+      return ResponseParser._toTable(results, query);
     }
 
-    let res = null;
-
-    if (format === 'time_series') {
-      res = ResponseParser._toTimeSeries(results);
-    }
-    if (format === 'table') {
-      res = ResponseParser._toTable(results);
-    }
-
-    if (format === 'var') {
-      res = ResponseParser.toVar(results);
-    }
-    if (res === null) {
-      res = [];
-    }
-    return res;
+    throw new Error('Unsupported query format');
   }
 
   static _convertValues(value: any, type: string) {
     if (['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'].includes(type)) {
       return Number(value);
     }
+
     if (['TIMESTAMP'].includes(type)) {
-      return new Date(Number(value) * 1000).toString();
+      return Number(value) * 1000;
     }
     //  No casting is required for types: DATE, DATETIME, TIME
     return value;
@@ -94,6 +81,7 @@ export default class ResponseParser {
     if (!results || results.length === 0) {
       return data;
     }
+
     const objectTextList = text.split('.');
     const objectValueList = value.split('.');
     let itemValue;
@@ -145,112 +133,148 @@ export default class ResponseParser {
     }
     return res;
   }
-  private static _toTimeSeries(results: BQTypes.IQueryResponse) {
-    let timeIndex = -1;
-    let metricIndex = -1;
-    const valueIndexes = [];
-    for (let i = 0; i < results.schema!.fields!.length; i++) {
-      if (timeIndex === -1 && ['DATE', 'TIMESTAMP', 'DATETIME'].includes(results.schema!.fields![i].type!)) {
-        timeIndex = i;
-      }
-      if (metricIndex === -1 && results.schema!.fields![i].name === 'metric') {
-        metricIndex = i;
-      }
-      if (['INT64', 'NUMERIC', 'FLOAT64', 'FLOAT', 'INT', 'INTEGER'].includes(results.schema!.fields![i].type!)) {
-        valueIndexes.push(i);
-      }
+
+  static mapSchemaTypeToFieldType(type: string): FieldType {
+    // TIMESTAMP, DATE, TIME, DATETIME, RECORD (where RECORD indicates that the field contains a nested schema) or STRUCT (same as RECORD).
+    switch (type) {
+      case 'STRING':
+      case 'BYTES':
+        return FieldType.string;
+      case 'INTEGER':
+      case 'INT64':
+      case 'FLOAT':
+      case 'FLOAT64':
+        return FieldType.number;
+      case 'BOOLEAN':
+      case 'BOOL':
+        return FieldType.boolean;
+      case 'TIMESTAMP':
+        return FieldType.time;
+      default:
+        return FieldType.other;
     }
-    if (timeIndex === -1) {
-      throw new Error('No datetime column found in the result. The Time Series format requires a time column.');
-    }
-    return ResponseParser._buildDataPoints(results, timeIndex, metricIndex, valueIndexes);
   }
 
-  private static _buildDataPoints(
-    results: BQTypes.IQueryResponse,
-    timeIndex: number,
-    metricIndex: number,
-    valueIndexes: number[]
-  ) {
-    const data: TimeSeries[] = [];
-    let targetName = '';
-    let metricName = '';
-    let i;
+  private static _toTimeSeries(results: BQTypes.IQueryResponse, query: BigQueryQueryNG): DataFrame {
+    let timeIndex;
+    const valueIndexes = [];
+    const valueFields = new Map<number, Field>();
+    const metricIndexes = [];
+    const metricFields = new Map<number, Field>();
 
-    if (!results.rows || !results.schema) {
-      return data;
+    const fields: Field[] = [];
+
+    const frame: DataFrame = {
+      refId: query.refId,
+      length: Number(results.totalRows) ?? 0,
+      fields,
+    };
+
+    if (!results.schema || !results.schema.fields) {
+      return frame;
     }
 
-    for (const row of results.rows) {
-      if (row) {
-        for (i = 0; i < valueIndexes.length; i++) {
-          if (row.f === undefined) {
-            continue;
+    // Prepare fields
+    for (let i = 0; i < results.schema.fields.length; i++) {
+      if (timeIndex === undefined && TIME_FIELD_SCHEMA_TYPES.includes(results.schema!.fields![i].type!)) {
+        timeIndex = i;
+      }
+
+      if (VALUE_FIELD_SCHEMA_TYPES.includes(results.schema!.fields![i].type!)) {
+        valueIndexes.push(i);
+        valueFields.set(i, {
+          name: results.schema!.fields![i].name!,
+          type: ResponseParser.mapSchemaTypeToFieldType(results.schema!.fields![i].type!),
+          config: {},
+          values: new ArrayVector(),
+        });
+      }
+
+      if (results.schema!.fields![i].type! === 'STRING') {
+        metricIndexes.push(i);
+        metricFields.set(i, {
+          name: results.schema!.fields![i].name!,
+          type: FieldType.string,
+          config: {},
+          values: new ArrayVector(),
+        });
+      }
+    }
+
+    if (timeIndex === undefined) {
+      throw new Error('No DATETIME column found in the result. The time series format requires a time column.');
+    }
+
+    const timeField = {
+      name: 'time',
+      type: FieldType.time,
+      config: {},
+      values: new ArrayVector(),
+    };
+
+    if (results.rows) {
+      for (let i = 0; i < results.rows.length; i++) {
+        const row = results.rows[i];
+        if (row.f) {
+          timeField.values.add(Number(row.f[timeIndex].v) * 1000);
+
+          for (let j = 0; j < valueIndexes.length; j++) {
+            const rawValue = row.f[valueIndexes[j]].v;
+            (valueFields.get(valueIndexes[j])!.values as ArrayVector).add(rawValue === null ? null : Number(rawValue));
           }
 
-          const epoch = Number(row.f[timeIndex].v) * 1000;
-          const valueIndexName = results.schema.fields![valueIndexes[i]].name;
-
-          targetName = metricIndex > -1 ? row.f[metricIndex].v.concat(' ', valueIndexName) : valueIndexName;
-          metricName = metricIndex > -1 ? row.f[metricIndex].v : valueIndexName;
-
-          if (metricIndex > -1 && valueIndexes.length === 1) {
-            targetName = metricName;
+          for (let j = 0; j < metricIndexes.length; j++) {
+            (metricFields.get(metricIndexes[j])!.values as ArrayVector).add(row.f[metricIndexes[j]].v);
           }
-
-          const bucket = ResponseParser.findOrCreateBucket(data, targetName, metricName);
-          const value = row.f![valueIndexes[i]].v === null ? null : Number(row.f[valueIndexes[i]].v);
-
-          bucket.datapoints.push([value, epoch]);
         }
       }
     }
-    return data;
+
+    return { ...frame, fields: [timeField, ...Array.from(valueFields.values()), ...Array.from(metricFields.values())] };
   }
 
-  private static findOrCreateBucket(data: TimeSeries[], target: string, metric: string): TimeSeries {
-    let dataTarget = _.find(data, ['target', target]);
-    if (!dataTarget) {
-      dataTarget = { target, datapoints: [], refId: metric, query: '' } as TimeSeries;
-      data.push(dataTarget);
-    }
-
-    return dataTarget;
-  }
-
-  private static _toTable(results: BQTypes.IQueryResponse): TableData {
-    const columns: Array<{ text: string; type: string }> = [];
-    const rows: any[] = [];
-
-    if (!results.schema) {
-      return {
-        columns,
-        rows,
-        type: 'table',
-      };
-    }
-
-    for (const fl of results.schema!.fields!) {
-      columns.push({
-        text: fl.name!,
-        type: fl.type!,
-      });
-    }
-
-    results.rows?.forEach((row) => {
-      const r: any[] = [];
-      row.f?.forEach((v, i) => {
-        const val = v.v ? ResponseParser._convertValues(v.v, columns[i].type) : '';
-        r.push(val);
-      });
-      rows.push(r);
-    });
-
-    return {
-      columns,
-      rows,
-      type: 'table',
+  private static _toTable(results: BQTypes.IQueryResponse, query: BigQueryQueryNG): DataFrame {
+    const fields: Field[] = [];
+    const frame: DataFrame = {
+      refId: query.refId,
+      length: Number(results.totalRows) ?? 0,
+      fields,
     };
+
+    if (!results.schema || !results.schema.fields) {
+      return frame;
+    }
+
+    if (results.schema && results.schema.fields) {
+      for (let i = 0; i < results.schema.fields.length; i++) {
+        fields.push({
+          name: results.schema.fields[i].name!,
+          type: ResponseParser.mapSchemaTypeToFieldType(results.schema.fields[i].type!),
+          config: {},
+          values: new ArrayVector(),
+        });
+      }
+    }
+
+    if (results.rows) {
+      for (let i = 0; i < results.rows.length; i++) {
+        const row = results.rows[i];
+        if (row.f) {
+          for (let j = 0; j < row.f.length; j++) {
+            const rawVal = row.f[j].v;
+            if (row.f[j].v !== null) {
+              (fields[j].values as ArrayVector).add(
+                ResponseParser._convertValues(rawVal, results.schema.fields[j].type!)
+              );
+            } else {
+              (fields[j].values as ArrayVector).add(rawVal);
+            }
+          }
+        }
+      }
+    }
+
+    return { ...frame, fields };
   }
 
   static toVar(results: any): MetricFindValue[] {
@@ -263,8 +287,6 @@ export default class ResponseParser {
       return { text: value };
     });
   }
-
-  constructor() {}
 
   parseTabels(results: BQTypes.ITableList['tables']): ResultFormat[] {
     return this._handelWildCardTables(

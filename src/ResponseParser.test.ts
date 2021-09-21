@@ -1,6 +1,8 @@
-import { MetricFindValue, TableData, TimeSeries } from '@grafana/data';
+import { MetricFindValue } from '@grafana/data';
 import { FetchResponse } from '@grafana/runtime';
+import { BigQueryQueryNG } from 'bigquery_query';
 import ResponseParser from 'ResponseParser';
+import { QueryFormat } from 'types';
 
 describe('ResponseParser', () => {
   it('transformAnnotationResponse empty results with 0 rows', async () => {
@@ -28,6 +30,7 @@ describe('ResponseParser', () => {
 
     expect(list.length).toBe(0);
   });
+
   it('transformAnnotationResponse empty results without rows', async () => {
     const fields = [
       {
@@ -123,7 +126,7 @@ describe('ResponseParser', () => {
   });
 });
 
-describe('When performing parseDataQuery for table', () => {
+describe('When performing parseQueryResults for table', () => {
   const response = {
     kind: 'bigquery#queryResponse',
     schema: {
@@ -183,88 +186,204 @@ describe('When performing parseDataQuery for table', () => {
     cacheHit: false,
   };
 
-  const results = ResponseParser.parseDataQuery(response, 'table') as TableData;
-
-  it('should return a table', () => {
-    expect(results.columns.length).toBe(2);
-    expect(results.rows.length).toBe(3);
-    expect(results.columns[0].text).toBe('time');
-    expect((results.columns[0] as any).type).toBe('TIMESTAMP');
-  });
-});
-
-describe('When performing parseDataQuery for time_series', () => {
-  let results: TimeSeries[];
-  const response = {
-    kind: 'bigquery#queryResponse',
-    schema: {
-      fields: [
-        {
-          name: 'time',
-          type: 'TIMESTAMP',
-          mode: 'NULLABLE',
-        },
-        {
-          name: 'start_station_latitude',
-          type: 'FLOAT',
-          mode: 'NULLABLE',
-        },
-      ],
-    },
-    jobReference: {
-      projectId: 'proj-1',
-      jobId: 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5',
-      location: 'US',
-    },
-    totalRows: '3',
-    rows: [
-      {
-        f: [
-          {
-            v: '1.521578851E9',
-          },
-          {
-            v: null,
-          },
-        ],
-      },
-      {
-        f: [
-          {
-            v: '1.521578916E9',
-          },
-          {
-            v: '37.3322326',
-          },
-        ],
-      },
-      {
-        f: [
-          {
-            v: '1.521578927E9',
-          },
-          {
-            v: '37.781752',
-          },
-        ],
-      },
-    ],
-    totalBytesProcessed: '23289520',
-    jobComplete: true,
-    cacheHit: false,
+  const query = {
+    format: QueryFormat.Table,
+    refId: 'A',
+    rawSql: 'raw',
+    timeColumn: 'time',
   };
 
-  results = ResponseParser.parseDataQuery(response, 'time_series') as TimeSeries[];
-  it('should return a time_series', () => {
-    expect(results[0].datapoints.length).toBe(3);
-    expect(results[0].datapoints[0][0]).toBe(null);
-    expect(results[0].datapoints[0][1]).toBe(1521578851000);
-    expect(results[0].datapoints[2][0]).toBe(37.781752);
-    expect(results[0].datapoints[2][1]).toBe(1521578927000);
+  it('should return a data frame', () => {
+    const results = ResponseParser.parseQueryResults(response, query as BigQueryQueryNG);
+    expect(results.refId).toBe('A');
+    expect(results.length).toBe(3);
+    expect(results.fields.length).toBe(2);
+    expect(results).toMatchInlineSnapshot(`
+      Object {
+        "fields": Array [
+          Object {
+            "config": Object {},
+            "name": "time",
+            "type": "time",
+            "values": Array [
+              1521578851000,
+              1521578916000,
+              1521578927000,
+            ],
+          },
+          Object {
+            "config": Object {},
+            "name": "start_station_latitude",
+            "type": "number",
+            "values": Array [
+              37.7753058,
+              37.3322326,
+              37.781752,
+            ],
+          },
+        ],
+        "length": 3,
+        "refId": "A",
+      }
+    `);
   });
 });
 
-describe('When performing parseDataQuery for vars', () => {
+describe('When performing parseQueryResults for time_series', () => {
+  it('should return a data frame', () => {
+    const response = {
+      kind: 'bigquery#queryResponse',
+      schema: {
+        fields: [
+          {
+            name: 'time',
+            type: 'TIMESTAMP',
+            mode: 'NULLABLE',
+          },
+          {
+            name: 'start_station_latitude',
+            type: 'FLOAT',
+            mode: 'NULLABLE',
+          },
+        ],
+      },
+      jobReference: {
+        projectId: 'proj-1',
+        jobId: 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5',
+        location: 'US',
+      },
+      totalRows: '3',
+      rows: [
+        {
+          f: [
+            {
+              v: '1.521578851E9',
+            },
+            {
+              v: null,
+            },
+          ],
+        },
+        {
+          f: [
+            {
+              v: '1.521578916E9',
+            },
+            {
+              v: '37.3322326',
+            },
+          ],
+        },
+        {
+          f: [
+            {
+              v: '1.521578927E9',
+            },
+            {
+              v: '37.781752',
+            },
+          ],
+        },
+      ],
+      totalBytesProcessed: '23289520',
+      jobComplete: true,
+      cacheHit: false,
+    };
+    const query = {
+      format: QueryFormat.Timeseries,
+      refId: 'A',
+      rawSql: 'raw',
+      timeColumn: 'time',
+    };
+    const results = ResponseParser.parseQueryResults(response, query as BigQueryQueryNG);
+
+    expect(results.refId).toBe('A');
+    expect(results.length).toBe(3);
+    expect(results).toMatchInlineSnapshot(`
+      Object {
+        "fields": Array [
+          Object {
+            "config": Object {},
+            "name": "time",
+            "type": "time",
+            "values": Array [
+              1521578851000,
+              1521578916000,
+              1521578927000,
+            ],
+          },
+          Object {
+            "config": Object {},
+            "name": "start_station_latitude",
+            "type": "number",
+            "values": Array [
+              null,
+              37.3322326,
+              37.781752,
+            ],
+          },
+        ],
+        "length": 3,
+        "refId": "A",
+      }
+    `);
+  });
+  it('should  throw if there is no time field', () => {
+    const response = {
+      kind: 'bigquery#queryResponse',
+      schema: {
+        fields: [
+          {
+            name: 'start_station_latitude',
+            type: 'FLOAT',
+            mode: 'NULLABLE',
+          },
+        ],
+      },
+      jobReference: {
+        projectId: 'proj-1',
+        jobId: 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5',
+        location: 'US',
+      },
+      totalRows: '3',
+      rows: [
+        {
+          f: [
+            {
+              v: null,
+            },
+          ],
+        },
+        {
+          f: [
+            {
+              v: '37.3322326',
+            },
+          ],
+        },
+        {
+          f: [
+            {
+              v: '37.781752',
+            },
+          ],
+        },
+      ],
+      totalBytesProcessed: '23289520',
+      jobComplete: true,
+      cacheHit: false,
+    };
+    const query = {
+      format: QueryFormat.Timeseries,
+      refId: 'A',
+      rawSql: 'raw',
+      timeColumn: 'time',
+    };
+    expect(() => ResponseParser.parseQueryResults(response, query as BigQueryQueryNG)).toThrow();
+  });
+});
+
+describe('When performing parseQueryResults for vars', () => {
   let results: MetricFindValue[];
   const response = {
     kind: 'bigquery#queryResponse',
@@ -325,9 +444,8 @@ describe('When performing parseDataQuery for vars', () => {
     cacheHit: false,
   };
 
-  results = ResponseParser.parseDataQuery(response, 'var') as MetricFindValue[];
-
   it('should return a var', () => {
+    results = ResponseParser.toVar(response);
     expect(results.length).toBe(3);
     expect(results[0].text).toBe('1.521578851E9');
   });
