@@ -12,7 +12,7 @@
     "test:codecov": "jest --config jest.config.js && codecov",
     "build:sign": "yarn run build:prod && yarn run sign"
   },
-  "author": "DoiT International",
+  "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
   "license": "MIT",
   "dependencies": {
     "@grafana/data": "8.1.3",
