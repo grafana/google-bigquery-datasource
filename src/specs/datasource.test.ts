@@ -125,8 +125,8 @@ describe('BigQueryDatasource', () => {
 
     it('should return expected data', async () => {
       const results = await ctx.ds.doQuery('select * from table', 'id-1');
-      expect(results.rows.length).toBe(3);
-      expect(results.schema.fields.length).toBe(2);
+      expect(results.data.rows.length).toBe(3);
+      expect(results.data.schema.fields.length).toBe(2);
     });
 
     it('should return expected data batch api', async () => {
@@ -134,16 +134,18 @@ describe('BigQueryDatasource', () => {
       await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data: any) => {
         results = data;
       });
-      expect(results.rows.length).toBe(3);
-      expect(results.schema.fields.length).toBe(2);
+      expect(results.data.rows.length).toBe(3);
+      expect(results.data.schema.fields.length).toBe(2);
     });
+
     it('should return expected data interactive', async () => {
       const priority = 'INTERACTIVE';
       await ctx.ds.doQuery('select * from table', 'id-1', priority).then((data: any) => {
         results = data;
       });
-      expect(results.rows.length).toBe(3);
-      expect(results.schema.fields.length).toBe(2);
+
+      expect(results.data.rows.length).toBe(3);
+      expect(results.data.schema.fields.length).toBe(2);
     });
 
     it('should return expected data interactive', async () => {
@@ -151,6 +153,7 @@ describe('BigQueryDatasource', () => {
       await ctx.ds.doQueryRequest('select * from table', 'id-1', priority).then((data: any) => {
         results = data;
       });
+
       expect(results.data.rows.length).toBe(3);
       expect(results.data.schema.fields.length).toBe(2);
     });
@@ -166,6 +169,7 @@ describe('BigQueryDatasource', () => {
         cacheHit: false,
       },
     };
+
     beforeEach(() => {
       const mockResponse = {
         kind: 'bigquery#queryResponse',
@@ -366,12 +370,10 @@ describe('BigQueryDatasource', () => {
     });
 
     it('should return expected data', async () => {
-      await ctx.ds
-        ._getQueryResults(queryResults, mockResponse.rows, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5')
-        .then((data: any) => {
-          results = data;
-        });
-      expect(results.length).toBe(6);
+      await ctx.ds._getQueryResults(queryResults, 'requestId', 'job_fB4qCDAO-TKg1Orc-OrkdIRxCGN5').then((data: any) => {
+        results = data;
+      });
+      expect(results.data.rows.length).toBe(6);
     });
   });
 
