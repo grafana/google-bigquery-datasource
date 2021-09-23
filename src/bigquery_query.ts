@@ -35,6 +35,7 @@ export interface BigQueryQueryNG extends DataQuery {
   project?: string;
   table?: string;
   queryPriority?: QueryPriority;
+  timeShift?: string;
 }
 
 export default class BigQueryQuery {

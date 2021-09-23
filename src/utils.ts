@@ -1,7 +1,6 @@
-import { DataQueryRequest, DurationUnit } from '@grafana/data';
+import { DataQueryRequest, dateTime, DurationUnit } from '@grafana/data';
 import { BigQueryQueryNG } from 'bigquery_query';
 import SqlParser from 'sql_parser';
-import { QueryFormat } from 'types';
 
 export const SHIFTED = '_shifted';
 
@@ -78,51 +77,49 @@ export function handleError(error: any) {
 
 export function createTimeShiftQuery(query: BigQueryQueryNG) {
   const res = getTimeShift(query.rawSql);
-  if (!res) {
-    return res;
-  }
-  const copy = query.constructor();
 
-  for (const attr in query) {
-    if (query.hasOwnProperty(attr)) {
-      copy[attr] = query[attr as keyof BigQueryQueryNG];
-    }
+  if (!res) {
+    return null;
   }
+
+  const copy = { ...query };
+
+  console.log('createTimeShiftQuery', query);
   copy.rawSql = replaceTimeShift(copy.rawSql);
-  copy.format += '#' + res;
+  copy.timeShift = res;
   copy.refId += SHIFTED + '_' + res;
   return copy;
 }
 
 export function setupTimeShiftQuery(query: BigQueryQueryNG, options: DataQueryRequest<BigQueryQueryNG>) {
-  const index = query.format.indexOf('#');
-  const copy = options.constructor();
-
-  for (const attr in options) {
-    if (options.hasOwnProperty(attr)) {
-      copy[attr] = options[attr as keyof DataQueryRequest<BigQueryQueryNG>];
-    }
-  }
-  if (index === -1) {
-    return copy;
+  if (!query.timeShift) {
+    return { ...options };
   }
 
-  let strInterval = query.format.substr(index + 1);
+  const copy = { ...options };
+
+  let strInterval = query.timeShift;
   const res = getShiftPeriod(strInterval);
   strInterval = res[0];
 
   if (!['s', 'min', 'h', 'd', 'w', 'm', 'w', 'y', 'M'].includes(strInterval)) {
     return copy;
   }
-  query.format = query.format.substr(0, index) as QueryFormat;
+
   strInterval = res[0];
+
   const shift = res[1];
 
   if (strInterval === 'min') {
     strInterval = 'm';
   }
-  copy.range.from = options.range.from.subtract(parseInt(shift, 10), strInterval as DurationUnit);
-  copy.range.to = options.range.to.subtract(parseInt(shift, 10), strInterval as DurationUnit);
+
+  copy.range = {
+    from: dateTime(options.range.from).subtract(shift, strInterval as DurationUnit),
+    to: dateTime(options.range.to).subtract(shift, strInterval as DurationUnit),
+    raw: { ...options.range.raw }, // huh, not relevant really
+  };
+
   return copy;
 }
 

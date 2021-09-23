@@ -5,11 +5,13 @@ import ResponseParser, { ResultFormat } from './ResponseParser';
 import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
 import {
+  ArrayVector,
   DataQueryRequest,
   DataQueryResponse,
   DataSourceApi,
   DataSourceInstanceSettings,
   dateTime,
+  FieldType,
   VariableModel,
 } from '@grafana/data';
 import { FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
@@ -79,35 +81,37 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
   }
 
   async query(options: DataQueryRequest<BigQueryQueryNG>): Promise<DataQueryResponse> {
-    const queries = _.filter(options.targets, (target) => {
-      return target.hide !== true;
-    }).map<BigQueryQueryNG>((target) => {
-      const queryModel = new BigQueryQuery(target, options.scopedVars);
-      this.queryModel = queryModel;
+    const queries = options.targets
+      .filter((target) => {
+        return target.hide !== true;
+      })
+      .map<BigQueryQueryNG>((target) => {
+        const queryModel = new BigQueryQuery(target, options.scopedVars);
+        this.queryModel = queryModel;
 
-      return {
-        queryPriority: this.queryPriority,
-        datasourceId: this.id,
-        format: target.format,
-        intervalMs: options.intervalMs,
-        maxDataPoints: options.maxDataPoints,
-        metricColumn: target.metricColumn,
-        partitioned: target.partitioned,
-        partitionedField: target.partitionedField,
-        rawSql: queryModel.render(true),
-        refId: target.refId,
-        sharded: target.sharded,
-        table: target.table,
-        timeColumn: target.timeColumn,
-        timeColumnType: target.timeColumnType,
-      };
-    });
+        return {
+          queryPriority: this.queryPriority,
+          datasourceId: this.id,
+          format: target.format,
+          intervalMs: options.intervalMs,
+          maxDataPoints: options.maxDataPoints,
+          metricColumn: target.metricColumn,
+          partitioned: target.partitioned,
+          partitionedField: target.partitionedField,
+          rawSql: queryModel.render(true),
+          refId: target.refId,
+          sharded: target.sharded,
+          table: target.table,
+          timeColumn: target.timeColumn,
+          timeColumnType: target.timeColumnType,
+        };
+      });
 
     if (queries.length === 0) {
       return Promise.resolve({ data: [] });
     }
 
-    _.map(queries, (query) => {
+    queries.map((query) => {
       const newQuery = createTimeShiftQuery(query);
       if (newQuery) {
         queries.push(newQuery);
@@ -116,7 +120,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
 
     let modOptions;
 
-    const allQueryPromise = _.map(queries, (query) => {
+    const allQueryPromise = queries.map((query) => {
       const tmpQ = this.queryModel.target.rawSql;
 
       if (this.queryModel.target.rawQuery === false) {
@@ -128,6 +132,7 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
         this.queryModel.target.table = query.table;
         this.queryModel.target.timeColumn = query.timeColumn;
         this.queryModel.target.timeColumnType = query.timeColumnType;
+
         modOptions = setupTimeShiftQuery(query, options);
 
         const q = this.setUpQ(modOptions, options, query);
@@ -173,27 +178,33 @@ export class BigQueryDatasource extends DataSourceApi<any, BigQueryOptions> {
       }
     });
 
-    return Promise.all(allQueryPromise).then((responses): any => {
+    return Promise.all(allQueryPromise).then((responses) => {
       const data = [];
+
       if (responses) {
-        for (const response of responses) {
-          data.push(response);
+        for (let i = 0; i < responses.length; i++) {
+          data.push(responses[i]);
         }
       }
 
-      // TODO: bring back timeshift
-      // for (const d of data) {
-      //   if (typeof d.target !== 'undefined' && d.target.search(SHIFTED) > -1) {
-      //     const res = getShiftPeriod(d.target.substring(d.target.lastIndexOf('_') + 1, d.target.length));
+      for (let i = 0; i < data.length; i++) {
+        const q = queries[i];
 
-      //     const shiftPeriod = res[0];
-      //     const shiftVal = parseInt(res[1], 10);
-
-      //     for (let i = 0; i < d.datapoints.length; i++) {
-      //       d.datapoints[i][1] = dateTime(d.datapoints[i][1]).subtract(shiftVal, shiftPeriod).valueOf();
-      //     }
-      //   }
-      // }
+        if (q.timeShift) {
+          const timeField = data[i]?.fields.find((f, i) => {
+            if (f.type === FieldType.time) {
+              return true;
+            }
+            return false;
+          });
+          if (timeField) {
+            const shiftPeriod = getShiftPeriod(q.timeShift);
+            timeField.values = new ArrayVector(
+              timeField.values.toArray().map((v) => dateTime(v).add(shiftPeriod[1], shiftPeriod[0]).valueOf())
+            );
+          }
+        }
+      }
 
       return { data };
     });

@@ -181,9 +181,10 @@ export default class ResponseParser {
       }
 
       if (VALUE_FIELD_SCHEMA_TYPES.includes(results.schema!.fields![i].type!)) {
+        const fieldName = results.schema!.fields![i].name!;
         valueIndexes.push(i);
         valueFields.set(i, {
-          name: results.schema!.fields![i].name!,
+          name: query.timeShift ? `${fieldName}_${query.timeShift}` : fieldName,
           type: ResponseParser.mapSchemaTypeToFieldType(results.schema!.fields![i].type!),
           config: {},
           values: new ArrayVector(),
@@ -247,9 +248,11 @@ export default class ResponseParser {
 
     if (results.schema && results.schema.fields) {
       for (let i = 0; i < results.schema.fields.length; i++) {
+        const fieldName = results.schema!.fields![i].name!;
+        const fieldType = ResponseParser.mapSchemaTypeToFieldType(results.schema.fields[i].type!);
         fields.push({
-          name: results.schema.fields[i].name!,
-          type: ResponseParser.mapSchemaTypeToFieldType(results.schema.fields[i].type!),
+          name: query.timeShift && fieldType !== FieldType.time ? `${fieldName}_${query.timeShift}` : fieldName,
+          type: fieldType,
           config: {},
           values: new ArrayVector(),
         });
