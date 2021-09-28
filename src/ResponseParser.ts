@@ -23,7 +23,7 @@ export default class ResponseParser {
     return ResponseParser.parseData(results, 'datasetReference.datasetId', 'datasetReference.datasetId');
   }
 
-  static parseTableFields(results: BQTypes.ITableFieldSchema[], filter: string[]): ResultFormat[] {
+  static parseTableFields(results: BQTypes.ITableFieldSchema[] | undefined, filter: string[]): ResultFormat[] {
     const fields: ResultFormat[] = [];
     if (!results || results.length === 0) {
       return fields;
@@ -291,7 +291,7 @@ export default class ResponseParser {
     });
   }
 
-  parseTabels(results: BQTypes.ITableList['tables']): ResultFormat[] {
+  parseTables(results: BQTypes.ITableList['tables']): ResultFormat[] {
     return this._handelWildCardTables(
       ResponseParser.parseData(results, 'tableReference.tableId', 'tableReference.tableId')
     );

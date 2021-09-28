@@ -19,9 +19,7 @@
     "@grafana/runtime": "next",
     "@grafana/ui": "next",
     "brace": "^0.10.0",
-    "import": "^0.0.6",
     "lodash": "^4.17.11",
-    "q": "^1.5.1",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
@@ -29,10 +27,10 @@
     "@grafana/toolkit": "next",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.1.0",
-    "@types/grafana": "https://git@github.com/CorpGlory/types-grafana.git",
     "@types/lodash": "^4.14.173",
-    "@types/uuid": "^8.3.1",
-    "googleapis": "^49.0.0",
-    "grafana-sdk-mocks": "github:grafana/grafana-sdk-mocks"
+    "@types/uuid": "^8.3.1"
+  },
+  "resolutions": {
+    "rxjs": "6.6.3"
   }
 }
