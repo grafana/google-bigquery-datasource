@@ -5,28 +5,28 @@ import ResponseParser, { ResultFormat } from './ResponseParser';
 import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
 import {
-  ArrayVector,
+  // ArrayVector,
   DataQueryRequest,
-  DataQueryResponse,
-  DataSourceApi,
+  // DataQueryResponse,
+  // DataSourceApi,
   DataSourceInstanceSettings,
-  dateTime,
-  FieldType,
+  // dateTime,
+  // FieldType,
   ScopedVars,
   VariableModel,
 } from '@grafana/data';
 import { DataSourceWithBackend, FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import {
   convertToUtc,
-  createTimeShiftQuery,
-  extractFromClause,
-  findTimeField,
+  // createTimeShiftQuery,
+  // extractFromClause,
+  // findTimeField,
   formatBigqueryError,
   formatDateToString,
-  getShiftPeriod,
+  // getShiftPeriod,
   handleError,
   quoteLiteral,
-  setupTimeShiftQuery,
+  // setupTimeShiftQuery,
   updatePartition,
   updateTableSuffix,
   SHIFTED,
@@ -230,44 +230,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
       }
       return ResponseParser.toVar(metricData);
     });
-  }
-
-  async testDatasource() {
-    let status = 'success';
-    let message = 'Successfully queried the BigQuery API.';
-    const defaultErrorMessage = 'Cannot connect to BigQuery API';
-
-    if (!this.projectName) {
-      await this.getDefaultProject();
-    }
-
-    try {
-      const path = `v2/projects/${this.projectName}/datasets`;
-      const response = await this.doRequest(`${this.baseUrl}${path}`);
-      if (response.status !== 200) {
-        status = 'error';
-        message = response.statusText ? response.statusText : defaultErrorMessage;
-      }
-    } catch (error) {
-      message = (error as any).statusText ? (error as any).statusText : defaultErrorMessage;
-    }
-
-    try {
-      const path = `v2/projects/${this.projectName}/jobs/no-such-jobs`;
-      const response = await this.doRequest(`${this.baseUrl}${path}`);
-      if (response.status !== 200) {
-        status = 'error';
-        message = response.statusText ? response.statusText : defaultErrorMessage;
-      }
-    } catch (error) {
-      if ((error as any).status !== 404) {
-        message = (error as any).statusText ? (error as any).statusText : defaultErrorMessage;
-      }
-    }
-    return {
-      message,
-      status,
-    };
   }
 
   async getProjects(): Promise<ResultFormat[]> {
@@ -648,10 +610,10 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): Record<string, any> {
     // TMP until we refactor Query Model
     const query = new BigQueryQuery(queryModel, scopedVars);
-    
+
     const result = {
       ...queryModel,
-      rawSql: query.buildQuery(), 
+      rawSql: query.buildQuery(),
       format: queryModel.format === QueryFormat.Timeseries ? 0 : 1,
       connectionArgs: {
         project: queryModel.project,

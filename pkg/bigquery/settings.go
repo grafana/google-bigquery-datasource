@@ -6,7 +6,6 @@ import (
 	"fmt"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/pkg/errors"
 )
 
@@ -60,7 +59,6 @@ func getDSN(settings Settings, queryArgs *ConnectionArgs) (string, error) {
 
 	creds, err := json.Marshal(credentials)
 
-	log.DefaultLogger.Info("ERRRRRRRRRR", err)
 	if err != nil {
 		return "", errors.WithMessage(err, "Invalid service account")
 	}
