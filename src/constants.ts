@@ -6,7 +6,9 @@ export const GOOGLE_AUTH_TYPE_OPTIONS = [
   { label: 'GCE Default Service Account', value: GoogleAuthType.GCE },
 ];
 
-export const PROCESSING_LOCATIONS = [
+export const DEFAULT_REGION = 'US';
+
+export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
   // Multi-regional locations
   { label: 'United States (US)', value: 'US' },
   { label: 'European Union (EU)', value: 'EU' },

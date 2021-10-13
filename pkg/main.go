@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/routes"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/sqlds/v2"
@@ -19,7 +20,7 @@ func main() {
 	s := bigquery.New()
 	ds := sqlds.NewDatasource(s)
 	ds.EnableMultipleConnections = true
-
+	ds.CustomRoutes = routes.New(s).Routes()
 	if err := datasource.Manage(
 		"grafana-bigquery-datasource",
 		ds.NewDatasource,

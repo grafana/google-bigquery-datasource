@@ -2,21 +2,25 @@ import {
   DataSourcePluginOptionsEditorProps,
   onUpdateDatasourceJsonDataOption,
   onUpdateDatasourceJsonDataOptionSelect,
+  SelectableValue,
 } from '@grafana/data';
 import { Field, FieldSet, Input, RadioButtonGroup, Select } from '@grafana/ui';
-import React from 'react';
+
+import React, { useEffect } from 'react';
 import { JWTConfigEditor } from './components/JWTConfigEditor';
 import { JWTForm } from './components/JWTForm';
 import { ConfigurationHelp } from './components/ConfigurationHelp';
-import { GOOGLE_AUTH_TYPE_OPTIONS, PROCESSING_LOCATIONS, QUERY_PRIORITIES } from './constants';
+import { DEFAULT_REGION, GOOGLE_AUTH_TYPE_OPTIONS, PROCESSING_LOCATIONS, QUERY_PRIORITIES } from './constants';
 import { BigQueryOptions, BigQuerySecureJsonData, GoogleAuthType, QueryPriority } from './types';
+import { BigQueryAPI, getApiClient } from './api';
+
+import { useAsync } from 'react-use';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 
 export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props) => {
   const { options, onOptionsChange } = props;
   const { jsonData, secureJsonFields, secureJsonData } = options;
-
   const isJWT = jsonData.authenticationType === GoogleAuthType.JWT || jsonData.authenticationType === undefined;
 
   const hasJWTConfigured = Boolean(
@@ -34,6 +38,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     delete nextJsonData.clientEmail;
     delete nextJsonData.defaultProject;
     delete nextJsonData.tokenUri;
+    delete nextJsonData.defaultDataset;
     delete nextSecureJsonData.privateKey;
 
     onOptionsChange({
@@ -81,7 +86,6 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
                   jsonData: {
                     ...jsonData,
                     clientEmail: jwt.clientEmail,
-
                     defaultProject: jwt.projectId,
                     tokenUri: jwt.tokenUri,
                   },
@@ -93,6 +97,15 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       )}
 
       <FieldSet label="Other settings">
+        {jsonData.defaultProject && (
+          <DefaultDatasetSelector
+            apiClient={getApiClient(options.id)}
+            location={jsonData.processingLocation || DEFAULT_REGION}
+            projectId={jsonData.defaultProject}
+            value={jsonData.defaultDataset}
+            onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'defaultDataset')}
+          />
+        )}
         <Field
           label="Flat rate project"
           description="The project that the Queries will be run in if you are using a flat-rate pricing model"
@@ -103,16 +116,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             onChange={onUpdateDatasourceJsonDataOption(props, 'flatRateProject')}
           />
         </Field>
-        <Field
-          label="Default dataset"
-          description="TODO"
-        >
-          <Input
-            className="width-30"
-            value={jsonData.defaultDataset || ''}
-            onChange={onUpdateDatasourceJsonDataOption(props, 'defaultDataset')}
-          />
-        </Field>
+
         <Field
           label="Processing location"
           description={
@@ -168,5 +172,47 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
         </Field>
       </FieldSet>
     </>
+  );
+};
+
+interface DefaultDatasetSelectorProps {
+  apiClient: BigQueryAPI;
+  location: string;
+  projectId: string;
+  value?: string;
+  onChange: (v: SelectableValue) => void;
+}
+
+const DefaultDatasetSelector: React.FC<DefaultDatasetSelectorProps> = ({
+  apiClient,
+  location,
+  projectId,
+  value,
+  onChange,
+}) => {
+  const state = useAsync(async () => {
+    const datasets = await apiClient.getDatasets(projectId, location);
+    return datasets.map<SelectableValue<string>>((d) => ({ label: d, value: d }));
+  }, [projectId, location]);
+
+  useEffect(() => {
+    // Set default dataset when values are fetched
+    if (!value) {
+      if (state.value && state.value[0]) {
+        onChange(state.value[0]);
+      }
+    } else {
+      if (state.value && state.value.find((v) => v.value === value) === undefined) {
+        onChange(state.value[0]);
+      }
+    }
+  }, [state.value, value, location, onChange]);
+
+  if (state.loading && value === undefined) return null;
+
+  return (
+    <Field label="Default dataset">
+      <Select className="width-30" value={value} options={state.value} onChange={onChange} />
+    </Field>
   );
 };

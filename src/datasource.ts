@@ -4,29 +4,14 @@ import { map } from 'rxjs/operators';
 import ResponseParser, { ResultFormat } from './ResponseParser';
 import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
-import {
-  // ArrayVector,
-  DataQueryRequest,
-  // DataQueryResponse,
-  // DataSourceApi,
-  DataSourceInstanceSettings,
-  // dateTime,
-  // FieldType,
-  ScopedVars,
-  VariableModel,
-} from '@grafana/data';
+import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableModel } from '@grafana/data';
 import { DataSourceWithBackend, FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import {
   convertToUtc,
-  // createTimeShiftQuery,
-  // extractFromClause,
-  // findTimeField,
   formatBigqueryError,
   formatDateToString,
-  // getShiftPeriod,
   handleError,
   quoteLiteral,
-  // setupTimeShiftQuery,
   updatePartition,
   updateTableSuffix,
   SHIFTED,
@@ -81,136 +66,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     this.queryPriority = this.jsonData.queryPriority;
   }
 
-  // async query(options: DataQueryRequest<BigQueryQueryNG>): Promise<DataQueryResponse> {
-  //   const queries = options.targets
-  //     .filter((target) => {
-  //       return target.hide !== true;
-  //     })
-  //     .map<BigQueryQueryNG>((target) => {
-  //       const queryModel = new BigQueryQuery(target, options.scopedVars);
-  //       this.queryModel = queryModel;
-
-  //       return {
-  //         queryPriority: this.queryPriority,
-  //         datasourceId: this.id,
-  //         format: target.format,
-  //         intervalMs: options.intervalMs,
-  //         maxDataPoints: options.maxDataPoints,
-  //         metricColumn: target.metricColumn,
-  //         partitioned: target.partitioned,
-  //         partitionedField: target.partitionedField,
-  //         rawSql: queryModel.render(true),
-  //         refId: target.refId,
-  //         sharded: target.sharded,
-  //         table: target.table,
-  //         timeColumn: target.timeColumn,
-  //         timeColumnType: target.timeColumnType,
-  //       };
-  //     });
-
-  //   if (queries.length === 0) {
-  //     return Promise.resolve({ data: [] });
-  //   }
-
-  //   queries.map((query) => {
-  //     const newQuery = createTimeShiftQuery(query);
-  //     if (newQuery) {
-  //       queries.push(newQuery);
-  //     }
-  //   });
-
-  //   let modOptions;
-
-  //   const allQueryPromise = queries.map((query) => {
-  //     const tmpQ = this.queryModel.target.rawSql;
-
-  //     if (this.queryModel.target.rawQuery === false) {
-  //       this.queryModel.target.metricColumn = query.metricColumn;
-  //       this.queryModel.target.partitioned = query.partitioned;
-  //       this.queryModel.target.partitionedField = query.partitionedField;
-  //       this.queryModel.target.rawSql = query.rawSql;
-  //       this.queryModel.target.sharded = query.sharded;
-  //       this.queryModel.target.table = query.table;
-  //       this.queryModel.target.timeColumn = query.timeColumn;
-  //       this.queryModel.target.timeColumnType = query.timeColumnType;
-
-  //       modOptions = setupTimeShiftQuery(query, options);
-
-  //       const q = this.setUpQ(modOptions, options, query);
-
-  //       this.queryModel.target.rawSql = q;
-
-  //       return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then((response) => {
-  //         if (!response) {
-  //           return null;
-  //         }
-  //         return ResponseParser.parseQueryResults(response.data, query);
-  //       });
-  //     } else {
-  //       // Fix raw sql
-  //       const sqlWithNoVariables = getTemplateSrv().replace(tmpQ, options.scopedVars, this.interpolateVariable);
-  //       const [project, dataset, table] = extractFromClause(sqlWithNoVariables);
-
-  //       if (!project || !dataset || !table) {
-  //         console.error(`Unable to extract project, dataset, or table from query: ${sqlWithNoVariables}`);
-  //       }
-
-  //       // TODO: fix the !
-  //       this.getDateFields(project!, dataset!, table!)
-  //         .then((dateFields) => {
-  //           const tm = findTimeField(tmpQ, dateFields);
-  //           this.queryModel.target.timeColumn = tm.text;
-  //           this.queryModel.target.timeColumnType = tm.value;
-  //           this.queryModel.target.table = table;
-  //         })
-  //         .catch((err) => {
-  //           console.log(err);
-  //         });
-  //       this.queryModel.target.rawSql = query.rawSql;
-  //       modOptions = setupTimeShiftQuery(query, options);
-  //       const q = this.setUpQ(modOptions, options, query);
-
-  //       return this.doQuery(q!, options.panelId + query.refId, query.queryPriority).then((response) => {
-  //         if (!response) {
-  //           return null;
-  //         }
-  //         return ResponseParser.parseQueryResults(response.data, query);
-  //       });
-  //     }
-  //   });
-
-  //   return Promise.all(allQueryPromise).then((responses) => {
-  //     const data = [];
-
-  //     if (responses) {
-  //       for (let i = 0; i < responses.length; i++) {
-  //         data.push(responses[i]);
-  //       }
-  //     }
-
-  //     for (let i = 0; i < data.length; i++) {
-  //       const q = queries[i];
-
-  //       if (q.timeShift) {
-  //         const timeField = data[i]?.fields.find((f, i) => {
-  //           if (f.type === FieldType.time) {
-  //             return true;
-  //           }
-  //           return false;
-  //         });
-  //         if (timeField) {
-  //           const shiftPeriod = getShiftPeriod(q.timeShift);
-  //           timeField.values = new ArrayVector(
-  //             timeField.values.toArray().map((v) => dateTime(v).add(shiftPeriod[1], shiftPeriod[0]).valueOf())
-  //           );
-  //         }
-  //       }
-  //     }
-
-  //     return { data };
-  //   });
-  // }
-
   async metricFindQuery(query: string, optionalOptions: any) {
     let refId = 'tempvar';
     if (optionalOptions && optionalOptions.variable && optionalOptions.variable.name) {
@@ -238,29 +93,29 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     return ResponseParser.parseProjects(data);
   }
 
-  async getDatasets(projectName: string): Promise<ResultFormat[]> {
-    const path = `v2/projects/${projectName}/datasets`;
-    const data = await this.paginatedResults(path, 'datasets');
-    return ResponseParser.parseDatasets(data);
-  }
+  // async getDatasets(projectName: string): Promise<ResultFormat[]> {
+  //   const path = `v2/projects/${projectName}/datasets`;
+  //   const data = await this.paginatedResults(path, 'datasets');
+  //   return ResponseParser.parseDatasets(data);
+  // }
 
-  async getTables(projectName: string, datasetName: string): Promise<ResultFormat[]> {
-    const path = `v2/projects/${projectName}/datasets/${datasetName}/tables`;
-    const data: BQTypes.ITableList['tables'] = await this.paginatedResults(path, 'tables');
+  // async getTables(projectName: string, datasetName: string): Promise<ResultFormat[]> {
+  //   const path = `v2/projects/${projectName}/datasets/${datasetName}/tables`;
+  //   const data: BQTypes.ITableList['tables'] = await this.paginatedResults(path, 'tables');
 
-    return new ResponseParser().parseTabels(data);
-  }
+  //   return new ResponseParser().parseTabels(data);
+  // }
 
-  async getTableFields(
-    projectName: string,
-    datasetName: string,
-    tableName: string,
-    filter: string[]
-  ): Promise<ResultFormat[]> {
-    const path = `v2/projects/${projectName}/datasets/${datasetName}/tables/${tableName}`;
-    const data = await this.paginatedResults(path, 'schema.fields');
-    return ResponseParser.parseTableFields(data, filter);
-  }
+  // async getTableFields(
+  //   projectName: string,
+  //   datasetName: string,
+  //   tableName: string,
+  //   filter: string[]
+  // ): Promise<ResultFormat[]> {
+  //   const path = `v2/projects/${projectName}/datasets/${datasetName}/tables/${tableName}`;
+  //   const data = await this.paginatedResults(path, 'schema.fields');
+  //   return ResponseParser.parseTableFields(data, filter);
+  // }
 
   async getDateFields(projectName: string, datasetName: string, tableName: string) {
     return this.getTableFields(projectName, datasetName, tableName, ['DATE', 'TIMESTAMP', 'DATETIME']);
@@ -625,3 +480,133 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     return result;
   }
 }
+
+// async query(options: DataQueryRequest<BigQueryQueryNG>): Promise<DataQueryResponse> {
+//   const queries = options.targets
+//     .filter((target) => {
+//       return target.hide !== true;
+//     })
+//     .map<BigQueryQueryNG>((target) => {
+//       const queryModel = new BigQueryQuery(target, options.scopedVars);
+//       this.queryModel = queryModel;
+
+//       return {
+//         queryPriority: this.queryPriority,
+//         datasourceId: this.id,
+//         format: target.format,
+//         intervalMs: options.intervalMs,
+//         maxDataPoints: options.maxDataPoints,
+//         metricColumn: target.metricColumn,
+//         partitioned: target.partitioned,
+//         partitionedField: target.partitionedField,
+//         rawSql: queryModel.render(true),
+//         refId: target.refId,
+//         sharded: target.sharded,
+//         table: target.table,
+//         timeColumn: target.timeColumn,
+//         timeColumnType: target.timeColumnType,
+//       };
+//     });
+
+//   if (queries.length === 0) {
+//     return Promise.resolve({ data: [] });
+//   }
+
+//   queries.map((query) => {
+//     const newQuery = createTimeShiftQuery(query);
+//     if (newQuery) {
+//       queries.push(newQuery);
+//     }
+//   });
+
+//   let modOptions;
+
+//   const allQueryPromise = queries.map((query) => {
+//     const tmpQ = this.queryModel.target.rawSql;
+
+//     if (this.queryModel.target.rawQuery === false) {
+//       this.queryModel.target.metricColumn = query.metricColumn;
+//       this.queryModel.target.partitioned = query.partitioned;
+//       this.queryModel.target.partitionedField = query.partitionedField;
+//       this.queryModel.target.rawSql = query.rawSql;
+//       this.queryModel.target.sharded = query.sharded;
+//       this.queryModel.target.table = query.table;
+//       this.queryModel.target.timeColumn = query.timeColumn;
+//       this.queryModel.target.timeColumnType = query.timeColumnType;
+
+//       modOptions = setupTimeShiftQuery(query, options);
+
+//       const q = this.setUpQ(modOptions, options, query);
+
+//       this.queryModel.target.rawSql = q;
+
+//       return this.doQuery(q, options.panelId + query.refId, query.queryPriority).then((response) => {
+//         if (!response) {
+//           return null;
+//         }
+//         return ResponseParser.parseQueryResults(response.data, query);
+//       });
+//     } else {
+//       // Fix raw sql
+//       const sqlWithNoVariables = getTemplateSrv().replace(tmpQ, options.scopedVars, this.interpolateVariable);
+//       const [project, dataset, table] = extractFromClause(sqlWithNoVariables);
+
+//       if (!project || !dataset || !table) {
+//         console.error(`Unable to extract project, dataset, or table from query: ${sqlWithNoVariables}`);
+//       }
+
+//       // TODO: fix the !
+//       this.getDateFields(project!, dataset!, table!)
+//         .then((dateFields) => {
+//           const tm = findTimeField(tmpQ, dateFields);
+//           this.queryModel.target.timeColumn = tm.text;
+//           this.queryModel.target.timeColumnType = tm.value;
+//           this.queryModel.target.table = table;
+//         })
+//         .catch((err) => {
+//           console.log(err);
+//         });
+//       this.queryModel.target.rawSql = query.rawSql;
+//       modOptions = setupTimeShiftQuery(query, options);
+//       const q = this.setUpQ(modOptions, options, query);
+
+//       return this.doQuery(q!, options.panelId + query.refId, query.queryPriority).then((response) => {
+//         if (!response) {
+//           return null;
+//         }
+//         return ResponseParser.parseQueryResults(response.data, query);
+//       });
+//     }
+//   });
+
+//   return Promise.all(allQueryPromise).then((responses) => {
+//     const data = [];
+
+//     if (responses) {
+//       for (let i = 0; i < responses.length; i++) {
+//         data.push(responses[i]);
+//       }
+//     }
+
+//     for (let i = 0; i < data.length; i++) {
+//       const q = queries[i];
+
+//       if (q.timeShift) {
+//         const timeField = data[i]?.fields.find((f, i) => {
+//           if (f.type === FieldType.time) {
+//             return true;
+//           }
+//           return false;
+//         });
+//         if (timeField) {
+//           const shiftPeriod = getShiftPeriod(q.timeShift);
+//           timeField.values = new ArrayVector(
+//             timeField.values.toArray().map((v) => dateTime(v).add(shiftPeriod[1], shiftPeriod[0]).valueOf())
+//           );
+//         }
+//       }
+//     }
+
+//     return { data };
+//   });
+// }
