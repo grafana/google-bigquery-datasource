@@ -6,6 +6,11 @@ export const GOOGLE_AUTH_TYPE_OPTIONS = [
   { label: 'GCE Default Service Account', value: GoogleAuthType.GCE },
 ];
 
+export const QUERY_FORMAT_OPTIONS = [
+  { label: 'Time series', value: 'time_series' },
+  { label: 'Table', value: 'table' },
+];
+
 export const DEFAULT_REGION = 'US';
 
 export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
