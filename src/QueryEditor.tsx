@@ -20,6 +20,7 @@ function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
   result.dataset = q.dataset || ds.jsonData.defaultDataset;
   result.location = q.location || ds.jsonData.defaultRegion || DEFAULT_REGION;
   result.format = q.format || 0;
+  result.rawSql = q.rawSql || 'Select ...';
 
   return result;
 }

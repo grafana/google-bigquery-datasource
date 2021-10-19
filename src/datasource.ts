@@ -439,8 +439,12 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     const query = new BigQueryQuery(queryModel, scopedVars);
 
     const result = {
-      ...queryModel,
-      rawSql: query.buildQuery(),
+      refId: queryModel.refId,
+      hide: queryModel.hide,
+      key: queryModel.key,
+      queryType: queryModel.queryType,
+      datasource: queryModel.datasource,
+      rawSql: query.target.rawQuery ? query.target.rawSql : query.buildQuery(),
       format: queryModel.format,
       connectionArgs: {
         project: queryModel.project!,

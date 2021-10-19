@@ -27,7 +27,6 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
       return [];
     }
     const tables = await apiClient.getTables(projectId, location, dataset);
-    console.log(tables);
     return tables.map<SelectableValue<string>>((d) => ({ label: d, value: d }));
   }, [projectId, location, dataset]);
 

@@ -15,6 +15,7 @@ export function QueryEditorRaw(props: Props) {
   const onRawSqlChange = (rawSql: string) => {
     const query = {
       ...props.query,
+      rawQuery: true,
       rawSql,
     };
     props.onChange(query);

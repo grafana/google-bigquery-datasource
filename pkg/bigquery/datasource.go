@@ -35,9 +35,9 @@ type TableMetadataResponse struct {
 
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
-	Datasets(ctx context.Context, project, location string) ([]string, error)
-	Tables(ctx context.Context, project, location, dataset string) ([]string, error)
-	TableSchema(ctx context.Context, project, location, dataset, table string) (*TableMetadataResponse, error)
+	Datasets(ctx context.Context, options sqlds.Options) ([]string, error)
+	Tables(ctx context.Context, options sqlds.Options) ([]string, error)
+	TableSchema(ctx context.Context, options sqlds.Options) (*TableMetadataResponse, error)
 }
 
 type BigQueryDatasource struct {
@@ -103,7 +103,8 @@ func (s *BigQueryDatasource) Settings(_ backend.DataSourceInstanceSettings) sqld
 	}
 }
 
-func (s *BigQueryDatasource) Datasets(ctx context.Context, project, location string) ([]string, error) {
+func (s *BigQueryDatasource) Datasets(ctx context.Context, options sqlds.Options) ([]string, error) {
+	project, location := options["project"], options["location"]
 	apiClient, err := s.getApi(ctx, project)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
@@ -131,7 +132,8 @@ func (s *BigQueryDatasource) Datasets(ctx context.Context, project, location str
 	return result, nil
 }
 
-func (s *BigQueryDatasource) Tables(ctx context.Context, project, location, dataset string) ([]string, error) {
+func (s *BigQueryDatasource) Tables(ctx context.Context, options sqlds.Options) ([]string, error) {
+	project, dataset, location := options["project"], options["dataset"], options["location"]
 	apiClient, err := s.getApi(ctx, project)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
@@ -160,7 +162,8 @@ func (s *BigQueryDatasource) Tables(ctx context.Context, project, location, data
 	return result, nil
 }
 
-func (s *BigQueryDatasource) TableSchema(ctx context.Context, project, location, dataset, table string) (*TableMetadataResponse, error) {
+func (s *BigQueryDatasource) TableSchema(ctx context.Context, options sqlds.Options) (*TableMetadataResponse, error) {
+	project, dataset, table, location := options["project"], options["dataset"], options["table"], options["location"]
 	apiClient, err := s.getApi(ctx, project)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")

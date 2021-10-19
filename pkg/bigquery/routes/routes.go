@@ -8,17 +8,11 @@ import (
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/sqlds/v2"
 )
 
 type ResourceHandler struct {
 	ds bigquery.BigqueryDatasourceIface
-}
-
-type reqBody struct {
-	Location string `json:"location"`
-	Project  string `json:"project"`
-	Dataset  string `json:"dataset"`
-	Table    string `json:"table"`
 }
 
 func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
@@ -33,19 +27,20 @@ func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res, err := r.ds.Datasets(req.Context(), reqBody.Project, reqBody.Location)
+	res, err := r.ds.Datasets(req.Context(), reqBody)
 	sendResponse(res, err, rw)
 }
 
 func (r *ResourceHandler) tables(rw http.ResponseWriter, req *http.Request) {
 	reqBody, err := parseBody(req.Body)
+
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		write(rw, []byte(err.Error()))
 		return
 	}
 
-	res, err := r.ds.Tables(req.Context(), reqBody.Project, reqBody.Location, reqBody.Dataset)
+	res, err := r.ds.Tables(req.Context(), reqBody)
 	sendResponse(res, err, rw)
 }
 
@@ -57,7 +52,7 @@ func (r *ResourceHandler) tableSchema(rw http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	res, err := r.ds.TableSchema(req.Context(), reqBody.Project, reqBody.Location, reqBody.Dataset, reqBody.Table)
+	res, err := r.ds.TableSchema(req.Context(), reqBody)
 	rw.Header().Set("Content-Type", "application/json")
 	sendResponse(res, err, rw)
 }
@@ -70,13 +65,13 @@ func (r *ResourceHandler) Routes() map[string]func(http.ResponseWriter, *http.Re
 	}
 }
 
-func parseBody(body io.ReadCloser) (*reqBody, error) {
-	reqBody := &reqBody{}
+func parseBody(body io.ReadCloser) (sqlds.Options, error) {
+	reqBody := sqlds.Options{}
 	b, err := ioutil.ReadAll(body)
 	if err != nil {
 		return nil, err
 	}
-	err = json.Unmarshal(b, reqBody)
+	err = json.Unmarshal(b, &reqBody)
 	if err != nil {
 		return nil, err
 	}

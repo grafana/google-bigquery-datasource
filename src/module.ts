@@ -6,7 +6,7 @@ import { QueryEditor } from './QueryEditor';
 import { BigQueryDatasource } from './datasource';
 import { BigQueryQueryCtrl } from './query_ctrl';
 
-const ENABLE_NG = false;
+const ENABLE_NG = true;
 
 const plugin = new DataSourcePlugin<any, any, BigQueryOptions>(BigQueryDatasource)
   .setConfigEditor(BigQueryConfigEditor)
