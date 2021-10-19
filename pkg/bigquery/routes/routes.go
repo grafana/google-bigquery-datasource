@@ -16,6 +16,7 @@ type ResourceHandler struct {
 }
 
 func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
+	log.DefaultLogger.Info("NEW RESOURCE HANDLER")
 	return &ResourceHandler{ds: ds}
 }
 
@@ -26,7 +27,6 @@ func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
 		write(rw, []byte(err.Error()))
 		return
 	}
-
 	res, err := r.ds.Datasets(req.Context(), reqBody)
 	sendResponse(res, err, rw)
 }

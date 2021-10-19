@@ -54,9 +54,6 @@ func TestConnection_bigqueryConnectionString(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
-			id := int64(1)
-			ds := BigQueryDatasource{}
-			ds.config.Store(id, config)
 			defaultSettings, err := LoadSettings(config)
 
 			if err != nil {
