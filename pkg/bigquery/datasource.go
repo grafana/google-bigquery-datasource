@@ -212,9 +212,9 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project string) (*bq.Cl
 	log.DefaultLogger.Info("Creating new BigQuery API client", clientId)
 	credentials := Credentials{
 		Type:        "service_account",
-		ClientEmail: settings.(Settings).ClientEmail,
-		PrivateKey:  settings.(Settings).PrivateKey,
-		TokenURI:    settings.(Settings).TokenUri,
+		ClientEmail: settings.(BigQuerySettings).ClientEmail,
+		PrivateKey:  settings.(BigQuerySettings).PrivateKey,
+		TokenURI:    settings.(BigQuerySettings).TokenUri,
 		ProjectID:   project,
 	}
 	creds, err := json.Marshal(credentials)

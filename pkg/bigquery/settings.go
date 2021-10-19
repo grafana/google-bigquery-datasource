@@ -10,7 +10,7 @@ import (
 )
 
 // Settings - data loaded from grafana settings database
-type Settings struct {
+type BigQuerySettings struct {
 	ClientEmail        string `json:"clientEmail"`
 	DefaultProject     string `json:"defaultProject"`
 	DefaultDataset     string `json:"defaultDataset"`
@@ -32,8 +32,8 @@ type Credentials struct {
 }
 
 // LoadSettings will read and validate Settings from the DataSourceConfg
-func LoadSettings(config backend.DataSourceInstanceSettings) (Settings, error) {
-	settings := Settings{}
+func LoadSettings(config backend.DataSourceInstanceSettings) (BigQuerySettings, error) {
+	settings := BigQuerySettings{}
 
 	if err := json.Unmarshal(config.JSONData, &settings); err != nil {
 		return settings, fmt.Errorf("could not unmarshal DataSourceInfo json: %w", err)
@@ -44,7 +44,7 @@ func LoadSettings(config backend.DataSourceInstanceSettings) (Settings, error) {
 	return settings, nil
 }
 
-func getDSN(settings Settings, queryArgs *ConnectionArgs) (string, error) {
+func getDSN(settings BigQuerySettings, queryArgs *ConnectionArgs) (string, error) {
 	credentials := Credentials{
 		Type:        "service_account",
 		ClientEmail: settings.ClientEmail,
