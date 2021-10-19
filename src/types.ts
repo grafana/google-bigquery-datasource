@@ -1,4 +1,5 @@
-import { DataSourceJsonData } from '@grafana/data';
+import { DataQuery, DataSourceJsonData } from '@grafana/data';
+import { BigQueryAPI } from 'api';
 
 export enum GoogleAuthType {
   JWT = 'jwt',
@@ -31,6 +32,27 @@ export enum GroupType {
 }
 
 export enum QueryFormat {
-  Table = 'table',
-  Timeseries = 'time_series',
+  Timeseries = 0,
+  Table = 1,
+}
+
+export interface QueryModel extends DataQuery {
+  rawSql: string;
+  format: QueryFormat;
+  connectionArgs: {
+    project: string;
+    dataset: string;
+    table: string;
+    location: string;
+  };
+}
+
+export interface ResourceSelectorProps {
+  apiClient: BigQueryAPI;
+  location: string;
+  projectId: string;
+  readonly?: boolean;
+  disabled?: boolean;
+  className?: string;
+  applyDefault?: boolean;
 }

@@ -2,19 +2,17 @@ import {
   DataSourcePluginOptionsEditorProps,
   onUpdateDatasourceJsonDataOption,
   onUpdateDatasourceJsonDataOptionSelect,
-  SelectableValue,
 } from '@grafana/data';
 import { Field, FieldSet, Input, RadioButtonGroup, Select } from '@grafana/ui';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { JWTConfigEditor } from './components/JWTConfigEditor';
 import { JWTForm } from './components/JWTForm';
 import { ConfigurationHelp } from './components/ConfigurationHelp';
 import { DEFAULT_REGION, GOOGLE_AUTH_TYPE_OPTIONS, PROCESSING_LOCATIONS, QUERY_PRIORITIES } from './constants';
 import { BigQueryOptions, BigQuerySecureJsonData, GoogleAuthType, QueryPriority } from './types';
-import { BigQueryAPI, getApiClient } from './api';
+import { getApiClient } from './api';
 
-import { useAsync } from 'react-use';
 import { DatasetSelector } from 'components/DatasetSelector';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
@@ -101,10 +99,12 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
         {jsonData.defaultProject && (
           <Field label="Default dataset">
             <DatasetSelector
+              applyDefault
               apiClient={getApiClient(options.id)}
+              value={jsonData.defaultDataset}
               location={jsonData.processingLocation || DEFAULT_REGION}
               projectId={jsonData.defaultProject}
-              value={jsonData.defaultDataset}
+              className="width-30"
               onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'defaultDataset')}
             />
           </Field>

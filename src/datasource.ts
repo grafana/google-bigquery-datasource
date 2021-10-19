@@ -2,7 +2,7 @@ import _ from 'lodash';
 import BigQueryQuery, { BigQueryQueryNG } from './bigquery_query';
 import { map } from 'rxjs/operators';
 import ResponseParser, { ResultFormat } from './ResponseParser';
-import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryPriority } from './types';
+import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryModel, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
 import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableModel } from '@grafana/data';
 import { DataSourceWithBackend, FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
@@ -29,18 +29,17 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
   private readonly url?: string;
 
   private runInProject: string;
-  private jsonData: BigQueryOptions;
   private responseParser: ResponseParser;
   private queryModel: BigQueryQuery;
   private processingLocation?: string;
   private queryPriority?: QueryPriority;
+  jsonData: BigQueryOptions;
 
   authenticationType: string;
   projectName = '';
 
   constructor(instanceSettings: DataSourceInstanceSettings<BigQueryOptions>) {
     super(instanceSettings);
-
     this.baseUrl = `/bigquery/`;
     this.url = instanceSettings.url;
     this.responseParser = new ResponseParser();
@@ -93,35 +92,8 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     return ResponseParser.parseProjects(data);
   }
 
-  // async getDatasets(projectName: string): Promise<ResultFormat[]> {
-  //   const path = `v2/projects/${projectName}/datasets`;
-  //   const data = await this.paginatedResults(path, 'datasets');
-  //   return ResponseParser.parseDatasets(data);
-  // }
-
-  // async getTables(projectName: string, datasetName: string): Promise<ResultFormat[]> {
-  //   const path = `v2/projects/${projectName}/datasets/${datasetName}/tables`;
-  //   const data: BQTypes.ITableList['tables'] = await this.paginatedResults(path, 'tables');
-
-  //   return new ResponseParser().parseTabels(data);
-  // }
-
-  // async getTableFields(
-  //   projectName: string,
-  //   datasetName: string,
-  //   tableName: string,
-  //   filter: string[]
-  // ): Promise<ResultFormat[]> {
-  //   const path = `v2/projects/${projectName}/datasets/${datasetName}/tables/${tableName}`;
-  //   const data = await this.paginatedResults(path, 'schema.fields');
-  //   return ResponseParser.parseTableFields(data, filter);
-  // }
-
-  async getDateFields(projectName: string, datasetName: string, tableName: string) {
-    return this.getTableFields(projectName, datasetName, tableName, ['DATE', 'TIMESTAMP', 'DATETIME']);
-  }
-
   async getDefaultProject() {
+    alert('TODO');
     try {
       if (this.authenticationType === 'gce' || !this.projectName) {
         const data = await this.getProjects();
@@ -138,7 +110,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     }
   }
 
-  async annotationQuery(options: any) {
+  async annotationQuery(options: any): any {
     const path = `v2/projects/${this.runInProject}/queries`;
     const url = this.url + `${this.baseUrl}${path}`;
     if (!options.annotation.rawQuery) {
@@ -462,19 +434,19 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     return q;
   }
 
-  applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): Record<string, any> {
+  applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
     // TMP until we refactor Query Model
     const query = new BigQueryQuery(queryModel, scopedVars);
 
     const result = {
       ...queryModel,
       rawSql: query.buildQuery(),
-      format: queryModel.format === QueryFormat.Timeseries ? 0 : 1,
+      format: queryModel.format,
       connectionArgs: {
-        project: queryModel.project,
-        dataset: queryModel.dataset,
-        table: queryModel.table,
-        location: queryModel.location,
+        project: queryModel.project!,
+        dataset: queryModel.dataset!,
+        table: queryModel.table!,
+        location: queryModel.location!,
       },
     };
     return result;

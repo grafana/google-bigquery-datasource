@@ -1,15 +1,12 @@
-import { BigQueryAPI } from '../api';
-
 import { SelectableValue } from '@grafana/data';
-import { Field, Select } from '@grafana/ui';
+import { Select } from '@grafana/ui';
 
 import React, { useEffect } from 'react';
 
 import { useAsync } from 'react-use';
+import { ResourceSelectorProps } from 'types';
 
-interface DatasetSelectorProps {
-  apiClient: BigQueryAPI;
-  location: string;
+interface DatasetSelectorProps extends ResourceSelectorProps {
   projectId: string;
   value?: string;
   applyDefault?: boolean;
@@ -24,6 +21,7 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   value,
   onChange,
   disabled,
+  className,
   applyDefault,
 }) => {
   const state = useAsync(async () => {
@@ -42,16 +40,22 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       }
     } else {
       if (state.value && state.value.find((v) => v.value === value) === undefined) {
-        onChange(state.value[0]);
+        // if value is set and newly fetched values does not contain selected value
+        if (state.value.length > 0) {
+          onChange(state.value[0]);
+        }
       }
     }
   }, [state.value, value, location, applyDefault, onChange]);
 
-  if (state.loading && value === undefined) return null;
-
   return (
-    <Field label="Default dataset">
-      <Select className="width-30" value={value} options={state.value} onChange={onChange} disabled={disabled} />
-    </Field>
+    <Select
+      className={className}
+      value={value}
+      options={state.value}
+      onChange={onChange}
+      disabled={disabled}
+      isLoading={state.loading}
+    />
   );
 };

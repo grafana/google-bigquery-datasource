@@ -1,205 +1,143 @@
 import React, { useMemo } from 'react';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { BigQueryDatasource } from './datasource';
-import { QUERY_FORMAT_OPTIONS } from './constants';
-// import { AthenaDataSourceOptions, AthenaQuery, defaultQuery, FormatOptions, SelectableFormatOptions } from './types';
-import { InlineField, InlineSegmentGroup, Select } from '@grafana/ui';
-// import { QueryEditorRaw } from './QueryEditorRaw';
+import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from './constants';
+import { Field, HorizontalGroup, Select } from '@grafana/ui';
+import { QueryEditorRaw } from './QueryEditorRaw';
 import { DatasetSelector } from './components/DatasetSelector';
 import { TableSelector } from './components/TableSelector';
 import { BigQueryQueryNG } from './bigquery_query';
-import { BigQueryOptions, QueryFormat } from './types';
+import { BigQueryOptions, GoogleAuthType, QueryFormat } from './types';
 import { getApiClient } from './api';
+import { ProjectSelector } from 'components/ProjectSelector';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
+function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
+  const result = { ...q };
+
+  result.project = q.project || ds.jsonData.defaultProject;
+  result.dataset = q.dataset || ds.jsonData.defaultDataset;
+  result.location = q.location || ds.jsonData.defaultRegion || DEFAULT_REGION;
+  result.format = q.format || 0;
+
+  return result;
+}
 export function QueryEditor(props: Props) {
   const apiClient = useMemo(() => getApiClient(props.datasource.id), [props.datasource]);
-  //   const queryWithDefaults = {
-  //     ...defaultQuery,
-  //     ...props.query,
-  //     connectionArgs: {
-  //       ...defaultQuery.connectionArgs,
-  //       ...props.query.connectionArgs,
-  //     },
-  //   };
+  const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
 
-  //   // Region selector
-  //   const [region, setRegion] = useState(queryWithDefaults.connectionArgs.region);
-  //   const fetchRegions = async () => {
-  //     const regions = await props.datasource.getResource('regions');
-  //     return regions;
-  //   };
-  //   const onRegionChange = (region: string | null) => {
-  //     setRegion(region || '');
-  //     props.onChange({
-  //       ...props.query,
-  //       connectionArgs: {
-  //         ...queryWithDefaults.connectionArgs,
-  //         region: region || '',
-  //       },
-  //     });
-  //   };
+  const processQuery = () => {
+    if (
+      queryWithDefaults.location &&
+      queryWithDefaults.project &&
+      queryWithDefaults.dataset &&
+      queryWithDefaults.table
+    ) {
+      props.onRunQuery();
+    }
+  };
 
-  //   // Catalog selector
-  //   const [catalog, setCatalog] = useState<string | null>(queryWithDefaults.connectionArgs.catalog);
-  //   const fetchCatalogs = async () => await props.datasource.postResource('catalogs', { region });
-  //   const onCatalogChange = (catalog: string | null) => {
-  //     setCatalog(catalog);
-  //     props.onChange({
-  //       ...props.query,
-  //       connectionArgs: {
-  //         ...queryWithDefaults.connectionArgs,
-  //         catalog: catalog || '',
-  //       },
-  //     });
-  //   };
-
-  //   // Database selector
-  //   const [database, setDatabase] = useState<string | null>(queryWithDefaults.connectionArgs.database);
-  //   const fetchDatabases = async () => await props.datasource.postResource('databases', { region, catalog });
-  //   const onDatabaseChange = (database: string | null) => {
-  //     setDatabase(database);
-  //     props.onChange({
-  //       ...props.query,
-  //       connectionArgs: {
-  //         ...queryWithDefaults.connectionArgs,
-  //         database: database || '',
-  //       },
-  //     });
-  //     // now that connection args are complete, run request
-  //     props.onRunQuery();
-  //   };
-
-  //   // Tables selector
-  //   const [table, setTable] = useState<string | null>(queryWithDefaults.table || null);
-  //   const fetchTables = async () =>
-  //     await props.datasource.postResource('tablesWithConnectionDetails', { region, catalog, database });
-  //   const onTableChange = (newTable: string | null) => {
-  //     setTable(newTable);
-  //     props.onChange({
-  //       ...queryWithDefaults,
-  //       table: newTable || undefined,
-  //       column: undefined,
-  //     });
-  //     props.onRunQuery();
-  //   };
-
-  //   // column
-  //   const [column, setColumn] = useState<string | null>(queryWithDefaults.column || null);
-  //   const columnDependencies = {
-  //     ...queryWithDefaults.connectionArgs,
-  //     table: queryWithDefaults.table,
-  //   };
-  //   const fetchColumns = async () =>
-  //     await props.datasource.postResource('columnsWithConnectionDetails', columnDependencies);
-  //   const onColumnChange = (newColumn: string | null) => {
-  //     setColumn(newColumn);
-  //     props.onChange({
-  //       ...queryWithDefaults,
-  //       column: newColumn || undefined,
-  //     });
-  //     props.onRunQuery();
-  //   };
-
-  const onChangeFormat = (e: SelectableValue) => {
+  const onFormatChange = (e: SelectableValue) => {
     props.onChange({
-      ...props.query,
+      ...queryWithDefaults,
       format: e.value || QueryFormat.Timeseries,
     });
-    props.onRunQuery();
+    processQuery();
+  };
+
+  const onLocationChange = (e: SelectableValue) => {
+    props.onChange({
+      ...queryWithDefaults,
+      location: e.value || DEFAULT_REGION,
+    });
+    processQuery();
+  };
+
+  const onProjectChange = (e: SelectableValue) => {
+    props.onChange({
+      ...queryWithDefaults,
+      project: e.value,
+      dataset: undefined,
+      table: undefined,
+    });
+  };
+
+  const onDatasetChange = (e: SelectableValue) => {
+    props.onChange({
+      ...queryWithDefaults,
+      dataset: e.value,
+      table: undefined,
+    });
+    processQuery();
+  };
+
+  const onTableChange = (e: SelectableValue) => {
+    props.onChange({
+      ...queryWithDefaults,
+      table: e.value,
+    });
+    processQuery();
   };
 
   return (
     <>
-      <InlineSegmentGroup>
-        <DatasetSelector
-          apiClient={apiClient}
-          projectId={props.query.project}
-          location={props.query.location}
-          onChange={(c) => {
-            console.log(c);
-          }}
-        />
-        <TableSelector
-          apiClient={apiClient}
-          projectId={props.query.project}
-          location={props.query.location}
-          dataset={props.query.dataset}
-          disabled={props.query.dataset === undefined}
-          onChange={(c) => {
-            console.log(c);
-          }}
-        />
+      <HorizontalGroup>
+        <Field label="Processing location">
+          <Select
+            options={PROCESSING_LOCATIONS}
+            value={queryWithDefaults.location}
+            onChange={onLocationChange}
+            className="width-12"
+          />
+        </Field>
+        <Field label="Project">
+          <ProjectSelector
+            readonly={props.datasource.jsonData.authenticationType === GoogleAuthType.JWT}
+            apiClient={apiClient}
+            projectId={queryWithDefaults.project!}
+            location={queryWithDefaults.location!}
+            onChange={onProjectChange}
+            className="width-12"
+          />
+        </Field>
 
-        <InlineField label="Format as" labelWidth={11}>
+        <Field label="Dataset">
+          <DatasetSelector
+            apiClient={apiClient}
+            projectId={queryWithDefaults.project!}
+            location={queryWithDefaults.location!}
+            value={queryWithDefaults.dataset}
+            onChange={onDatasetChange}
+            className="width-12"
+          />
+        </Field>
+
+        <Field label="Table">
+          <TableSelector
+            apiClient={apiClient}
+            projectId={queryWithDefaults.project!}
+            location={queryWithDefaults.location!}
+            dataset={queryWithDefaults.dataset!}
+            value={queryWithDefaults.table}
+            disabled={queryWithDefaults.dataset === undefined}
+            onChange={onTableChange}
+            className="width-12"
+            applyDefault
+          />
+        </Field>
+
+        <Field label="Format as">
           <Select
             options={QUERY_FORMAT_OPTIONS}
             value={props.query.format}
-            onChange={(e) => {
-              console.log(e);
-            }}
+            onChange={onFormatChange}
             className="width-12"
           />
-        </InlineField>
+        </Field>
+      </HorizontalGroup>
 
-        {/* <div className="gf-form-group"> */}
-        {/* <AthenaResourceSelector
-            resource="region"
-            value={region}
-            fetch={fetchRegions}
-            onChange={onRegionChange}
-            default={props.datasource.defaultRegion}
-            labelWidth={11}
-            className="width-12"
-          />
-          <AthenaResourceSelector
-            resource="catalog"
-            value={catalog}
-            fetch={fetchCatalogs}
-            onChange={onCatalogChange}
-            default={props.datasource.defaultCatalog}
-            dependencies={[region]}
-            labelWidth={11}
-            className="width-12"
-          />
-          <AthenaResourceSelector
-            resource="database"
-            value={database}
-            fetch={fetchDatabases}
-            onChange={onDatabaseChange}
-            default={props.datasource.defaultDatabase}
-            dependencies={[region, catalog]}
-            labelWidth={11}
-            className="width-12"
-          />
-          <AthenaResourceSelector
-            resource="table"
-            value={table}
-            fetch={fetchTables}
-            onChange={onTableChange}
-            dependencies={[region, catalog, database]}
-            tooltip="Use the selected table with the $__table macro"
-            labelWidth={11}
-            className="width-12"
-          />
-          <AthenaResourceSelector
-            resource="column"
-            value={column}
-            fetch={fetchColumns}
-            onChange={onColumnChange}
-            dependencies={[region, catalog, database, table]}
-            tooltip="Use the selected column with the $__column macro"
-            labelWidth={11}
-            className="width-12"
-          /> */}
-        {/* <h6>Frames</h6>
-          
-        </div> */}
-        <div style={{ minWidth: '400px', marginLeft: '10px', flex: 1 }}>
-          <QueryEditorRaw query={props.query} onChange={props.onChange} onRunQuery={props.onRunQuery} />
-        </div>
-      </InlineSegmentGroup>
+      <QueryEditorRaw query={props.query} onChange={props.onChange} onRunQuery={props.onRunQuery} />
     </>
   );
 }

@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { GoogleAuthType, QueryPriority } from './types';
+import { GoogleAuthType, QueryFormat, QueryPriority } from './types';
 
 export const GOOGLE_AUTH_TYPE_OPTIONS = [
   { label: 'Google JWT File', value: GoogleAuthType.JWT },
@@ -7,8 +7,8 @@ export const GOOGLE_AUTH_TYPE_OPTIONS = [
 ];
 
 export const QUERY_FORMAT_OPTIONS = [
-  { label: 'Time series', value: 'time_series' },
-  { label: 'Table', value: 'table' },
+  { label: 'Time series', value: QueryFormat.Timeseries },
+  { label: 'Table', value: QueryFormat.Table },
 ];
 
 export const DEFAULT_REGION = 'US';
