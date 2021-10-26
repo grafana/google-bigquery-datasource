@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sync"
 
 	bq "cloud.google.com/go/bigquery"
+	"cloud.google.com/go/civil"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
 	_ "github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
@@ -74,7 +76,27 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 }
 
 func (s *BigQueryDatasource) Converters() (sc []sqlutil.Converter) {
-	return sc
+	dateConverter := sqlutil.Converter{
+		Name:          "civil.Date converter",
+		InputScanType: reflect.TypeOf(civil.Date{}),
+		InputTypeName: "DATE",
+		FrameConverter: sqlutil.FrameConverter{
+			FieldType: data.FieldTypeString,
+			ConverterFunc: func(n interface{}) (interface{}, error) {
+				v := n.(*civil.Date)
+
+				if !v.IsValid() {
+					return (*string)(nil), nil
+				}
+
+				return v.String(), nil
+			},
+		},
+	}
+
+	// TODO: TIME, DATETIME conversion
+
+	return append(sc, dateConverter)
 }
 
 func (s *BigQueryDatasource) FillMode() *data.FillMissing {
