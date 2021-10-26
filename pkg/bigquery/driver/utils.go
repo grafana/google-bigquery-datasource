@@ -27,7 +27,6 @@ func ConfigFromConnString(in string) (*Config, error) {
 		cfg.DatasetID = fields[1]
 		cfg.ApiKey = v.Get("apiKey")
 		cfg.Credentials = v.Get("credentials")
-		fmt.Errorf("CREDENTIALS", cfg.Credentials)
 		return cfg, nil
 	} else {
 		// Nope, bad prefix

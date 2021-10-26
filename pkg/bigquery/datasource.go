@@ -94,9 +94,27 @@ func (s *BigQueryDatasource) Converters() (sc []sqlutil.Converter) {
 		},
 	}
 
+	// naive record -> string converter
+	recordConverter := sqlutil.Converter{
+		Name:          "RECORD converter",
+		InputScanType: reflect.TypeOf([]bq.Value{}),
+		InputTypeName: "RECORD",
+		FrameConverter: sqlutil.FrameConverter{
+			FieldType: data.FieldTypeString,
+			ConverterFunc: func(n interface{}) (interface{}, error) {
+				out, err := json.Marshal(n)
+				if err != nil {
+					return nil, fmt.Errorf("problem converting RECORD")
+				}
+
+				return string(out), nil
+			},
+		},
+	}
+
 	// TODO: TIME, DATETIME conversion
 
-	return append(sc, dateConverter)
+	return append(sc, dateConverter, recordConverter)
 }
 
 func (s *BigQueryDatasource) FillMode() *data.FillMissing {

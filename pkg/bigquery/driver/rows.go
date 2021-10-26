@@ -68,6 +68,8 @@ func (r *rows) bigqueryTypeOf(columnType *string) (reflect.Type, error) {
 		return reflect.TypeOf(false), nil
 	case "TIMESTAMP":
 		return reflect.TypeOf(time.Time{}), nil
+	case "RECORD":
+		return reflect.TypeOf(""), nil
 	default:
 		return nil, fmt.Errorf("unknown column type `%s`", *columnType)
 	}
