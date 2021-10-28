@@ -251,6 +251,7 @@ func (c *Conn) queryContext(ctx context.Context, query string, args []driver.Val
 	}
 	for _, column := range rowsIterator.Schema {
 		res.columns = append(res.columns, column.Name)
+		res.fieldSchemas = append(res.fieldSchemas, column)
 		res.types = append(res.types, fmt.Sprintf("%v", column.Type))
 	}
 	for {
