@@ -11,6 +11,7 @@ import {
   Tab,
   TabContent,
   TabsBar,
+  Tooltip,
   useTheme2,
 } from '@grafana/ui';
 import { QueryEditorRaw } from './QueryEditorRaw';
@@ -47,9 +48,10 @@ export function QueryEditor(props: Props) {
   const theme: GrafanaTheme2 = useTheme2();
 
   const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (q: BigQueryQueryNG) => {
-    if (!isQueryValid(q)) {
+    if (!Boolean(q.location && q.project && q.dataset && q.table)) {
       return null;
     }
+
     const tablePath = `${q.project}:${q.dataset}.${q.table}`;
     if (schemaCache.current?.has(tablePath)) {
       return schemaCache.current?.get(tablePath);
@@ -112,6 +114,20 @@ export function QueryEditor(props: Props) {
     processQuery(next);
   };
 
+  const schemaTab = (
+    <Tab
+      label="Table schema"
+      active={isSchemaOpen}
+      onChangeTab={() => {
+        if (!Boolean(queryWithDefaults.table)) {
+          return;
+        }
+        setIsSchemaOpen(true);
+      }}
+      icon={fetchTableSchemaState.loading ? 'fa fa-spinner' : undefined}
+    />
+  );
+
   return (
     <>
       <HorizontalGroup>
@@ -123,6 +139,7 @@ export function QueryEditor(props: Props) {
             className="width-12"
           />
         </Field>
+
         {props.datasource.jsonData.authenticationType === GoogleAuthType.GCE && (
           <Field label="Project">
             <ProjectSelector
@@ -172,7 +189,7 @@ export function QueryEditor(props: Props) {
 
       <TabsBar>
         <Tab label={'Query'} active={!isSchemaOpen} onChangeTab={() => setIsSchemaOpen(false)} />
-        <Tab label={'Table schema'} active={isSchemaOpen} onChangeTab={() => setIsSchemaOpen(true)} />
+        {queryWithDefaults.table ? schemaTab : <Tooltip content={'Choose table first'}>{schemaTab}</Tooltip>}
       </TabsBar>
 
       <TabContent>
