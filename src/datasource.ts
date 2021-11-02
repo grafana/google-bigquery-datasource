@@ -93,7 +93,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
   }
 
   async getDefaultProject() {
-    alert('TODO');
     try {
       if (this.authenticationType === 'gce' || !this.projectName) {
         const data = await this.getProjects();
