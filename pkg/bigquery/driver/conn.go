@@ -59,12 +59,11 @@ type Config struct {
 }
 
 type Conn struct {
-	cfg       *Config
-	client    *bigquery.Client
-	ds        Dataset
-	projectID string
-	bad       bool
-	closed    bool
+	cfg    *Config
+	client *bigquery.Client
+	ds     Dataset
+	bad    bool
+	closed bool
 }
 
 func namedValueToValue(named []driver.NamedValue) ([]driver.Value, error) {

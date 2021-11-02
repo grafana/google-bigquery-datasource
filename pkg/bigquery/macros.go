@@ -49,17 +49,19 @@ func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
 		return "", fmt.Errorf("%w: expected 2 arguments, received %d", errors.New("macro $__timeGroup needs time column and interval"), len(args))
 	}
 
+	timeVar := args[0]
+	last := args[1][len(args[1])-1:]
+
+	// when month interval
+	if last == "M" {
+		return fmt.Sprintf("TIMESTAMP((PARSE_DATE(\"%%Y-%%m-%%d\",CONCAT( CAST((EXTRACT(YEAR FROM `%s`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `%s`)) AS STRING),'-','01'))))", timeVar, timeVar), nil
+	}
+
 	interval, err := gtime.ParseInterval(strings.Trim(args[1], `'`))
 
 	if err != nil {
 		return "", fmt.Errorf("error parsing interval %v", args[1])
 
-	}
-	timeVar := args[0]
-
-	// when month interval
-	if interval == 2678400000000000 {
-		return fmt.Sprintf("TIMESTAMP((PARSE_DATE(\"%%Y-%%m-%%d\",CONCAT( CAST((EXTRACT(YEAR FROM `%s`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `%s`)) AS STRING),'-','01'))))", timeVar, timeVar), nil
 	}
 
 	return fmt.Sprintf("TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(`%s`), %v) * %v)", timeVar, interval.Seconds(), interval.Seconds()), nil

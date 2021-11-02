@@ -67,7 +67,10 @@ func (a *API) GetTableSchema(ctx context.Context, dataset, table string) (*types
 
 	response, _ := json.Marshal(tableMeta)
 	result := &types.TableMetadataResponse{}
-	json.Unmarshal(response, result)
+
+	if err := json.Unmarshal(response, result); err != nil {
+		return nil, errors.WithMessage(err, fmt.Sprintf("Failed to parse %s table metadata", table))
+	}
 
 	return result, nil
 }
