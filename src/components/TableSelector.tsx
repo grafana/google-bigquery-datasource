@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { HorizontalGroup, IconButton, Select } from '@grafana/ui';
+import { Select } from '@grafana/ui';
 import React from 'react';
 import { useAsync } from 'react-use';
 import { ResourceSelectorProps } from '../types';

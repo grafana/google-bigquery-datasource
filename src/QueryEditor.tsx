@@ -206,7 +206,7 @@ export function QueryEditor(props: Props) {
               overflow: 'auto',
             }}
           >
-            {fetchTableSchemaState.value && props.query.table && (
+            {fetchTableSchemaState.value && fetchTableSchemaState.value.schema && props.query.table && (
               <CustomScrollbar>
                 <JSONFormatter json={fetchTableSchemaState.value.schema} open={2} />
               </CustomScrollbar>

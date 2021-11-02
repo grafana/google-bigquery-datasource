@@ -4,17 +4,15 @@ import { map } from 'rxjs/operators';
 import ResponseParser, { ResultFormat } from './ResponseParser';
 import { BigQueryOptions, GoogleAuthType, QueryFormat, QueryModel, QueryPriority } from './types';
 import { v4 as generateID } from 'uuid';
-import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableModel } from '@grafana/data';
+import { DataSourceInstanceSettings, ScopedVars, VariableModel } from '@grafana/data';
 import { DataSourceWithBackend, FetchResponse, getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import {
-  convertToUtc,
   formatBigqueryError,
-  formatDateToString,
   handleError,
   quoteLiteral,
-  updatePartition,
-  updateTableSuffix,
-  SHIFTED,
+  // updatePartition,
+  // updateTableSuffix,
+  // SHIFTED,
 } from 'utils';
 import BQTypes from '@google-cloud/bigquery/build/src/types';
 
@@ -24,7 +22,7 @@ function sleep(ms: number) {
   });
 }
 
-export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptions> {
+export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   private readonly baseUrl: string;
   private readonly url?: string;
 
@@ -62,7 +60,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
         ? this.jsonData.processingLocation
         : undefined;
 
-    this.queryPriority = this.jsonData.queryPriority;
+    // this.queryPriority = this.jsonData.queryPriority;
   }
 
   async metricFindQuery(query: string, optionalOptions: any) {
@@ -109,7 +107,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     }
   }
 
-  async annotationQuery(options: any): any {
+  async annotationQuery(options: any): Promise<any> {
     const path = `v2/projects/${this.runInProject}/queries`;
     const url = this.url + `${this.baseUrl}${path}`;
     if (!options.annotation.rawQuery) {
@@ -151,34 +149,34 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
       .toPromise();
   }
 
-  private setUpQ(modOptions: any, options: DataQueryRequest<BigQueryQueryNG>, query: BigQueryQueryNG) {
-    let q = this.queryModel.expend_macros(modOptions);
+  // private setUpQ(modOptions: any, options: DataQueryRequest<BigQueryQueryNG>, query: BigQueryQueryNG) {
+  //   let q = this.queryModel.expend_macros(modOptions);
 
-    if (q) {
-      q = this.setUpPartition(q, Boolean(query.partitioned), query.partitionedField || '', modOptions);
-      q = updatePartition(q, modOptions);
-      q = updateTableSuffix(q, modOptions);
+  //   if (q) {
+  //     q = this.setUpPartition(q, Boolean(query.partitioned), query.partitionedField || '', modOptions);
+  //     q = updatePartition(q, modOptions);
+  //     q = updateTableSuffix(q, modOptions);
 
-      if (query.refId.search(SHIFTED) > -1) {
-        // TODO: get rid of !
-        q = this._updateAlias(q!, modOptions, query.refId);
-      }
+  //     if (query.refId.search(SHIFTED) > -1) {
+  //       // TODO: get rid of !
+  //       q = this._updateAlias(q!, modOptions, query.refId);
+  //     }
 
-      const limit = q?.match(/[^]+(\bLIMIT\b)/gi);
+  //     const limit = q?.match(/[^]+(\bLIMIT\b)/gi);
 
-      if (limit == null) {
-        const limitStatement = ' LIMIT ' + options.maxDataPoints;
-        const limitPosition = q?.match(/\$__limitPosition/g);
+  //     if (limit == null) {
+  //       const limitStatement = ' LIMIT ' + options.maxDataPoints;
+  //       const limitPosition = q?.match(/\$__limitPosition/g);
 
-        if (limitPosition !== null) {
-          q = q?.replace(/\$__limitPosition/g, limitStatement);
-        } else {
-          q += limitStatement;
-        }
-      }
-    }
-    return q;
-  }
+  //       if (limitPosition !== null) {
+  //         q = q?.replace(/\$__limitPosition/g, limitStatement);
+  //       } else {
+  //         q += limitStatement;
+  //       }
+  //     }
+  //   }
+  //   return q;
+  // }
 
   /**
    * Add partition to query unless it has one
@@ -187,31 +185,31 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
    * @param partitionedField
    * @param options
    */
-  private setUpPartition(
-    query: string,
-    isPartitioned: boolean,
-    partitionedField: string,
-    options: DataQueryRequest<BigQueryQueryNG>
-  ) {
-    partitionedField = partitionedField ? partitionedField : '_PARTITIONTIME';
+  // private setUpPartition(
+  //   query: string,
+  //   isPartitioned: boolean,
+  //   partitionedField: string,
+  //   options: DataQueryRequest<BigQueryQueryNG>
+  // ) {
+  //   partitionedField = partitionedField ? partitionedField : '_PARTITIONTIME';
 
-    if (isPartitioned && !query.match(new RegExp(partitionedField, 'i'))) {
-      const fromD = convertToUtc(options.range.from.toDate());
-      const toD = convertToUtc(options.range.to.toDate());
+  //   if (isPartitioned && !query.match(new RegExp(partitionedField, 'i'))) {
+  //     const fromD = convertToUtc(options.range.from.toDate());
+  //     const toD = convertToUtc(options.range.to.toDate());
 
-      const from = `${partitionedField} >= '${formatDateToString(fromD, '-', true)}'`;
-      const to = `${partitionedField} < '${formatDateToString(toD, '-', true)}'`;
-      const partition = `where ${from} AND ${to} AND `;
-      if (query.match(/where/i)) {
-        query = query.replace(/where/i, partition);
-      } else {
-        const reg = /from ('|`|"|){1}(.*?)('|`|"|){1} as ('|`|"|)(\S*)('|`|"|){1}|from ('|`|"|){1}(\S*)('|`|"|){1}/i;
-        const fromMatch = query.match(reg);
-        query = query.replace(reg, `${fromMatch} ${fromMatch}`);
-      }
-    }
-    return query;
-  }
+  //     const from = `${partitionedField} >= '${formatDateToString(fromD, '-', true)}'`;
+  //     const to = `${partitionedField} < '${formatDateToString(toD, '-', true)}'`;
+  //     const partition = `where ${from} AND ${to} AND `;
+  //     if (query.match(/where/i)) {
+  //       query = query.replace(/where/i, partition);
+  //     } else {
+  //       const reg = /from ('|`|"|){1}(.*?)('|`|"|){1} as ('|`|"|)(\S*)('|`|"|){1}|from ('|`|"|){1}(\S*)('|`|"|){1}/i;
+  //       const fromMatch = query.match(reg);
+  //       query = query.replace(reg, `${fromMatch} ${fromMatch}`);
+  //     }
+  //   }
+  //   return query;
+  // }
 
   // @ts-ignore
   private async doRequest(url: string, requestId = 'requestId', maxRetries = 3) {
@@ -223,11 +221,11 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
       })
       .toPromise()
       .then((result) => {
-        if (result.status !== 200) {
-          if (result.status >= 500 && maxRetries > 0) {
+        if (result?.status !== 200) {
+          if (result && result.status >= 500 && maxRetries > 0) {
             return this.doRequest(url, requestId, maxRetries - 1);
           }
-          throw formatBigqueryError((result.data as any).error);
+          throw formatBigqueryError((result?.data as any).error);
         }
 
         return result;
@@ -270,11 +268,11 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
       })
       .toPromise()
       .then((result) => {
-        if (result.status !== 200) {
-          if (result.status >= 500 && maxRetries > 0) {
+        if (result?.status !== 200) {
+          if (result && result.status >= 500 && maxRetries > 0) {
             return this.doQueryRequest(query, requestId, priority, maxRetries - 1);
           }
-          throw formatBigqueryError((result.data as any).error);
+          throw formatBigqueryError((result?.data as any).error);
         }
         return result;
       })
@@ -411,27 +409,27 @@ export class BigQueryDatasource extends DataSourceWithBackend<any, BigQueryOptio
     return data;
   }
 
-  private _updateAlias(q: string, options: any, shiftstr: string) {
-    if (shiftstr !== undefined) {
-      const index = shiftstr.search(SHIFTED);
-      const shifted = shiftstr.substr(index, shiftstr.length);
-      for (const al of options.targets[0].select[0]) {
-        if (al.type === 'alias') {
-          q = q.replace('AS ' + al.params[0], 'AS ' + al.params[0] + shifted);
-          return q;
-        }
-      }
-      const aliasshiftted = [options.targets[0].select[0][0].params[0] + shifted];
-      const oldSelect = this.queryModel.buildValueColumn(options.targets[0].select[0]);
-      const newSelect = this.queryModel.buildValueColumn([
-        options.targets[0].select[0][0],
-        options.targets[0].select[0][1],
-        { type: 'alias', params: [aliasshiftted] },
-      ]);
-      q = q.replace(oldSelect, newSelect);
-    }
-    return q;
-  }
+  // private _updateAlias(q: string, options: any, shiftstr: string) {
+  //   if (shiftstr !== undefined) {
+  //     const index = shiftstr.search(SHIFTED);
+  //     const shifted = shiftstr.substr(index, shiftstr.length);
+  //     for (const al of options.targets[0].select[0]) {
+  //       if (al.type === 'alias') {
+  //         q = q.replace('AS ' + al.params[0], 'AS ' + al.params[0] + shifted);
+  //         return q;
+  //       }
+  //     }
+  //     const aliasshiftted = [options.targets[0].select[0][0].params[0] + shifted];
+  //     const oldSelect = this.queryModel.buildValueColumn(options.targets[0].select[0]);
+  //     const newSelect = this.queryModel.buildValueColumn([
+  //       options.targets[0].select[0][0],
+  //       options.targets[0].select[0][1],
+  //       { type: 'alias', params: [aliasshiftted] },
+  //     ]);
+  //     q = q.replace(oldSelect, newSelect);
+  //   }
+  //   return q;
+  // }
 
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
     // TMP until we refactor Query Model
