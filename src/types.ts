@@ -51,7 +51,6 @@ export interface ResourceSelectorProps {
   apiClient: BigQueryAPI;
   location: string;
   projectId: string;
-  readonly?: boolean;
   disabled?: boolean;
   className?: string;
   applyDefault?: boolean;
