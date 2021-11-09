@@ -1,36 +1,68 @@
-package bigquery
+package driver
 
 import (
 	"context"
 	"database/sql"
 	"database/sql/driver"
+	"fmt"
+	"net/http"
+	"sync"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
 const (
 	ConnectionStringEnvKey = "BIGQUERY_CONNECTION_STRING"
 )
 
+var (
+	openFromSessionMutex sync.Mutex
+	openFromSessionCount int
+)
+
 type Driver struct {
+	connector  *BigQueryConnector
+	httpClient *http.Client
+	settings   types.ConnectionSettings
 }
 
-func (d *Driver) Open(connectionString string) (c driver.Conn, err error) {
-	connector, err := d.OpenConnector(connectionString)
+func (d *Driver) Open(_ string) (c driver.Conn, err error) {
+	connector, err := d.OpenConnector()
 	if err != nil {
 		return
 	}
-	return connector.Connect(context.Background())
-}
+	connection, err := connector.Connect(context.Background())
 
-func (d *Driver) OpenConnector(connectionString string) (c driver.Connector, err error) {
-	if _, err := ConfigFromConnString(connectionString); err != nil { // validates connection string
+	if err != nil {
 		return nil, err
 	}
-	return NewConnector(connectionString), nil
+
+	d.connector = connector
+	return connection, nil
 }
 
-func init() {
-	log.DefaultLogger.Info("Registering BigQuery driver")
-	sql.Register("bigquery", &Driver{})
+func (d *Driver) OpenConnector() (c *BigQueryConnector, err error) {
+	return NewConnector(d.settings, d.httpClient), nil
+}
+
+func (d *Driver) Closed() bool {
+	return d.connector == nil || d.connector.connection.closed
+}
+
+// Open registers a new driver with a unique name
+func Open(settings types.ConnectionSettings, c *http.Client) (*Driver, *sql.DB, error) {
+	openFromSessionMutex.Lock()
+	openFromSessionCount++
+	name := fmt.Sprintf("%s-%d", "bigquery", openFromSessionCount)
+	openFromSessionMutex.Unlock()
+
+	d := &Driver{
+		httpClient: c,
+		// apiClient:  apiClient,
+		settings: settings,
+	}
+	sql.Register(name, d)
+	db, err := sql.Open(name, "")
+
+	return d, db, err
 }

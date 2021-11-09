@@ -41,6 +41,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/flatbuffers v2.0.0+incompatible // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
+	github.com/grafana/grafana-google-sdk-go v0.0.0-20211104130251-b190293eaf58
 	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0 // indirect
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/magefile/mage v1.11.0 // indirect

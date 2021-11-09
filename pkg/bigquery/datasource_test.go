@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
@@ -27,7 +28,7 @@ func TestConnection_bigqueryConnectionString(t *testing.T) {
 	tests := []struct {
 		description              string
 		args                     *ConnectionArgs
-		expectedSettings         *BigQuerySettings
+		expectedSettings         *types.BigQuerySettings
 		expectedConnectionString string
 	}{
 		{

@@ -22,6 +22,21 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
   const { jsonData, secureJsonFields, secureJsonData } = options;
   const isJWT = jsonData.authenticationType === GoogleAuthType.JWT || jsonData.authenticationType === undefined;
 
+  const onAuthTypeChange = (authenticationType: GoogleAuthType) => {
+    if (authenticationType === GoogleAuthType.GCE) {
+      console.log(authenticationType);
+      const api = getApiClient(options.id);
+      api.getProjects().then((projects) => {
+        console.log(projects);
+      });
+      // await fetchDefaultProject();
+    }
+    onOptionsChange({
+      ...options,
+      jsonData: { ...jsonData, authenticationType },
+    });
+  };
+
   const hasJWTConfigured = Boolean(
     secureJsonFields &&
       secureJsonFields.privateKey &&
@@ -58,12 +73,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           <RadioButtonGroup
             options={GOOGLE_AUTH_TYPE_OPTIONS}
             value={jsonData.authenticationType || GoogleAuthType.JWT}
-            onChange={(v) => {
-              onOptionsChange({
-                ...options,
-                jsonData: { ...jsonData, authenticationType: v },
-              });
-            }}
+            onChange={onAuthTypeChange}
           />
         </Field>
       </FieldSet>
@@ -96,7 +106,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       )}
 
       <FieldSet label="Other settings">
-        {jsonData.defaultProject && (
+        {isJWT && jsonData.defaultProject && (
           <Field label="Default dataset">
             <DatasetSelector
               applyDefault

@@ -16,8 +16,18 @@ type ResourceHandler struct {
 }
 
 func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
-	log.DefaultLogger.Info("NEW RESOURCE HANDLER")
 	return &ResourceHandler{ds: ds}
+}
+
+func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
+	reqBody, err := parseBody(req.Body)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		write(rw, []byte(err.Error()))
+		return
+	}
+	res, err := r.ds.GetGCEDefaultProject(req.Context(), reqBody)
+	sendResponse(res, err, rw)
 }
 
 func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
@@ -59,6 +69,7 @@ func (r *ResourceHandler) tableSchema(rw http.ResponseWriter, req *http.Request)
 
 func (r *ResourceHandler) Routes() map[string]func(http.ResponseWriter, *http.Request) {
 	return map[string]func(http.ResponseWriter, *http.Request){
+		"/projects":             r.projects,
 		"/datasets":             r.datasets,
 		"/dataset/tables":       r.tables,
 		"/dataset/table/schema": r.tableSchema,
