@@ -170,8 +170,6 @@ func NewConn(ctx context.Context, cfg types.ConnectionSettings, client *http.Cli
 	if err != nil {
 		return nil, err
 	}
-	// c.ds = c.client.Dataset(c.cfg.Dataset)
-
 	return
 }
 
