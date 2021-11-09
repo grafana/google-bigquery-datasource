@@ -9,17 +9,20 @@ import React from 'react';
 import { JWTConfigEditor } from './components/JWTConfigEditor';
 import { JWTForm } from './components/JWTForm';
 import { ConfigurationHelp } from './components/ConfigurationHelp';
-import { DEFAULT_REGION, GOOGLE_AUTH_TYPE_OPTIONS, PROCESSING_LOCATIONS, QUERY_PRIORITIES } from './constants';
+import { GOOGLE_AUTH_TYPE_OPTIONS, PROCESSING_LOCATIONS, QUERY_PRIORITIES } from './constants';
 import { BigQueryOptions, BigQuerySecureJsonData, GoogleAuthType, QueryPriority } from './types';
 import { getApiClient } from './api';
-
-import { DatasetSelector } from 'components/DatasetSelector';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 
 export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props) => {
   const { options, onOptionsChange } = props;
   const { jsonData, secureJsonFields, secureJsonData } = options;
+
+  if (!jsonData.authenticationType) {
+    jsonData.authenticationType = GoogleAuthType.JWT;
+  }
+
   const isJWT = jsonData.authenticationType === GoogleAuthType.JWT || jsonData.authenticationType === undefined;
 
   const onAuthTypeChange = (authenticationType: GoogleAuthType) => {
@@ -106,19 +109,6 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       )}
 
       <FieldSet label="Other settings">
-        {isJWT && jsonData.defaultProject && (
-          <Field label="Default dataset">
-            <DatasetSelector
-              applyDefault
-              apiClient={getApiClient(options.id)}
-              value={jsonData.defaultDataset}
-              location={jsonData.processingLocation || DEFAULT_REGION}
-              projectId={jsonData.defaultProject}
-              className="width-30"
-              onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'defaultDataset')}
-            />
-          </Field>
-        )}
         <Field
           label="Flat rate project"
           description="The project that the Queries will be run in if you are using a flat-rate pricing model"

@@ -167,22 +167,10 @@ func NewConn(ctx context.Context, cfg types.ConnectionSettings, client *http.Cli
 
 	c.client, err = bigquery.NewClient(ctx, cfg.Project, option.WithHTTPClient(client))
 
-	// if cfg.ApiKey != "" {
-	// 	c.client, err = bigquery.NewClient(ctx, cfg.ProjectID, option.WithAPIKey(cfg.ApiKey))
-	// } else if cfg.Credentials != "" {
-	// 	credentialsJSON, _err := base64.StdEncoding.DecodeString(cfg.Credentials)
-	// 	if _err != nil {
-	// 		return nil, _err
-	// 	}
-	// 	c.client, err = bigquery.NewClient(ctx, cfg.ProjectID, option.WithCredentialsJSON([]byte(credentialsJSON)))
-	// } else {
-	// 	c.client, err = bigquery.NewClient(ctx, cfg.ProjectID)
-	// }
-
 	if err != nil {
 		return nil, err
 	}
-	c.ds = c.client.Dataset(c.cfg.Dataset)
+	// c.ds = c.client.Dataset(c.cfg.Dataset)
 
 	return
 }
@@ -216,16 +204,17 @@ func (c *BigQueryConnector) Driver() driver.Driver {
 
 // Ping the BigQuery service and make sure it's reachable
 func (c *Conn) Ping(ctx context.Context) (err error) {
-	if c.ds == nil {
-		c.ds = c.client.Dataset(c.cfg.Dataset)
-	}
-	var md *bigquery.DatasetMetadata
-	md, err = c.ds.Metadata(ctx)
+	q := c.client.Query("SELECT 1")
+
+	q.QueryConfig.DryRun = true
+	job, err := q.Run(ctx)
+
 	if err != nil {
-		log.DefaultLogger.Info("Failed Ping Dataset: %s", c.cfg.Dataset)
+		log.DefaultLogger.Info("Failed to connect with BigQuery")
 		return
 	}
-	log.DefaultLogger.Info("Successful Ping: %s", md.FullID)
+
+	log.DefaultLogger.Info("Successful Ping", job.LastStatus().State)
 	return
 }
 
