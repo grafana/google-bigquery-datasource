@@ -63,7 +63,6 @@ type Dataset interface {
 type Conn struct {
 	cfg    *types.ConnectionSettings
 	client *bigquery.Client
-	ds     Dataset
 	bad    bool
 	closed bool
 }
