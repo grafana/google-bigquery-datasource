@@ -9,7 +9,6 @@ require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/fatih/color v1.13.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
-	github.com/google/go-cmp v0.5.6
 	github.com/grafana/grafana-plugin-sdk-go v0.114.0
 	github.com/grafana/sqlds/v2 v2.3.0
 	github.com/hashicorp/go-hclog v0.16.2 // indirect
@@ -63,6 +62,8 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
+
+require github.com/google/go-cmp v0.5.6 // indirect
 
 // replace github.com/grafana/sqlds/v2 => /Users/dominikprokop/projects/sqlds
 // replace github.com/grafana/grafana-plugin-sdk-go => /Users/dominikprokop/go/src/github.com/grafana/grafana-plugin-sdk-go

@@ -10,7 +10,6 @@ type BigQuerySettings struct {
 	DatasourceId       int64  `json:"datasourceId"`
 	ClientEmail        string `json:"clientEmail"`
 	DefaultProject     string `json:"defaultProject"`
-	DefaultDataset     string `json:"defaultDataset"`
 	FlatRateProject    string `json:"flatRateProject"`
 	TokenUri           string `json:"tokenUri"`
 	QueryPriority      string `json:"queryPriority"`

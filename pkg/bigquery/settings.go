@@ -38,7 +38,6 @@ func LoadSettings(config backend.DataSourceInstanceSettings) (types.BigQuerySett
 func getConnectionSettings(settings types.BigQuerySettings, queryArgs *ConnectionArgs) types.ConnectionSettings {
 	connectionSettings := types.ConnectionSettings{
 		Project:            settings.DefaultProject,
-		Dataset:            settings.DefaultDataset,
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
 	}
@@ -51,7 +50,6 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		connectionSettings.Location = queryArgs.Location
 	}
 
-	// dataset := settings.DefaultDataset
 	if queryArgs.Dataset != "" {
 		connectionSettings.Dataset = queryArgs.Dataset
 	}

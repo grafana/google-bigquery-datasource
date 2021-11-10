@@ -55,7 +55,6 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     delete nextJsonData.clientEmail;
     delete nextJsonData.defaultProject;
     delete nextJsonData.tokenUri;
-    delete nextJsonData.defaultDataset;
     delete nextSecureJsonData.privateKey;
 
     onOptionsChange({
