@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"sync"
 
-	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
@@ -19,13 +18,11 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
 	"github.com/grafana/sqlds/v2"
 	"github.com/pkg/errors"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/option"
 )
 
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
-	GetGCEDefaultProject(ctx context.Context, options sqlds.Options) (string, error)
+	GetGCEDefaultProject(ctx context.Context) (string, error)
 	Datasets(ctx context.Context, options sqlds.Options) ([]string, error)
 	Tables(ctx context.Context, options sqlds.Options) ([]string, error)
 	TableSchema(ctx context.Context, options sqlds.Options) (*types.TableMetadataResponse, error)
@@ -69,7 +66,16 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	}
 
 	connectionSettings := getConnectionSettings(settings, args)
-	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, args.Project, args.Dataset)
+
+	if settings.AuthenticationType == "gce" {
+		defaultProject, err := s.GetGCEDefaultProject(context.Background())
+		if err != nil {
+			return nil, errors.WithMessage(err, "Failed to retrieve default GCE project")
+		}
+		connectionSettings.Project = defaultProject
+	}
+
+	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, connectionSettings.Project, connectionSettings.Dataset)
 
 	c, exists := s.connections.Load(connectionKey)
 
@@ -118,20 +124,20 @@ func (s *BigQueryDatasource) Settings(_ backend.DataSourceInstanceSettings) sqld
 	}
 }
 
-func (s *BigQueryDatasource) GetGCEDefaultProject(ctx context.Context, options sqlds.Options) (string, error) {
-	defaultCredentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/bigquery")
-	if err != nil {
-		return "", fmt.Errorf("failed to retrieve default project from GCE metadata server: %w", err)
-	}
-	token, err := defaultCredentials.TokenSource.Token()
-	if err != nil {
-		return "", fmt.Errorf("failed to retrieve GCP credential token: %w", err)
-	}
-	if !token.Valid() {
-		return "", errors.New("failed to validate GCP credentials")
-	}
+func (s *BigQueryDatasource) GetGCEDefaultProject(ctx context.Context) (string, error) {
+	// defaultCredentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/bigquery")
+	// if err != nil {
+	// 	return "", fmt.Errorf("failed to retrieve default project from GCE metadata server: %w", err)
+	// }
+	// token, err := defaultCredentials.TokenSource.Token()
+	// if err != nil {
+	// 	return "", fmt.Errorf("failed to retrieve GCP credential token: %w", err)
+	// }
+	// if !token.Valid() {
+	// 	return "", errors.New("failed to validate GCP credentials")
+	// }
 
-	return defaultCredentials.ProjectID, nil
+	return "defaultCredentials.ProjectID", nil
 
 }
 
@@ -189,24 +195,25 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		return client.(*api.API), nil
 	}
 
-	httpClient, err := newHTTPClient(settings.(types.BigQuerySettings), httpclient.Options{})
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to crate http client")
-	}
+	// httpClient, err := newHTTPClient(settings.(types.BigQuerySettings), httpclient.Options{})
+	// if err != nil {
+	// 	return nil, errors.WithMessage(err, "Failed to crate http client")
+	// }
 
-	client, err = bq.NewClient(ctx, project, option.WithHTTPClient(httpClient))
+	// client, err = bq.NewClient(ctx, project, option.WithHTTPClient(httpClient))
 
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to initialize BigQuery client")
-	}
+	// if err != nil {
+	// 	return nil, errors.WithMessage(err, "Failed to initialize BigQuery client")
+	// }
 
-	apiInstance := api.New(client.(*bq.Client))
+	// apiInstance := api.New(client.(*bq.Client))
+	apiInstance := api.New(nil)
 
-	if location != "" {
-		apiInstance.SetLocation(location)
-	} else {
-		apiInstance.SetLocation(settings.(types.BigQuerySettings).ProcessingLocation)
-	}
+	// if location != "" {
+	// 	apiInstance.SetLocation(location)
+	// } else {
+	// 	apiInstance.SetLocation(settings.(types.BigQuerySettings).ProcessingLocation)
+	// }
 
 	s.apiClients.Store(clientId, apiInstance)
 

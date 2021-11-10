@@ -54,9 +54,9 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		connectionSettings.Dataset = queryArgs.Dataset
 	}
 
-	if queryArgs.Project != "" {
-		connectionSettings.Project = queryArgs.Project
-	}
+	// if queryArgs.Project != "" {
+	// 	connectionSettings.Project = queryArgs.Project
+	// }
 
 	return connectionSettings
 }

@@ -20,16 +20,22 @@ import { TableSelector } from './components/TableSelector';
 import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, GoogleAuthType, QueryFormat } from './types';
 import { getApiClient, TableSchema } from './api';
-import { ProjectSelector } from 'components/ProjectSelector';
-import { useAsyncFn } from 'react-use';
+import { useAsync, useAsyncFn } from 'react-use';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
-function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
+async function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
+  debugger;
   const result = { ...q };
 
-  result.project = q.project || ds.jsonData.defaultProject;
-  result.dataset = q.dataset || ds.jsonData.defaultDataset;
+  if (!result.project && ds.jsonData.authenticationType === GoogleAuthType.GCE) {
+    const defaultGCEProject = await getApiClient(ds.id).getProject();
+    result.project = defaultGCEProject;
+  } else {
+    result.project = q.project || ds.jsonData.defaultProject;
+  }
+
+  result.dataset = q.dataset;
   result.location = q.location || ds.jsonData.defaultRegion || DEFAULT_REGION;
   result.format = q.format !== undefined ? q.format : QueryFormat.Table;
   result.rawSql = q.rawSql || '';
@@ -40,12 +46,19 @@ function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
 const isQueryValid = (q: BigQueryQueryNG) => {
   return Boolean(q.location && q.project && q.dataset && q.table && q.rawSql);
 };
+
 export function QueryEditor(props: Props) {
   const schemaCache = useRef(new Map<string, TableSchema>());
-  const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
+  // const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
   const apiClient = useMemo(() => getApiClient(props.datasource.id), [props.datasource]);
   const [isSchemaOpen, setIsSchemaOpen] = useState(false);
   const theme: GrafanaTheme2 = useTheme2();
+
+  const queryWithDefaults = useAsync(async () => {
+    const q = await applyQueryDefaults(props.query, props.datasource);
+    props.onChange(q);
+    return q;
+  }, [props.query, props.datasource, props.onChange]);
 
   const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (q: BigQueryQueryNG) => {
     if (!Boolean(q.location && q.project && q.dataset && q.table)) {
@@ -83,15 +96,6 @@ export function QueryEditor(props: Props) {
     processQuery(next);
   };
 
-  const onProjectChange = (e: SelectableValue) => {
-    props.onChange({
-      ...queryWithDefaults,
-      project: e.value,
-      dataset: undefined,
-      table: undefined,
-    });
-  };
-
   const onDatasetChange = (e: SelectableValue) => {
     const next = {
       ...queryWithDefaults,
@@ -119,7 +123,7 @@ export function QueryEditor(props: Props) {
       label="Table schema"
       active={isSchemaOpen}
       onChangeTab={() => {
-        if (!Boolean(queryWithDefaults.table)) {
+        if (!Boolean(queryWithDefaults.value?.table)) {
           return;
         }
         setIsSchemaOpen(true);
@@ -128,13 +132,17 @@ export function QueryEditor(props: Props) {
     />
   );
 
+  if (queryWithDefaults.loading || !queryWithDefaults.value) {
+    return null;
+  }
+
   return (
     <>
       <HorizontalGroup>
         <Field label="Processing location">
           <Select
             options={PROCESSING_LOCATIONS}
-            value={queryWithDefaults.location}
+            value={queryWithDefaults.value.location}
             onChange={onLocationChange}
             className="width-12"
           />
@@ -142,22 +150,17 @@ export function QueryEditor(props: Props) {
 
         {props.datasource.jsonData.authenticationType === GoogleAuthType.GCE && (
           <Field label="Project">
-            <ProjectSelector
-              apiClient={apiClient}
-              projectId={queryWithDefaults.project!}
-              location={queryWithDefaults.location!}
-              onChange={onProjectChange}
-              className="width-12"
-            />
+            <div>{queryWithDefaults.value.project || 'Fetching project'}</div>
           </Field>
         )}
 
         <Field label="Dataset">
           <DatasetSelector
+            disabled={Boolean(queryWithDefaults.value.project)}
             apiClient={apiClient}
-            projectId={queryWithDefaults.project!}
-            location={queryWithDefaults.location!}
-            value={queryWithDefaults.dataset}
+            projectId={queryWithDefaults.value.project!}
+            location={queryWithDefaults.value.location!}
+            value={queryWithDefaults.value.dataset}
             onChange={onDatasetChange}
             className="width-12"
           />
@@ -166,11 +169,11 @@ export function QueryEditor(props: Props) {
         <Field label="Table">
           <TableSelector
             apiClient={apiClient}
-            projectId={queryWithDefaults.project!}
-            location={queryWithDefaults.location!}
-            dataset={queryWithDefaults.dataset!}
-            value={queryWithDefaults.table}
-            disabled={queryWithDefaults.dataset === undefined}
+            projectId={queryWithDefaults.value.project!}
+            location={queryWithDefaults.value.location!}
+            dataset={queryWithDefaults.value.dataset!}
+            value={queryWithDefaults.value.table}
+            disabled={queryWithDefaults.value.dataset === undefined}
             onChange={onTableChange}
             className="width-12"
             applyDefault
@@ -180,7 +183,7 @@ export function QueryEditor(props: Props) {
         <Field label="Format as">
           <Select
             options={QUERY_FORMAT_OPTIONS}
-            value={queryWithDefaults.format}
+            value={queryWithDefaults.value.format}
             onChange={onFormatChange}
             className="width-12"
           />
@@ -189,7 +192,7 @@ export function QueryEditor(props: Props) {
 
       <TabsBar>
         <Tab label={'Query'} active={!isSchemaOpen} onChangeTab={() => setIsSchemaOpen(false)} />
-        {queryWithDefaults.table ? schemaTab : <Tooltip content={'Choose table first'}>{schemaTab}</Tooltip>}
+        {queryWithDefaults.value.table ? schemaTab : <Tooltip content={'Choose table first'}>{schemaTab}</Tooltip>}
       </TabsBar>
 
       <TabContent>

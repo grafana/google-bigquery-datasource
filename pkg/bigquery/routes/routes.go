@@ -20,13 +20,7 @@ func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
 }
 
 func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
-	reqBody, err := parseBody(req.Body)
-	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		write(rw, []byte(err.Error()))
-		return
-	}
-	res, err := r.ds.GetGCEDefaultProject(req.Context(), reqBody)
+	res, err := r.ds.GetGCEDefaultProject(req.Context())
 	sendResponse(res, err, rw)
 }
 

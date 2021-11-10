@@ -16,6 +16,9 @@ import { GroupType, QueryFormat, QueryPriority } from 'types';
 
 export interface BigQueryQueryNG extends DataQuery {
   dataset?: string;
+  project?: string;
+  table?: string;
+
   format: QueryFormat;
   orderByCol?: string;
   orderBySort?: string;
@@ -32,8 +35,6 @@ export interface BigQueryQueryNG extends DataQuery {
   partitionedField?: string;
   convertToUTC?: boolean;
   sharded?: boolean;
-  project?: string;
-  table?: string;
   queryPriority?: QueryPriority;
   timeShift?: string;
 }

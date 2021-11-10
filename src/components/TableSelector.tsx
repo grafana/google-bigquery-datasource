@@ -17,13 +17,11 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
   projectId,
   value,
   dataset,
-  applyDefault,
-  disabled,
   className,
   onChange,
 }) => {
   const state = useAsync(async () => {
-    if (dataset === undefined) {
+    if (!projectId || !dataset) {
       return [];
     }
     const tables = await apiClient.getTables(projectId, location, dataset);
@@ -36,7 +34,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
       value={value}
       options={state.value}
       onChange={onChange}
-      disabled={!Boolean(dataset) || state.loading}
+      disabled={!Boolean(projectId) || !Boolean(dataset) || state.loading}
       isLoading={state.loading}
     />
   );

@@ -12,7 +12,7 @@ export interface TableSchema {
 }
 
 export interface BigQueryAPI {
-  getProjects: () => Promise<string>;
+  getProject: () => Promise<string>;
   getDatasets: (project: string, location: string) => Promise<string[]>;
   getTables: (project: string, location: string, dataset: string) => Promise<string[]>;
   getTableSchema: (project: string, location: string, dataset: string, table: string) => Promise<TableSchema>;
@@ -28,7 +28,7 @@ class BigQueryAPIClient implements BigQueryAPI {
     this.resourcesUrl = `${this.baseUrl}/resources`;
   }
 
-  getProjects = async (): Promise<string> => {
+  getProject = async (): Promise<string> => {
     return await getBackendSrv().post(this.resourcesUrl + '/projects', {});
   };
 
