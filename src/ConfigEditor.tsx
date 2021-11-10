@@ -26,18 +26,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
   const isJWT = jsonData.authenticationType === GoogleAuthType.JWT || jsonData.authenticationType === undefined;
 
   const onAuthTypeChange = (authenticationType: GoogleAuthType) => {
-    if (authenticationType === GoogleAuthType.GCE) {
-      console.log(authenticationType);
-      const api = getApiClient(options.id);
-      api.getProjects().then((projects) => {
-        console.log(projects);
-      });
-      // await fetchDefaultProject();
-    }
-    onOptionsChange({
-      ...options,
-      jsonData: { ...jsonData, authenticationType },
-    });
+    onResetApiKey({ authenticationType });
   };
 
   const hasJWTConfigured = Boolean(
@@ -48,9 +37,9 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       jsonData.tokenUri
   );
 
-  const onResetApiKey = () => {
+  const onResetApiKey = (jsonData?: Partial<BigQueryOptions>) => {
     const nextSecureJsonData = { ...secureJsonData };
-    const nextJsonData = { ...options.jsonData };
+    const nextJsonData = !jsonData ? { ...options.jsonData } : { ...options.jsonData, ...jsonData };
 
     delete nextJsonData.clientEmail;
     delete nextJsonData.defaultProject;
