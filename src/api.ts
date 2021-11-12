@@ -15,7 +15,6 @@ export interface BigQueryAPI {
   getDatasets: (location: string) => Promise<string[]>;
   getTables: (location: string, dataset: string) => Promise<string[]>;
   getTableSchema: (location: string, dataset: string, table: string) => Promise<TableSchema>;
-  // dryRunQuery: (project: string, location: string, dataset: string, table: string) => Promise<TableSchema>;
 }
 
 class BigQueryAPIClient implements BigQueryAPI {

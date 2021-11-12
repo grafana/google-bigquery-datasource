@@ -41,9 +41,6 @@ func (a *API) ListDatasets(ctx context.Context) ([]string, error) {
 
 func (a *API) ListTables(ctx context.Context, dataset string) ([]string, error) {
 	datasetRef := a.Client.Dataset(dataset)
-	// result := make([]string, 2)
-	// result[0] = "test_table"
-	// result[1] = "test_table2"
 	result := []string{}
 
 	it := datasetRef.Tables(ctx)

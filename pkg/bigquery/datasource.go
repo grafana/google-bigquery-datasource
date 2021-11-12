@@ -217,7 +217,6 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, location string) (*api.
 	}
 
 	apiInstance := api.New(client.(*bq.Client))
-	//apiInstance := api.New(nil)
 
 	if location != "" {
 		apiInstance.SetLocation(location)

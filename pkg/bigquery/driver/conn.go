@@ -52,13 +52,6 @@ type Dataset interface {
 	Routines(ctx context.Context) *bigquery.RoutineIterator
 }
 
-// type Config struct {
-// 	ProjectID   string
-// 	Location    string
-// 	DatasetID   string
-// 	ApiKey      string
-// 	Credentials string
-// }
 
 type Conn struct {
 	cfg    *types.ConnectionSettings

@@ -41,7 +41,6 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 
 export function QueryEditor(props: Props) {
   const schemaCache = useRef(new Map<string, TableSchema>());
-  // const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
   const apiClient = useMemo(() => getApiClient(props.datasource.id), [props.datasource]);
   const [isSchemaOpen, setIsSchemaOpen] = useState(false);
   const theme: GrafanaTheme2 = useTheme2();

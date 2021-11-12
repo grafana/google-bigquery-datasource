@@ -58,7 +58,6 @@ func Open(settings types.ConnectionSettings, c *http.Client) (*Driver, *sql.DB, 
 
 	d := &Driver{
 		httpClient: c,
-		// apiClient:  apiClient,
 		settings: settings,
 	}
 	sql.Register(name, d)
