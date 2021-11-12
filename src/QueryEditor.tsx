@@ -48,16 +48,16 @@ export function QueryEditor(props: Props) {
 
   const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
 
-  const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (l: string, d: string, t: string) => {
+  const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (l?: string, d?: string, t?: string) => {
     if (!Boolean(l && d && t)) {
       return null;
     }
 
-    if (schemaCache.current?.has(t)) {
-      return schemaCache.current?.get(t);
+    if (schemaCache.current?.has(t!)) {
+      return schemaCache.current?.get(t!);
     }
     const schema = await apiClient.getTableSchema(l!, d!, t!);
-    schemaCache.current.set(t, schema);
+    schemaCache.current.set(t!, schema);
     return schema;
   }, []);
 
@@ -104,7 +104,7 @@ export function QueryEditor(props: Props) {
       table: e.value,
     };
     props.onChange(next);
-    fetchTableSchema(next);
+    fetchTableSchema(next.location, next.dataset, next.table);
     processQuery(next);
   };
 
