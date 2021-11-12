@@ -11,7 +11,6 @@ import { JWTForm } from './components/JWTForm';
 import { ConfigurationHelp } from './components/ConfigurationHelp';
 import { GOOGLE_AUTH_TYPE_OPTIONS, PROCESSING_LOCATIONS, QUERY_PRIORITIES } from './constants';
 import { BigQueryOptions, BigQuerySecureJsonData, GoogleAuthType, QueryPriority } from './types';
-import { getApiClient } from './api';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 

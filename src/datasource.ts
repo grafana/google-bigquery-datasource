@@ -451,7 +451,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
       rawSql: query.target.rawQuery ? query.target.rawSql : query.buildQuery(),
       format: queryModel.format,
       connectionArgs: {
-        project: queryModel.project!,
         dataset: queryModel.dataset!,
         table: queryModel.table!,
         location: queryModel.location!,

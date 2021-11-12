@@ -14,19 +14,18 @@ interface TableSelectorProps extends ResourceSelectorProps {
 export const TableSelector: React.FC<TableSelectorProps> = ({
   apiClient,
   location,
-  projectId,
   value,
   dataset,
   className,
   onChange,
 }) => {
   const state = useAsync(async () => {
-    if (!projectId || !dataset) {
+    if (!dataset) {
       return [];
     }
-    const tables = await apiClient.getTables(projectId, location, dataset);
+    const tables = await apiClient.getTables(location, dataset);
     return tables.map<SelectableValue<string>>((d) => ({ label: d, value: d }));
-  }, [projectId, location, dataset]);
+  }, [location, dataset]);
 
   return (
     <Select
@@ -34,7 +33,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
       value={value}
       options={state.value}
       onChange={onChange}
-      disabled={!Boolean(projectId) || !Boolean(dataset) || state.loading}
+      disabled={!Boolean(dataset) || state.loading}
       isLoading={state.loading}
     />
   );

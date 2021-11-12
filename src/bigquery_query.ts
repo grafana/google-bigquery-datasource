@@ -16,7 +16,6 @@ import { GroupType, QueryFormat, QueryPriority } from 'types';
 
 export interface BigQueryQueryNG extends DataQuery {
   dataset?: string;
-  project?: string;
   table?: string;
 
   format: QueryFormat;
@@ -466,7 +465,7 @@ export default class BigQueryQuery {
         outerGroupBy = outerGroupBy + ',' + i;
       }
     }
-    query += '\nFROM ' + '`' + this.target.project + '.' + this.target.dataset + '.' + this.target.table + '`';
+    query += '\nFROM ' + '`' + this.target.dataset + '.' + this.target.table + '`';
 
     query += this.buildWhereClause();
     query += this.buildGroupClause();
