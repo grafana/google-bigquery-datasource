@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"sync"
 
+	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
@@ -18,6 +19,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
 	"github.com/grafana/sqlds/v2"
 	"github.com/pkg/errors"
+	"google.golang.org/api/option"
 )
 
 type BigqueryDatasourceIface interface {
@@ -142,9 +144,9 @@ func (s *BigQueryDatasource) GetGCEDefaultProject(ctx context.Context) (string, 
 }
 
 func (s *BigQueryDatasource) Datasets(ctx context.Context, options sqlds.Options) ([]string, error) {
-	project, location := options["project"], options["location"]
+	location := options["location"]
 
-	apiClient, err := s.getApi(ctx, project, location)
+	apiClient, err := s.getApi(ctx, location)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
 	}
@@ -153,8 +155,8 @@ func (s *BigQueryDatasource) Datasets(ctx context.Context, options sqlds.Options
 }
 
 func (s *BigQueryDatasource) Tables(ctx context.Context, options sqlds.Options) ([]string, error) {
-	project, dataset, location := options["project"], options["dataset"], options["location"]
-	apiClient, err := s.getApi(ctx, project, location)
+	dataset, location := options["dataset"], options["location"]
+	apiClient, err := s.getApi(ctx, location)
 
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
@@ -164,8 +166,8 @@ func (s *BigQueryDatasource) Tables(ctx context.Context, options sqlds.Options) 
 }
 
 func (s *BigQueryDatasource) TableSchema(ctx context.Context, options sqlds.Options) (*types.TableMetadataResponse, error) {
-	project, dataset, table, location := options["project"], options["dataset"], options["table"], options["location"]
-	apiClient, err := s.getApi(ctx, project, location)
+	dataset, table, location := options["dataset"], options["table"], options["location"]
+	apiClient, err := s.getApi(ctx, location)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
 	}
@@ -174,9 +176,9 @@ func (s *BigQueryDatasource) TableSchema(ctx context.Context, options sqlds.Opti
 
 }
 
-func (s *BigQueryDatasource) getApi(ctx context.Context, project, location string) (*api.API, error) {
+func (s *BigQueryDatasource) getApi(ctx context.Context, location string) (*api.API, error) {
 	datasourceID := getDatasourceID(ctx)
-	clientId := fmt.Sprintf("%d/%s", datasourceID, project)
+	clientId := fmt.Sprintf("%d", datasourceID)
 	settings, exists := s.config.Load(datasourceID)
 
 	if !exists {
@@ -195,25 +197,34 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		return client.(*api.API), nil
 	}
 
-	// httpClient, err := newHTTPClient(settings.(types.BigQuerySettings), httpclient.Options{})
-	// if err != nil {
-	// 	return nil, errors.WithMessage(err, "Failed to crate http client")
-	// }
+	project := settings.(types.BigQuerySettings).DefaultProject
+	if settings.(types.BigQuerySettings).AuthenticationType == "gce" {
+		p, err := s.GetGCEDefaultProject(context.Background())
+		if err != nil {
+			return nil, errors.WithMessage(err, "Failed to get project")
+		}
+		project = p
+	}
 
-	// client, err = bq.NewClient(ctx, project, option.WithHTTPClient(httpClient))
+	httpClient, err := newHTTPClient(settings.(types.BigQuerySettings), httpclient.Options{})
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to crate http client")
+	}
 
-	// if err != nil {
-	// 	return nil, errors.WithMessage(err, "Failed to initialize BigQuery client")
-	// }
+	client, err = bq.NewClient(ctx, project, option.WithHTTPClient(httpClient))
 
-	// apiInstance := api.New(client.(*bq.Client))
-	apiInstance := api.New(nil)
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to initialize BigQuery client")
+	}
 
-	// if location != "" {
-	// 	apiInstance.SetLocation(location)
-	// } else {
-	// 	apiInstance.SetLocation(settings.(types.BigQuerySettings).ProcessingLocation)
-	// }
+	apiInstance := api.New(client.(*bq.Client))
+	//apiInstance := api.New(nil)
+
+	if location != "" {
+		apiInstance.SetLocation(location)
+	} else {
+		apiInstance.SetLocation(settings.(types.BigQuerySettings).ProcessingLocation)
+	}
 
 	s.apiClients.Store(clientId, apiInstance)
 
