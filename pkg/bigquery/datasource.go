@@ -19,6 +19,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
 	"github.com/grafana/sqlds/v2"
 	"github.com/pkg/errors"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 )
 
@@ -41,7 +42,6 @@ type BigQueryDatasource struct {
 }
 
 type ConnectionArgs struct {
-	Project  string `json:"project,omitempty"`
 	Dataset  string `json:"dataset,omitempty"`
 	Table    string `json:"table,omitempty"`
 	Location string `json:"location,omitempty"`
@@ -127,20 +127,19 @@ func (s *BigQueryDatasource) Settings(_ backend.DataSourceInstanceSettings) sqld
 }
 
 func (s *BigQueryDatasource) GetGCEDefaultProject(ctx context.Context) (string, error) {
-	// defaultCredentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/bigquery")
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to retrieve default project from GCE metadata server: %w", err)
-	// }
-	// token, err := defaultCredentials.TokenSource.Token()
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to retrieve GCP credential token: %w", err)
-	// }
-	// if !token.Valid() {
-	// 	return "", errors.New("failed to validate GCP credentials")
-	// }
+	defaultCredentials, err := google.FindDefaultCredentials(ctx, "https://www.googleapis.com/auth/bigquery")
+	if err != nil {
+		return "", fmt.Errorf("failed to retrieve default project from GCE metadata server: %w", err)
+	}
+	token, err := defaultCredentials.TokenSource.Token()
+	if err != nil {
+		return "", fmt.Errorf("failed to retrieve GCP credential token: %w", err)
+	}
+	if !token.Valid() {
+		return "", errors.New("failed to validate GCP credentials")
+	}
 
-	return "defaultCredentials.ProjectID", nil
-
+	return defaultCredentials.ProjectID, nil
 }
 
 func (s *BigQueryDatasource) Datasets(ctx context.Context, options sqlds.Options) ([]string, error) {

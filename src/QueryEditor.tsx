@@ -48,23 +48,25 @@ export function QueryEditor(props: Props) {
 
   const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
 
-  const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (q: BigQueryQueryNG) => {
-    if (!Boolean(q.location && q.dataset && q.table)) {
+  const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (l: string, d: string, t: string) => {
+    if (!Boolean(l && d && t)) {
       return null;
     }
 
-    const tablePath = `${q.table}`;
-    if (schemaCache.current?.has(tablePath)) {
-      return schemaCache.current?.get(tablePath);
+    if (schemaCache.current?.has(t)) {
+      return schemaCache.current?.get(t);
     }
-    const schema = await apiClient.getTableSchema(q.location!, q.dataset!, q.table!);
-    schemaCache.current.set(tablePath, schema);
+    const schema = await apiClient.getTableSchema(l!, d!, t!);
+    schemaCache.current.set(t, schema);
     return schema;
   }, []);
 
   useEffect(() => {
-    fetchTableSchema(queryWithDefaults);
-  }, [fetchTableSchema, queryWithDefaults]);
+    if (!queryWithDefaults.location || !queryWithDefaults.dataset || !queryWithDefaults.table) {
+      return;
+    }
+    fetchTableSchema(queryWithDefaults.location, queryWithDefaults.dataset, queryWithDefaults.table);
+  }, [fetchTableSchema, queryWithDefaults.location, queryWithDefaults.dataset, queryWithDefaults.table]);
 
   const processQuery = (q: BigQueryQueryNG) => {
     if (isQueryValid(q)) {

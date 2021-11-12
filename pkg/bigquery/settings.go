@@ -42,10 +42,6 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		AuthenticationType: settings.AuthenticationType,
 	}
 
-	if queryArgs.Project != "" {
-		connectionSettings.Project = queryArgs.Project
-	}
-
 	if queryArgs.Location != "" {
 		connectionSettings.Location = queryArgs.Location
 	}
@@ -53,10 +49,6 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 	if queryArgs.Dataset != "" {
 		connectionSettings.Dataset = queryArgs.Dataset
 	}
-
-	// if queryArgs.Project != "" {
-	// 	connectionSettings.Project = queryArgs.Project
-	// }
 
 	return connectionSettings
 }
@@ -93,6 +85,12 @@ func getMiddleware(settings types.BigQuerySettings) (httpclient.Middleware, erro
 	case "gce":
 		provider = tokenprovider.NewGceAccessTokenProvider(providerConfig)
 	case "jwt":
+		err := validateDataSourceSettings(settings)
+
+		if err != nil {
+			return nil, err
+		}
+
 		providerConfig.JwtTokenConfig = &tokenprovider.JwtTokenConfig{
 			Email:      settings.ClientEmail,
 			URI:        settings.TokenUri,
@@ -112,4 +110,12 @@ func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options) (*h
 
 	opts.Middlewares = append(opts.Middlewares, m)
 	return httpclient.New(opts)
+}
+
+func validateDataSourceSettings(settings types.BigQuerySettings) error {
+	if settings.DefaultProject == "" || settings.ClientEmail == "" || settings.PrivateKey == "" || settings.TokenUri == "" {
+		return fmt.Errorf("datasource is missing authentication details")
+	}
+
+	return nil
 }
