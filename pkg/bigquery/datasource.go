@@ -28,9 +28,9 @@ var PluginConfigFromContext = httpadapter.PluginConfigFromContext
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
 	GetGCEDefaultProject(ctx context.Context) (string, error)
-	Datasets(ctx context.Context, options sqlds.Options) ([]string, error)
-	Tables(ctx context.Context, options sqlds.Options) ([]string, error)
-	TableSchema(ctx context.Context, options sqlds.Options) (*types.TableMetadataResponse, error)
+	Datasets(ctx context.Context, args DatasetsArgs) ([]string, error)
+	Tables(ctx context.Context, args TablesArgs) ([]string, error)
+	TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error)
 }
 
 type conn struct {
@@ -59,7 +59,7 @@ func New() *BigQueryDatasource {
 }
 
 func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, queryArgs json.RawMessage) (*sql.DB, error) {
-	log.DefaultLogger.Info("Connecting to BigQuery")
+	log.DefaultLogger.Debug("Connecting to BigQuery")
 
 	settings, err := LoadSettings(&config)
 	if err != nil {
@@ -92,7 +92,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 			return connection.db, nil
 		}
 	} else {
-		log.DefaultLogger.Info("Creating new connection to BigQuery")
+		log.DefaultLogger.Debug("Creating new connection to BigQuery")
 	}
 
 	aC, exists := s.apiClients.Load(connectionKey)
@@ -170,10 +170,13 @@ func (s *BigQueryDatasource) GetGCEDefaultProject(ctx context.Context) (string, 
 	return defaultCredentials.ProjectID, nil
 }
 
-func (s *BigQueryDatasource) Datasets(ctx context.Context, options sqlds.Options) ([]string, error) {
-	project, location := options["project"], options["location"]
+type DatasetsArgs struct {
+	Project  string `json:"project"`
+	Location string `json:"location"`
+}
 
-	apiClient, err := s.getApi(ctx, project, location)
+func (s *BigQueryDatasource) Datasets(ctx context.Context, options DatasetsArgs) ([]string, error) {
+	apiClient, err := s.getApi(ctx, options.Project, options.Location)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
 	}
@@ -181,25 +184,36 @@ func (s *BigQueryDatasource) Datasets(ctx context.Context, options sqlds.Options
 	return apiClient.ListDatasets(ctx)
 }
 
-func (s *BigQueryDatasource) Tables(ctx context.Context, options sqlds.Options) ([]string, error) {
-	project, dataset, location := options["project"], options["dataset"], options["location"]
-	apiClient, err := s.getApi(ctx, project, location)
-
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
-	}
-
-	return apiClient.ListTables(ctx, dataset)
+type TablesArgs struct {
+	Project  string `json:"project"`
+	Location string `json:"location"`
+	Dataset  string `json:"dataset"`
 }
 
-func (s *BigQueryDatasource) TableSchema(ctx context.Context, options sqlds.Options) (*types.TableMetadataResponse, error) {
-	project, dataset, table, location := options["project"], options["dataset"], options["table"], options["location"]
-	apiClient, err := s.getApi(ctx, project, location)
+func (s *BigQueryDatasource) Tables(ctx context.Context, args TablesArgs) ([]string, error) {
+	apiClient, err := s.getApi(ctx, args.Project, args.Location)
+
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
 	}
 
-	return apiClient.GetTableSchema(ctx, dataset, table)
+	return apiClient.ListTables(ctx, args.Dataset)
+}
+
+type TableSchemaArgs struct {
+	Project  string `json:"project"`
+	Location string `json:"location"`
+	Dataset  string `json:"dataset"`
+	Table    string `json:"table"`
+}
+
+func (s *BigQueryDatasource) TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error) {
+	apiClient, err := s.getApi(ctx, args.Project, args.Location)
+	if err != nil {
+		return nil, errors.WithMessage(err, "Failed to retrieve BigQuery API client")
+	}
+
+	return apiClient.GetTableSchema(ctx, args.Dataset, args.Table)
 
 }
 
@@ -209,7 +223,7 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 	cClient, exists := s.apiClients.Load(connectionKey)
 
 	if exists {
-		log.DefaultLogger.Info("Reusing existing BigQuery API client")
+		log.DefaultLogger.Debug("Reusing existing BigQuery API client")
 		return cClient.(*api.API), nil
 	}
 
