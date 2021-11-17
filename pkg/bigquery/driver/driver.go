@@ -5,9 +5,10 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-	"net/http"
 	"sync"
 
+	bq "cloud.google.com/go/bigquery"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
@@ -21,9 +22,11 @@ var (
 )
 
 type Driver struct {
-	connector  *BigQueryConnector
-	httpClient *http.Client
-	settings   types.ConnectionSettings
+	connector *BigQueryConnector
+	ApiClient *api.API
+
+	bqClient *bq.Client
+	settings types.ConnectionSettings
 }
 
 func (d *Driver) Open(_ string) (c driver.Conn, err error) {
@@ -32,17 +35,17 @@ func (d *Driver) Open(_ string) (c driver.Conn, err error) {
 		return
 	}
 	connection, err := connector.Connect(context.Background())
-
 	if err != nil {
 		return nil, err
 	}
 
 	d.connector = connector
+
 	return connection, nil
 }
 
 func (d *Driver) OpenConnector() (c *BigQueryConnector, err error) {
-	return NewConnector(d.settings, d.httpClient), nil
+	return NewConnector(d.settings, d.bqClient), nil
 }
 
 func (d *Driver) Closed() bool {
@@ -50,14 +53,15 @@ func (d *Driver) Closed() bool {
 }
 
 // Open registers a new driver with a unique name
-func Open(settings types.ConnectionSettings, c *http.Client) (*Driver, *sql.DB, error) {
+func Open(settings types.ConnectionSettings, bqClient *bq.Client) (*Driver, *sql.DB, error) {
 	openFromSessionMutex.Lock()
 	openFromSessionCount++
 	name := fmt.Sprintf("%s-%d", "bigquery", openFromSessionCount)
 	openFromSessionMutex.Unlock()
 
 	d := &Driver{
-		httpClient: c,
+		bqClient: bqClient,
+
 		settings: settings,
 	}
 	sql.Register(name, d)

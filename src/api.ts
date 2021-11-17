@@ -21,23 +21,21 @@ class BigQueryAPIClient implements BigQueryAPI {
   private baseUrl: string;
   private resourcesUrl: string;
 
-  constructor(datasourceId: number) {
+  constructor(datasourceId: number, private defaultProject: string) {
     this.baseUrl = `/api/datasources/${datasourceId}`;
     this.resourcesUrl = `${this.baseUrl}/resources`;
   }
 
-  getProject = async (): Promise<string> => {
-    return await getBackendSrv().post(this.resourcesUrl + '/projects', {});
-  };
-
   getDatasets = async (location: string): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/datasets', {
+      project: this.defaultProject,
       location,
     });
   };
 
   getTables = async (location: string, dataset: string): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/dataset/tables', {
+      project: this.defaultProject,
       location,
       dataset,
     });
@@ -45,6 +43,7 @@ class BigQueryAPIClient implements BigQueryAPI {
 
   getTableSchema = async (location: string, dataset: string, table: string): Promise<TableSchema> => {
     return await getBackendSrv().post(this.resourcesUrl + '/dataset/table/schema', {
+      project: this.defaultProject,
       location,
       dataset,
       table,
@@ -54,9 +53,10 @@ class BigQueryAPIClient implements BigQueryAPI {
 
 const apis: Map<number, BigQueryAPI> = new Map();
 
-export function getApiClient(datasourceId: number) {
+export async function getApiClient(datasourceId: number) {
   if (!apis.has(datasourceId)) {
-    apis.set(datasourceId, new BigQueryAPIClient(datasourceId));
+    const defaultProject = await getBackendSrv().post(`/api/datasources/${datasourceId}/resources/projects`, {});
+    apis.set(datasourceId, new BigQueryAPIClient(datasourceId, defaultProject));
   }
 
   return apis.get(datasourceId)!;

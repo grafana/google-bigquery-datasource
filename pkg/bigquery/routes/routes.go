@@ -8,6 +8,7 @@ import (
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 	"github.com/grafana/sqlds/v2"
 )
 
@@ -20,8 +21,19 @@ func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
 }
 
 func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
-	res, err := r.ds.GetGCEDefaultProject(req.Context())
-	sendResponse(res, err, rw)
+	p := httpadapter.PluginConfigFromContext(req.Context())
+	s, err := bigquery.LoadSettings(p.DataSourceInstanceSettings)
+
+	if err != nil {
+		sendResponse(nil, err, rw)
+	}
+
+	if s.AuthenticationType == "gce" {
+		res, err := r.ds.GetGCEDefaultProject(req.Context())
+		sendResponse(res, err, rw)
+	} else {
+		sendResponse(s.DefaultProject, nil, rw)
+	}
 }
 
 func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {

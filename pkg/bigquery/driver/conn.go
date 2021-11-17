@@ -5,16 +5,15 @@ import (
 	"database/sql/driver"
 	"encoding/base64"
 	"fmt"
-	"net/http"
 	"reflect"
 	"strings"
 	"time"
 
 	"cloud.google.com/go/bigquery"
+	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"google.golang.org/api/iterator"
-	"google.golang.org/api/option"
 )
 
 type Dataset interface {
@@ -51,7 +50,6 @@ type Dataset interface {
 	// Routines returns an iterator over the routines in the Dataset.
 	Routines(ctx context.Context) *bigquery.RoutineIterator
 }
-
 
 type Conn struct {
 	cfg    *types.ConnectionSettings
@@ -152,16 +150,17 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 }
 
 // NewConn returns a connection for this Config
-func NewConn(ctx context.Context, cfg types.ConnectionSettings, client *http.Client) (c *Conn, err error) {
+func NewConn(ctx context.Context, cfg types.ConnectionSettings, client *bq.Client) (c *Conn, err error) {
 	c = &Conn{
 		cfg: &cfg,
 	}
 
-	c.client, err = bigquery.NewClient(ctx, cfg.Project, option.WithHTTPClient(client))
+	// c.client, err = bigquery.NewClient(ctx, cfg.Project, option.WithHTTPClient(client))
+	c.client = client
 
-	if err != nil {
-		return nil, err
-	}
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return
 }
 
@@ -170,15 +169,15 @@ type BigQueryConnector struct {
 	Client     *bigquery.Client
 	settings   types.ConnectionSettings
 	connection *Conn
-	httpClient *http.Client
+	bqClient   *bq.Client
 }
 
-func NewConnector(settings types.ConnectionSettings, client *http.Client) *BigQueryConnector {
-	return &BigQueryConnector{settings: settings, httpClient: client}
+func NewConnector(settings types.ConnectionSettings, client *bq.Client) *BigQueryConnector {
+	return &BigQueryConnector{settings: settings, bqClient: client}
 }
 
 func (c *BigQueryConnector) Connect(ctx context.Context) (driver.Conn, error) {
-	conn, err := NewConn(ctx, c.settings, c.httpClient)
+	conn, err := NewConn(ctx, c.settings, c.bqClient)
 
 	if err != nil {
 		return nil, err
