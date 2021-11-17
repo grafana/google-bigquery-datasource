@@ -23,6 +23,8 @@ import (
 	"google.golang.org/api/option"
 )
 
+var PluginConfigFromContext = httpadapter.PluginConfigFromContext
+
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
 	GetGCEDefaultProject(ctx context.Context) (string, error)
@@ -35,9 +37,13 @@ type conn struct {
 	db     *sql.DB
 	driver *driver.Driver
 }
+
+type bqServiceFactory func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error)
+
 type BigQueryDatasource struct {
 	connections sync.Map
 	apiClients  sync.Map
+	bqFactory   bqServiceFactory
 }
 
 type ConnectionArgs struct {
@@ -47,7 +53,9 @@ type ConnectionArgs struct {
 }
 
 func New() *BigQueryDatasource {
-	return &BigQueryDatasource{}
+	return &BigQueryDatasource{
+		bqFactory: bq.NewClient,
+	}
 }
 
 func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, queryArgs json.RawMessage) (*sql.DB, error) {
@@ -88,10 +96,13 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	}
 
 	aC, exists := s.apiClients.Load(connectionKey)
+
+	// If we have already instantiated API client for given connection details then reuse it's underlying big query
+	// client for db connection.
 	if exists {
-		dr, db, err := driver.Open(connectionSettings, client, aC.(*api.API).Client)
+		dr, db, err := driver.Open(connectionSettings, aC.(*api.API).Client)
 		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to connect to database. Is the hostname and port correct?")
+			return nil, errors.WithMessage(err, "Failed to connect to database")
 		}
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 		return db, nil
@@ -101,18 +112,25 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 			return nil, errors.WithMessage(err, "Failed to crate http client")
 		}
 
-		bqClient, err := bq.NewClient(context.Background(), connectionSettings.Project, option.WithHTTPClient(client))
-
+		bqClient, err := s.bqFactory(context.Background(), connectionSettings.Project, option.WithHTTPClient(client))
 		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to crate bigQuery client")
+			return nil, errors.WithMessage(err, "Failed to crate BigQuery client")
 		}
 
-		dr, db, err := driver.Open(connectionSettings, client, bqClient)
+		dr, db, err := driver.Open(connectionSettings, bqClient)
 
 		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to connect to database. Is the hostname and port correct?")
+			return nil, errors.WithMessage(err, "Failed to connect to database")
 		}
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
+
+		apiInstance := api.New(bqClient)
+		apiInstance.SetLocation(connectionSettings.Location)
+
+		if err != nil {
+			return nil, errors.WithMessage(err, "Failed to create BigQuery API client")
+		}
+		s.apiClients.Store(connectionKey, apiInstance)
 		return db, nil
 	}
 
@@ -201,16 +219,15 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 	}
 
 	httpClient, err := newHTTPClient(settings, httpclient.Options{})
+
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to crate http client")
 	}
 
-	client, err := bq.NewClient(ctx, project, option.WithHTTPClient(httpClient))
-
+	client, err := s.bqFactory(ctx, project, option.WithHTTPClient(httpClient))
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to initialize BigQuery client")
 	}
-
 	apiInstance := api.New(client)
 
 	if location != "" {
@@ -226,7 +243,7 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 }
 
 func getDatasourceSettings(ctx context.Context) *backend.DataSourceInstanceSettings {
-	plugin := httpadapter.PluginConfigFromContext(ctx)
+	plugin := PluginConfigFromContext(ctx)
 	return plugin.DataSourceInstanceSettings
 }
 

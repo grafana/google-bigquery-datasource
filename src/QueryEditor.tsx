@@ -1,4 +1,4 @@
-import React, { useMemo, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { GrafanaTheme2, QueryEditorProps, SelectableValue } from '@grafana/data';
 import { BigQueryDatasource } from './datasource';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from './constants';
@@ -20,7 +20,7 @@ import { TableSelector } from './components/TableSelector';
 import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, QueryFormat } from './types';
 import { getApiClient, TableSchema } from './api';
-import { useAsyncFn } from 'react-use';
+import { useAsync, useAsyncFn } from 'react-use';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
@@ -41,24 +41,31 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 
 export function QueryEditor(props: Props) {
   const schemaCache = useRef(new Map<string, TableSchema>());
-  const apiClient = useMemo(() => getApiClient(props.datasource.id), [props.datasource]);
+  const {
+    loading: apiLoading,
+    error: apiError,
+    value: apiClient,
+  } = useAsync(async () => await getApiClient(props.datasource.id), [props.datasource]);
   const [isSchemaOpen, setIsSchemaOpen] = useState(false);
   const theme: GrafanaTheme2 = useTheme2();
 
   const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
 
-  const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(async (l?: string, d?: string, t?: string) => {
-    if (!Boolean(l && d && t)) {
-      return null;
-    }
+  const [fetchTableSchemaState, fetchTableSchema] = useAsyncFn(
+    async (l?: string, d?: string, t?: string) => {
+      if (!Boolean(l && d && t) || !apiClient) {
+        return null;
+      }
 
-    if (schemaCache.current?.has(t!)) {
-      return schemaCache.current?.get(t!);
-    }
-    const schema = await apiClient.getTableSchema(l!, d!, t!);
-    schemaCache.current.set(t!, schema);
-    return schema;
-  }, []);
+      if (schemaCache.current?.has(t!)) {
+        return schemaCache.current?.get(t!);
+      }
+      const schema = await apiClient.getTableSchema(l!, d!, t!);
+      schemaCache.current.set(t!, schema);
+      return schema;
+    },
+    [apiClient]
+  );
 
   useEffect(() => {
     if (!queryWithDefaults.location || !queryWithDefaults.dataset || !queryWithDefaults.table) {
@@ -120,6 +127,10 @@ export function QueryEditor(props: Props) {
       icon={fetchTableSchemaState.loading ? 'fa fa-spinner' : undefined}
     />
   );
+
+  if (apiLoading || apiError || !apiClient) {
+    return null;
+  }
 
   return (
     <>

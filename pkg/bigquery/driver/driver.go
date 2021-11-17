@@ -8,7 +8,6 @@ import (
 	"sync"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
@@ -23,10 +22,8 @@ var (
 
 type Driver struct {
 	connector *BigQueryConnector
-	ApiClient *api.API
-
-	bqClient *bq.Client
-	settings types.ConnectionSettings
+	bqClient  *bq.Client
+	settings  types.ConnectionSettings
 }
 
 func (d *Driver) Open(_ string) (c driver.Conn, err error) {
@@ -61,7 +58,6 @@ func Open(settings types.ConnectionSettings, bqClient *bq.Client) (*Driver, *sql
 
 	d := &Driver{
 		bqClient: bqClient,
-
 		settings: settings,
 	}
 	sql.Register(name, d)
