@@ -19,7 +19,7 @@ func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
 	return &ResourceHandler{ds: ds}
 }
 
-func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
+func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Request) {
 	p := httpadapter.PluginConfigFromContext(req.Context())
 	s, err := bigquery.LoadSettings(p.DataSourceInstanceSettings)
 
@@ -79,7 +79,7 @@ func (r *ResourceHandler) tableSchema(rw http.ResponseWriter, req *http.Request)
 
 func (r *ResourceHandler) Routes() map[string]func(http.ResponseWriter, *http.Request) {
 	return map[string]func(http.ResponseWriter, *http.Request){
-		"/projects":             r.projects,
+		"/defaultProjects":      r.defaultProjects,
 		"/datasets":             r.datasets,
 		"/dataset/tables":       r.tables,
 		"/dataset/table/schema": r.tableSchema,

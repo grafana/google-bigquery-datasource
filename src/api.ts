@@ -55,7 +55,7 @@ const apis: Map<number, BigQueryAPI> = new Map();
 
 export async function getApiClient(datasourceId: number) {
   if (!apis.has(datasourceId)) {
-    const defaultProject = await getBackendSrv().post(`/api/datasources/${datasourceId}/resources/projects`, {});
+    const defaultProject = await getBackendSrv().post(`/api/datasources/${datasourceId}/resources/defaultProjects`, {});
     apis.set(datasourceId, new BigQueryAPIClient(datasourceId, defaultProject));
   }
 
