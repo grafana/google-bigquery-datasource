@@ -19,7 +19,7 @@ import { DatasetSelector } from './components/DatasetSelector';
 import { TableSelector } from './components/TableSelector';
 import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, QueryFormat } from './types';
-import { getApiClient, TableSchema } from './api';
+import { getApiClient, TableFieldSchema } from './api';
 import { useAsync, useAsyncFn } from 'react-use';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
@@ -40,7 +40,7 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 };
 
 export function QueryEditor(props: Props) {
-  const schemaCache = useRef(new Map<string, TableSchema>());
+  const schemaCache = useRef(new Map<string, { schema: TableFieldSchema[]; columns: string[] }>());
   const {
     loading: apiLoading,
     error: apiError,
@@ -61,8 +61,13 @@ export function QueryEditor(props: Props) {
         return schemaCache.current?.get(t!);
       }
       const schema = await apiClient.getTableSchema(l!, d!, t!);
-      schemaCache.current.set(t!, schema);
-      return schema;
+      const columns = await apiClient.getColumns(l!, d!, t!);
+      const results = {
+        schema: schema.schema || [],
+        columns,
+      };
+      schemaCache.current.set(t!, results);
+      return results;
     },
     [apiClient]
   );
@@ -141,6 +146,7 @@ export function QueryEditor(props: Props) {
             value={queryWithDefaults.location}
             onChange={onLocationChange}
             className="width-12"
+            menuShouldPortal={true}
           />
         </Field>
 
@@ -173,6 +179,7 @@ export function QueryEditor(props: Props) {
             value={queryWithDefaults.format}
             onChange={onFormatChange}
             className="width-12"
+            menuShouldPortal={true}
           />
         </Field>
       </HorizontalGroup>
@@ -184,7 +191,13 @@ export function QueryEditor(props: Props) {
 
       <TabContent>
         {!isSchemaOpen && (
-          <QueryEditorRaw query={queryWithDefaults} onChange={props.onChange} onRunQuery={props.onRunQuery} />
+          <QueryEditorRaw
+            schema={fetchTableSchemaState.value ? fetchTableSchemaState.value.schema : []}
+            columns={fetchTableSchemaState.value ? fetchTableSchemaState.value.columns : []}
+            query={queryWithDefaults}
+            onChange={props.onChange}
+            onRunQuery={props.onRunQuery}
+          />
         )}
         {isSchemaOpen && (
           <div

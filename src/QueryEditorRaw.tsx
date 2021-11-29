@@ -1,17 +1,33 @@
 import React from 'react';
-import { CodeEditor } from '@grafana/ui';
-// import { getTemplateSrv } from '@grafana/runtime';
+
 import { BigQueryQueryNG } from './bigquery_query';
-// import { buildGetSuggestions } from 'Suggestions';
+import { TableFieldSchema } from 'api';
+import { SQLEditor } from 'components/sql-editor/SQLEditor';
+import { LanguageCompletionProvider } from 'components/sql-editor/types';
+import { StatementPosition } from 'components/sql-editor/utils/types';
 
 type Props = {
   query: BigQueryQueryNG;
+  schema: TableFieldSchema[];
+  columns: string[];
   onChange: (value: BigQueryQueryNG) => void;
   onRunQuery: () => void;
 };
 
+// function getColumnSchema(schema: TableFieldSchema[], column: string): TableFieldSchema | undefined {
+//   const path = column.split('.');
+//   let currentSchema = schema;
+
+//   const k = path.shift();
+//   const c = currentSchema.find((f) => f.name === k);
+
+//   if (c && c.schema && path.length > 0) {
+//     return getColumnSchema(c.schema, path.join('.'));
+//   }
+//   return c;
+// }
+
 export function QueryEditorRaw(props: Props) {
-  //   const { rawSQL } = defaults(props.query, defaultQuery);
   const onRawSqlChange = (rawSql: string) => {
     const query = {
       ...props.query,
@@ -22,17 +38,47 @@ export function QueryEditorRaw(props: Props) {
     props.onRunQuery();
   };
 
-  //   const getSuggestions = buildGetSuggestions({ query: props.query, templateSrv: getTemplateSrv() });
-
   return (
-    <CodeEditor
-      height={'240px'}
-      language={'sql'}
-      value={props.query.rawSql}
-      onBlur={onRawSqlChange}
-      showMiniMap={false}
-      showLineNumbers={true}
-      //   getSuggestions={getSuggestions}
+    <SQLEditor
+      query={props.query.rawSql}
+      onChange={onRawSqlChange}
+      language={{ id: 'sql', completionProvider: BigQueryCompletionProvider }}
     />
   );
 }
+
+const BigQueryCompletionProvider: LanguageCompletionProvider = (monaco) => ({
+  triggerCharacters: [' ', '$', ',', '(', "'"],
+
+  customFunctions: () => [
+    // TODO: add BQ functions
+    {
+      id: 'custom_function',
+      name: 'CUSTOM_FN',
+    },
+  ],
+
+  customSuggestionKinds: () => {
+    return [
+      {
+        id: 'tables',
+        applyTo: [StatementPosition.AfterSelectKeyword],
+        suggestionsResolver: () => {
+          return Promise.resolve([
+            {
+              label: 'tables custom',
+              kind: 1,
+              insertText: 'some custom table returned by i.e. completion API',
+            },
+          ]);
+        },
+      },
+    ];
+  },
+
+  provideCompletionItems: (model, position, context, token, positionContext) => {
+    return {
+      suggestions: [],
+    };
+  },
+});
