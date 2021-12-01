@@ -2,7 +2,7 @@ import { CodeEditor, Monaco, monacoTypes } from '@grafana/ui';
 import React from 'react';
 import { getStatementPosition } from './standardSql/getStatementPosition';
 import { functionsRegistry, stdSuggestionsRegistry } from './standardSql/registries';
-import { getStandardSuggestions } from './standardSql/standardSuggestions';
+import { getStandardSuggestions } from './standardSql/getStandardSuggestions';
 import { suggestionsKindRegistry } from './standardSql/suggestionsKindRegistry';
 import { SQLCompletionItemProvider } from './types';
 import { getSuggestionKinds } from './utils/getSuggestionKind';
@@ -46,6 +46,7 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
   if (INITIALIZED) {
     return;
   }
+
   const { id } = l;
 
   const languages = monaco.languages.getLanguages();
@@ -93,6 +94,7 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
           kind,
         });
 
+        console.log('completionProvider', statementPosition, kind);
         const stdSuggestions = await getStandardSuggestions(monaco, currentToken, kind, statementPosition, position);
         return {
           ...ci,

@@ -16,8 +16,9 @@ export const getStandardSuggestions = async (
   const invalidRangeToken = currentToken?.isWhiteSpace() || currentToken?.isParenthesis();
   const range = invalidRangeToken || !currentToken?.range ? monaco.Range.fromPositions(position) : currentToken?.range;
 
+  console.log('suggestionKinds', suggestionKinds);
   for (const suggestion of suggestionKinds) {
-    const registeredSuggestions = stdSuggestionsRegistry.get(suggestion);
+    const registeredSuggestions = stdSuggestionsRegistry.getIfExists(suggestion);
     if (registeredSuggestions) {
       const su = await registeredSuggestions.suggestions(monaco);
       suggestions = [...suggestions, ...su.map((s) => toCompletionItem(s.label, range, { kind: s.kind, ...s }))];

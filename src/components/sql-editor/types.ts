@@ -17,6 +17,11 @@ export interface CustomSuggestionKind {
   applyTo?: StatementPosition[];
 }
 
+export interface CustomStatementPlacement {
+  id: string;
+  resolve: () => Promise<CustomSuggestion[]>;
+}
+
 export interface SQLCompletionItemProvider
   extends Omit<monacoTypes.languages.CompletionItemProvider, 'provideCompletionItems'> {
   provideCompletionItems: (
@@ -33,8 +38,11 @@ export interface SQLCompletionItemProvider
     name: string;
   }>;
 
-  // Allows
+  // Allows custom suggestion kinds to be defined and correlate them with <Custom>StatementPosition
   customSuggestionKinds?: () => CustomSuggestionKind[];
+
+  // Allows custom statement placement definition
+  customStatementPlacement?: () => CustomStatementPlacement[];
 }
 export type LanguageCompletionProvider = (m: Monaco) => SQLCompletionItemProvider;
 

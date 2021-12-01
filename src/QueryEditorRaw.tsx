@@ -57,18 +57,42 @@ const BigQueryCompletionProvider: LanguageCompletionProvider = (monaco) => ({
       name: 'CUSTOM_FN',
     },
   ],
+  customStatementPlacement: () => [],
 
   customSuggestionKinds: () => {
     return [
       {
         id: 'tables',
+        applyTo: [StatementPosition.AfterFromKeyword],
+        suggestionsResolver: () => {
+          return Promise.resolve([
+            {
+              label: 'TableA',
+              kind: 1,
+              insertText: 'tableA',
+            },
+            {
+              label: 'TableB',
+              kind: 1,
+              insertText: 'tableB',
+            },
+          ]);
+        },
+      },
+      {
+        id: 'columns',
         applyTo: [StatementPosition.AfterSelectKeyword],
         suggestionsResolver: () => {
           return Promise.resolve([
             {
-              label: 'tables custom',
+              label: 'ColumnA',
               kind: 1,
-              insertText: 'some custom table returned by i.e. completion API',
+              insertText: 'columnA',
+            },
+            {
+              label: 'ColumnB',
+              kind: 1,
+              insertText: 'columnB',
             },
           ]);
         },
