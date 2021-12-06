@@ -19,7 +19,9 @@ export enum StatementPosition {
   SelectKeyword = 'selectKeyword',
   AfterSelectKeyword = 'afterSelectKeyword',
   AfterSelectFuncFirstArgument = 'afterSelectFuncFirstArgument',
+  AfterSelectArguments = 'afterSelectArguments',
   AfterFromKeyword = 'afterFromKeyword',
+  AfterTable = 'afterTable',
   SchemaFuncFirstArgument = 'schemaFuncFirstArgument',
   SchemaFuncExtraArgument = 'schemaFuncExtraArgument',
   FromKeyword = 'fromKeyword',
@@ -36,6 +38,8 @@ export enum StatementPosition {
 }
 
 export enum SuggestionKind {
+  Tables = 'tables',
+  Columns = 'columns',
   SelectKeyword = 'selectKeyword',
   FunctionsWithArguments = 'functionsWithArguments',
   FromKeyword = 'fromKeyword',

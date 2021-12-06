@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { GrafanaTheme2, QueryEditorProps, SelectableValue } from '@grafana/data';
 import { BigQueryDatasource } from './datasource';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from './constants';
@@ -41,11 +41,13 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 
 export function QueryEditor(props: Props) {
   const schemaCache = useRef(new Map<string, { schema: TableFieldSchema[]; columns: string[] }>());
+
   const {
     loading: apiLoading,
     error: apiError,
     value: apiClient,
   } = useAsync(async () => await getApiClient(props.datasource.id), [props.datasource]);
+
   const [isSchemaOpen, setIsSchemaOpen] = useState(false);
   const theme: GrafanaTheme2 = useTheme2();
 
@@ -71,6 +73,24 @@ export function QueryEditor(props: Props) {
     },
     [apiClient]
   );
+
+  const getColumns = useCallback(
+    async (t: string) => {
+      if (!queryWithDefaults.location || !queryWithDefaults.dataset || !apiClient) {
+        return [];
+      }
+      const cols = await apiClient.getColumns(queryWithDefaults.location, queryWithDefaults.dataset, t!);
+      return cols.map((c) => ({ name: c }));
+    },
+    [apiClient, queryWithDefaults.location, queryWithDefaults.dataset]
+  );
+
+  const getTables = useCallback(async () => {
+    if (!queryWithDefaults.location || !queryWithDefaults.dataset || !apiClient) {
+      return [];
+    }
+    return await apiClient.getTables(queryWithDefaults.location, queryWithDefaults.dataset);
+  }, [apiClient, queryWithDefaults.location, queryWithDefaults.dataset]);
 
   useEffect(() => {
     if (!queryWithDefaults.location || !queryWithDefaults.dataset || !queryWithDefaults.table) {
@@ -192,13 +212,14 @@ export function QueryEditor(props: Props) {
       <TabContent>
         {!isSchemaOpen && (
           <QueryEditorRaw
-            schema={fetchTableSchemaState.value ? fetchTableSchemaState.value.schema : []}
-            columns={fetchTableSchemaState.value ? fetchTableSchemaState.value.columns : []}
+            getTables={getTables}
+            getColumns={getColumns}
             query={queryWithDefaults}
             onChange={props.onChange}
             onRunQuery={props.onRunQuery}
           />
         )}
+
         {isSchemaOpen && (
           <div
             style={{

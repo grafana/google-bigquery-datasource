@@ -8,6 +8,7 @@ export interface TableFieldSchema {
 }
 
 export interface TableSchema {
+  name?: string;
   schema?: TableFieldSchema[];
 }
 

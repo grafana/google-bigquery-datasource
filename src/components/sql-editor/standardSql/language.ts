@@ -12,11 +12,12 @@ export const WITH = 'WITH';
 export const SCHEMA = 'SCHEMA';
 
 export const KEYWORDS = [SELECT, FROM, WHERE, GROUP, ORDER, BY, DESC, ASC, LIMIT, WITH, SCHEMA];
-export const STATISTICS = ['AVG', 'COUNT', 'MAX', 'MIN', 'SUM'];
+
+export const STD_STATS = ['AVG', 'COUNT', 'MAX', 'MIN', 'SUM'];
 
 export const AND = 'AND';
 export const LOGICAL_OPERATORS = [AND];
 
 export const EQUALS = '=';
-export const NOT_EQUALS = '!=';
+export const NOT_EQUALS = 'IS NOT';
 export const COMPARISON_OPERATORS = [EQUALS, NOT_EQUALS];

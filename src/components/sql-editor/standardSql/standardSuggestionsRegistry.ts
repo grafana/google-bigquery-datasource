@@ -14,7 +14,7 @@ import {
   LOGICAL_OPERATORS,
   ORDER,
   SELECT,
-  STATISTICS,
+  STD_STATS,
   WHERE,
 } from './language';
 import { functionsRegistry } from './registries';
@@ -25,21 +25,30 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
   {
     id: SuggestionKind.SelectKeyword,
     name: SuggestionKind.SelectKeyword,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         {
-          label: SELECT,
+          label: `${SELECT} <column>`,
           insertText: `${SELECT} $0`,
           insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          kind: m.languages.CompletionItemKind.Keyword,
+          kind: m.languages.CompletionItemKind.Snippet,
           command: TRIGGER_SUGGEST,
+          sortText: CompletionItemPriority.Medium,
+        },
+        {
+          label: `${SELECT} <column> ${FROM} <table>>`,
+          insertText: `${SELECT} $2 ${FROM} $1`,
+          insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          kind: m.languages.CompletionItemKind.Snippet,
+          command: TRIGGER_SUGGEST,
+          sortText: CompletionItemPriority.Medium,
         },
       ]),
   },
   {
     id: SuggestionKind.FunctionsWithArguments,
     name: SuggestionKind.FunctionsWithArguments,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         ...functionsRegistry.list().map((f) => ({
           label: f.name,
@@ -47,13 +56,14 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
           insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           kind: m.languages.CompletionItemKind.Function,
           command: TRIGGER_SUGGEST,
+          sortText: CompletionItemPriority.MediumHigh,
         })),
       ]),
   },
   {
     id: SuggestionKind.FunctionsWithoutArguments,
     name: SuggestionKind.FunctionsWithoutArguments,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         ...functionsRegistry.list().map((f) => ({
           label: f.name,
@@ -61,13 +71,14 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
           insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           kind: m.languages.CompletionItemKind.Function,
           command: TRIGGER_SUGGEST,
+          sortText: CompletionItemPriority.MediumHigh,
         })),
       ]),
   },
   {
     id: SuggestionKind.FromKeyword,
     name: SuggestionKind.FromKeyword,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         {
           label: FROM,
@@ -78,9 +89,19 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
       ]),
   },
   {
+    id: SuggestionKind.Tables,
+    name: SuggestionKind.Tables,
+    suggestions: (_, m) => Promise.resolve([]),
+  },
+  {
+    id: SuggestionKind.Columns,
+    name: SuggestionKind.Columns,
+    suggestions: (_, m) => Promise.resolve([]),
+  },
+  {
     id: SuggestionKind.LogicalOperators,
     name: SuggestionKind.LogicalOperators,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve(
         LOGICAL_OPERATORS.map((o) => ({
           label: o,
@@ -93,7 +114,7 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
   {
     id: SuggestionKind.WhereKeyword,
     name: SuggestionKind.WhereKeyword,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         {
           label: WHERE,
@@ -106,20 +127,20 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
   {
     id: SuggestionKind.ComparisonOperators,
     name: SuggestionKind.ComparisonOperators,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve(
         COMPARISON_OPERATORS.map((o) => ({
           label: o,
           insertText: `${o} `,
           command: TRIGGER_SUGGEST,
-          // sortText: CompletionItemPriority.High,
+          sortText: CompletionItemPriority.High,
         }))
       ),
   },
   {
     id: SuggestionKind.GroupByKeywords,
     name: SuggestionKind.GroupByKeywords,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         {
           label: 'GROUP BY',
@@ -132,7 +153,7 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
   {
     id: SuggestionKind.OrderByKeywords,
     name: SuggestionKind.OrderByKeywords,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         {
           label: 'ORDER BY',
@@ -145,7 +166,7 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
   {
     id: SuggestionKind.LimitKeyword,
     name: SuggestionKind.LimitKeyword,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve([
         {
           label: 'LIMIT',
@@ -158,7 +179,7 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
   {
     id: SuggestionKind.SortOrderDirectionKeyword,
     name: SuggestionKind.SortOrderDirectionKeyword,
-    suggestions: (m) =>
+    suggestions: (_, m) =>
       Promise.resolve(
         [ASC, DESC].map((o) => ({
           label: o,
@@ -170,7 +191,7 @@ export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
 ];
 
 export const initFunctionsRegistry = (): FunctionsRegistryItem[] => [
-  ...STATISTICS.map((s) => ({
+  ...STD_STATS.map((s) => ({
     id: s,
     name: s,
   })),

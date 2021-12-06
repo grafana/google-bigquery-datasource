@@ -32,31 +32,25 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
         ),
     },
     {
+      id: StatementPosition.AfterSelectArguments,
+      name: StatementPosition.AfterSelectArguments,
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
+        return Boolean(previousKeyword?.value === SELECT && previousNonWhiteSpace?.value === ',');
+      },
+    },
+    {
       id: StatementPosition.FromKeyword,
       name: StatementPosition.FromKeyword,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
-        Boolean(previousKeyword?.value === SELECT && previousNonWhiteSpace?.isParenthesis()),
+        // cloudwatch specific commented out
+        // Boolean(previousKeyword?.value === SELECT && previousNonWhiteSpace?.isParenthesis()),
+        Boolean(previousKeyword?.value === SELECT && previousNonWhiteSpace?.value !== ','),
     },
     {
       id: StatementPosition.AfterFromKeyword,
       name: StatementPosition.AfterFromKeyword,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
         Boolean(previousNonWhiteSpace?.value === FROM),
-    },
-    {
-      id: StatementPosition.SchemaFuncFirstArgument,
-      name: StatementPosition.SchemaFuncFirstArgument,
-      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
-        Boolean(
-          (previousNonWhiteSpace?.is(TokenType.Parenthesis, '(') || currentToken?.is(TokenType.Parenthesis, '()')) &&
-            previousKeyword?.value === SCHEMA
-        ),
-    },
-    {
-      id: StatementPosition.SchemaFuncExtraArgument,
-      name: StatementPosition.SchemaFuncExtraArgument,
-      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
-        Boolean(previousKeyword?.value === SCHEMA && previousNonWhiteSpace?.is(TokenType.Delimiter, ',')),
     },
     {
       id: StatementPosition.AfterFrom,
@@ -67,6 +61,17 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
             (previousKeyword?.value === FROM && previousNonWhiteSpace?.isVariable()) ||
             (previousKeyword?.value === SCHEMA && previousNonWhiteSpace?.is(TokenType.Parenthesis, ')'))
         ),
+    },
+    {
+      id: StatementPosition.AfterTable,
+      name: StatementPosition.AfterTable,
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
+        console.log(previousNonWhiteSpace?.value);
+        return Boolean(
+          previousKeyword?.value === FROM &&
+            (previousNonWhiteSpace?.isVariable() || previousNonWhiteSpace?.value !== '')
+        );
+      },
     },
     {
       id: StatementPosition.WhereKey,
@@ -152,6 +157,23 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
       name: StatementPosition.AfterOrderByDirection,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
         Boolean(previousKeyword?.is(TokenType.Keyword, DESC) || previousKeyword?.is(TokenType.Keyword, ASC)),
+    },
+
+    // cw specific?
+    {
+      id: StatementPosition.SchemaFuncFirstArgument,
+      name: StatementPosition.SchemaFuncFirstArgument,
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
+        Boolean(
+          (previousNonWhiteSpace?.is(TokenType.Parenthesis, '(') || currentToken?.is(TokenType.Parenthesis, '()')) &&
+            previousKeyword?.value === SCHEMA
+        ),
+    },
+    {
+      id: StatementPosition.SchemaFuncExtraArgument,
+      name: StatementPosition.SchemaFuncExtraArgument,
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
+        Boolean(previousKeyword?.value === SCHEMA && previousNonWhiteSpace?.is(TokenType.Delimiter, ',')),
     },
   ];
 }

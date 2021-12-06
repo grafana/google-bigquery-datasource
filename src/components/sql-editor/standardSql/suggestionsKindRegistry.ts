@@ -18,28 +18,22 @@ suggestionsKindRegistry.setInit(() => {
     {
       id: StatementPosition.AfterSelectKeyword,
       name: StatementPosition.AfterSelectKeyword,
-      kind: [SuggestionKind.FunctionsWithArguments],
+      kind: [SuggestionKind.FunctionsWithArguments, SuggestionKind.Columns],
     },
     {
       id: StatementPosition.AfterSelectFuncFirstArgument,
       name: StatementPosition.AfterSelectFuncFirstArgument,
-      kind: [SuggestionKind.Metrics],
+      kind: [SuggestionKind.Columns],
+    },
+    {
+      id: StatementPosition.AfterSelectArguments,
+      name: StatementPosition.AfterSelectArguments,
+      kind: [SuggestionKind.Columns],
     },
     {
       id: StatementPosition.AfterFromKeyword,
       name: StatementPosition.AfterFromKeyword,
-      kind: [SuggestionKind.Namespaces, SuggestionKind.SchemaKeyword],
-    },
-    {
-      id: StatementPosition.SchemaFuncFirstArgument,
-      name: StatementPosition.SchemaFuncFirstArgument,
-      kind: [SuggestionKind.Namespaces],
-    },
-    {
-      // cw specific?
-      id: StatementPosition.SchemaFuncExtraArgument,
-      name: StatementPosition.SchemaFuncExtraArgument,
-      kind: [SuggestionKind.LabelKeys],
+      kind: [SuggestionKind.Namespaces, SuggestionKind.SchemaKeyword, SuggestionKind.Tables],
     },
     {
       id: StatementPosition.FromKeyword,
@@ -54,8 +48,20 @@ suggestionsKindRegistry.setInit(() => {
         SuggestionKind.GroupByKeywords,
         SuggestionKind.OrderByKeywords,
         SuggestionKind.LimitKeyword,
+        SuggestionKind.Tables,
       ],
     },
+    {
+      id: StatementPosition.AfterTable,
+      name: StatementPosition.AfterTable,
+      kind: [
+        SuggestionKind.WhereKeyword,
+        SuggestionKind.GroupByKeywords,
+        SuggestionKind.OrderByKeywords,
+        SuggestionKind.LimitKeyword,
+      ],
+    },
+
     {
       id: StatementPosition.WhereKey,
       name: StatementPosition.WhereKey,
@@ -94,7 +100,7 @@ suggestionsKindRegistry.setInit(() => {
     {
       id: StatementPosition.AfterOrderByKeywords,
       name: StatementPosition.AfterOrderByKeywords,
-      kind: [SuggestionKind.FunctionsWithoutArguments],
+      kind: [SuggestionKind.Columns],
     },
     {
       id: StatementPosition.AfterOrderByFunction,
@@ -106,5 +112,18 @@ suggestionsKindRegistry.setInit(() => {
       name: StatementPosition.AfterOrderByDirection,
       kind: [SuggestionKind.LimitKeyword],
     },
+
+    // cw specific?
+    {
+      id: StatementPosition.SchemaFuncFirstArgument,
+      name: StatementPosition.SchemaFuncFirstArgument,
+      kind: [SuggestionKind.Namespaces],
+    },
+    {
+      id: StatementPosition.SchemaFuncExtraArgument,
+      name: StatementPosition.SchemaFuncExtraArgument,
+      kind: [SuggestionKind.LabelKeys],
+    },
+    // cw specific?
   ];
 });
