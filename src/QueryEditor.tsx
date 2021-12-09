@@ -108,7 +108,7 @@ export function QueryEditor(props: Props) {
       let datasets = [];
       if (!d) {
         datasets = await apiClient.getDatasets(queryWithDefaults.location);
-        return datasets.map((d) => ({ name: d, completion: `${apiClient.getDefaultProject()}.${d}` }));
+        return datasets.map((d) => ({ name: d, completion: `${apiClient.getDefaultProject()}.${d}.` }));
       } else {
         const path = d.split('.').filter((s) => s);
         if (path.length > 2) {
@@ -167,8 +167,8 @@ export function QueryEditor(props: Props) {
 
   const onRawQueryChange = useCallback(
     (q: BigQueryQueryNG) => {
-      const a = queryParser.tableList(q.rawSql);
-      console.log(a);
+      // const a = queryParser.tableList(q.rawSql);
+      // console.log(a);
 
       props.onChange(q);
       processQuery(q);

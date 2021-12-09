@@ -30,6 +30,10 @@ export class LinkedToken {
     return this.type === TokenType.String;
   }
 
+  isNumber(): boolean {
+    return this.type === TokenType.Number;
+  }
+
   isDoubleQuotedString(): boolean {
     return this.type === TokenType.Type;
   }

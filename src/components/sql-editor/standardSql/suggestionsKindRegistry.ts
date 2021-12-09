@@ -1,14 +1,13 @@
-import { Registry, RegistryItem } from '@grafana/data';
+import { RegistryItem } from '@grafana/data';
 import { StatementPosition, SuggestionKind } from '../utils/types';
 
-interface SuggestionKindRegistyItem extends RegistryItem {
+export interface SuggestionKindRegistyItem extends RegistryItem {
   kind: SuggestionKind[];
   id: StatementPosition;
 }
-export const suggestionsKindRegistry = new Registry<SuggestionKindRegistyItem>();
 
 // Registry of possible suggestions for the given statement position
-suggestionsKindRegistry.setInit(() => {
+export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
   return [
     {
       id: StatementPosition.SelectKeyword,
@@ -126,4 +125,4 @@ suggestionsKindRegistry.setInit(() => {
     },
     // cw specific?
   ];
-});
+};

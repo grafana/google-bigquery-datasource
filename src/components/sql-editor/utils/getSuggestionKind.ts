@@ -1,7 +1,11 @@
-import { suggestionsKindRegistry } from '../standardSql/suggestionsKindRegistry';
+import { Registry } from '@grafana/data';
+import { SuggestionKindRegistyItem } from '../standardSql/suggestionsKindRegistry';
 import { StatementPosition, SuggestionKind } from './types';
 
-export function getSuggestionKinds(statementPosition: StatementPosition[]): SuggestionKind[] {
+export function getSuggestionKinds(
+  statementPosition: StatementPosition[],
+  suggestionsKindRegistry: Registry<SuggestionKindRegistyItem>
+): SuggestionKind[] {
   let k;
 
   let result: SuggestionKind[] = [];

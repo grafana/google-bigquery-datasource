@@ -16,7 +16,8 @@ export const KEYWORDS = [SELECT, FROM, WHERE, GROUP, ORDER, BY, DESC, ASC, LIMIT
 export const STD_STATS = ['AVG', 'COUNT', 'MAX', 'MIN', 'SUM'];
 
 export const AND = 'AND';
-export const LOGICAL_OPERATORS = [AND];
+export const OR = 'OR';
+export const LOGICAL_OPERATORS = [AND, OR];
 
 export const EQUALS = '=';
 export const NOT_EQUALS = 'IS NOT';

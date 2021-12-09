@@ -107,8 +107,9 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
       name: StatementPosition.AfterWhereValue,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
         Boolean(
-          previousKeyword?.value === WHERE &&
-            (previousNonWhiteSpace?.isString() || previousNonWhiteSpace?.is(TokenType.Parenthesis, ')'))
+          previousKeyword?.value === WHERE && (previousNonWhiteSpace?.isString() || previousNonWhiteSpace?.isNumber())
+          // cloudwatch specific?
+          // || previousNonWhiteSpace?.is(TokenType.Parenthesis, ')')
         ),
     },
     {

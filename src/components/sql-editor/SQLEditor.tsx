@@ -1,13 +1,8 @@
 import { CodeEditor, Monaco, monacoTypes } from '@grafana/ui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getStatementPosition } from './standardSql/getStatementPosition';
-import {
-  functionsRegistry,
-  statementPositionResolversRegistry,
-  stdSuggestionsRegistry,
-} from './standardSql/registries';
 import { getStandardSuggestions } from './standardSql/getStandardSuggestions';
-import { suggestionsKindRegistry } from './standardSql/suggestionsKindRegistry';
+import { initSuggestionsKindRegistry, SuggestionKindRegistyItem } from './standardSql/suggestionsKindRegistry';
 import { CompletionItemPriority, CustomSuggestion, PositionContext, SQLCompletionItemProvider } from './types';
 import { getSuggestionKinds } from './utils/getSuggestionKind';
 import { linkedTokenBuilder } from './utils/linkedTokenBuilder';
@@ -15,6 +10,20 @@ import { StatementPosition, SuggestionKind } from './utils/types';
 import { getTableToken } from './utils/tokenUtils';
 import { TRIGGER_SUGGEST } from './utils/misc';
 import { LinkedToken } from './utils/LinkedToken';
+import { v4 } from 'uuid';
+import { Registry } from '@grafana/data';
+import {
+  FunctionsRegistryItem,
+  OperatorsRegistryItem,
+  StatementPositionResolversRegistryItem,
+  SuggestionsRegistyItem,
+} from './standardSql/types';
+import {
+  initFunctionsRegistry,
+  initOperatorsRegistry,
+  initStandardSuggestions,
+} from './standardSql/standardSuggestionsRegistry';
+import { initStatementPositionResolvers } from './standardSql/statementPositionResolversRegistry';
 
 const STANDARD_SQL_LANGUAGE = 'sql';
 
@@ -31,127 +40,51 @@ interface SQLEditorProps {
 
 const defaultTableNameParser = (t: LinkedToken) => t.value;
 
-let INITIALIZED = false;
+interface LanguageRegistries {
+  functions: Registry<FunctionsRegistryItem>;
+  operators: Registry<OperatorsRegistryItem>;
+  suggestionKinds: Registry<SuggestionKindRegistyItem>;
+  positionResolvers: Registry<StatementPositionResolversRegistryItem>;
+}
+
+const LANGUAGES_CACHE = new Map<string, LanguageRegistries>();
+const INSTANCE_CACHE = new Map<string, Registry<SuggestionsRegistyItem>>();
 
 export const SQLEditor: React.FC<SQLEditorProps> = ({ onChange, query, language = { id: STANDARD_SQL_LANGUAGE } }) => {
+  // create unique language id for each SQLEditor instance
+  const id = useMemo(() => {
+    const uid = v4();
+    return `${language.id}-${uid}`;
+  }, [language.id]);
+
   return (
     <CodeEditor
       height={'240px'}
-      language={language.id}
+      language={id}
       value={query}
       onBlur={onChange}
       showMiniMap={false}
       showLineNumbers={true}
       onBeforeEditorMount={(m: Monaco) => {
-        registerLanguageAndSuggestions(m, language);
+        registerLanguageAndSuggestions(m, language, id);
       }}
     />
   );
 };
 
-export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefinition) => {
-  // !!! One language id can be registeresd only once. We need to figure out a way to allow multiple languages to be registered
-  // i.e. for scenario when there are multiple query editors for the same datasource
-  if (INITIALIZED) {
-    return;
-  }
+export const registerLanguageAndSuggestions = async (monaco: Monaco, l: LanguageDefinition, lid: string) => {
+  if (!l.loadLanguage) {
+    // Assume lanuage based on standard Monaco SQL definition
+    const defaultSQLLanguage = await getSQLLangConf(monaco);
+    monaco.languages.register({ id: lid });
+    monaco.languages.setMonarchTokensProvider(lid, defaultSQLLanguage.language);
+    monaco.languages.setLanguageConfiguration(lid, defaultSQLLanguage.conf);
 
-  const { id } = l;
-
-  const languages = monaco.languages.getLanguages();
-
-  if (languages.find((l) => l.id === id)) {
     if (l.completionProvider) {
       const customProvider = l.completionProvider(monaco);
-
-      if (customProvider.supportedFunctions) {
-        for (const func of customProvider.supportedFunctions()) {
-          const exists = functionsRegistry.getIfExists(func.id);
-          if (!exists) {
-            functionsRegistry.register(func);
-          }
-        }
-      }
-
-      if (customProvider.customStatementPlacement) {
-        for (const placement of customProvider.customStatementPlacement()) {
-          const exists = statementPositionResolversRegistry.getIfExists(placement.id);
-          if (!exists) {
-            statementPositionResolversRegistry.register({
-              ...placement,
-              id: placement.id as StatementPosition,
-              name: placement.id,
-            });
-            suggestionsKindRegistry.register({
-              id: placement.id as StatementPosition,
-              name: placement.id,
-              kind: [],
-            });
-          }
-        }
-      }
-
-      if (customProvider.customSuggestionKinds) {
-        for (const kind of customProvider.customSuggestionKinds()) {
-          kind.applyTo?.forEach((applyTo) => {
-            const exists = suggestionsKindRegistry.getIfExists(applyTo);
-            if (exists) {
-              exists.kind.push(kind.id as SuggestionKind);
-            }
-          });
-
-          stdSuggestionsRegistry.register({
-            id: kind.id as SuggestionKind,
-            name: kind.id,
-            suggestions: kind.suggestionsResolver,
-          });
-        }
-      }
-
-      if (customProvider.tables) {
-        const stbBehaviour = stdSuggestionsRegistry.get(SuggestionKind.Tables);
-        const s = stbBehaviour!.suggestions;
-        stbBehaviour!.suggestions = async (ctx, m) => {
-          const o = await s(ctx, m);
-          const oo = (await customProvider.tables!.resolve!()).map((x) => ({
-            label: x.name,
-            kind: 1,
-            insertText: x.completion ?? x.name,
-            sortText: CompletionItemPriority.High,
-            command: TRIGGER_SUGGEST,
-          }));
-          return [...o, ...oo];
-        };
-      }
-
-      if (customProvider.columns) {
-        const stbBehaviour = stdSuggestionsRegistry.get(SuggestionKind.Columns);
-        const s = stbBehaviour!.suggestions;
-        stbBehaviour!.suggestions = async (ctx, m) => {
-          const o = await s(ctx, m);
-          const tableToken = getTableToken(ctx.currentToken);
-          let table = '';
-          const tableNameParser = customProvider.tables?.parseName ?? defaultTableNameParser;
-
-          if (tableToken && tableToken.value) {
-            table = tableNameParser(tableToken).trim();
-          }
-
-          let oo: CustomSuggestion[] = [];
-          if (table) {
-            const columns = await customProvider.columns?.resolve!(table);
-            oo = columns
-              ? columns.map<CustomSuggestion>((x) => ({
-                  label: x.name,
-                  kind: m.languages.CompletionItemKind.Field,
-                  insertText: x.completion ?? x.name,
-                  sortText: CompletionItemPriority.High,
-                }))
-              : [];
-          }
-          return [...o, ...oo];
-        };
-      }
+      extendStandardRegistries(l.id, lid, customProvider);
+      const languageSuggestionsRegistries = LANGUAGES_CACHE.get(l.id)!;
+      const instanceSuggestionsRegistry = INSTANCE_CACHE.get(lid)!;
 
       const completionProvider: monacoTypes.languages.CompletionItemProvider['provideCompletionItems'] = async (
         model,
@@ -160,9 +93,8 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
         token
       ) => {
         const currentToken = linkedTokenBuilder(monaco, model, position, 'sql');
-        const statementPosition = getStatementPosition(currentToken);
-        const kind = getSuggestionKinds(statementPosition);
-
+        const statementPosition = getStatementPosition(currentToken, languageSuggestionsRegistries.positionResolvers);
+        const kind = getSuggestionKinds(statementPosition, languageSuggestionsRegistries.suggestionKinds);
         const ctx: PositionContext = {
           currentToken,
           statementPosition,
@@ -182,27 +114,171 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
           kind,
           statementPosition,
           position,
-          ctx
+          ctx,
+          instanceSuggestionsRegistry
         );
 
+        console.log('stdSuggestions', stdSuggestions);
         return {
           // ...ci,
           suggestions: stdSuggestions,
         };
       };
 
-      monaco.languages.registerCompletionItemProvider(id, {
+      monaco.languages.registerCompletionItemProvider(lid, {
         ...customProvider,
         provideCompletionItems: completionProvider,
       });
     }
   } else {
     // TODO custom dialect support
-    // monaco.languages.register({ id });
-    //   loader().then(() => {
-    //   monaco.languages.setMonarchTokensProvider(id, monarch.language);
-    //   monaco.languages.setLanguageConfiguration(id, monarch.conf);
+  }
+};
+
+function extendStandardRegistries(id: string, lid: string, customProvider: SQLCompletionItemProvider) {
+  console.log('extending standard registries', lid);
+  if (!LANGUAGES_CACHE.has(id)) {
+    initializeLanguageRegistries(id);
   }
 
-  INITIALIZED = true;
-};
+  const languageRegistries = LANGUAGES_CACHE.get(id)!;
+
+  if (!INSTANCE_CACHE.has(lid)) {
+    INSTANCE_CACHE.set(
+      lid,
+      new Registry(initStandardSuggestions(languageRegistries.functions, languageRegistries.operators))
+    );
+  }
+
+  const instanceSuggestionsRegistry = INSTANCE_CACHE.get(lid)!;
+
+  if (customProvider.supportedFunctions) {
+    for (const func of customProvider.supportedFunctions()) {
+      const exists = languageRegistries.functions.getIfExists(func.id);
+      if (!exists) {
+        languageRegistries.functions.register(func);
+      }
+    }
+  }
+
+  if (customProvider.supportedOperators) {
+    for (const op of customProvider.supportedOperators()) {
+      const exists = languageRegistries.operators.getIfExists(op.id);
+      if (!exists) {
+        languageRegistries.operators.register({ ...op, name: op.id });
+      }
+    }
+  }
+
+  if (customProvider.customStatementPlacement) {
+    for (const placement of customProvider.customStatementPlacement()) {
+      const exists = languageRegistries.positionResolvers.getIfExists(placement.id);
+      if (!exists) {
+        languageRegistries.positionResolvers.register({
+          ...placement,
+          id: placement.id as StatementPosition,
+          name: placement.id,
+        });
+        languageRegistries.suggestionKinds.register({
+          id: placement.id as StatementPosition,
+          name: placement.id,
+          kind: [],
+        });
+      }
+    }
+  }
+
+  if (customProvider.customSuggestionKinds) {
+    for (const kind of customProvider.customSuggestionKinds()) {
+      kind.applyTo?.forEach((applyTo) => {
+        const exists = languageRegistries.suggestionKinds.getIfExists(applyTo);
+        if (exists) {
+          // avoid duplicates
+          if (exists.kind.indexOf(kind.id as SuggestionKind) === -1) {
+            exists.kind.push(kind.id as SuggestionKind);
+          }
+        }
+      });
+
+      instanceSuggestionsRegistry.register({
+        id: kind.id as SuggestionKind,
+        name: kind.id,
+        suggestions: kind.suggestionsResolver,
+      });
+    }
+  }
+
+  if (customProvider.tables) {
+    const stbBehaviour = instanceSuggestionsRegistry.get(SuggestionKind.Tables);
+    const s = stbBehaviour!.suggestions;
+    stbBehaviour!.suggestions = async (ctx, m) => {
+      const o = await s(ctx, m);
+      const oo = (await customProvider.tables!.resolve!()).map((x) => ({
+        label: x.name,
+        kind: 1,
+        insertText: x.completion ?? x.name,
+        sortText: CompletionItemPriority.High,
+        command: TRIGGER_SUGGEST,
+      }));
+      return [...o, ...oo];
+    };
+  }
+
+  if (customProvider.columns) {
+    const stbBehaviour = instanceSuggestionsRegistry.get(SuggestionKind.Columns);
+    const s = stbBehaviour!.suggestions;
+    stbBehaviour!.suggestions = async (ctx, m) => {
+      const o = await s(ctx, m);
+      const tableToken = getTableToken(ctx.currentToken);
+      let table = '';
+      const tableNameParser = customProvider.tables?.parseName ?? defaultTableNameParser;
+
+      if (tableToken && tableToken.value) {
+        table = tableNameParser(tableToken).trim();
+      }
+
+      let oo: CustomSuggestion[] = [];
+      if (table) {
+        const columns = await customProvider.columns?.resolve!(table);
+        oo = columns
+          ? columns.map<CustomSuggestion>((x) => ({
+              label: x.name,
+              kind: m.languages.CompletionItemKind.Field,
+              insertText: x.completion ?? x.name,
+              sortText: CompletionItemPriority.High,
+            }))
+          : [];
+      }
+      return [...o, ...oo];
+    };
+  }
+}
+
+/**
+ * Initializes language specific registries that are treated as singletons
+ */
+function initializeLanguageRegistries(id: string) {
+  if (!LANGUAGES_CACHE.has(id)) {
+    console.log('initializing language registries', id);
+    LANGUAGES_CACHE.set(id, {
+      functions: new Registry(initFunctionsRegistry),
+      operators: new Registry(initOperatorsRegistry),
+      suggestionKinds: new Registry(initSuggestionsKindRegistry),
+      positionResolvers: new Registry(initStatementPositionResolvers),
+    });
+  }
+
+  return LANGUAGES_CACHE.get(id)!;
+}
+
+async function getSQLLangConf(monaco: Monaco) {
+  const allLangs = monaco.languages.getLanguages();
+  const langObj = allLangs.find(({ id }) => id === 'sql');
+
+  if (langObj) {
+    // @ts-ignore : Ain't public API :/ https://github.com/microsoft/monaco-editor/issues/2123#issuecomment-694197340
+    return await langObj.loader();
+  }
+
+  return Promise.resolve({ conf: null, language: null });
+}

@@ -1,194 +1,190 @@
 // Standard suggestions registry, should work for a standard SQL query.
 // Does not include all functions, only the most common ones.
 
+import { Registry } from '@grafana/data';
 import { TRIGGER_SUGGEST } from '../utils/misc';
-import { CompletionItemPriority, SuggestionKind } from '../utils/types';
-import {
-  ASC,
-  BY,
-  COMPARISON_OPERATORS,
-  DESC,
-  FROM,
-  GROUP,
-  LIMIT,
-  LOGICAL_OPERATORS,
-  ORDER,
-  SELECT,
-  STD_STATS,
-  WHERE,
-} from './language';
-import { functionsRegistry } from './registries';
-import { FunctionsRegistryItem, SuggestionsRegistyItem } from './types';
+import { CompletionItemPriority, OperatorType, SuggestionKind } from '../utils/types';
+import { ASC, BY, DESC, FROM, GROUP, LIMIT, ORDER, SELECT, STD_STATS, WHERE } from './language';
+import { FunctionsRegistryItem, OperatorsRegistryItem, SuggestionsRegistyItem } from './types';
 
 // Consumer of the SQL editor should extend this registry with their own custom suggestions.
-export const initStandardSuggestions = (): SuggestionsRegistyItem[] => [
-  {
-    id: SuggestionKind.SelectKeyword,
-    name: SuggestionKind.SelectKeyword,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        {
-          label: `${SELECT} <column>`,
-          insertText: `${SELECT} $0`,
-          insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          kind: m.languages.CompletionItemKind.Snippet,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.Medium,
-        },
-        {
-          label: `${SELECT} <column> ${FROM} <table>>`,
-          insertText: `${SELECT} $2 ${FROM} $1`,
-          insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          kind: m.languages.CompletionItemKind.Snippet,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.Medium,
-        },
-      ]),
-  },
-  {
-    id: SuggestionKind.FunctionsWithArguments,
-    name: SuggestionKind.FunctionsWithArguments,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        ...functionsRegistry.list().map((f) => ({
-          label: f.name,
-          insertText: `${f.name}($0)`,
-          insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          kind: m.languages.CompletionItemKind.Function,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.MediumHigh,
-        })),
-      ]),
-  },
-  {
-    id: SuggestionKind.FunctionsWithoutArguments,
-    name: SuggestionKind.FunctionsWithoutArguments,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        ...functionsRegistry.list().map((f) => ({
-          label: f.name,
-          insertText: `${f.name}()`,
-          insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          kind: m.languages.CompletionItemKind.Function,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.MediumHigh,
-        })),
-      ]),
-  },
-  {
-    id: SuggestionKind.FromKeyword,
-    name: SuggestionKind.FromKeyword,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        {
-          label: FROM,
-          insertText: `${FROM} $0`,
-          insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-          kind: m.languages.CompletionItemKind.Keyword,
-        },
-      ]),
-  },
-  {
-    id: SuggestionKind.Tables,
-    name: SuggestionKind.Tables,
-    suggestions: (_, m) => Promise.resolve([]),
-  },
-  {
-    id: SuggestionKind.Columns,
-    name: SuggestionKind.Columns,
-    suggestions: (_, m) => Promise.resolve([]),
-  },
-  {
-    id: SuggestionKind.LogicalOperators,
-    name: SuggestionKind.LogicalOperators,
-    suggestions: (_, m) =>
-      Promise.resolve(
-        LOGICAL_OPERATORS.map((o) => ({
-          label: o,
-          insertText: `${o} `,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.MediumHigh,
-        }))
-      ),
-  },
-  {
-    id: SuggestionKind.WhereKeyword,
-    name: SuggestionKind.WhereKeyword,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        {
-          label: WHERE,
-          insertText: `${WHERE} `,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.High,
-        },
-      ]),
-  },
-  {
-    id: SuggestionKind.ComparisonOperators,
-    name: SuggestionKind.ComparisonOperators,
-    suggestions: (_, m) =>
-      Promise.resolve(
-        COMPARISON_OPERATORS.map((o) => ({
-          label: o,
-          insertText: `${o} `,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.High,
-        }))
-      ),
-  },
-  {
-    id: SuggestionKind.GroupByKeywords,
-    name: SuggestionKind.GroupByKeywords,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        {
-          label: 'GROUP BY',
-          insertText: `${GROUP} ${BY} `,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.MediumHigh,
-        },
-      ]),
-  },
-  {
-    id: SuggestionKind.OrderByKeywords,
-    name: SuggestionKind.OrderByKeywords,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        {
-          label: 'ORDER BY',
-          insertText: `${ORDER} ${BY} `,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.Medium,
-        },
-      ]),
-  },
-  {
-    id: SuggestionKind.LimitKeyword,
-    name: SuggestionKind.LimitKeyword,
-    suggestions: (_, m) =>
-      Promise.resolve([
-        {
-          label: 'LIMIT',
-          insertText: `${LIMIT} `,
-          command: TRIGGER_SUGGEST,
-          sortText: CompletionItemPriority.MediumLow,
-        },
-      ]),
-  },
-  {
-    id: SuggestionKind.SortOrderDirectionKeyword,
-    name: SuggestionKind.SortOrderDirectionKeyword,
-    suggestions: (_, m) =>
-      Promise.resolve(
-        [ASC, DESC].map((o) => ({
-          label: o,
-          insertText: `${o} `,
-          command: TRIGGER_SUGGEST,
-        }))
-      ),
-  },
-];
+export const initStandardSuggestions =
+  (functions: Registry<FunctionsRegistryItem>, operators: Registry<OperatorsRegistryItem>) =>
+  (): SuggestionsRegistyItem[] =>
+    [
+      {
+        id: SuggestionKind.SelectKeyword,
+        name: SuggestionKind.SelectKeyword,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: `${SELECT} <column>`,
+              insertText: `${SELECT} $0`,
+              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: m.languages.CompletionItemKind.Snippet,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.Medium,
+            },
+            {
+              label: `${SELECT} <column> ${FROM} <table>>`,
+              insertText: `${SELECT} $2 ${FROM} $1`,
+              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: m.languages.CompletionItemKind.Snippet,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.Medium,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.FunctionsWithArguments,
+        name: SuggestionKind.FunctionsWithArguments,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            ...functions.list().map((f) => ({
+              label: f.name,
+              insertText: `${f.name}($0)`,
+              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: m.languages.CompletionItemKind.Function,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.MediumHigh,
+            })),
+          ]),
+      },
+      {
+        id: SuggestionKind.FunctionsWithoutArguments,
+        name: SuggestionKind.FunctionsWithoutArguments,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            ...functions.list().map((f) => ({
+              label: f.name,
+              insertText: `${f.name}()`,
+              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: m.languages.CompletionItemKind.Function,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.MediumHigh,
+            })),
+          ]),
+      },
+      {
+        id: SuggestionKind.FromKeyword,
+        name: SuggestionKind.FromKeyword,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: FROM,
+              insertText: `${FROM} $0`,
+              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: m.languages.CompletionItemKind.Keyword,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.Tables,
+        name: SuggestionKind.Tables,
+        suggestions: (_, m) => Promise.resolve([]),
+      },
+      {
+        id: SuggestionKind.Columns,
+        name: SuggestionKind.Columns,
+        suggestions: (_, m) => Promise.resolve([]),
+      },
+      {
+        id: SuggestionKind.LogicalOperators,
+        name: SuggestionKind.LogicalOperators,
+        suggestions: (_, m) =>
+          Promise.resolve(
+            operators
+              .list()
+              .filter((o) => o.type === OperatorType.Logical)
+              .map((o) => ({
+                label: o.operator,
+                insertText: `${o.operator} `,
+                command: TRIGGER_SUGGEST,
+                sortText: CompletionItemPriority.High,
+              }))
+          ),
+      },
+      {
+        id: SuggestionKind.WhereKeyword,
+        name: SuggestionKind.WhereKeyword,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: WHERE,
+              insertText: `${WHERE} `,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.High,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.ComparisonOperators,
+        name: SuggestionKind.ComparisonOperators,
+        suggestions: (_, m) =>
+          Promise.resolve(
+            operators
+              .list()
+              .filter((o) => o.type === OperatorType.Comparison)
+              .map((o) => ({
+                label: o.operator,
+                insertText: `${o.operator} `,
+                command: TRIGGER_SUGGEST,
+                sortText: CompletionItemPriority.High,
+              }))
+          ),
+      },
+      {
+        id: SuggestionKind.GroupByKeywords,
+        name: SuggestionKind.GroupByKeywords,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: 'GROUP BY',
+              insertText: `${GROUP} ${BY} `,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.MediumHigh,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.OrderByKeywords,
+        name: SuggestionKind.OrderByKeywords,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: 'ORDER BY',
+              insertText: `${ORDER} ${BY} `,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.Medium,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.LimitKeyword,
+        name: SuggestionKind.LimitKeyword,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: 'LIMIT',
+              insertText: `${LIMIT} `,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.MediumLow,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.SortOrderDirectionKeyword,
+        name: SuggestionKind.SortOrderDirectionKeyword,
+        suggestions: (_, m) =>
+          Promise.resolve(
+            [ASC, DESC].map((o) => ({
+              label: o,
+              insertText: `${o} `,
+              command: TRIGGER_SUGGEST,
+            }))
+          ),
+      },
+    ];
 
 export const initFunctionsRegistry = (): FunctionsRegistryItem[] => [
   ...STD_STATS.map((s) => ({
@@ -196,6 +192,9 @@ export const initFunctionsRegistry = (): FunctionsRegistryItem[] => [
     name: s,
   })),
 ];
+
+// some std operators...?
+export const initOperatorsRegistry = (): OperatorsRegistryItem[] => [];
 
 // Cloudwatch specific below
 //   case SuggestionKind.Metrics:

@@ -2,7 +2,7 @@ import { FieldType } from '@grafana/data';
 import { Monaco, monacoTypes } from '@grafana/ui';
 import { StatementPositionResolver, SuggestionsResolver } from './standardSql/types';
 import { LinkedToken } from './utils/LinkedToken';
-import { StatementPosition, SuggestionKind } from './utils/types';
+import { OperatorType, StatementPosition, SuggestionKind } from './utils/types';
 
 export interface PositionContext {
   kind: SuggestionKind[];
@@ -46,6 +46,16 @@ export interface SQLCompletionItemProvider
   supportedFunctions?: () => Array<{
     id: string;
     name: string;
+  }>;
+
+  /**
+   * Allows dialect specific functions to be added to the completion list
+   * @alpha
+   */
+  supportedOperators?: () => Array<{
+    id: string;
+    operator: string;
+    type: OperatorType;
   }>;
 
   /**

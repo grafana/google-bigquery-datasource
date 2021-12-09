@@ -1,9 +1,13 @@
 import { StatementPosition, TokenType } from '../utils/types';
 import { LinkedToken } from '../utils/LinkedToken';
-import { statementPositionResolversRegistry } from './registries';
+import { StatementPositionResolversRegistryItem } from './types';
+import { Registry } from '@grafana/data';
 
 // Given current cursor position in the SQL editor, returns the statement position.
-export function getStatementPosition(currentToken: LinkedToken | null): StatementPosition[] {
+export function getStatementPosition(
+  currentToken: LinkedToken | null,
+  statementPositionResolversRegistry: Registry<StatementPositionResolversRegistryItem>
+): StatementPosition[] {
   const previousNonWhiteSpace = currentToken?.getPreviousNonWhiteSpaceToken();
   const previousKeyword = currentToken?.getPreviousKeyword();
   const previousIsSlash = currentToken?.getPreviousNonWhiteSpaceToken()?.is(TokenType.Operator, '/');

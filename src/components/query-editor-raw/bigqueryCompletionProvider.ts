@@ -1,12 +1,7 @@
 import { FROM } from 'components/sql-editor/standardSql/language';
-import {
-  ColumnDefinition,
-  ColumnSchema,
-  LanguageCompletionProvider,
-  TableDefinition,
-} from 'components/sql-editor/types';
+import { ColumnDefinition, LanguageCompletionProvider, TableDefinition } from 'components/sql-editor/types';
 import { LinkedToken } from 'components/sql-editor/utils/LinkedToken';
-import { TokenType } from 'components/sql-editor/utils/types';
+import { OperatorType, TokenType } from 'components/sql-editor/utils/types';
 
 interface CompletionProviderGetterArgs {
   getColumns: React.MutableRefObject<(t: string) => Promise<Array<ColumnDefinition>>>;
@@ -31,6 +26,19 @@ const BQ_AGGREGATE_FNS = [
   { id: 'SUM', name: 'SUM' },
 ];
 
+const BQ_OPERATORS = [
+  { type: OperatorType.Comparison, id: 'LESS_THAN', operator: '<' },
+  { type: OperatorType.Comparison, id: 'LESS_THAN_EQUAL', operator: '<=' },
+  { type: OperatorType.Comparison, id: 'GREATER_THAN', operator: '>' },
+  { type: OperatorType.Comparison, id: 'GREATER_THAN_EQUAL', operator: '>=' },
+  { type: OperatorType.Comparison, id: 'EQUAL', operator: '=' },
+  { type: OperatorType.Comparison, id: 'NOT_EQUAL', operator: '!=' },
+  { type: OperatorType.Comparison, id: 'NOT_EQUAL_ALT', operator: '<>' },
+  { type: OperatorType.Comparison, id: 'LIKE', operator: 'LIKE' },
+  { type: OperatorType.Logical, id: 'LOGICAL_AND', operator: 'AND' },
+  { type: OperatorType.Logical, id: 'LOGICAL_OR', operator: 'OR' },
+];
+
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables }) =>
   (monaco) => ({
@@ -40,7 +48,6 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
         return await getTables.current();
       },
       parseName: (token: LinkedToken) => {
-        // console.log('parseName', token);
         let processedToken = token;
         let tablePath = processedToken.value;
         while (processedToken.next && !processedToken?.next?.isKeyword()) {
@@ -58,7 +65,7 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
       },
     },
     supportedFunctions: () => BQ_AGGREGATE_FNS,
-
+    supportedOperators: () => BQ_OPERATORS,
     customSuggestionKinds: () => {
       return [
         {
@@ -66,7 +73,6 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
           applyTo: ['afterDataset'],
           suggestionsResolver: async (ctx) => {
             let processedToken = ctx.currentToken;
-            console.log(processedToken?.next);
             let tablePath = '';
             while (processedToken?.previous && !processedToken.previous.isWhiteSpace()) {
               tablePath = processedToken.previous.value + tablePath;

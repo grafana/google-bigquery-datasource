@@ -34,6 +34,6 @@ export function QueryEditorRaw(props: Props) {
   };
 
   return (
-    <SQLEditor query={props.query.rawSql} onChange={onRawSqlChange} language={{ id: 'sql', completionProvider }} />
+    <SQLEditor query={props.query.rawSql} onChange={onRawSqlChange} language={{ id: 'bigquery', completionProvider }} />
   );
 }

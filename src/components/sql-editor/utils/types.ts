@@ -1,5 +1,10 @@
 import { monacoTypes } from '@grafana/ui';
 
+export enum OperatorType {
+  Comparison,
+  Logical,
+}
+
 export enum TokenType {
   Parenthesis = 'delimiter.parenthesis.sql',
   Whitespace = 'white.sql',
@@ -43,7 +48,6 @@ export enum SuggestionKind {
   SelectKeyword = 'selectKeyword',
   FunctionsWithArguments = 'functionsWithArguments',
   FromKeyword = 'fromKeyword',
-  SchemaKeyword = 'schemaKeyword',
   WhereKeyword = 'whereKeyword',
   GroupByKeywords = 'groupByKeywords',
   OrderByKeywords = 'orderByKeywords',
@@ -51,12 +55,13 @@ export enum SuggestionKind {
   LimitKeyword = 'limitKeyword',
   SortOrderDirectionKeyword = 'sortOrderDirectionKeyword',
   ComparisonOperators = 'comparisonOperators',
-  LabelValues = 'labelValues',
   LogicalOperators = 'logicalOperators',
 
   // NON-STD
+  SchemaKeyword = 'schemaKeyword',
   Namespaces = 'namespaces', // EXTENSIBLE
   Metrics = 'metrics',
+  LabelValues = 'labelValues',
   LabelKeys = 'labelKeys',
 }
 
