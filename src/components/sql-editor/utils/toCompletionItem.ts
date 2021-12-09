@@ -11,8 +11,8 @@ export const toCompletionItem = (
     insertText: value,
     kind: CompletionItemKind.Field,
     sortText: CompletionItemPriority.Medium,
-    ...rest,
     range,
+    ...rest,
   };
   return item;
 };

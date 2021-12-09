@@ -66,7 +66,6 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
       id: StatementPosition.AfterTable,
       name: StatementPosition.AfterTable,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
-        console.log(previousNonWhiteSpace?.value);
         return Boolean(
           previousKeyword?.value === FROM &&
             (previousNonWhiteSpace?.isVariable() || previousNonWhiteSpace?.value !== '')

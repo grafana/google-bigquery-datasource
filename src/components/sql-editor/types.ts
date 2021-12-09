@@ -8,6 +8,7 @@ export interface PositionContext {
   kind: SuggestionKind[];
   statementPosition: StatementPosition[];
   currentToken: LinkedToken | null;
+  range: monacoTypes.IRange;
 }
 
 // Better name needed
@@ -24,9 +25,16 @@ export interface CustomStatementPlacement {
   resolve: StatementPositionResolver;
 }
 
-export interface ColumnSchema {
+export interface ColumnDefinition {
   name: string;
   type?: FieldType;
+  // Text used for automplete, if not provided name is used
+  completion?: string;
+}
+export interface TableDefinition {
+  name: string;
+  // Text used for automplete, if not provided name is used
+  completion?: string;
 }
 
 export interface SQLCompletionItemProvider
@@ -52,8 +60,13 @@ export interface SQLCompletionItemProvider
    */
   customStatementPlacement?: () => CustomStatementPlacement[];
 
-  resolveTables?: () => Promise<string[]>;
-  resolveColumns?: (table: string) => Promise<ColumnSchema[]>;
+  tables?: {
+    resolve: () => Promise<TableDefinition[]>;
+    parseName?: (t: LinkedToken) => string;
+  };
+  columns?: {
+    resolve: (table: string) => Promise<ColumnDefinition[]>;
+  };
 
   provideCompletionItems?: (
     model: monacoTypes.editor.ITextModel,

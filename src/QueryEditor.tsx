@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { GrafanaTheme2, QueryEditorProps, SelectableValue } from '@grafana/data';
 import { BigQueryDatasource } from './datasource';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from './constants';
@@ -14,20 +14,21 @@ import {
   Tooltip,
   useTheme2,
 } from '@grafana/ui';
-import { QueryEditorRaw } from './QueryEditorRaw';
+import { QueryEditorRaw } from './components/query-editor-raw/QueryEditorRaw';
 import { DatasetSelector } from './components/DatasetSelector';
-import { TableSelector } from './components/TableSelector';
 import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, QueryFormat } from './types';
 import { getApiClient, TableFieldSchema } from './api';
 import { useAsync, useAsyncFn } from 'react-use';
+
+import { Parser } from 'node-sql-parser/build/bigquery';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
 function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
   const result = { ...q };
 
-  result.dataset = q.dataset;
+  // result.dataset = q.dataset;
   result.location = q.location || ds.jsonData.defaultRegion || DEFAULT_REGION;
   result.format = q.format !== undefined ? q.format : QueryFormat.Table;
   result.rawSql = q.rawSql || '';
@@ -36,11 +37,12 @@ function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
 }
 
 const isQueryValid = (q: BigQueryQueryNG) => {
-  return Boolean(q.location && q.dataset && q.table && q.rawSql);
+  return Boolean(q.location && q.rawSql);
 };
 
 export function QueryEditor(props: Props) {
   const schemaCache = useRef(new Map<string, { schema: TableFieldSchema[]; columns: string[] }>());
+  const queryParser = useMemo(() => new Parser(), []);
 
   const {
     loading: apiLoading,
@@ -75,22 +77,56 @@ export function QueryEditor(props: Props) {
   );
 
   const getColumns = useCallback(
+    // excpects fully qualified table name: <project-id>.<dataset-id>.<table-id>
     async (t: string) => {
-      if (!queryWithDefaults.location || !queryWithDefaults.dataset || !apiClient) {
+      if (!apiClient || !queryWithDefaults.location) {
         return [];
       }
-      const cols = await apiClient.getColumns(queryWithDefaults.location, queryWithDefaults.dataset, t!);
+      let cols;
+      const tablePath = t.split('.');
+
+      if (tablePath.length === 3) {
+        cols = await apiClient.getColumns(queryWithDefaults.location, tablePath[1], tablePath[2]);
+      } else {
+        if (!queryWithDefaults.dataset) {
+          return [];
+        }
+        cols = await apiClient.getColumns(queryWithDefaults.location, queryWithDefaults.dataset, t!);
+      }
+
       return cols.map((c) => ({ name: c }));
     },
     [apiClient, queryWithDefaults.location, queryWithDefaults.dataset]
   );
 
-  const getTables = useCallback(async () => {
-    if (!queryWithDefaults.location || !queryWithDefaults.dataset || !apiClient) {
-      return [];
-    }
-    return await apiClient.getTables(queryWithDefaults.location, queryWithDefaults.dataset);
-  }, [apiClient, queryWithDefaults.location, queryWithDefaults.dataset]);
+  const getTables = useCallback(
+    async (d?: string) => {
+      if (!queryWithDefaults.location || !apiClient) {
+        return [];
+      }
+
+      let datasets = [];
+      if (!d) {
+        datasets = await apiClient.getDatasets(queryWithDefaults.location);
+        return datasets.map((d) => ({ name: d, completion: `${apiClient.getDefaultProject()}.${d}` }));
+      } else {
+        const path = d.split('.').filter((s) => s);
+        if (path.length > 2) {
+          return [];
+        }
+        if (path[0] && path[1]) {
+          const tables = await apiClient.getTables(queryWithDefaults.location, path[1]);
+          return tables.map((t) => ({ name: t }));
+        } else if (path[0]) {
+          datasets = await apiClient.getDatasets(queryWithDefaults.location);
+          return datasets.map((d) => ({ name: d, completion: `${d}` }));
+        } else {
+          return [];
+        }
+      }
+    },
+    [apiClient, queryWithDefaults.location]
+  );
 
   useEffect(() => {
     if (!queryWithDefaults.location || !queryWithDefaults.dataset || !queryWithDefaults.table) {
@@ -129,15 +165,16 @@ export function QueryEditor(props: Props) {
     processQuery(next);
   };
 
-  const onTableChange = (e: SelectableValue) => {
-    const next = {
-      ...queryWithDefaults,
-      table: e.value,
-    };
-    props.onChange(next);
-    fetchTableSchema(next.location, next.dataset, next.table);
-    processQuery(next);
-  };
+  const onRawQueryChange = useCallback(
+    (q: BigQueryQueryNG) => {
+      const a = queryParser.tableList(q.rawSql);
+      console.log(a);
+
+      props.onChange(q);
+      processQuery(q);
+    },
+    [props.onChange, queryParser]
+  );
 
   const schemaTab = (
     <Tab
@@ -180,19 +217,6 @@ export function QueryEditor(props: Props) {
           />
         </Field>
 
-        <Field label="Table">
-          <TableSelector
-            apiClient={apiClient}
-            location={queryWithDefaults.location!}
-            dataset={queryWithDefaults.dataset!}
-            value={queryWithDefaults.table}
-            disabled={queryWithDefaults.dataset === undefined}
-            onChange={onTableChange}
-            className="width-12"
-            applyDefault
-          />
-        </Field>
-
         <Field label="Format as">
           <Select
             options={QUERY_FORMAT_OPTIONS}
@@ -215,7 +239,7 @@ export function QueryEditor(props: Props) {
             getTables={getTables}
             getColumns={getColumns}
             query={queryWithDefaults}
-            onChange={props.onChange}
+            onChange={onRawQueryChange}
             onRunQuery={props.onRunQuery}
           />
         )}

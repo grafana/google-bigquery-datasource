@@ -21,7 +21,7 @@ export const getStandardSuggestions = async (
   for (const suggestion of suggestionKinds) {
     const registeredSuggestions = stdSuggestionsRegistry.getIfExists(suggestion);
     if (registeredSuggestions) {
-      const su = await registeredSuggestions.suggestions(positionContext, monaco);
+      const su = await registeredSuggestions.suggestions({ ...positionContext, range }, monaco);
       suggestions = [...suggestions, ...su.map((s) => toCompletionItem(s.label, range, { kind: s.kind, ...s }))];
     }
   }

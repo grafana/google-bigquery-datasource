@@ -37,7 +37,10 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
   }
 
   filterQuery(query: BigQueryQueryNG) {
-    if (!query.dataset || !query.table || !query.rawSql) {
+    if (
+      // !query.dataset || !query.table ||
+      !query.rawSql
+    ) {
       return false;
     }
     return true;
@@ -333,7 +336,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     const rawSql = query.target.rawQuery ? query.target.rawSql : query.buildQuery();
 
     const interpolatedSql = getTemplateSrv().replace(rawSql, scopedVars, this.interpolateVariable);
-
     const result = {
       refId: queryModel.refId,
       hide: queryModel.hide,

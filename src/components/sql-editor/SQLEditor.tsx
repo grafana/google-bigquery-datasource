@@ -13,6 +13,8 @@ import { getSuggestionKinds } from './utils/getSuggestionKind';
 import { linkedTokenBuilder } from './utils/linkedTokenBuilder';
 import { StatementPosition, SuggestionKind } from './utils/types';
 import { getTableToken } from './utils/tokenUtils';
+import { TRIGGER_SUGGEST } from './utils/misc';
+import { LinkedToken } from './utils/LinkedToken';
 
 const STANDARD_SQL_LANGUAGE = 'sql';
 
@@ -26,6 +28,8 @@ interface SQLEditorProps {
   onChange: (q: string) => void;
   language?: LanguageDefinition;
 }
+
+const defaultTableNameParser = (t: LinkedToken) => t.value;
 
 let INITIALIZED = false;
 
@@ -104,36 +108,46 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
         }
       }
 
-      if (customProvider.resolveTables) {
+      if (customProvider.tables) {
         const stbBehaviour = stdSuggestionsRegistry.get(SuggestionKind.Tables);
         const s = stbBehaviour!.suggestions;
-        stbBehaviour!.suggestions = async (a, b) => {
-          const o = await s(a, b);
-          const oo = (await customProvider.resolveTables!()).map((x) => ({
-            label: x,
+        stbBehaviour!.suggestions = async (ctx, m) => {
+          const o = await s(ctx, m);
+          const oo = (await customProvider.tables!.resolve!()).map((x) => ({
+            label: x.name,
             kind: 1,
-            insertText: x,
+            insertText: x.completion ?? x.name,
             sortText: CompletionItemPriority.High,
+            command: TRIGGER_SUGGEST,
           }));
           return [...o, ...oo];
         };
       }
 
-      if (customProvider.resolveColumns) {
+      if (customProvider.columns) {
         const stbBehaviour = stdSuggestionsRegistry.get(SuggestionKind.Columns);
         const s = stbBehaviour!.suggestions;
         stbBehaviour!.suggestions = async (ctx, m) => {
           const o = await s(ctx, m);
           const tableToken = getTableToken(ctx.currentToken);
-          let oo: CustomSuggestion[] = [];
+          let table = '';
+          const tableNameParser = customProvider.tables?.parseName ?? defaultTableNameParser;
+
           if (tableToken && tableToken.value) {
-            const columns = await customProvider.resolveColumns!(tableToken.value);
-            oo = columns.map<CustomSuggestion>((x) => ({
-              label: x.name,
-              kind: m.languages.CompletionItemKind.Field,
-              insertText: x.name,
-              sortText: CompletionItemPriority.High,
-            }));
+            table = tableNameParser(tableToken).trim();
+          }
+
+          let oo: CustomSuggestion[] = [];
+          if (table) {
+            const columns = await customProvider.columns?.resolve!(table);
+            oo = columns
+              ? columns.map<CustomSuggestion>((x) => ({
+                  label: x.name,
+                  kind: m.languages.CompletionItemKind.Field,
+                  insertText: x.completion ?? x.name,
+                  sortText: CompletionItemPriority.High,
+                }))
+              : [];
           }
           return [...o, ...oo];
         };
@@ -153,6 +167,7 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
           currentToken,
           statementPosition,
           kind,
+          range: monaco.Range.fromPositions(position),
         };
 
         // // Completely custom suggestions - hope this won't we needed
@@ -172,10 +187,7 @@ export const registerLanguageAndSuggestions = (monaco: Monaco, l: LanguageDefini
 
         return {
           // ...ci,
-          suggestions: [
-            ...stdSuggestions,
-            // , ...ci.suggestions
-          ],
+          suggestions: stdSuggestions,
         };
       };
 
