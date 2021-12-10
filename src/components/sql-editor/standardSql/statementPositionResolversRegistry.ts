@@ -1,5 +1,5 @@
 import { StatementPosition, TokenType } from '../utils/types';
-import { AND, ASC, BY, DESC, EQUALS, FROM, GROUP, NOT_EQUALS, ORDER, SCHEMA, SELECT, WHERE } from './language';
+import { AND, ASC, BY, DESC, EQUALS, FROM, GROUP, NOT_EQUALS, ORDER, SCHEMA, SELECT, WHERE, WITH } from './language';
 import { StatementPositionResolversRegistryItem } from './types';
 
 export function initStatementPositionResolvers(): StatementPositionResolversRegistryItem[] {
@@ -13,7 +13,19 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
             (currentToken.isWhiteSpace() && currentToken.previous === null) ||
             (currentToken.is(TokenType.Keyword, SELECT) && currentToken.previous === null) ||
             previousIsSlash ||
-            (currentToken.isIdentifier() && (previousIsSlash || currentToken?.previous === null))
+            (currentToken.isIdentifier() && (previousIsSlash || currentToken?.previous === null)) ||
+            (currentToken.isIdentifier() && SELECT.startsWith(currentToken.value))
+        ),
+    },
+    {
+      id: StatementPosition.WithKeyword,
+      name: StatementPosition.WithKeyword,
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
+        Boolean(
+          currentToken === null ||
+            (currentToken.isWhiteSpace() && currentToken.previous === null) ||
+            (currentToken.is(TokenType.Keyword, WITH) && currentToken.previous === null) ||
+            (currentToken.isIdentifier() && WITH.toLowerCase().startsWith(currentToken.value.toLowerCase()))
         ),
     },
     {

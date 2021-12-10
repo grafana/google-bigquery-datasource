@@ -77,8 +77,8 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
     // Assume lanuage based on standard Monaco SQL definition
     const defaultSQLLanguage = await getSQLLangConf(monaco);
     monaco.languages.register({ id: lid });
-    monaco.languages.setMonarchTokensProvider(lid, defaultSQLLanguage.language);
-    monaco.languages.setLanguageConfiguration(lid, defaultSQLLanguage.conf);
+    monaco.languages.setMonarchTokensProvider(lid, { ...defaultSQLLanguage.language });
+    monaco.languages.setLanguageConfiguration(lid, { ...defaultSQLLanguage.conf });
 
     if (l.completionProvider) {
       const customProvider = l.completionProvider(monaco);
@@ -259,7 +259,6 @@ function extendStandardRegistries(id: string, lid: string, customProvider: SQLCo
  */
 function initializeLanguageRegistries(id: string) {
   if (!LANGUAGES_CACHE.has(id)) {
-    console.log('initializing language registries', id);
     LANGUAGES_CACHE.set(id, {
       functions: new Registry(initFunctionsRegistry),
       operators: new Registry(initOperatorsRegistry),

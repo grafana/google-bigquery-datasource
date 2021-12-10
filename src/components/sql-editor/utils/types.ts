@@ -22,6 +22,7 @@ export enum TokenType {
 export enum StatementPosition {
   Unknown = 'unknown',
   SelectKeyword = 'selectKeyword',
+  WithKeyword = 'withKeyword',
   AfterSelectKeyword = 'afterSelectKeyword',
   AfterSelectFuncFirstArgument = 'afterSelectFuncFirstArgument',
   AfterSelectArguments = 'afterSelectArguments',
@@ -46,6 +47,7 @@ export enum SuggestionKind {
   Tables = 'tables',
   Columns = 'columns',
   SelectKeyword = 'selectKeyword',
+  WithKeyword = 'withKeyword',
   FunctionsWithArguments = 'functionsWithArguments',
   FromKeyword = 'fromKeyword',
   WhereKeyword = 'whereKeyword',

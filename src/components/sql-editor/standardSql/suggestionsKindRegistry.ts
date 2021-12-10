@@ -15,6 +15,11 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
       kind: [SuggestionKind.SelectKeyword],
     },
     {
+      id: StatementPosition.WithKeyword,
+      name: StatementPosition.WithKeyword,
+      kind: [SuggestionKind.WithKeyword],
+    },
+    {
       id: StatementPosition.AfterSelectKeyword,
       name: StatementPosition.AfterSelectKeyword,
       kind: [SuggestionKind.FunctionsWithArguments, SuggestionKind.Columns],

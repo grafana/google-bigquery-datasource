@@ -9,6 +9,7 @@ export const DESC = 'DESC';
 export const ASC = 'ASC';
 export const LIMIT = 'LIMIT';
 export const WITH = 'WITH';
+export const AS = 'AS';
 export const SCHEMA = 'SCHEMA';
 
 export const KEYWORDS = [SELECT, FROM, WHERE, GROUP, ORDER, BY, DESC, ASC, LIMIT, WITH, SCHEMA];

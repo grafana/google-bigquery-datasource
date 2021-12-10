@@ -4,7 +4,7 @@
 import { Registry } from '@grafana/data';
 import { TRIGGER_SUGGEST } from '../utils/misc';
 import { CompletionItemPriority, OperatorType, SuggestionKind } from '../utils/types';
-import { ASC, BY, DESC, FROM, GROUP, LIMIT, ORDER, SELECT, STD_STATS, WHERE } from './language';
+import { AS, ASC, BY, DESC, FROM, GROUP, LIMIT, ORDER, SELECT, STD_STATS, WHERE, WITH } from './language';
 import { FunctionsRegistryItem, OperatorsRegistryItem, SuggestionsRegistyItem } from './types';
 
 // Consumer of the SQL editor should extend this registry with their own custom suggestions.
@@ -28,6 +28,21 @@ export const initStandardSuggestions =
             {
               label: `${SELECT} <column> ${FROM} <table>>`,
               insertText: `${SELECT} $2 ${FROM} $1`,
+              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: m.languages.CompletionItemKind.Snippet,
+              command: TRIGGER_SUGGEST,
+              sortText: CompletionItemPriority.Medium,
+            },
+          ]),
+      },
+      {
+        id: SuggestionKind.WithKeyword,
+        name: SuggestionKind.WithKeyword,
+        suggestions: (_, m) =>
+          Promise.resolve([
+            {
+              label: `${WITH} <alias> ${AS} ( ... )`,
+              insertText: `${WITH} $1  ${AS} ( $2 )`,
               insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
               kind: m.languages.CompletionItemKind.Snippet,
               command: TRIGGER_SUGGEST,

@@ -50,11 +50,10 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
       parseName: (token: LinkedToken) => {
         let processedToken = token;
         let tablePath = processedToken.value;
-        while (processedToken.next && !processedToken?.next?.isKeyword()) {
+        while (processedToken.next && !processedToken?.next?.isKeyword() && !processedToken?.next?.isParenthesis()) {
           tablePath += processedToken.next.value;
           processedToken = processedToken.next;
         }
-
         return tablePath;
       },
     },

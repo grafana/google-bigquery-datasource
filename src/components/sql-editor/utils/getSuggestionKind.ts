@@ -10,14 +10,9 @@ export function getSuggestionKinds(
 
   let result: SuggestionKind[] = [];
   for (let i = 0; i < statementPosition.length; i++) {
-    try {
-      k = suggestionsKindRegistry.get(statementPosition[i]);
-    } catch (e) {
-      console.error(e);
-    }
-
-    if (k) {
-      result = result.concat(k.kind);
+    const exists = suggestionsKindRegistry.getIfExists(statementPosition[i]);
+    if (exists) {
+      result = result.concat(exists.kind);
     }
   }
 
