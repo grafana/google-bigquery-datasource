@@ -2,8 +2,8 @@ import { RegistryItem } from '@grafana/data';
 import { StatementPosition, SuggestionKind } from '../utils/types';
 
 export interface SuggestionKindRegistyItem extends RegistryItem {
-  kind: SuggestionKind[];
   id: StatementPosition;
+  kind: SuggestionKind[];
 }
 
 // Registry of possible suggestions for the given statement position

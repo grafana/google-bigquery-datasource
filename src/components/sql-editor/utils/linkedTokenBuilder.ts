@@ -6,7 +6,7 @@ export function linkedTokenBuilder(
   monaco: Monaco,
   model: monacoTypes.editor.ITextModel,
   position: monacoTypes.IPosition,
-  languageId: string
+  languageId: string = 'sql'
 ) {
   let current: LinkedToken | null = null;
   let previous: LinkedToken | null = null;

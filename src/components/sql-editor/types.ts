@@ -40,7 +40,7 @@ export interface TableDefinition {
 export interface SQLCompletionItemProvider
   extends Omit<monacoTypes.languages.CompletionItemProvider, 'provideCompletionItems'> {
   /**
-   * Allows dialect specific functions to be added to the completion list
+   * Allows dialect specific functions to be added to the completion list.
    * @alpha
    */
   supportedFunctions?: () => Array<{
@@ -49,7 +49,7 @@ export interface SQLCompletionItemProvider
   }>;
 
   /**
-   * Allows dialect specific functions to be added to the completion list
+   * Allows dialect specific operators to be added to the completion list.
    * @alpha
    */
   supportedOperators?: () => Array<{
@@ -59,25 +59,40 @@ export interface SQLCompletionItemProvider
   }>;
 
   /**
-   * Allows custom suggestion kinds to be defined and correlate them with <Custom>StatementPosition
+   * Allows custom suggestion kinds to be defined and correlate them with <Custom>StatementPosition.
    * @alpha
    */
   customSuggestionKinds?: () => CustomSuggestionKind[];
 
   /**
-   * Allows custom statement placement definition
+   * Allows custom statement placement definition.
    * @alpha
    */
   customStatementPlacement?: () => CustomStatementPlacement[];
 
+  /**
+   * Allows providing a custom function for resolving db tables.
+   * It's up to the consumer to decide whether the columns are resolved via API calls or preloaded in the query editor(i.e. full db schema is preloades loaded).
+   * @alpha
+   */
   tables?: {
     resolve: () => Promise<TableDefinition[]>;
+    // Allows providing a custom function for calculating the table name from the query. If not specified a default implemnentation is used.
     parseName?: (t: LinkedToken) => string;
   };
+  /**
+   * Allows providing a custom function for resolving table.
+   * It's up to the consumer to decide whether the columns are resolved via API calls or preloaded in the query editor(i.e. full db schema is preloades loaded).
+   * @alpha
+   */
   columns?: {
     resolve: (table: string) => Promise<ColumnDefinition[]>;
   };
 
+  /**
+   * TODO: Not sure whether or not we need this. Would like to avoid this kind of flexibility.
+   * @alpha
+   */
   provideCompletionItems?: (
     model: monacoTypes.editor.ITextModel,
     position: monacoTypes.Position,
@@ -85,9 +100,8 @@ export interface SQLCompletionItemProvider
     token: monacoTypes.CancellationToken,
     positionContext: PositionContext // Decorates original provideCompletionItems function with our custom statement position context
   ) => monacoTypes.languages.CompletionList;
-  // Some higher order schema type here..?
-  // resolveSchema?: () => Promise<any>;
 }
+
 export type LanguageCompletionProvider = (m: Monaco) => SQLCompletionItemProvider;
 
 export enum CompletionItemPriority {

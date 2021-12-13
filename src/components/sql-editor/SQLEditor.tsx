@@ -28,7 +28,9 @@ import { initStatementPositionResolvers } from './standardSql/statementPositionR
 const STANDARD_SQL_LANGUAGE = 'sql';
 
 interface LanguageDefinition extends monacoTypes.languages.ILanguageExtensionPoint {
+  // TODO: Will allow providing a custom language definition.
   loadLanguage?: (module: any) => Promise<void>;
+  // Provides API for customizing the autocomplete
   completionProvider?: (m: Monaco) => SQLCompletionItemProvider;
 }
 
