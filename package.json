@@ -8,6 +8,7 @@
     "build": "rm -rf dist && grafana-toolkit plugin:build  && mage -v buildAll",
     "sign": "grafana-toolkit plugin:sign",
     "test": "grafana-toolkit plugin:test",
+    "test:jest": "jest --config jest.config.js",
     "test:watch": "grafana-toolkit plugin:test  --watch",
     "test:codecov": "jest --config jest.config.js && codecov",
     "build:sign": "yarn run build:prod && yarn run sign"

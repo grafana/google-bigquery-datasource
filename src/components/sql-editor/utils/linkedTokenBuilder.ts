@@ -11,7 +11,6 @@ export function linkedTokenBuilder(
   let current: LinkedToken | null = null;
   let previous: LinkedToken | null = null;
   const tokensPerLine = monaco.editor.tokenize(model.getValue() ?? '', languageId);
-
   for (let lineIndex = 0; lineIndex < tokensPerLine.length; lineIndex++) {
     const tokens = tokensPerLine[lineIndex];
     // In case position is first column in new line, add empty whitespace token so that links are not broken

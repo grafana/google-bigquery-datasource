@@ -1,8 +1,8 @@
-import { monacoTypes } from '@grafana/ui';
 import { TestQueryModel } from 'components/sql-editor/test-utils/types';
 
-export const singleLineFullQuery: TestQueryModel = {
-  query: `SELECT column1, FROM table1 WHERE column1 = "value1" GROUP BY column1 ORDER BY column1 DESC LIMIT 10`,
+export const singleLineMultipleColumns: TestQueryModel = {
+  query:
+    'SELECT count(column1), column2 FROM table1 WHERE column1 = "value1" GROUP BY column1 ORDER BY column1, avg(column2) DESC LIMIT 10;',
   tokens: [
     [
       {
@@ -17,92 +17,87 @@ export const singleLineFullQuery: TestQueryModel = {
       },
       {
         offset: 7,
+        type: 'predefined.sql',
+        language: 'sql',
+      },
+      {
+        offset: 12,
+        type: 'delimiter.parenthesis.sql',
+        language: 'sql',
+      },
+      {
+        offset: 13,
         type: 'identifier.sql',
-        language: 'sql',
-      },
-      {
-        offset: 14,
-        type: 'delimiter.sql',
-        language: 'sql',
-      },
-      {
-        offset: 15,
-        type: 'white.sql',
-        language: 'sql',
-      },
-      {
-        offset: 16,
-        type: 'keyword.sql',
         language: 'sql',
       },
       {
         offset: 20,
-        type: 'white.sql',
+        type: 'delimiter.parenthesis.sql',
         language: 'sql',
       },
       {
         offset: 21,
-        type: 'identifier.sql',
+        type: 'delimiter.sql',
         language: 'sql',
       },
       {
-        offset: 27,
+        offset: 22,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 28,
+        offset: 23,
+        type: 'identifier.sql',
+        language: 'sql',
+      },
+      {
+        offset: 30,
+        type: 'white.sql',
+        language: 'sql',
+      },
+      {
+        offset: 31,
         type: 'keyword.sql',
         language: 'sql',
       },
       {
-        offset: 33,
+        offset: 35,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 34,
+        offset: 36,
         type: 'identifier.sql',
-        language: 'sql',
-      },
-      {
-        offset: 41,
-        type: 'white.sql',
         language: 'sql',
       },
       {
         offset: 42,
-        type: 'operator.sql',
+        type: 'white.sql',
         language: 'sql',
       },
       {
         offset: 43,
+        type: 'keyword.sql',
+        language: 'sql',
+      },
+      {
+        offset: 48,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 44,
-        type: 'identifier.quote.sql',
-        language: 'sql',
-      },
-      {
-        offset: 45,
+        offset: 49,
         type: 'identifier.sql',
         language: 'sql',
       },
       {
-        offset: 51,
-        type: 'identifier.quote.sql',
-        language: 'sql',
-      },
-      {
-        offset: 52,
+        offset: 56,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 53,
-        type: 'keyword.sql',
+        offset: 57,
+        type: 'operator.sql',
         language: 'sql',
       },
       {
@@ -112,84 +107,144 @@ export const singleLineFullQuery: TestQueryModel = {
       },
       {
         offset: 59,
-        type: 'keyword.sql',
+        type: 'identifier.quote.sql',
         language: 'sql',
       },
       {
-        offset: 61,
-        type: 'white.sql',
-        language: 'sql',
-      },
-      {
-        offset: 62,
+        offset: 60,
         type: 'identifier.sql',
         language: 'sql',
       },
       {
-        offset: 69,
+        offset: 66,
+        type: 'identifier.quote.sql',
+        language: 'sql',
+      },
+      {
+        offset: 67,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 70,
+        offset: 68,
         type: 'keyword.sql',
         language: 'sql',
       },
       {
-        offset: 75,
+        offset: 73,
         type: 'white.sql',
+        language: 'sql',
+      },
+      {
+        offset: 74,
+        type: 'keyword.sql',
         language: 'sql',
       },
       {
         offset: 76,
-        type: 'keyword.sql',
-        language: 'sql',
-      },
-      {
-        offset: 78,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 79,
+        offset: 77,
         type: 'identifier.sql',
         language: 'sql',
       },
       {
-        offset: 86,
+        offset: 84,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 87,
+        offset: 85,
         type: 'keyword.sql',
+        language: 'sql',
+      },
+      {
+        offset: 90,
+        type: 'white.sql',
         language: 'sql',
       },
       {
         offset: 91,
-        type: 'white.sql',
-        language: 'sql',
-      },
-      {
-        offset: 92,
         type: 'keyword.sql',
         language: 'sql',
       },
       {
-        offset: 97,
+        offset: 93,
         type: 'white.sql',
         language: 'sql',
       },
       {
-        offset: 98,
+        offset: 94,
+        type: 'identifier.sql',
+        language: 'sql',
+      },
+      {
+        offset: 101,
+        type: 'delimiter.sql',
+        language: 'sql',
+      },
+      {
+        offset: 102,
+        type: 'white.sql',
+        language: 'sql',
+      },
+      {
+        offset: 103,
+        type: 'predefined.sql',
+        language: 'sql',
+      },
+      {
+        offset: 106,
+        type: 'delimiter.parenthesis.sql',
+        language: 'sql',
+      },
+      {
+        offset: 107,
+        type: 'identifier.sql',
+        language: 'sql',
+      },
+      {
+        offset: 114,
+        type: 'delimiter.parenthesis.sql',
+        language: 'sql',
+      },
+      {
+        offset: 115,
+        type: 'white.sql',
+        language: 'sql',
+      },
+      {
+        offset: 116,
+        type: 'keyword.sql',
+        language: 'sql',
+      },
+      {
+        offset: 120,
+        type: 'white.sql',
+        language: 'sql',
+      },
+      {
+        offset: 121,
+        type: 'keyword.sql',
+        language: 'sql',
+      },
+      {
+        offset: 126,
+        type: 'white.sql',
+        language: 'sql',
+      },
+      {
+        offset: 127,
         type: 'number.sql',
         language: 'sql',
       },
       {
-        offset: 100,
+        offset: 129,
         type: 'delimiter.sql',
         language: 'sql',
       },
     ],
-  ] as monacoTypes.Token[][],
+  ],
 };

@@ -1,5 +1,10 @@
 import { FROM } from 'components/sql-editor/standardSql/language';
-import { ColumnDefinition, LanguageCompletionProvider, TableDefinition } from 'components/sql-editor/types';
+import {
+  ColumnDefinition,
+  CustomStatementPlacementProvider,
+  LanguageCompletionProvider,
+  TableDefinition,
+} from 'components/sql-editor/types';
 import { LinkedToken } from 'components/sql-editor/utils/LinkedToken';
 import { OperatorType, TokenType } from 'components/sql-editor/utils/types';
 
@@ -39,6 +44,21 @@ const BQ_OPERATORS = [
   { type: OperatorType.Logical, id: 'LOGICAL_OR', operator: 'OR' },
 ];
 
+export enum CustomStatementPlacement {
+  AfterDataset = 'afterDataset',
+}
+export const customStatementPlacement: CustomStatementPlacementProvider = () => [
+  {
+    id: CustomStatementPlacement.AfterDataset,
+    resolve: (currentToken, previousKeyword) => {
+      return Boolean(
+        previousKeyword?.value === FROM &&
+          (currentToken?.is(TokenType.Delimiter, '.') || currentToken?.previous?.is(TokenType.Delimiter, '.'))
+      );
+    },
+  },
+];
+
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables }) =>
   (monaco) => ({
@@ -69,7 +89,7 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
       return [
         {
           id: 'tablesWithinDataset',
-          applyTo: ['afterDataset'],
+          applyTo: [CustomStatementPlacement.AfterDataset],
           suggestionsResolver: async (ctx) => {
             let processedToken = ctx.currentToken;
             let tablePath = '';
@@ -95,17 +115,7 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
       ];
     },
 
-    customStatementPlacement: () => [
-      {
-        id: 'afterDataset',
-        resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
-          return Boolean(
-            previousKeyword?.value === FROM &&
-              (currentToken?.is(TokenType.Delimiter, '.') || currentToken?.previous?.is(TokenType.Delimiter, '.'))
-          );
-        },
-      },
-    ],
+    customStatementPlacement,
 
     // provideCompletionItems: () => {
     //   return {

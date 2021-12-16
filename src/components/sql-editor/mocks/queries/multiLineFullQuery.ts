@@ -1,12 +1,12 @@
-import { monacoTypes } from '@grafana/ui';
+import { TestQueryModel } from 'components/sql-editor/test-utils/types';
 
-export const multiLineFullQuery = {
-  query: `SELECT column1 
+export const multiLineFullQuery: TestQueryModel = {
+  query: `SELECT column1,  
   FROM table1 
   
   WHERE column1 = "value1" 
   GROUP BY column1 ORDER BY column1 DESC 
-  LIMIT 10`,
+  LIMIT 10;`,
   tokens: [
     [
       {
@@ -26,6 +26,11 @@ export const multiLineFullQuery = {
       },
       {
         offset: 14,
+        type: 'delimiter.sql',
+        language: 'sql',
+      },
+      {
+        offset: 15,
         type: 'white.sql',
         language: 'sql',
       },
@@ -205,5 +210,5 @@ export const multiLineFullQuery = {
         language: 'sql',
       },
     ],
-  ] as monacoTypes.Token[][],
+  ],
 };

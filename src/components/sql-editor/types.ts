@@ -22,8 +22,11 @@ export interface CustomSuggestionKind {
 
 export interface CustomStatementPlacement {
   id: string;
+  name?: string;
   resolve: StatementPositionResolver;
 }
+export type CustomStatementPlacementProvider = () => CustomStatementPlacement[];
+export type CustomSuggestionKindProvider = () => CustomSuggestionKind[];
 
 export interface ColumnDefinition {
   name: string;
@@ -62,13 +65,13 @@ export interface SQLCompletionItemProvider
    * Allows custom suggestion kinds to be defined and correlate them with <Custom>StatementPosition.
    * @alpha
    */
-  customSuggestionKinds?: () => CustomSuggestionKind[];
+  customSuggestionKinds?: CustomSuggestionKindProvider;
 
   /**
    * Allows custom statement placement definition.
    * @alpha
    */
-  customStatementPlacement?: () => CustomStatementPlacement[];
+  customStatementPlacement?: CustomStatementPlacementProvider;
 
   /**
    * Allows providing a custom function for resolving db tables.

@@ -67,8 +67,8 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
     },
 
     {
-      id: StatementPosition.WhereKey,
-      name: StatementPosition.WhereKey,
+      id: StatementPosition.WhereKeyword,
+      name: StatementPosition.WhereKeyword,
       kind: [SuggestionKind.LabelKeys],
     },
     {

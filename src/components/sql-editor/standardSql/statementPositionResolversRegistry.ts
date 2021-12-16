@@ -11,6 +11,7 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
         Boolean(
           currentToken === null ||
             (currentToken.isWhiteSpace() && currentToken.previous === null) ||
+            currentToken.is(TokenType.Keyword, SELECT) ||
             (currentToken.is(TokenType.Keyword, SELECT) && currentToken.previous === null) ||
             previousIsSlash ||
             (currentToken.isIdentifier() && (previousIsSlash || currentToken?.previous === null)) ||
@@ -35,15 +36,6 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
         Boolean(previousNonWhiteSpace?.value === SELECT),
     },
     {
-      id: StatementPosition.AfterSelectFuncFirstArgument,
-      name: StatementPosition.AfterSelectFuncFirstArgument,
-      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
-        Boolean(
-          (previousNonWhiteSpace?.is(TokenType.Parenthesis, '(') || currentToken?.is(TokenType.Parenthesis, '()')) &&
-            previousKeyword?.value === SELECT
-        ),
-    },
-    {
       id: StatementPosition.AfterSelectArguments,
       name: StatementPosition.AfterSelectArguments,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
@@ -51,12 +43,29 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
       },
     },
     {
+      id: StatementPosition.AfterSelectFuncFirstArgument,
+      name: StatementPosition.AfterSelectFuncFirstArgument,
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
+        return Boolean(
+          previousKeyword?.value === SELECT &&
+            (previousNonWhiteSpace?.is(TokenType.Parenthesis, '(') || currentToken?.is(TokenType.Parenthesis, '()'))
+        );
+      },
+    },
+
+    {
       id: StatementPosition.FromKeyword,
       name: StatementPosition.FromKeyword,
-      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
         // cloudwatch specific commented out
         // Boolean(previousKeyword?.value === SELECT && previousNonWhiteSpace?.isParenthesis()),
-        Boolean(previousKeyword?.value === SELECT && previousNonWhiteSpace?.value !== ','),
+
+        return Boolean(
+          (previousKeyword?.value === SELECT && previousNonWhiteSpace?.value !== ',') ||
+            ((currentToken?.isKeyword() || currentToken?.isIdentifier()) &&
+              FROM.toLowerCase().startsWith(currentToken.value.toLowerCase()))
+        );
+      },
     },
     {
       id: StatementPosition.AfterFromKeyword,
@@ -70,7 +79,9 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
         Boolean(
           (previousKeyword?.value === FROM && previousNonWhiteSpace?.isDoubleQuotedString()) ||
+            (previousKeyword?.value === FROM && previousNonWhiteSpace?.isIdentifier()) ||
             (previousKeyword?.value === FROM && previousNonWhiteSpace?.isVariable()) ||
+            //  cloudwatch specific
             (previousKeyword?.value === SCHEMA && previousNonWhiteSpace?.is(TokenType.Parenthesis, ')'))
         ),
     },
@@ -85,8 +96,8 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
       },
     },
     {
-      id: StatementPosition.WhereKey,
-      name: StatementPosition.WhereKey,
+      id: StatementPosition.WhereKeyword,
+      name: StatementPosition.WhereKeyword,
       resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
         Boolean(
           previousKeyword?.value === WHERE &&
@@ -117,12 +128,21 @@ export function initStatementPositionResolvers(): StatementPositionResolversRegi
     {
       id: StatementPosition.AfterWhereValue,
       name: StatementPosition.AfterWhereValue,
-      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) =>
-        Boolean(
-          previousKeyword?.value === WHERE && (previousNonWhiteSpace?.isString() || previousNonWhiteSpace?.isNumber())
+      resolve: (currentToken, previousKeyword, previousNonWhiteSpace, previousIsSlash) => {
+        return Boolean(
+          previousKeyword?.value === WHERE &&
+            (previousNonWhiteSpace?.isString() ||
+              previousNonWhiteSpace?.isNumber() ||
+              (previousNonWhiteSpace?.is(TokenType.IdentifierQuote) &&
+                previousNonWhiteSpace.getPreviousNonWhiteSpaceToken()?.is(TokenType.Identifier) &&
+                previousNonWhiteSpace
+                  ?.getPreviousNonWhiteSpaceToken()
+                  ?.getPreviousNonWhiteSpaceToken()
+                  ?.is(TokenType.IdentifierQuote)))
           // cloudwatch specific?
           // || previousNonWhiteSpace?.is(TokenType.Parenthesis, ')')
-        ),
+        );
+      },
     },
     {
       id: StatementPosition.AfterGroupByKeywords,

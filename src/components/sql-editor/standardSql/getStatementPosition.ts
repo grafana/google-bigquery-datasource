@@ -11,9 +11,7 @@ export function getStatementPosition(
   const previousNonWhiteSpace = currentToken?.getPreviousNonWhiteSpaceToken();
   const previousKeyword = currentToken?.getPreviousKeyword();
   const previousIsSlash = currentToken?.getPreviousNonWhiteSpaceToken()?.is(TokenType.Operator, '/');
-
   const resolvers = statementPositionResolversRegistry.list();
-
   const positions = [];
 
   for (const resolver of resolvers) {

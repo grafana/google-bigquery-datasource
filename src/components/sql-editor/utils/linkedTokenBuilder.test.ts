@@ -9,9 +9,10 @@ import { DESC, LIMIT, SELECT } from '../standardSql/language';
 describe('linkedTokenBuilder', () => {
   describe('singleLineFullQuery', () => {
     const testModel = TextModel(singleLineFullQuery.query);
-    const MonacoMock = getMonacoMock({
-      [singleLineFullQuery.query]: singleLineFullQuery.tokens,
-    });
+    const queriesMock = new Map();
+    queriesMock.set(singleLineFullQuery.query, singleLineFullQuery.tokens);
+
+    const MonacoMock = getMonacoMock(queriesMock);
 
     it('should add correct references to next LinkedToken', () => {
       const position: monacoTypes.IPosition = { lineNumber: 1, column: 0 };
@@ -34,9 +35,10 @@ describe('linkedTokenBuilder', () => {
 
   describe('multiLineFullQuery', () => {
     const testModel = TextModel(multiLineFullQuery.query);
-    const MonacoMock = getMonacoMock({
-      [multiLineFullQuery.query]: multiLineFullQuery.tokens,
-    });
+    const queriesMock = new Map();
+    queriesMock.set(multiLineFullQuery.query, multiLineFullQuery.tokens);
+
+    const MonacoMock = getMonacoMock(queriesMock);
 
     it('should add LinkedToken with whitespace in case empty lines', () => {
       const position: monacoTypes.IPosition = { lineNumber: 3, column: 0 };

@@ -6,8 +6,6 @@ export function getSuggestionKinds(
   statementPosition: StatementPosition[],
   suggestionsKindRegistry: Registry<SuggestionKindRegistyItem>
 ): SuggestionKind[] {
-  let k;
-
   let result: SuggestionKind[] = [];
   for (let i = 0; i < statementPosition.length; i++) {
     const exists = suggestionsKindRegistry.getIfExists(statementPosition[i]);
