@@ -17,6 +17,10 @@ const getMonacoMock: (testData: Map<string, Pick<monacoTypes.Token, 'language' |
       );
     },
   },
+  languages: {
+    CompletionItemKind: { Snippet: 2, Function: 1, Keyword: 3 },
+    CompletionItemInsertTextRule: { InsertAsSnippet: 2 },
+  },
 });
 
 export { getMonacoMock };

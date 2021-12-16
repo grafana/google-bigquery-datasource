@@ -5,6 +5,7 @@ import { LinkedToken } from './utils/LinkedToken';
 import { OperatorType, StatementPosition, SuggestionKind } from './utils/types';
 
 export interface PositionContext {
+  position: monacoTypes.IPosition;
   kind: SuggestionKind[];
   statementPosition: StatementPosition[];
   currentToken: LinkedToken | null;

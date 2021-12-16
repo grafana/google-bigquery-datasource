@@ -114,7 +114,6 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
           monaco,
           currentToken,
           kind,
-          statementPosition,
           position,
           ctx,
           instanceSuggestionsRegistry
