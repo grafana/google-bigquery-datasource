@@ -108,7 +108,6 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
           currentToken,
           statementPosition,
           kind,
-          position,
           range: monaco.Range.fromPositions(position),
         };
 
@@ -190,6 +189,14 @@ function extendStandardRegistries(id: string, lid: string, customProvider: SQLCo
           name: placement.id,
           kind: [],
         });
+      } else {
+        // Allow extension to the built-in placement resolvers
+        const origResolve = exists.resolve;
+        exists.resolve = (...args) => {
+          const orig = origResolve(...args);
+          const ext = placement.resolve(...args);
+          return orig || ext;
+        };
       }
     }
   }
