@@ -1,9 +1,9 @@
 import { monacoTypes } from '@grafana/ui';
 
 // Stub for the Monaco instance. Only implements the parts that are used in cloudwatch sql
-const getMonacoMock: (testData: Map<string, Pick<monacoTypes.Token, 'language' | 'offset' | 'type'>[][]>) => any = (
-  testData
-) => ({
+const getMonacoMock: (
+  testData: Map<string, Array<Array<Pick<monacoTypes.Token, 'language' | 'offset' | 'type'>>>>
+) => any = (testData) => ({
   editor: {
     tokenize: (value: string, languageId: string) => testData.get(value),
   },

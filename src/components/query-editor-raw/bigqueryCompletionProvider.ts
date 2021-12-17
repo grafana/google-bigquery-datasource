@@ -11,8 +11,8 @@ import {
 } from 'components/sql-editor';
 
 interface CompletionProviderGetterArgs {
-  getColumns: React.MutableRefObject<(t: string) => Promise<Array<ColumnDefinition>>>;
-  getTables: React.MutableRefObject<(d?: string) => Promise<Array<TableDefinition>>>;
+  getColumns: React.MutableRefObject<(t: string) => Promise<ColumnDefinition[]>>;
+  getTables: React.MutableRefObject<(d?: string) => Promise<TableDefinition[]>>;
 }
 
 const BQ_AGGREGATE_FNS = [

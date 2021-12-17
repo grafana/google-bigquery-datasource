@@ -29,7 +29,7 @@ function assertPosition(
 
 export const testStatementPosition = (
   expected: StatementPosition | string,
-  cases: Array<StatementPositionResolverTestCase>,
+  cases: StatementPositionResolverTestCase[],
   resolvers: () => CustomStatementPlacement[]
 ) => {
   describe(`${expected}`, () => {
@@ -37,7 +37,7 @@ export const testStatementPosition = (
     let statementPositionResolversRegistry: Registry<StatementPositionResolversRegistryItem>;
 
     beforeEach(() => {
-      const mockQueries = new Map<string, Pick<monacoTypes.Token, 'language' | 'offset' | 'type'>[][]>();
+      const mockQueries = new Map<string, Array<Array<Pick<monacoTypes.Token, 'language' | 'offset' | 'type'>>>>();
       cases.forEach((c) => mockQueries.set(c.query.query, c.query.tokens));
 
       MonacoMock = getMonacoMock(mockQueries);
