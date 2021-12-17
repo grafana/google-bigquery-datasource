@@ -7,8 +7,8 @@ import { getBigQueryCompletionProvider } from './bigqueryCompletionProvider';
 
 type Props = {
   query: BigQueryQueryNG;
-  getTables: (d?: string) => Promise<Array<TableDefinition>>;
-  getColumns: (t: string) => Promise<Array<ColumnDefinition>>;
+  getTables: (d?: string) => Promise<TableDefinition[]>;
+  getColumns: (t: string) => Promise<ColumnDefinition[]>;
   getSchema?: () => TableSchema | null;
   onChange: (value: BigQueryQueryNG) => void;
   onRunQuery: () => void;

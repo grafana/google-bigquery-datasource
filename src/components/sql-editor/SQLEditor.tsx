@@ -101,6 +101,7 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
           currentToken,
           statementPosition,
           kind,
+          position,
           range: monaco.Range.fromPositions(position),
         };
 
@@ -114,7 +115,6 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
           monaco,
           currentToken,
           kind,
-          position,
           ctx,
           instanceSuggestionsRegistry
         );

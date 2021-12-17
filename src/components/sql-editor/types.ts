@@ -18,7 +18,7 @@ export type CustomSuggestion = Partial<monacoTypes.languages.CompletionItem> & {
 export interface CustomSuggestionKind {
   id: string;
   suggestionsResolver: SuggestionsResolver;
-  applyTo?: (StatementPosition | string)[];
+  applyTo?: Array<StatementPosition | string>;
 }
 
 export interface CustomStatementPlacement {

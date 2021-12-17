@@ -16,7 +16,6 @@ export const initStandardSuggestions =
         id: SuggestionKind.SelectKeyword,
         name: SuggestionKind.SelectKeyword,
         suggestions: (_, m) =>
-          (console.log(m) as any) ||
           Promise.resolve([
             {
               label: `${SELECT} <column>`,
