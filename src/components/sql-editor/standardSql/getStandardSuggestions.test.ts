@@ -3,10 +3,10 @@ import { monacoTypes } from '@grafana/ui';
 import { singleLineFullQuery } from '../mocks/testData';
 import { linkedTokenBuilder } from '../utils/linkedTokenBuilder';
 import { TextModel } from '../mocks/TextModel';
-import { CustomVariableSupport, Registry } from '@grafana/data';
+import { Registry } from '@grafana/data';
 import { initStandardSuggestions } from './standardSuggestionsRegistry';
 import { FunctionsRegistryItem, OperatorsRegistryItem, SuggestionsRegistyItem } from './types';
-import { SuggestionKind } from '../utils/types';
+import { OperatorType, SuggestionKind } from '../utils/types';
 import { getStandardSuggestions } from './getStandardSuggestions';
 import { CustomSuggestion, PositionContext } from '../types';
 describe('getStandardSuggestions', () => {
@@ -48,7 +48,137 @@ describe('getStandardSuggestions', () => {
     expect(result[0].label).toEqual(suggestionMock.label);
   });
 
-  it('suggests select and select from', async () => {
+  it('suggests custom functions with arguments from the registry', async () => {
+    const customFunction = {
+      name: 'customFunction',
+      id: 'customFunction',
+    };
+
+    const suggestionsRegistry = new Registry(
+      initStandardSuggestions(
+        new Registry<FunctionsRegistryItem>(() => [customFunction]),
+        new Registry<OperatorsRegistryItem>(() => [])
+      )
+    );
+
+    const result = await getStandardSuggestions(
+      MonacoMock,
+      token,
+      [SuggestionKind.FunctionsWithArguments],
+      posContextMock as PositionContext,
+      suggestionsRegistry
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toEqual(customFunction.name);
+  });
+
+  it('suggests custom functions without arguments from the registry', async () => {
+    const customFunction = {
+      name: 'customFunction',
+      id: 'customFunction',
+    };
+
+    const suggestionsRegistry = new Registry(
+      initStandardSuggestions(
+        new Registry<FunctionsRegistryItem>(() => [customFunction]),
+        new Registry<OperatorsRegistryItem>(() => [])
+      )
+    );
+
+    const result = await getStandardSuggestions(
+      MonacoMock,
+      token,
+      [SuggestionKind.FunctionsWithoutArguments],
+      posContextMock as PositionContext,
+      suggestionsRegistry
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toEqual(customFunction.name);
+  });
+
+  it('suggests custom logical operators from the registry', async () => {
+    const customLogicalOperator = {
+      type: OperatorType.Logical,
+      name: 'customOperator',
+      id: 'customOperator',
+      operator: '½',
+    };
+
+    const suggestionsRegistry = new Registry(
+      initStandardSuggestions(
+        new Registry<FunctionsRegistryItem>(() => []),
+        new Registry<OperatorsRegistryItem>(() => [customLogicalOperator])
+      )
+    );
+
+    const result = await getStandardSuggestions(
+      MonacoMock,
+      token,
+      [SuggestionKind.LogicalOperators],
+      posContextMock as PositionContext,
+      suggestionsRegistry
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toEqual(customLogicalOperator.operator);
+  });
+
+  it('suggests custom comparison operators from the registry', async () => {
+    const customComparisonOperator = {
+      type: OperatorType.Comparison,
+      name: 'customOperator',
+      id: 'customOperator',
+      operator: '§',
+    };
+
+    const suggestionsRegistry = new Registry(
+      initStandardSuggestions(
+        new Registry<FunctionsRegistryItem>(() => []),
+        new Registry<OperatorsRegistryItem>(() => [customComparisonOperator])
+      )
+    );
+
+    const result = await getStandardSuggestions(
+      MonacoMock,
+      token,
+      [SuggestionKind.ComparisonOperators],
+      posContextMock as PositionContext,
+      suggestionsRegistry
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].label).toEqual(customComparisonOperator.operator);
+  });
+
+  it('does not suggest logical operators when asked for comparison operators', async () => {
+    const customLogicalOperator = {
+      type: OperatorType.Logical,
+      name: 'customOperator',
+      id: 'customOperator',
+      operator: '§',
+    };
+
+    const suggestionsRegistry = new Registry(
+      initStandardSuggestions(
+        new Registry<FunctionsRegistryItem>(() => []),
+        new Registry<OperatorsRegistryItem>(() => [customLogicalOperator])
+      )
+    );
+
+    const result = await getStandardSuggestions(
+      MonacoMock,
+      token,
+      [SuggestionKind.ComparisonOperators],
+      posContextMock as PositionContext,
+      suggestionsRegistry
+    );
+
+    expect(result).toHaveLength(0);
+  });
+
+  it('suggests SELECT and SELECT FROM from the standard registry', async () => {
     const suggestionsRegistry = new Registry(
       initStandardSuggestions(
         new Registry<FunctionsRegistryItem>(() => []),
