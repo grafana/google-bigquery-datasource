@@ -8,11 +8,11 @@ import { formatBigqueryError, quoteLiteral } from 'utils';
 import BQTypes from '@google-cloud/bigquery/build/src/types';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
-  private readonly baseUrl: string;
+  // private readonly baseUrl: string;
   private readonly url?: string;
 
-  private queryModel: BigQueryQuery;
-  private processingLocation?: string;
+  // private queryModel: BigQueryQuery;
+  // private processingLocation?: string;
   // private queryPriority?: QueryPriority;
   jsonData: BigQueryOptions;
 
@@ -20,18 +20,18 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
 
   constructor(instanceSettings: DataSourceInstanceSettings<BigQueryOptions>) {
     super(instanceSettings);
-    this.baseUrl = `/bigquery/`;
+    // this.baseUrl = `/bigquery/`;
     this.url = instanceSettings.url;
     // this.responseParser = new ResponseParser();
-    this.queryModel = new BigQueryQuery({} as any);
+    // this.queryModel = new BigQueryQuery({} as any);
 
     this.jsonData = instanceSettings.jsonData;
     this.authenticationType = instanceSettings.jsonData.authenticationType || GoogleAuthType.JWT;
 
-    this.processingLocation =
-      this.jsonData.processingLocation && this.jsonData.processingLocation.length
-        ? this.jsonData.processingLocation
-        : undefined;
+    // this.processingLocation =
+    //   this.jsonData.processingLocation && this.jsonData.processingLocation.length
+    //     ? this.jsonData.processingLocation
+    //     : undefined;
 
     // this.queryPriority = this.jsonData.queryPriority;
   }
@@ -47,17 +47,17 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
   }
 
   async metricFindQuery(query: string, optionalOptions: any) {
-    let refId = 'tempvar';
-    if (optionalOptions && optionalOptions.variable && optionalOptions.variable.name) {
-      refId = optionalOptions.variable.name;
-    }
+    // let refId = 'tempvar';
+    // if (optionalOptions && optionalOptions.variable && optionalOptions.variable.name) {
+    //   refId = optionalOptions.variable.name;
+    // }
 
-    const interpolatedQuery = {
-      datasourceId: this.id,
-      format: 'table',
-      rawSql: getTemplateSrv().replace(query, {}, this.interpolateVariable),
-      refId,
-    };
+    // const interpolatedQuery = {
+    //   datasourceId: this.id,
+    //   format: 'table',
+    //   rawSql: getTemplateSrv().replace(query, {}, this.interpolateVariable),
+    //   refId,
+    // };
 
     return [];
 
@@ -284,29 +284,29 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     return quotedValues.join(',');
   };
 
-  private async paginatedResults(path: string, dataName: string) {
-    let queryResults = await this.doRequest(`${this.baseUrl}${path}`);
-    let data = queryResults.data;
+  // private async paginatedResults(path: string, dataName: string) {
+  //   let queryResults = await this.doRequest(`${this.baseUrl}${path}`);
+  //   let data = queryResults.data;
 
-    if (!data) {
-      return data;
-    }
+  //   if (!data) {
+  //     return data;
+  //   }
 
-    const dataList = dataName.split('.');
-    dataList.forEach((element) => {
-      if (data && data[element]) {
-        data = data[element];
-      }
-    });
+  //   const dataList = dataName.split('.');
+  //   dataList.forEach((element) => {
+  //     if (data && data[element]) {
+  //       data = data[element];
+  //     }
+  //   });
 
-    while (queryResults && queryResults.data && queryResults.data.nextPageToken) {
-      queryResults = await this.doRequest(`${this.baseUrl}${path}` + '?pageToken=' + queryResults.data.nextPageToken);
-      dataList.forEach((element) => {
-        data = data.concat(queryResults.data[element]);
-      });
-    }
-    return data;
-  }
+  //   while (queryResults && queryResults.data && queryResults.data.nextPageToken) {
+  //     queryResults = await this.doRequest(`${this.baseUrl}${path}` + '?pageToken=' + queryResults.data.nextPageToken);
+  //     dataList.forEach((element) => {
+  //       data = data.concat(queryResults.data[element]);
+  //     });
+  //   }
+  //   return data;
+  // }
 
   // private _updateAlias(q: string, options: any, shiftstr: string) {
   //   if (shiftstr !== undefined) {
