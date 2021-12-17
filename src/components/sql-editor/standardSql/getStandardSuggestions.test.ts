@@ -203,8 +203,8 @@ describe('getStandardSuggestions', () => {
             "title": "",
           },
           "insertText": "SELECT $0",
-          "insertTextRules": 2,
-          "kind": 2,
+          "insertTextRules": 4,
+          "kind": 27,
           "label": "SELECT <column>",
           "range": Object {
             "endColumn": 7,
@@ -220,8 +220,8 @@ describe('getStandardSuggestions', () => {
             "title": "",
           },
           "insertText": "SELECT $2 FROM $1",
-          "insertTextRules": 2,
-          "kind": 2,
+          "insertTextRules": 4,
+          "kind": 27,
           "label": "SELECT <column> FROM <table>>",
           "range": Object {
             "endColumn": 7,

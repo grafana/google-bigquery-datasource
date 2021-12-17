@@ -14,4 +14,5 @@ export {
   SuggestionKind,
   CompletionItemKind,
   CompletionItemPriority,
+  CompletionItemInsertTextRule,
 } from './types';

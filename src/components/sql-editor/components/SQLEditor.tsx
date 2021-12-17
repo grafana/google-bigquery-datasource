@@ -4,6 +4,7 @@ import { getStatementPosition } from '../standardSql/getStatementPosition';
 import { getStandardSuggestions } from '../standardSql/getStandardSuggestions';
 import { initSuggestionsKindRegistry, SuggestionKindRegistyItem } from '../standardSql/suggestionsKindRegistry';
 import {
+  CompletionItemKind,
   CompletionItemPriority,
   CustomSuggestion,
   PositionContext,
@@ -228,10 +229,10 @@ function extendStandardRegistries(id: string, lid: string, customProvider: SQLCo
       const o = await s(ctx, m);
       const oo = (await customProvider.tables!.resolve!()).map((x) => ({
         label: x.name,
-        kind: 1,
         insertText: x.completion ?? x.name,
-        sortText: CompletionItemPriority.High,
         command: TRIGGER_SUGGEST,
+        kind: CompletionItemKind.Field,
+        sortText: CompletionItemPriority.High,
       }));
       return [...o, ...oo];
     };
@@ -256,8 +257,8 @@ function extendStandardRegistries(id: string, lid: string, customProvider: SQLCo
         oo = columns
           ? columns.map<CustomSuggestion>((x) => ({
               label: x.name,
-              kind: m.languages.CompletionItemKind.Field,
               insertText: x.completion ?? x.name,
+              kind: CompletionItemKind.Field,
               sortText: CompletionItemPriority.High,
             }))
           : [];

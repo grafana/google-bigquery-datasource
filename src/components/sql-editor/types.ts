@@ -171,6 +171,7 @@ export enum SuggestionKind {
   LogicalOperators = 'logicalOperators',
 }
 
+// TODO: export from grafana/ui
 export enum CompletionItemPriority {
   High = 'a',
   MediumHigh = 'd',
@@ -179,7 +180,6 @@ export enum CompletionItemPriority {
   Low = 'q',
 }
 
-// TODO: export from grafana/ui
 export enum CompletionItemKind {
   Method = 0,
   Function = 1,
@@ -209,4 +209,9 @@ export enum CompletionItemKind {
   User = 25,
   Issue = 26,
   Snippet = 27,
+}
+
+export enum CompletionItemInsertTextRule {
+  KeepWhitespace = 1,
+  InsertAsSnippet = 4,
 }

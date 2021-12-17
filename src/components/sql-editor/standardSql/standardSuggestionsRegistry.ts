@@ -1,6 +1,12 @@
 import { Registry } from '@grafana/data';
 import { TRIGGER_SUGGEST } from '../utils/commands';
-import { CompletionItemPriority, OperatorType, SuggestionKind } from '../types';
+import {
+  CompletionItemInsertTextRule,
+  CompletionItemKind,
+  CompletionItemPriority,
+  OperatorType,
+  SuggestionKind,
+} from '../types';
 import {
   AS,
   ASC,
@@ -36,16 +42,16 @@ export const initStandardSuggestions =
             {
               label: `${SELECT} <column>`,
               insertText: `${SELECT} $0`,
-              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              kind: m.languages.CompletionItemKind.Snippet,
+              insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: CompletionItemKind.Snippet,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.Medium,
             },
             {
               label: `${SELECT} <column> ${FROM} <table>>`,
               insertText: `${SELECT} $2 ${FROM} $1`,
-              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              kind: m.languages.CompletionItemKind.Snippet,
+              insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: CompletionItemKind.Snippet,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.Medium,
             },
@@ -59,8 +65,8 @@ export const initStandardSuggestions =
             {
               label: `${WITH} <alias> ${AS} ( ... )`,
               insertText: `${WITH} $1  ${AS} ( $2 )`,
-              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              kind: m.languages.CompletionItemKind.Snippet,
+              insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: CompletionItemKind.Snippet,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.Medium,
             },
@@ -74,8 +80,8 @@ export const initStandardSuggestions =
             ...functions.list().map((f) => ({
               label: f.name,
               insertText: `${f.name}($0)`,
-              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              kind: m.languages.CompletionItemKind.Function,
+              insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: CompletionItemKind.Function,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.MediumHigh,
             })),
@@ -89,8 +95,8 @@ export const initStandardSuggestions =
             ...functions.list().map((f) => ({
               label: f.name,
               insertText: `${f.name}()`,
-              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              kind: m.languages.CompletionItemKind.Function,
+              insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: CompletionItemKind.Function,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.MediumHigh,
             })),
@@ -104,8 +110,8 @@ export const initStandardSuggestions =
             {
               label: FROM,
               insertText: `${FROM} $0`,
-              insertTextRules: m.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-              kind: m.languages.CompletionItemKind.Keyword,
+              insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+              kind: CompletionItemKind.Keyword,
             },
           ]),
       },
@@ -132,6 +138,7 @@ export const initStandardSuggestions =
                 insertText: `${o.operator} `,
                 command: TRIGGER_SUGGEST,
                 sortText: CompletionItemPriority.High,
+                kind: CompletionItemKind.Operator,
               }))
           ),
       },
@@ -144,7 +151,8 @@ export const initStandardSuggestions =
               label: WHERE,
               insertText: `${WHERE} `,
               command: TRIGGER_SUGGEST,
-              sortText: CompletionItemPriority.High,
+              sortText: CompletionItemPriority.MediumHigh,
+              kind: CompletionItemKind.Keyword,
             },
           ]),
       },
@@ -161,6 +169,7 @@ export const initStandardSuggestions =
                 insertText: `${o.operator} `,
                 command: TRIGGER_SUGGEST,
                 sortText: CompletionItemPriority.High,
+                kind: CompletionItemKind.Operator,
               }))
           ),
       },
@@ -174,6 +183,7 @@ export const initStandardSuggestions =
               insertText: `${GROUP} ${BY} `,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.MediumHigh,
+              kind: CompletionItemKind.Keyword,
             },
           ]),
       },
@@ -187,6 +197,7 @@ export const initStandardSuggestions =
               insertText: `${ORDER} ${BY} `,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.Medium,
+              kind: CompletionItemKind.Keyword,
             },
           ]),
       },
@@ -200,6 +211,7 @@ export const initStandardSuggestions =
               insertText: `${LIMIT} `,
               command: TRIGGER_SUGGEST,
               sortText: CompletionItemPriority.MediumLow,
+              kind: CompletionItemKind.Keyword,
             },
           ]),
       },
@@ -212,6 +224,7 @@ export const initStandardSuggestions =
               label: o,
               insertText: `${o} `,
               command: TRIGGER_SUGGEST,
+              kind: CompletionItemKind.Keyword,
             }))
           ),
       },
