@@ -1,4 +1,4 @@
-import { TestQueryModel } from 'components/sql-editor/test-utils';
+import { TestQueryModel } from '@grafana/experimental';
 
 export const simpleBigQueryQuery: TestQueryModel = {
   query: 'SELECT block_id FROM raintank-dev.bitcoin_blockchain.blocks LIMIT 10;',

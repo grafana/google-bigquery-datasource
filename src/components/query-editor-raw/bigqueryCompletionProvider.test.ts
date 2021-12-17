@@ -1,4 +1,4 @@
-import { SQLEditorTestUtils } from 'components/sql-editor';
+import { SQLEditorTestUtils } from '@grafana/experimental';
 import { CustomStatementPlacement, customStatementPlacement } from './bigqueryCompletionProvider';
 import { simpleBigQueryQuery } from './testData/simpleBigQueryQuery';
 

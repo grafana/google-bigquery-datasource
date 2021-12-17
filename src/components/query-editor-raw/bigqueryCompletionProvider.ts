@@ -8,7 +8,7 @@ import {
   SuggestionKindProvider,
   TableDefinition,
   TokenType,
-} from 'components/sql-editor';
+} from '@grafana/experimental';
 
 interface CompletionProviderGetterArgs {
   getColumns: React.MutableRefObject<(t: string) => Promise<ColumnDefinition[]>>;
