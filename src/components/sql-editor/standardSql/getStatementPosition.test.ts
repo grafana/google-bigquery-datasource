@@ -10,7 +10,7 @@ import {
   singleLineTwoQueriesWithAggregation,
 } from '../mocks/testData';
 import { testStatementPosition } from '../test-utils/statementPosition';
-import { StatementPosition } from '../utils/types';
+import { StatementPosition } from '../types';
 import { initStatementPositionResolvers } from './statementPositionResolversRegistry';
 
 describe('statementPosition', () => {

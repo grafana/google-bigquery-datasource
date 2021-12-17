@@ -1,4 +1,4 @@
-import { StatementPosition, TokenType } from '../utils/types';
+import { StatementPosition, TokenType } from '../types';
 import { LinkedToken } from '../utils/LinkedToken';
 import { StatementPositionResolversRegistryItem } from './types';
 import { Registry } from '@grafana/data';

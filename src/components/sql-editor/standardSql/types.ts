@@ -1,8 +1,7 @@
 import { RegistryItem } from '@grafana/data';
 import { monacoTypes } from '@grafana/ui';
-import { CustomSuggestion, PositionContext } from '../types';
+import { CustomSuggestion, OperatorType, PositionContext, StatementPosition, SuggestionKind } from '../types';
 import { LinkedToken } from '../utils/LinkedToken';
-import { OperatorType, StatementPosition, SuggestionKind } from '../utils/types';
 
 export interface SuggestionsRegistyItem extends RegistryItem {
   id: SuggestionKind;

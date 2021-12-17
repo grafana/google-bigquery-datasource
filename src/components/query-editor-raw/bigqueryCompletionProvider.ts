@@ -1,12 +1,14 @@
-import { FROM } from 'components/sql-editor/standardSql/language';
 import {
   ColumnDefinition,
-  CustomStatementPlacementProvider,
+  CompletionItemKind,
   LanguageCompletionProvider,
+  LinkedToken,
+  OperatorType,
+  StatementPlacementProvider,
+  SuggestionKindProvider,
   TableDefinition,
-} from 'components/sql-editor/types';
-import { LinkedToken } from 'components/sql-editor/utils/LinkedToken';
-import { OperatorType, TokenType } from 'components/sql-editor/utils/types';
+  TokenType,
+} from 'components/sql-editor';
 
 interface CompletionProviderGetterArgs {
   getColumns: React.MutableRefObject<(t: string) => Promise<Array<ColumnDefinition>>>;
@@ -44,24 +46,9 @@ const BQ_OPERATORS = [
   { type: OperatorType.Logical, id: 'LOGICAL_OR', operator: 'OR' },
 ];
 
-export enum CustomStatementPlacement {
-  AfterDataset = 'afterDataset',
-}
-export const customStatementPlacement: CustomStatementPlacementProvider = () => [
-  {
-    id: CustomStatementPlacement.AfterDataset,
-    resolve: (currentToken, previousKeyword) => {
-      return Boolean(
-        previousKeyword?.value === FROM &&
-          (currentToken?.is(TokenType.Delimiter, '.') || currentToken?.previous?.is(TokenType.Delimiter, '.'))
-      );
-    },
-  },
-];
-
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables }) =>
-  (monaco) => ({
+  () => ({
     triggerCharacters: ['.', ' ', '$', ',', '(', "'"],
     tables: {
       resolve: async () => {
@@ -85,54 +72,56 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
     },
     supportedFunctions: () => BQ_AGGREGATE_FNS,
     supportedOperators: () => BQ_OPERATORS,
-    customSuggestionKinds: () => {
-      return [
-        {
-          id: 'tablesWithinDataset',
-          applyTo: [CustomStatementPlacement.AfterDataset],
-          suggestionsResolver: async (ctx) => {
-            let processedToken = ctx.currentToken;
-            let tablePath = '';
-            while (processedToken?.previous && !processedToken.previous.isWhiteSpace()) {
-              tablePath = processedToken.previous.value + tablePath;
-              processedToken = processedToken.previous;
-            }
-
-            const t = await getTables.current(tablePath);
-
-            return t.map((table) => ({
-              label: table.name,
-              insertText: table.completion ?? table.name,
-              kind: 1,
-              range: {
-                ...ctx.range,
-                startColumn: ctx.range.endColumn,
-                endColumn: ctx.range.endColumn,
-              },
-            }));
-          },
-        },
-      ];
-    },
-
+    customSuggestionKinds: customSuggestionKinds(getTables),
     customStatementPlacement,
-
-    // provideCompletionItems: () => {
-    //   return {
-    //     suggestions: [],
-    //   };
-    // },
   });
 
-// function getColumnSchema(schema: TableFieldSchema[], column: string): TableFieldSchema | undefined {
-//   const path = column.split('.');
-//   let currentSchema = schema;
+export enum CustomStatementPlacement {
+  AfterDataset = 'afterDataset',
+}
 
-//   const k = path.shift();
-//   const c = currentSchema.find((f) => f.name === k);
+export enum CustomSuggestionKind {
+  TablesWithinDataset = 'tablesWithinDataset',
+}
 
-//   if (c && c.schema && path.length > 0) {
-//     return getColumnSchema(c.schema, path.join('.'));
-//   }
-//   return c;
-// }
+export const customStatementPlacement: StatementPlacementProvider = () => [
+  {
+    id: CustomStatementPlacement.AfterDataset,
+    resolve: (currentToken, previousKeyword) => {
+      return Boolean(
+        previousKeyword?.value.toLowerCase() === 'from' &&
+          (currentToken?.is(TokenType.Delimiter, '.') || currentToken?.previous?.is(TokenType.Delimiter, '.'))
+      );
+    },
+  },
+];
+
+export const customSuggestionKinds: (getTables: CompletionProviderGetterArgs['getTables']) => SuggestionKindProvider =
+  (getTables) => () =>
+    [
+      {
+        id: CustomSuggestionKind.TablesWithinDataset,
+        applyTo: [CustomStatementPlacement.AfterDataset],
+        suggestionsResolver: async (ctx) => {
+          let processedToken = ctx.currentToken;
+          let tablePath = '';
+          while (processedToken?.previous && !processedToken.previous.isWhiteSpace()) {
+            tablePath = processedToken.previous.value + tablePath;
+            processedToken = processedToken.previous;
+          }
+
+          const t = await getTables.current(tablePath);
+
+          return t.map((table) => ({
+            label: table.name,
+            insertText: table.completion ?? table.name,
+            kind: CompletionItemKind.Field,
+            range: {
+              ...ctx.range,
+              startColumn: ctx.range.endColumn,
+              endColumn: ctx.range.endColumn,
+            },
+          }));
+        },
+      },
+    ];

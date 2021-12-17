@@ -1,5 +1,5 @@
 import { monacoTypes } from '@grafana/ui';
-import { TokenType } from './types';
+import { TokenType } from '../types';
 
 export class LinkedToken {
   constructor(

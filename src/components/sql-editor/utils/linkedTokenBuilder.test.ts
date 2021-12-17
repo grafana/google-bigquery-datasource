@@ -3,8 +3,8 @@ import { getMonacoMock } from '../mocks/Monaco';
 import { TextModel } from '../mocks/TextModel';
 import { multiLineFullQuery, singleLineFullQuery } from '../mocks/testData';
 import { linkedTokenBuilder } from './linkedTokenBuilder';
-import { TokenType } from './types';
 import { DESC, LIMIT, SELECT } from '../standardSql/language';
+import { TokenType } from '../types';
 
 describe('linkedTokenBuilder', () => {
   describe('singleLineFullQuery', () => {

@@ -1,7 +1,10 @@
 import { Registry } from '@grafana/data';
 import { SuggestionKindRegistyItem } from '../standardSql/suggestionsKindRegistry';
-import { StatementPosition, SuggestionKind } from './types';
+import { StatementPosition, SuggestionKind } from '../types';
 
+/**
+ * Given statement positions, returns list of suggestion kinds that apply to those positions.
+ */
 export function getSuggestionKinds(
   statementPosition: StatementPosition[],
   suggestionsKindRegistry: Registry<SuggestionKindRegistyItem>

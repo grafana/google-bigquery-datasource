@@ -1,4 +1,4 @@
-import { StatementPosition, TokenType } from '../utils/types';
+import { StatementPosition, TokenType } from '../types';
 import { AND, ASC, BY, DESC, EQUALS, FROM, GROUP, NOT_EQUALS, ORDER, SCHEMA, SELECT, WHERE, WITH } from './language';
 import { StatementPositionResolversRegistryItem } from './types';
 

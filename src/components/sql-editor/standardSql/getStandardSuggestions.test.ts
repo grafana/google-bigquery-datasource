@@ -6,9 +6,10 @@ import { TextModel } from '../mocks/TextModel';
 import { Registry } from '@grafana/data';
 import { initStandardSuggestions } from './standardSuggestionsRegistry';
 import { FunctionsRegistryItem, OperatorsRegistryItem, SuggestionsRegistyItem } from './types';
-import { OperatorType, SuggestionKind } from '../utils/types';
+import { OperatorType, SuggestionKind } from '../types';
 import { getStandardSuggestions } from './getStandardSuggestions';
 import { CustomSuggestion, PositionContext } from '../types';
+
 describe('getStandardSuggestions', () => {
   const mockQueries = new Map<string, Array<Array<Pick<monacoTypes.Token, 'language' | 'offset' | 'type'>>>>();
   const cases = [{ query: singleLineFullQuery, position: { line: 1, column: 0 } }];

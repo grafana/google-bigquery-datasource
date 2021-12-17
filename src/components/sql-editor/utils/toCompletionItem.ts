@@ -1,5 +1,5 @@
 import { monacoTypes } from '@grafana/ui';
-import { CompletionItemKind, CompletionItemPriority } from './types';
+import { CompletionItemKind, CompletionItemPriority } from '../types';
 
 export const toCompletionItem = (
   value: string,

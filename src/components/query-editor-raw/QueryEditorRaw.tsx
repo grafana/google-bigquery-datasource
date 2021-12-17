@@ -1,9 +1,8 @@
 import React, { useMemo, useRef, useEffect } from 'react';
 import { BigQueryQueryNG } from '../../bigquery_query';
 import { TableSchema } from 'api';
-import { SQLEditor } from 'components/sql-editor/SQLEditor';
-import { ColumnDefinition, TableDefinition } from 'components/sql-editor/types';
 import { getBigQueryCompletionProvider } from './bigqueryCompletionProvider';
+import { ColumnDefinition, SQLEditor, TableDefinition } from 'components/sql-editor';
 
 type Props = {
   query: BigQueryQueryNG;

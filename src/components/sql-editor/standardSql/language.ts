@@ -23,3 +23,5 @@ export const LOGICAL_OPERATORS = [AND, OR];
 export const EQUALS = '=';
 export const NOT_EQUALS = '!=';
 export const COMPARISON_OPERATORS = [EQUALS, NOT_EQUALS];
+
+export const STD_OPERATORS = [...COMPARISON_OPERATORS];

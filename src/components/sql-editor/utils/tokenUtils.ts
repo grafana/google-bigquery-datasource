@@ -1,7 +1,6 @@
 import { FROM, SCHEMA, SELECT } from '../standardSql/language';
+import { TokenType } from '../types';
 import { LinkedToken } from './LinkedToken';
-
-import { TokenType } from './types';
 
 export const getSelectToken = (currentToken: LinkedToken | null) =>
   currentToken?.getPreviousOfType(TokenType.Keyword, SELECT) ?? null;

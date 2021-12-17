@@ -1,9 +1,8 @@
 import { Registry } from '@grafana/data';
 import { Monaco, monacoTypes } from '@grafana/ui';
-import { PositionContext } from '../types';
+import { PositionContext, SuggestionKind } from '../types';
 import { LinkedToken } from '../utils/LinkedToken';
 import { toCompletionItem } from '../utils/toCompletionItem';
-import { SuggestionKind } from '../utils/types';
 import { SuggestionsRegistyItem } from './types';
 
 // Given standard and custom registered suggestions and kinds of suggestion expected, return a list of completion items

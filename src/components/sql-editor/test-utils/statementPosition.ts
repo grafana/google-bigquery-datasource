@@ -4,9 +4,8 @@ import { getMonacoMock } from '../mocks/Monaco';
 import { TextModel } from '../mocks/TextModel';
 import { getStatementPosition } from '../standardSql/getStatementPosition';
 import { StatementPositionResolversRegistryItem } from '../standardSql/types';
-import { CustomStatementPlacement } from '../types';
+import { CustomStatementPlacement, StatementPosition } from '../types';
 import { linkedTokenBuilder } from '../utils/linkedTokenBuilder';
-import { StatementPosition } from '../utils/types';
 import { TestQueryModel } from './types';
 
 interface StatementPositionResolverTestCase {

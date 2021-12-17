@@ -1,5 +1,5 @@
-import { SQLEditorTestUtils } from 'components/sql-editor/test-utils';
-import { customStatementPlacement, CustomStatementPlacement } from './bigqueryCompletionProvider';
+import { SQLEditorTestUtils } from 'components/sql-editor';
+import { CustomStatementPlacement, customStatementPlacement } from './bigqueryCompletionProvider';
 import { simpleBigQueryQuery } from './testData/simpleBigQueryQuery';
 
 describe('Custom statement position resolvers', () => {

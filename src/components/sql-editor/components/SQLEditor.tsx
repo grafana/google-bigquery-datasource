@@ -1,15 +1,21 @@
 import { CodeEditor, Monaco, monacoTypes } from '@grafana/ui';
 import React, { useMemo } from 'react';
-import { getStatementPosition } from './standardSql/getStatementPosition';
-import { getStandardSuggestions } from './standardSql/getStandardSuggestions';
-import { initSuggestionsKindRegistry, SuggestionKindRegistyItem } from './standardSql/suggestionsKindRegistry';
-import { CompletionItemPriority, CustomSuggestion, PositionContext, SQLCompletionItemProvider } from './types';
-import { getSuggestionKinds } from './utils/getSuggestionKind';
-import { linkedTokenBuilder } from './utils/linkedTokenBuilder';
-import { StatementPosition, SuggestionKind } from './utils/types';
-import { getTableToken } from './utils/tokenUtils';
-import { TRIGGER_SUGGEST } from './utils/misc';
-import { LinkedToken } from './utils/LinkedToken';
+import { getStatementPosition } from '../standardSql/getStatementPosition';
+import { getStandardSuggestions } from '../standardSql/getStandardSuggestions';
+import { initSuggestionsKindRegistry, SuggestionKindRegistyItem } from '../standardSql/suggestionsKindRegistry';
+import {
+  CompletionItemPriority,
+  CustomSuggestion,
+  PositionContext,
+  SQLCompletionItemProvider,
+  StatementPosition,
+  SuggestionKind,
+} from '../types';
+import { getSuggestionKinds } from '../utils/getSuggestionKind';
+import { linkedTokenBuilder } from '../utils/linkedTokenBuilder';
+import { getTableToken } from '../utils/tokenUtils';
+import { TRIGGER_SUGGEST } from '../utils/commands';
+import { LinkedToken } from '../utils/LinkedToken';
 import { v4 } from 'uuid';
 import { Registry } from '@grafana/data';
 import {
@@ -17,13 +23,13 @@ import {
   OperatorsRegistryItem,
   StatementPositionResolversRegistryItem,
   SuggestionsRegistyItem,
-} from './standardSql/types';
+} from '../standardSql/types';
 import {
   initFunctionsRegistry,
   initOperatorsRegistry,
   initStandardSuggestions,
-} from './standardSql/standardSuggestionsRegistry';
-import { initStatementPositionResolvers } from './standardSql/statementPositionResolversRegistry';
+} from '../standardSql/standardSuggestionsRegistry';
+import { initStatementPositionResolvers } from '../standardSql/statementPositionResolversRegistry';
 
 const STANDARD_SQL_LANGUAGE = 'sql';
 
@@ -98,6 +104,7 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
         const statementPosition = getStatementPosition(currentToken, languageSuggestionsRegistries.positionResolvers);
         const kind = getSuggestionKinds(statementPosition, languageSuggestionsRegistries.suggestionKinds);
         const ctx: PositionContext = {
+          position,
           currentToken,
           statementPosition,
           kind,
@@ -114,12 +121,10 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
           monaco,
           currentToken,
           kind,
-          position,
           ctx,
           instanceSuggestionsRegistry
         );
 
-        console.log('stdSuggestions', stdSuggestions);
         return {
           // ...ci,
           suggestions: stdSuggestions,
@@ -137,7 +142,6 @@ export const registerLanguageAndSuggestions = async (monaco: Monaco, l: Language
 };
 
 function extendStandardRegistries(id: string, lid: string, customProvider: SQLCompletionItemProvider) {
-  console.log('extending standard registries', lid);
   if (!LANGUAGES_CACHE.has(id)) {
     initializeLanguageRegistries(id);
   }

@@ -2,8 +2,11 @@ import { FieldType } from '@grafana/data';
 import { Monaco, monacoTypes } from '@grafana/ui';
 import { StatementPositionResolver, SuggestionsResolver } from './standardSql/types';
 import { LinkedToken } from './utils/LinkedToken';
-import { OperatorType, StatementPosition, SuggestionKind } from './utils/types';
 
+/**
+ * Provides a context for suggestions resolver
+ * @alpha
+ */
 export interface PositionContext {
   position: monacoTypes.IPosition;
   kind: SuggestionKind[];
@@ -12,7 +15,6 @@ export interface PositionContext {
   range: monacoTypes.IRange;
 }
 
-// Better name needed
 export type CustomSuggestion = Partial<monacoTypes.languages.CompletionItem> & { label: string };
 
 export interface CustomSuggestionKind {
@@ -26,18 +28,18 @@ export interface CustomStatementPlacement {
   name?: string;
   resolve: StatementPositionResolver;
 }
-export type CustomStatementPlacementProvider = () => CustomStatementPlacement[];
-export type CustomSuggestionKindProvider = () => CustomSuggestionKind[];
+export type StatementPlacementProvider = () => CustomStatementPlacement[];
+export type SuggestionKindProvider = () => CustomSuggestionKind[];
 
 export interface ColumnDefinition {
   name: string;
   type?: FieldType;
-  // Text used for automplete, if not provided name is used
+  // Text used for automplete. If not provided name is used.
   completion?: string;
 }
 export interface TableDefinition {
   name: string;
-  // Text used for automplete, if not provided name is used
+  // Text used for automplete. If not provided name is used.
   completion?: string;
 }
 
@@ -66,13 +68,13 @@ export interface SQLCompletionItemProvider
    * Allows custom suggestion kinds to be defined and correlate them with <Custom>StatementPosition.
    * @alpha
    */
-  customSuggestionKinds?: CustomSuggestionKindProvider;
+  customSuggestionKinds?: SuggestionKindProvider;
 
   /**
    * Allows custom statement placement definition.
    * @alpha
    */
-  customStatementPlacement?: CustomStatementPlacementProvider;
+  customStatementPlacement?: StatementPlacementProvider;
 
   /**
    * Allows providing a custom function for resolving db tables.
@@ -108,10 +110,103 @@ export interface SQLCompletionItemProvider
 
 export type LanguageCompletionProvider = (m: Monaco) => SQLCompletionItemProvider;
 
+export enum OperatorType {
+  Comparison,
+  Logical,
+}
+
+export enum TokenType {
+  Parenthesis = 'delimiter.parenthesis.sql',
+  Whitespace = 'white.sql',
+  Keyword = 'keyword.sql',
+  Delimiter = 'delimiter.sql',
+  Operator = 'operator.sql',
+  Identifier = 'identifier.sql',
+  IdentifierQuote = 'identifier.quote.sql',
+  Type = 'type.sql',
+  Function = 'predefined.sql',
+  Number = 'number.sql',
+  String = 'string.sql',
+  Variable = 'variable.sql',
+}
+
+export enum StatementPosition {
+  Unknown = 'unknown',
+  SelectKeyword = 'selectKeyword',
+  WithKeyword = 'withKeyword',
+  AfterSelectKeyword = 'afterSelectKeyword',
+  AfterSelectArguments = 'afterSelectArguments',
+  AfterSelectFuncFirstArgument = 'afterSelectFuncFirstArgument',
+  AfterFromKeyword = 'afterFromKeyword',
+  AfterTable = 'afterTable',
+  SchemaFuncFirstArgument = 'schemaFuncFirstArgument',
+  SchemaFuncExtraArgument = 'schemaFuncExtraArgument',
+  FromKeyword = 'fromKeyword',
+  AfterFrom = 'afterFrom',
+  WhereKeyword = 'whereKeyword',
+  WhereComparisonOperator = 'whereComparisonOperator',
+  WhereValue = 'whereValue',
+  AfterWhereValue = 'afterWhereValue',
+  AfterGroupByKeywords = 'afterGroupByKeywords',
+  AfterGroupBy = 'afterGroupBy',
+  AfterOrderByKeywords = 'afterOrderByKeywords',
+  AfterOrderByFunction = 'afterOrderByFunction',
+  AfterOrderByDirection = 'afterOrderByDirection',
+}
+
+export enum SuggestionKind {
+  Tables = 'tables',
+  Columns = 'columns',
+  SelectKeyword = 'selectKeyword',
+  WithKeyword = 'withKeyword',
+  FunctionsWithArguments = 'functionsWithArguments',
+  FromKeyword = 'fromKeyword',
+  WhereKeyword = 'whereKeyword',
+  GroupByKeywords = 'groupByKeywords',
+  OrderByKeywords = 'orderByKeywords',
+  FunctionsWithoutArguments = 'functionsWithoutArguments',
+  LimitKeyword = 'limitKeyword',
+  SortOrderDirectionKeyword = 'sortOrderDirectionKeyword',
+  ComparisonOperators = 'comparisonOperators',
+  LogicalOperators = 'logicalOperators',
+}
+
 export enum CompletionItemPriority {
   High = 'a',
   MediumHigh = 'd',
   Medium = 'g',
   MediumLow = 'k',
   Low = 'q',
+}
+
+// TODO: export from grafana/ui
+export enum CompletionItemKind {
+  Method = 0,
+  Function = 1,
+  Constructor = 2,
+  Field = 3,
+  Variable = 4,
+  Class = 5,
+  Struct = 6,
+  Interface = 7,
+  Module = 8,
+  Property = 9,
+  Event = 10,
+  Operator = 11,
+  Unit = 12,
+  Value = 13,
+  Constant = 14,
+  Enum = 15,
+  EnumMember = 16,
+  Keyword = 17,
+  Text = 18,
+  Color = 19,
+  File = 20,
+  Reference = 21,
+  Customcolor = 22,
+  Folder = 23,
+  TypeParameter = 24,
+  User = 25,
+  Issue = 26,
+  Snippet = 27,
 }

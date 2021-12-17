@@ -1,5 +1,5 @@
 import { RegistryItem } from '@grafana/data';
-import { StatementPosition, SuggestionKind } from '../utils/types';
+import { StatementPosition, SuggestionKind } from '../types';
 
 export interface SuggestionKindRegistyItem extends RegistryItem {
   id: StatementPosition;
@@ -37,7 +37,7 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
     {
       id: StatementPosition.AfterFromKeyword,
       name: StatementPosition.AfterFromKeyword,
-      kind: [SuggestionKind.Namespaces, SuggestionKind.SchemaKeyword, SuggestionKind.Tables],
+      kind: [SuggestionKind.Tables],
     },
     {
       id: StatementPosition.FromKeyword,
@@ -69,7 +69,7 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
     {
       id: StatementPosition.WhereKeyword,
       name: StatementPosition.WhereKeyword,
-      kind: [SuggestionKind.LabelKeys],
+      kind: [],
     },
     {
       id: StatementPosition.WhereComparisonOperator,
@@ -79,7 +79,7 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
     {
       id: StatementPosition.WhereValue,
       name: StatementPosition.WhereValue,
-      kind: [SuggestionKind.LabelValues],
+      kind: [],
     },
     {
       id: StatementPosition.AfterWhereValue,
@@ -94,7 +94,7 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
     {
       id: StatementPosition.AfterGroupByKeywords,
       name: StatementPosition.AfterGroupByKeywords,
-      kind: [SuggestionKind.LabelKeys],
+      kind: [],
     },
     {
       id: StatementPosition.AfterGroupBy,
@@ -116,18 +116,5 @@ export const initSuggestionsKindRegistry = (): SuggestionKindRegistyItem[] => {
       name: StatementPosition.AfterOrderByDirection,
       kind: [SuggestionKind.LimitKeyword],
     },
-
-    // cw specific?
-    {
-      id: StatementPosition.SchemaFuncFirstArgument,
-      name: StatementPosition.SchemaFuncFirstArgument,
-      kind: [SuggestionKind.Namespaces],
-    },
-    {
-      id: StatementPosition.SchemaFuncExtraArgument,
-      name: StatementPosition.SchemaFuncExtraArgument,
-      kind: [SuggestionKind.LabelKeys],
-    },
-    // cw specific?
   ];
 };

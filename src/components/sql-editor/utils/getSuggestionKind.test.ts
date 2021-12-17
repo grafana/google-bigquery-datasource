@@ -1,7 +1,7 @@
 import { Registry } from '@grafana/data';
 import { SuggestionKindRegistyItem } from '../standardSql/suggestionsKindRegistry';
 import { getSuggestionKinds } from './getSuggestionKind';
-import { StatementPosition, SuggestionKind } from './types';
+import { StatementPosition, SuggestionKind } from '../types';
 
 describe('getSuggestionKind', () => {
   const registry = new Registry((): SuggestionKindRegistyItem[] => {

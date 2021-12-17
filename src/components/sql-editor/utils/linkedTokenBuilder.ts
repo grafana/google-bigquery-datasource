@@ -1,6 +1,7 @@
 import type { monacoTypes } from '@grafana/ui';
+import { TokenType } from '../types';
 import { LinkedToken } from './LinkedToken';
-import { Monaco, TokenType } from './types';
+import { Monaco } from './types';
 
 export function linkedTokenBuilder(
   monaco: Monaco,
