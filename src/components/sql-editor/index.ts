@@ -1,5 +1,5 @@
 export { SQLEditor } from './components/SQLEditor';
-export { SQLEditorTestUtils } from './test-utils';
+export { SQLEditorTestUtils, TestQueryModel } from './test-utils';
 export { LinkedToken } from './utils/LinkedToken';
 
 export {

@@ -20,13 +20,13 @@ export const getStandardSuggestions = async (
       ? monaco.Range.fromPositions(positionContext.position)
       : currentToken?.range;
 
-  for (const suggestion of suggestionKinds) {
+  // iterating over Set to deduplicate
+  for (const suggestion of [...new Set(suggestionKinds)]) {
     const registeredSuggestions = suggestionsRegistry.getIfExists(suggestion);
     if (registeredSuggestions) {
       const su = await registeredSuggestions.suggestions({ ...positionContext, range }, monaco);
       suggestions = [...suggestions, ...su.map((s) => toCompletionItem(s.label, range, { kind: s.kind, ...s }))];
     }
   }
-
   return Promise.resolve(suggestions);
 };
