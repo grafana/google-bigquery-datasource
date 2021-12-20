@@ -19,6 +19,7 @@ import { DatasetSelector } from './components/DatasetSelector';
 import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, QueryFormat } from './types';
 import { getApiClient, TableFieldSchema } from './api';
+import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
 import { useAsync, useAsyncFn } from 'react-use';
 
 import { Parser } from 'node-sql-parser/build/bigquery';
@@ -94,7 +95,15 @@ export function QueryEditor(props: Props) {
         cols = await apiClient.getColumns(queryWithDefaults.location, queryWithDefaults.dataset, t!);
       }
 
-      return cols.map((c) => ({ name: c }));
+      if (cols.length > 0) {
+        const schema = await apiClient.getTableSchema(queryWithDefaults.location, tablePath[1], tablePath[2]);
+        return cols.map((c) => {
+          const cInfo = schema.schema ? getColumnInfoFromSchema(c, schema.schema) : null;
+          return { name: c, ...cInfo };
+        });
+      } else {
+        return [];
+      }
     },
     [apiClient, queryWithDefaults.location, queryWithDefaults.dataset]
   );

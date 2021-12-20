@@ -4,6 +4,7 @@ export interface TableFieldSchema {
   name: string;
   description?: string;
   type: string;
+  repeated: boolean;
   schema: TableFieldSchema[];
 }
 
