@@ -3,48 +3,18 @@ import {
   CompletionItemKind,
   LanguageCompletionProvider,
   LinkedToken,
-  OperatorType,
   StatementPlacementProvider,
   SuggestionKindProvider,
   TableDefinition,
   TokenType,
 } from '@grafana/experimental';
+import { BQ_AGGREGATE_FNS } from './bigQueryFunctions';
+import { BQ_OPERATORS } from './bigQueryOperators';
 
 interface CompletionProviderGetterArgs {
   getColumns: React.MutableRefObject<(t: string) => Promise<ColumnDefinition[]>>;
   getTables: React.MutableRefObject<(d?: string) => Promise<TableDefinition[]>>;
 }
-
-const BQ_AGGREGATE_FNS = [
-  { id: 'ANY_VALUE', name: 'ANY_VALUE' },
-  { id: 'ARRAY_AGG', name: 'ARRAY_AGG' },
-  { id: 'ARRAY_CONCAT_AGG', name: 'ARRAY_CONCAT_AGG' },
-  { id: 'AVG', name: 'AVG' },
-  { id: 'BIT_AND', name: 'BIT_AND' },
-  { id: 'BIT_OR', name: 'BIT_OR' },
-  { id: 'BIT_XOR', name: 'BIT_XOR' },
-  { id: 'COUNT', name: 'COUNT' },
-  { id: 'COUNTIF', name: 'COUNTIF' },
-  { id: 'LOGICAL_AND', name: 'LOGICAL_AND' },
-  { id: 'LOGICAL_OR', name: 'LOGICAL_OR' },
-  { id: 'MAX', name: 'MAX' },
-  { id: 'MIN', name: 'MIN' },
-  { id: 'STRING_AGG', name: 'STRING_AGG' },
-  { id: 'SUM', name: 'SUM' },
-];
-
-const BQ_OPERATORS = [
-  { type: OperatorType.Comparison, id: 'LESS_THAN', operator: '<' },
-  { type: OperatorType.Comparison, id: 'LESS_THAN_EQUAL', operator: '<=' },
-  { type: OperatorType.Comparison, id: 'GREATER_THAN', operator: '>' },
-  { type: OperatorType.Comparison, id: 'GREATER_THAN_EQUAL', operator: '>=' },
-  { type: OperatorType.Comparison, id: 'EQUAL', operator: '=' },
-  { type: OperatorType.Comparison, id: 'NOT_EQUAL', operator: '!=' },
-  { type: OperatorType.Comparison, id: 'NOT_EQUAL_ALT', operator: '<>' },
-  { type: OperatorType.Comparison, id: 'LIKE', operator: 'LIKE' },
-  { type: OperatorType.Logical, id: 'LOGICAL_AND', operator: 'AND' },
-  { type: OperatorType.Logical, id: 'LOGICAL_OR', operator: 'OR' },
-];
 
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables }) =>
