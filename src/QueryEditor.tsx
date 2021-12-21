@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { BigQueryDatasource } from './datasource';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from './constants';
@@ -7,9 +7,9 @@ import { QueryEditorRaw } from './components/query-editor-raw/QueryEditorRaw';
 // import { DatasetSelector } from './components/DatasetSelector';
 import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, QueryFormat } from './types';
-import { getApiClient, TableFieldSchema } from './api';
+import { getApiClient } from './api';
 import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
-import { useAsync, useAsyncFn } from 'react-use';
+import { useAsync } from 'react-use';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
@@ -29,8 +29,6 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 };
 
 export function QueryEditor(props: Props) {
-  const schemaCache = useRef(new Map<string, { schema: TableFieldSchema[]; columns: string[] }>());
-
   const {
     loading: apiLoading,
     error: apiError,
@@ -44,27 +42,6 @@ export function QueryEditor(props: Props) {
       getApiClient(props.datasource.id).then((client) => client.dispose());
     };
   }, []);
-
-  const [_, fetchTableSchema] = useAsyncFn(
-    async (l?: string, d?: string, t?: string) => {
-      if (!Boolean(l && d && t) || !apiClient) {
-        return null;
-      }
-
-      if (schemaCache.current?.has(t!)) {
-        return schemaCache.current?.get(t!);
-      }
-      const schema = await apiClient.getTableSchema(l!, d!, t!);
-      const columns = await apiClient.getColumns(l!, d!, t!);
-      const results = {
-        schema: schema.schema || [],
-        columns,
-      };
-      schemaCache.current.set(t!, results);
-      return results;
-    },
-    [apiClient]
-  );
 
   const getColumns = useCallback(
     // excpects fully qualified table name: <project-id>.<dataset-id>.<table-id>
@@ -125,13 +102,6 @@ export function QueryEditor(props: Props) {
     },
     [apiClient, queryWithDefaults.location]
   );
-
-  useEffect(() => {
-    if (!queryWithDefaults.location || !queryWithDefaults.dataset || !queryWithDefaults.table) {
-      return;
-    }
-    fetchTableSchema(queryWithDefaults.location, queryWithDefaults.dataset, queryWithDefaults.table);
-  }, [fetchTableSchema, queryWithDefaults.location, queryWithDefaults.dataset, queryWithDefaults.table]);
 
   const processQuery = (q: BigQueryQueryNG) => {
     if (isQueryValid(q)) {
