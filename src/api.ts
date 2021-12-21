@@ -85,19 +85,17 @@ class BigQueryAPIClient implements BigQueryAPI {
     });
   };
 
-  private fromCache =
-    <T>(scope: string, fn: (...args: any[]) => Promise<T>) =>
-    async (...args: any[]): Promise<T> => {
-      const id = `${scope}/${args.join('.')}`;
+  private fromCache = <T>(scope: string, fn: (...args: any[]) => Promise<T>) => async (...args: any[]): Promise<T> => {
+    const id = `${scope}/${args.join('.')}`;
 
-      if (this.RESULTS_CACHE.has(id)) {
-        return Promise.resolve(this.RESULTS_CACHE.get(id)!);
-      } else {
-        const res = await fn(...args);
-        this.RESULTS_CACHE.set(id, res);
-        return res;
-      }
-    };
+    if (this.RESULTS_CACHE.has(id)) {
+      return Promise.resolve(this.RESULTS_CACHE.get(id)!);
+    } else {
+      const res = await fn(...args);
+      this.RESULTS_CACHE.set(id, res);
+      return res;
+    }
+  };
 
   dispose() {
     this.RESULTS_CACHE.clear();

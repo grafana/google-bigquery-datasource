@@ -29,11 +29,11 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 };
 
 export function QueryEditor(props: Props) {
-  const {
-    loading: apiLoading,
-    error: apiError,
-    value: apiClient,
-  } = useAsync(async () => await getApiClient(props.datasource.id), [props.datasource]);
+  const { onRunQuery, onChange } = props;
+  const { loading: apiLoading, error: apiError, value: apiClient } = useAsync(
+    async () => await getApiClient(props.datasource.id),
+    [props.datasource]
+  );
 
   const queryWithDefaults = applyQueryDefaults(props.query, props.datasource);
 
@@ -41,7 +41,7 @@ export function QueryEditor(props: Props) {
     return () => {
       getApiClient(props.datasource.id).then((client) => client.dispose());
     };
-  }, []);
+  }, [props.datasource.id]);
 
   const getColumns = useCallback(
     // excpects fully qualified table name: <project-id>.<dataset-id>.<table-id>
@@ -103,11 +103,14 @@ export function QueryEditor(props: Props) {
     [apiClient, queryWithDefaults.location]
   );
 
-  const processQuery = (q: BigQueryQueryNG) => {
-    if (isQueryValid(q)) {
-      props.onRunQuery();
-    }
-  };
+  const processQuery = useCallback(
+    (q: BigQueryQueryNG) => {
+      if (isQueryValid(q)) {
+        onRunQuery();
+      }
+    },
+    [onRunQuery]
+  );
 
   const onFormatChange = (e: SelectableValue) => {
     const next = { ...props.query, format: e.value || QueryFormat.Timeseries };
@@ -135,10 +138,10 @@ export function QueryEditor(props: Props) {
 
   const onRawQueryChange = useCallback(
     (q: BigQueryQueryNG) => {
-      props.onChange(q);
+      onChange(q);
       processQuery(q);
     },
-    [props.onChange]
+    [onChange, processQuery]
   );
 
   if (apiLoading || apiError || !apiClient) {
