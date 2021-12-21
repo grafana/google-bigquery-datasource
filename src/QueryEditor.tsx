@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { QueryEditorProps, SelectableValue } from '@grafana/data';
 import { BigQueryDatasource } from './datasource';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from './constants';
@@ -10,8 +10,6 @@ import { BigQueryOptions, QueryFormat } from './types';
 import { getApiClient, TableFieldSchema } from './api';
 import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
 import { useAsync, useAsyncFn } from 'react-use';
-
-import { Parser } from 'node-sql-parser/build/bigquery';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
@@ -32,7 +30,6 @@ const isQueryValid = (q: BigQueryQueryNG) => {
 
 export function QueryEditor(props: Props) {
   const schemaCache = useRef(new Map<string, { schema: TableFieldSchema[]; columns: string[] }>());
-  const queryParser = useMemo(() => new Parser(), []);
 
   const {
     loading: apiLoading,
@@ -171,7 +168,7 @@ export function QueryEditor(props: Props) {
       props.onChange(q);
       processQuery(q);
     },
-    [props.onChange, queryParser]
+    [props.onChange]
   );
 
   if (apiLoading || apiError || !apiClient) {
