@@ -43,7 +43,7 @@ When Grafana is running on a Google Compute Engine (GCE) virtual machine, it is 
 
 It is possible to configure data sources using configuration files with Grafana’s provisioning system. To read about how it works, including and all the settings that you can set for this data source, refer to [Provisioning Grafana data sources](https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources).
 
-Below you will find are some provisioning examples
+Below you will find some provisioning examples
 
 #### Using service account
 
