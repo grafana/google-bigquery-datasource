@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import BigQueryQuery, { BigQueryQueryNG } from './bigquery_query';
+import { BigQueryQueryNG } from './bigquery_query';
 import { BigQueryOptions, GoogleAuthType, QueryModel } from './types';
 import { v4 as generateID } from 'uuid';
 import {
@@ -66,8 +66,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     });
   }
 
-  async annotationQuery(options: any): Promise<any> {}
-
   // @ts-ignore
   private async doRequest(url: string, requestId = 'requestId', maxRetries = 3) {
     return getBackendSrv()
@@ -110,10 +108,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
   };
 
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
-    // TMP until we refactor Query Model
-    const query = new BigQueryQuery(queryModel, scopedVars);
-    const rawSql = query.target.rawQuery ? query.target.rawSql : query.buildQuery();
-    const interpolatedSql = getTemplateSrv().replace(rawSql, scopedVars, this.interpolateVariable);
+    const interpolatedSql = getTemplateSrv().replace(queryModel.rawSql, scopedVars, this.interpolateVariable);
 
     const result = {
       refId: queryModel.refId,

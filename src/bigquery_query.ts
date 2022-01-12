@@ -19,17 +19,18 @@ export interface BigQueryQueryNG extends DataQuery {
   table?: string;
 
   format: QueryFormat;
+  rawQuery?: boolean;
+  rawSql: string;
+  location?: string;
+
   orderByCol?: string;
   orderBySort?: string;
-  location?: string;
-  timeColumn: string;
+  timeColumn?: string;
   timeColumnType?: 'TIMESTAMP' | 'DATE' | 'DATETIME' | 'int4';
-  metricColumn: string;
+  metricColumn?: string;
   group?: Array<{ type: GroupType; params: string[] }>;
   where?: any[];
   select?: any[];
-  rawQuery?: boolean;
-  rawSql: string;
   partitioned?: boolean;
   partitionedField?: string;
   convertToUTC?: boolean;
@@ -94,9 +95,9 @@ export default class BigQueryQuery {
         'TIMESTAMP(' +
         '  (' +
         'PARSE_DATE( "%Y-%m-%d",CONCAT( CAST((EXTRACT(YEAR FROM ' +
-        quoteFiledName(this.target.timeColumn) +
+        quoteFiledName(this.target.timeColumn || '') +
         ")) AS STRING),'-',CAST((EXTRACT(MONTH FROM " +
-        quoteFiledName(this.target.timeColumn) +
+        quoteFiledName(this.target.timeColumn || '') +
         ')) AS STRING),' +
         "'-','01'" +
         ')' +
@@ -169,7 +170,7 @@ export default class BigQueryQuery {
     if (timeGroup) {
       query = this._buildTimeColumntimeGroup(alias, timeGroup);
     } else {
-      query = quoteFiledName(this.target.timeColumn);
+      query = quoteFiledName(this.target.timeColumn || '');
       if (alias) {
         query += ' AS time';
       }
@@ -179,7 +180,7 @@ export default class BigQueryQuery {
 
   buildMetricColumn() {
     if (this.hasMetricColumn()) {
-      return quoteFiledName(this.target.metricColumn) + ' AS metric';
+      return quoteFiledName(this.target.metricColumn || '') + ' AS metric';
     }
 
     return '';
@@ -538,9 +539,9 @@ export default class BigQueryQuery {
         this.target.timeColumn = tf[1];
       }
     }
-    const range = quoteFiledName(this.target.timeColumn) + ' BETWEEN ' + from + ' AND ' + to;
-    const fromRange = quoteFiledName(this.target.timeColumn) + ' > ' + from + ' ';
-    const toRange = quoteFiledName(this.target.timeColumn) + ' < ' + to + ' ';
+    const range = quoteFiledName(this.target.timeColumn || '') + ' BETWEEN ' + from + ' AND ' + to;
+    const fromRange = quoteFiledName(this.target.timeColumn || '') + ' > ' + from + ' ';
+    const toRange = quoteFiledName(this.target.timeColumn || '') + ' < ' + to + ' ';
     q = q.replace(/\$__timeFilter\((.*?)\)/g, range);
     q = q.replace(/\$__timeFrom\(([\w_.]+)\)/g, fromRange);
     q = q.replace(/\$__timeTo\(([\w_.]+)\)/g, toRange);
@@ -566,9 +567,9 @@ export default class BigQueryQuery {
 
   private _dateToTimestamp() {
     if (this.target.timeColumnType === 'DATE') {
-      return 'Timestamp(' + quoteFiledName(this.target.timeColumn) + ')';
+      return 'Timestamp(' + quoteFiledName(this.target.timeColumn || '') + ')';
     }
-    return quoteFiledName(this.target.timeColumn);
+    return quoteFiledName(this.target.timeColumn || '');
   }
 
   private _calcAutoInterval(options: any) {
