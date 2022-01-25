@@ -1,12 +1,23 @@
 import { toOption } from '@grafana/data';
-import { InlineSelect } from '@grafana/experimental';
-import { Button } from '@grafana/ui';
+import { Button, Input, Select } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
-import React, { useEffect, useState } from 'react';
-import { BasicConfig, Builder, Fields, ImmutableTree, Query, Utils } from 'react-awesome-query-builder';
+import { debounce } from 'lodash';
+import React, { useEffect, useMemo, useState } from 'react';
+import {
+  BasicConfig,
+  Builder,
+  Config,
+  Fields,
+  ImmutableTree,
+  Query,
+  Settings,
+  Utils,
+  Widgets,
+} from 'react-awesome-query-builder';
 import useAsync from 'react-use/lib/useAsync';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { toRawSql } from 'utils/sql.utils';
+import './SQLBuilderWhereRow.scss';
 
 interface SQLBuilderWhereRowProps {
   query: QueryWithDefaults;
@@ -15,6 +26,83 @@ interface SQLBuilderWhereRowProps {
 }
 
 const emptyInitValue = { id: Utils.uuid(), type: 'group' } as const;
+const widgets: Widgets = {
+  ...BasicConfig.widgets,
+  text: {
+    ...BasicConfig.widgets.text,
+    factory: function TextInput(props) {
+      return (
+        <Input
+          value={props?.value || ''}
+          placeholder={props?.placeholder}
+          onChange={(e) => props?.setValue(e.currentTarget.value)}
+        />
+      );
+    },
+  },
+  number: {
+    ...BasicConfig.widgets.number,
+    factory: function NumberInput(props) {
+      return (
+        <Input
+          value={props?.value}
+          placeholder={props?.placeholder}
+          type="number"
+          onChange={(e) => props?.setValue(Number.parseInt(e.currentTarget.value, 10))}
+        />
+      );
+    },
+  },
+};
+const settings: Settings = {
+  ...BasicConfig.settings,
+  canRegroup: false,
+  maxNesting: 1,
+  canReorder: false,
+  showNot: false,
+  addRuleLabel: 'plus',
+  deleteLabel: 'times',
+  renderConjs: function Conjunctions(conjProps) {
+    return (
+      <Select
+        id={conjProps?.id}
+        menuShouldPortal
+        options={conjProps?.conjunctionOptions ? Object.keys(conjProps?.conjunctionOptions).map(toOption) : undefined}
+        value={conjProps?.selectedConjunction}
+        onChange={(val) => conjProps?.setConjunction(val.value!)}
+      />
+    );
+  },
+  renderField: function Field(fieldProps) {
+    return (
+      <Select
+        id={fieldProps?.id}
+        menuShouldPortal
+        options={fieldProps?.items.map((f) => ({ label: f.label, value: f.key }))}
+        value={fieldProps?.selectedKey}
+        className="width-12"
+        onChange={(val) => {
+          fieldProps?.setField(val.label!);
+        }}
+      />
+    );
+  },
+  renderButton: function RAQBButton(buttonProps) {
+    return <Button onClick={buttonProps?.onClick} variant="secondary" size="md" icon={buttonProps?.label as any} />;
+  },
+  renderOperator: function Operator(operatorProps) {
+    return (
+      <Select
+        options={operatorProps?.items.map((op) => ({ label: op.label, value: op.key }))}
+        menuShouldPortal
+        value={operatorProps?.selectedKey}
+        onChange={(val) => {
+          operatorProps?.setField(val.key);
+        }}
+      />
+    );
+  },
+};
 
 export function SQLBuilderWhereRow({ query, apiClient, onQueryChange }: SQLBuilderWhereRowProps) {
   const [tree, setTree] = useState<ImmutableTree>();
@@ -22,14 +110,58 @@ export function SQLBuilderWhereRow({ query, apiClient, onQueryChange }: SQLBuild
     if (!query.location || !query.dataset || !query.table) {
       return;
     }
-    const columns = await apiClient.getColumns(query.location, query.dataset, query.table);
+    const tableSchema = await apiClient.getTableSchema(query.location, query.dataset, query.table);
     const fields: Fields = {};
-    for (const col of columns) {
-      fields[col] = {
-        type: 'text',
+    tableSchema.schema?.forEach((field) => {
+      let type = 'text';
+      switch (field.type) {
+        case 'BOOLEAN':
+        case 'BOOL': {
+          type = 'boolean';
+          break;
+        }
+        case 'BYTES': {
+          type = 'text';
+          break;
+        }
+        case 'FLOAT':
+        case 'FLOAT64':
+        case 'INTEGER':
+        case 'INT64':
+        case 'NUMERIC':
+        case 'BIGNUMERIC': {
+          type = 'number';
+          break;
+        }
+        case 'DATE': {
+          type = 'date';
+          break;
+        }
+        case 'DATETIME': {
+          type = 'datetime';
+          break;
+        }
+        case 'TIME': {
+          type = 'time';
+          break;
+        }
+        case 'TIMESTAMP': {
+          type = 'datetime';
+          break;
+        }
+        case 'GEOGRAPHY': {
+          type = 'text';
+          break;
+        }
+        default:
+          break;
+      }
+      fields[field.name] = {
+        type,
         valueSources: ['value'],
       };
-    }
+    });
+
     return fields;
   }, [apiClient, query.dataset, query.location, query.table]);
 
@@ -38,10 +170,29 @@ export function SQLBuilderWhereRow({ query, apiClient, onQueryChange }: SQLBuild
       const initTree = Utils.checkTree(Utils.loadTree(query.sql.whereJsonTree ?? emptyInitValue), {
         ...BasicConfig,
         fields: state.value,
+        widgets,
+        settings,
       });
       setTree(initTree);
     }
   }, [query.sql.whereJsonTree, state.value, tree]);
+
+  const onTreeChange = (changedTree: ImmutableTree, config: Config) => {
+    setTree(changedTree);
+    const newQuery = {
+      ...query,
+      sql: {
+        ...query.sql,
+        whereJsonTree: Utils.getTree(changedTree),
+        whereString: Utils.sqlFormat(changedTree, config),
+      },
+    };
+    newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
+    onQueryChange(newQuery);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedOnChange = useMemo(() => debounce(onTreeChange, 300), []);
 
   if (state.loading) {
     return <div>Loading...</div>;
@@ -53,65 +204,10 @@ export function SQLBuilderWhereRow({ query, apiClient, onQueryChange }: SQLBuild
         <Query
           {...BasicConfig}
           fields={state.value}
-          settings={{
-            ...BasicConfig.settings,
-            canRegroup: false,
-            maxNesting: 1,
-            canReorder: false,
-            showNot: false,
-            addRuleLabel: 'plus',
-            deleteLabel: 'times',
-            // eslint-disable-next-line react/display-name
-            renderConjs: (conjProps) => (
-              <InlineSelect
-                id={conjProps?.id}
-                options={
-                  conjProps?.conjunctionOptions ? Object.keys(conjProps?.conjunctionOptions).map(toOption) : undefined
-                }
-                value={conjProps?.selectedConjunction}
-                onChange={(val) => conjProps?.setConjunction(val.value!)}
-              />
-            ),
-            // eslint-disable-next-line react/display-name
-            renderField: (fieldProps) => (
-              <InlineSelect
-                id={fieldProps?.id}
-                options={fieldProps?.items}
-                onChange={(val) => {
-                  fieldProps?.setField(val.label!);
-                }}
-              />
-            ),
-            // eslint-disable-next-line react/display-name
-            renderButton: (buttonProps) => (
-              <Button onClick={buttonProps?.onClick} variant="secondary" size="md" icon={buttonProps?.label as any} />
-            ),
-            // eslint-disable-next-line react/display-name
-            renderOperator: (operatorProps) => (
-              <InlineSelect
-                options={operatorProps?.items}
-                onChange={(val) => {
-                  operatorProps?.setField(val.label!);
-                }}
-              />
-            ),
-          }}
+          widgets={widgets}
+          settings={settings}
           value={tree}
-          onChange={(changedTree, config) => {
-            setTree(changedTree);
-            const newQuery = {
-              ...query,
-              sql: {
-                ...query.sql,
-                whereJsonTree: Utils.getTree(changedTree),
-                whereString: Utils.sqlFormat(changedTree, config),
-              },
-            };
-
-            newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
-
-            onQueryChange(newQuery);
-          }}
+          onChange={debouncedOnChange}
           renderBuilder={(props) => <Builder {...props} />}
         />
       )}

@@ -1,0 +1,28 @@
+@mixin flex($direction) {
+  display: flex;
+  gap: 8px;
+  flex-direction: $direction;
+}
+
+.group--header {
+  @include flex(row);
+}
+
+.group-or-rule {
+  @include flex(column);
+  .rule {
+    flex-direction: row;
+  }
+}
+
+.rule--body {
+  @include flex(row);
+}
+
+.group--children {
+  @include flex(column);
+}
+
+.group--conjunctions:empty {
+  display: none;
+}

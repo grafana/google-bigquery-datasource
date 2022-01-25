@@ -21,15 +21,13 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
     async () => await getApiClient(datasource.id),
     [datasource]
   );
-
+  const queryWithDefaults = applyQueryDefaults(query, datasource);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
-    filter: false,
-    group: false,
-    order: false,
+    filter: !!queryWithDefaults.sql.whereString,
+    group: !!queryWithDefaults.sql.groupBy?.length,
+    order: !!queryWithDefaults.sql.orderBy,
     preview: true,
   });
-
-  const queryWithDefaults = applyQueryDefaults(query, datasource);
 
   useEffect(() => {
     return () => {
