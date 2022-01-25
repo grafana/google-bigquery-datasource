@@ -5,6 +5,7 @@ import {
   QueryEditorGroupByExpression,
   QueryEditorPropertyExpression,
 } from 'expressions';
+import { JsonTree } from 'react-awesome-query-builder';
 import { applyQueryDefaults } from 'utils';
 
 export enum GoogleAuthType {
@@ -66,7 +67,8 @@ export interface QueryModel extends DataQuery {
 export interface SQLExpression {
   columns?: QueryEditorFunctionExpression[];
   from?: string;
-  where?: string;
+  whereJsonTree?: JsonTree;
+  whereString?: string;
   groupBy?: QueryEditorGroupByExpression[];
   orderBy?: QueryEditorPropertyExpression;
   orderByDirection?: 'ASC' | 'DESC';

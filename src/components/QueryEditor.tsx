@@ -10,6 +10,7 @@ import { getApiClient } from '../api';
 import QueryHeader from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, EditorMode, QueryRowFilter } from '../types';
+import { SQLBuilderWhereRow } from './SQLBuilderWhereRow';
 import { SQLGroupByRow } from './SQLGroupByRow';
 import { SQLOrderByRow } from './SQLOrderByRow';
 
@@ -74,6 +75,13 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
           <EditorRow>
             <SQLBuilderSelectRow query={queryWithDefaults} onQueryChange={onColumnsChange} apiClient={apiClient} />
           </EditorRow>
+          {queryRowFilter.filter && (
+            <EditorRow>
+              <EditorField label="Filter by column value" optional>
+                <SQLBuilderWhereRow apiClient={apiClient} query={queryWithDefaults} onQueryChange={onColumnsChange} />
+              </EditorField>
+            </EditorRow>
+          )}
           {queryRowFilter.group && (
             <EditorRow>
               <EditorField label="Group by column">
