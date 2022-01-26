@@ -18,7 +18,7 @@ export function CodeEditor({
   const getColumns = useCallback(
     // expects fully qualified table name: <project-id>.<dataset-id>.<table-id>
     async (t: string) => {
-      if (!apiClient || !queryWithDefaults.location) {
+      if (!apiClient) {
         return [];
       }
       let cols;
@@ -48,7 +48,7 @@ export function CodeEditor({
 
   const getTables = useCallback(
     async (d?: string) => {
-      if (!queryWithDefaults.location || !apiClient) {
+      if (!apiClient) {
         return [];
       }
 

@@ -1,10 +1,10 @@
 import { SelectableValue } from '@grafana/data';
-import { EditorField, EditorHeader, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
+import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
 import { Button, ConfirmModal, InlineSwitch, RadioButtonGroup, Select } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React, { useCallback, useState } from 'react';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
-import { BigQueryQueryNG, EditorMode, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
+import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
 import { DatasetSelector } from './DatasetSelector';
 import { TableSelector } from './TableSelector';
 
@@ -23,7 +23,7 @@ const editorModes = [
   { label: 'Code', value: EditorMode.Code },
 ];
 
-const QueryHeader: React.FC<QueryHeaderProps> = ({
+export function QueryHeader({
   query,
   sqlCodeEditorIsDirty,
   queryRowFilter,
@@ -31,7 +31,7 @@ const QueryHeader: React.FC<QueryHeaderProps> = ({
   onRunQuery,
   onQueryRowChange,
   apiClient,
-}) => {
+}: QueryHeaderProps) {
   const { location, editorMode } = query;
   const [showConfirm, setShowConfirm] = useState(false);
 
@@ -164,27 +164,20 @@ const QueryHeader: React.FC<QueryHeaderProps> = ({
           <Space v={0.5} />
 
           <EditorRow>
-            <EditorField label="Format" width={12}>
-              <Select
-                options={QUERY_FORMAT_OPTIONS}
-                menuShouldPortal
-                value={query.format}
-                onChange={onFormatChange}
-                className="width-12"
-              />
+            <EditorField label="Format" width={25}>
+              <Select options={QUERY_FORMAT_OPTIONS} menuShouldPortal value={query.format} onChange={onFormatChange} />
             </EditorField>
 
-            <EditorField label="Dataset" width={12}>
+            <EditorField label="Dataset" width={25}>
               <DatasetSelector
                 apiClient={apiClient}
                 location={query.location}
                 value={query.dataset}
                 onChange={onDatasetChange}
-                className="width-12"
               />
             </EditorField>
 
-            <EditorField label="Table">
+            <EditorField label="Table" width={25}>
               <TableSelector
                 apiClient={apiClient}
                 location={query.location}
@@ -192,7 +185,6 @@ const QueryHeader: React.FC<QueryHeaderProps> = ({
                 value={query.table}
                 disabled={query.dataset === undefined}
                 onChange={onTableChange}
-                className="width-12"
                 applyDefault
               />
             </EditorField>
@@ -201,6 +193,4 @@ const QueryHeader: React.FC<QueryHeaderProps> = ({
       )}
     </>
   );
-};
-
-export default QueryHeader;
+}

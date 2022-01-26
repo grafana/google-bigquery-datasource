@@ -1,11 +1,11 @@
-import { SelectableValue, toOption } from '@grafana/data';
+import { toOption } from '@grafana/data';
 import { EditorField, Space } from '@grafana/experimental';
 import { Input, RadioButtonGroup, Select } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React from 'react';
-import { useAsync } from 'react-use';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { setPropertyField, toRawSql } from 'utils/sql.utils';
+import { useColumns } from 'utils/useColumns';
 
 type SQLOrderByRowProps = {
   query: QueryWithDefaults;
@@ -19,13 +19,7 @@ const sortOrderOptions = [
 ];
 
 export function SQLOrderByRow({ query, onQueryChange, apiClient }: SQLOrderByRowProps) {
-  const state = useAsync(async () => {
-    if (!query.location || !query.dataset || !query.table) {
-      return;
-    }
-    const columns = await apiClient.getColumns(query.location, query.dataset, query.table, true);
-    return columns.map<SelectableValue<string>>(toOption);
-  }, [apiClient, query.dataset, query.location, query.table]);
+  const state = useColumns({ apiClient, query, isOrderable: true });
 
   const onSortOrderChange = (item: 'ASC' | 'DESC') => {
     const newQuery = { ...query, sql: { ...query.sql, orderByDirection: item } };
@@ -35,7 +29,7 @@ export function SQLOrderByRow({ query, onQueryChange, apiClient }: SQLOrderByRow
 
   return (
     <>
-      <EditorField label="Order by" width={12}>
+      <EditorField label="Order by" width={25}>
         <>
           <Select
             options={state.value}
@@ -50,7 +44,6 @@ export function SQLOrderByRow({ query, onQueryChange, apiClient }: SQLOrderByRow
               newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
               onQueryChange(newQuery);
             }}
-            className="width-12"
           />
 
           <Space h={1.5} />
@@ -63,10 +56,10 @@ export function SQLOrderByRow({ query, onQueryChange, apiClient }: SQLOrderByRow
           />
         </>
       </EditorField>
-      <EditorField label="Limit" optional width={12}>
+      <EditorField label="Limit" optional width={25}>
         <Input
           type="number"
-          value={query.sql.limit}
+          value={query.sql.limit || ''}
           onChange={(e) => {
             const newQuery = { ...query, sql: { ...query.sql, limit: Number.parseInt(e.currentTarget.value, 10) } };
             newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());

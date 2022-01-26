@@ -80,7 +80,6 @@ const settings: Settings = {
         menuShouldPortal
         options={fieldProps?.items.map((f) => ({ label: f.label, value: f.key }))}
         value={fieldProps?.selectedKey}
-        className="width-12"
         onChange={(val) => {
           fieldProps?.setField(val.label!);
         }}

@@ -4,8 +4,8 @@ import { Select } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import { QueryEditorGroupByExpression } from 'expressions';
 import React from 'react';
-import { useAsync } from 'react-use';
 import { setGroupByField, toRawSql } from 'utils/sql.utils';
+import { useColumns } from 'utils/useColumns';
 import { BigQueryQueryNG, QueryWithDefaults } from '../types';
 
 interface SQLGroupByRowProps {
@@ -15,13 +15,7 @@ interface SQLGroupByRowProps {
 }
 
 export function SQLGroupByRow({ query, apiClient, onQueryChange }: SQLGroupByRowProps) {
-  const state = useAsync(async () => {
-    if (!query.location || !query.dataset || !query.table) {
-      return;
-    }
-    const columns = await apiClient.getColumns(query.location, query.dataset, query.table, true);
-    return columns.map<SelectableValue<string>>((d) => ({ label: d, value: d }));
-  }, [apiClient, query.dataset, query.location, query.table]);
+  const state = useColumns({ apiClient, query, isOrderable: true });
 
   return (
     <EditorList<QueryEditorGroupByExpression>
@@ -65,7 +59,6 @@ function makeRenderColumn({
           onChange={({ value }) => value && onChangeItem(setGroupByField(value))}
           disabled={disabled}
           isLoading={isLoading}
-          className="width-12"
         />
         <AccessoryButton aria-label="remove" icon="times" variant="secondary" onClick={onDeleteItem} />
       </InputGroup>

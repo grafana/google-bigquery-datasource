@@ -1,11 +1,11 @@
 import { SelectableValue, toOption } from '@grafana/data';
-import { AccessoryButton, EditorField, Stack } from '@grafana/experimental';
+import { EditorField, Stack } from '@grafana/experimental';
 import { Button, Select } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
 import React from 'react';
-import { useAsync } from 'react-use';
 import { createFunctionField, toRawSql } from 'utils/sql.utils';
+import { useColumns } from 'utils/useColumns';
 import { BigQueryQueryNG, QueryWithDefaults } from '../types';
 import { BQ_AGGREGATE_FNS } from './query-editor-raw/bigQueryFunctions';
 
@@ -16,20 +16,14 @@ interface SQLBuilderSelectRowProps {
 }
 
 export function SQLBuilderSelectRow({ query, apiClient, onQueryChange }: SQLBuilderSelectRowProps) {
-  const state = useAsync(async () => {
-    if (!query.location || !query.dataset || !query.table) {
-      return;
-    }
-    const columns = await apiClient.getColumns(query.location, query.dataset, query.table);
-    return columns.map<SelectableValue<string>>(toOption);
-  }, [apiClient, query.dataset, query.location, query.table]);
+  const state = useColumns({ apiClient, query });
 
   return (
-    <Stack gap={1} alignItems="end" wrap direction="column">
+    <Stack gap={2} alignItems="end" wrap direction="column">
       {query.sql.columns?.map((item, index) => (
         <div key={index}>
-          <Stack gap={1} alignItems="end">
-            <EditorField label="Column" width={12}>
+          <Stack gap={2} alignItems="end">
+            <EditorField label="Column" width={25}>
               <Select
                 value={getColumnValue(item)}
                 options={state.value}
@@ -53,11 +47,10 @@ export function SQLBuilderSelectRow({ query, apiClient, onQueryChange }: SQLBuil
                 }}
                 disabled={!query.table || !query.dataset || !query.location}
                 isLoading={state.loading}
-                className="width-12"
               />
             </EditorField>
 
-            <EditorField label="Aggregation" optional width={12}>
+            <EditorField label="Aggregation" optional width={25}>
               <Select
                 value={item.name ? toOption(item.name) : null}
                 isClearable
@@ -76,11 +69,11 @@ export function SQLBuilderSelectRow({ query, apiClient, onQueryChange }: SQLBuil
                   newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
                   onQueryChange(newQuery);
                 }}
-                className="width-12"
               />
             </EditorField>
-            <AccessoryButton
-              aria-label="remove"
+            <Button
+              aria-label="Remove"
+              type="button"
               icon="trash-alt"
               variant="secondary"
               size="md"

@@ -21,9 +21,10 @@
 // SOFTWARE.
 
 import { DataQueryRequest, dateTime, DurationUnit } from '@grafana/data';
+import { EditorMode } from '@grafana/experimental';
 import { BigQueryDatasource } from 'datasource';
 import SqlParser from 'sql_parser';
-import { BigQueryQueryNG, EditorMode, QueryFormat } from 'types';
+import { BigQueryQueryNG, QueryFormat } from 'types';
 import { DEFAULT_REGION } from './constants';
 
 export const SHIFTED = '_shifted';

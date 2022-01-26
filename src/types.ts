@@ -1,4 +1,5 @@
 import { DataQuery, DataSourceJsonData } from '@grafana/data';
+import { EditorMode } from '@grafana/experimental';
 import { BigQueryAPI } from 'api';
 import {
   QueryEditorFunctionExpression,
@@ -16,11 +17,6 @@ export enum GoogleAuthType {
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',
   Batch = 'BATCH',
-}
-
-export enum EditorMode {
-  Builder = "builder",
-  Code = "code",
 }
 
 export interface QueryRowFilter {
