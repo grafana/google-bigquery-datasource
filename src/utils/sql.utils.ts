@@ -27,6 +27,10 @@ export function toRawSql(query: BigQueryQueryNG, projectId: string): string {
     rawQuery += `FROM ${projectId}.${query.dataset}.${query.table} `;
   }
 
+  if (query.sql?.whereString) {
+    rawQuery += `WHERE ${query.sql.whereString} `;
+  }
+
   if (query.sql?.groupBy?.length) {
     const groupBy = query.sql.groupBy.map((g) => g.property.name).filter((g) => !isEmpty(g));
     rawQuery += `GROUP BY ${groupBy.join(', ')} `;

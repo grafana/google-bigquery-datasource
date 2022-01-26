@@ -10,6 +10,7 @@ import { getApiClient } from '../api';
 import QueryHeader from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, EditorMode, QueryRowFilter } from '../types';
+import { SQLBuilderWhereRow } from './SQLBuilderWhereRow';
 import { SQLGroupByRow } from './SQLGroupByRow';
 import { SQLOrderByRow } from './SQLOrderByRow';
 
@@ -20,15 +21,13 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
     async () => await getApiClient(datasource.id),
     [datasource]
   );
-
+  const queryWithDefaults = applyQueryDefaults(query, datasource);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
-    filter: false,
-    group: false,
-    order: false,
+    filter: !!queryWithDefaults.sql.whereString,
+    group: !!queryWithDefaults.sql.groupBy?.length,
+    order: !!queryWithDefaults.sql.orderBy,
     preview: true,
   });
-
-  const queryWithDefaults = applyQueryDefaults(query, datasource);
 
   useEffect(() => {
     return () => {
@@ -74,6 +73,13 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
           <EditorRow>
             <SQLBuilderSelectRow query={queryWithDefaults} onQueryChange={onColumnsChange} apiClient={apiClient} />
           </EditorRow>
+          {queryRowFilter.filter && (
+            <EditorRow>
+              <EditorField label="Filter by column value" optional>
+                <SQLBuilderWhereRow apiClient={apiClient} query={queryWithDefaults} onQueryChange={onColumnsChange} />
+              </EditorField>
+            </EditorRow>
+          )}
           {queryRowFilter.group && (
             <EditorRow>
               <EditorField label="Group by column">
