@@ -19,8 +19,8 @@ export enum QueryPriority {
 }
 
 export enum EditorMode {
-  'Builder',
-  'Code',
+  Builder = "builder",
+  Code = "code",
 }
 
 export interface QueryRowFilter {
