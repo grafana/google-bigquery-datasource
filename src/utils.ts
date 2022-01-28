@@ -25,6 +25,7 @@ import { EditorMode } from '@grafana/experimental';
 import { BigQueryDatasource } from 'datasource';
 import SqlParser from 'sql_parser';
 import { BigQueryQueryNG, QueryFormat } from 'types';
+import { createFunctionField, setGroupByField } from 'utils/sql.utils';
 import { DEFAULT_REGION } from './constants';
 
 export const SHIFTED = '_shifted';
@@ -285,8 +286,8 @@ export function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
     rawSql: q.rawSql || '',
     editorMode: q.editorMode || EditorMode.Builder,
     sql: q.sql || {
-      columns: [],
-      groupBy: [],
+      columns: [createFunctionField()],
+      groupBy: [setGroupByField()],
     },
   };
 

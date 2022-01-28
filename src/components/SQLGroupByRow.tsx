@@ -30,21 +30,12 @@ export function SQLGroupByRow({ query, apiClient, onQueryChange }: SQLGroupByRow
       renderItem={makeRenderColumn({
         options: state.value,
         isLoading: state.loading,
-        disabled: !query.table || !query.dataset || !query.location,
       })}
     />
   );
 }
 
-function makeRenderColumn({
-  options,
-  disabled,
-  isLoading,
-}: {
-  options?: Array<SelectableValue<string>>;
-  disabled: boolean;
-  isLoading: boolean;
-}) {
+function makeRenderColumn({ options, isLoading }: { options?: Array<SelectableValue<string>>; isLoading: boolean }) {
   const renderColumn = function (
     item: Partial<QueryEditorGroupByExpression>,
     onChangeItem: (item: QueryEditorGroupByExpression) => void,
@@ -54,10 +45,10 @@ function makeRenderColumn({
       <InputGroup>
         <Select
           value={item.property?.name ? toOption(item.property.name) : null}
+          aria-label="Group by"
           options={options}
           menuShouldPortal
           onChange={({ value }) => value && onChangeItem(setGroupByField(value))}
-          disabled={disabled}
           isLoading={isLoading}
         />
         <AccessoryButton aria-label="remove" icon="times" variant="secondary" onClick={onDeleteItem} />

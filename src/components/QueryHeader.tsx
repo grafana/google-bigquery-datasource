@@ -136,13 +136,13 @@ export function QueryHeader({
 
         <FlexItem grow={1} />
 
-        <RadioButtonGroup options={editorModes} size="sm" value={editorMode} onChange={onEditorModeChange} />
-
         {editorMode === EditorMode.Code && (
           <Button variant="secondary" size="sm" onClick={() => onRunQuery()}>
             Run query
           </Button>
         )}
+
+        <RadioButtonGroup options={editorModes} size="sm" value={editorMode} onChange={onEditorModeChange} />
 
         <ConfirmModal
           isOpen={showConfirm}
@@ -165,7 +165,13 @@ export function QueryHeader({
 
           <EditorRow>
             <EditorField label="Format" width={25}>
-              <Select options={QUERY_FORMAT_OPTIONS} menuShouldPortal value={query.format} onChange={onFormatChange} />
+              <Select
+                inputId={`bq-format-${query.refId}`}
+                options={QUERY_FORMAT_OPTIONS}
+                menuShouldPortal
+                value={query.format}
+                onChange={onFormatChange}
+              />
             </EditorField>
 
             <EditorField label="Dataset" width={25}>
@@ -183,7 +189,6 @@ export function QueryHeader({
                 location={query.location}
                 dataset={query.dataset}
                 value={query.table}
-                disabled={query.dataset === undefined}
                 onChange={onTableChange}
                 applyDefault
               />

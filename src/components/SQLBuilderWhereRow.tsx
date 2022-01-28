@@ -1,8 +1,7 @@
 import { toOption } from '@grafana/data';
 import { Button, Input, Select } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
-import { debounce } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   BasicConfig,
   Builder,
@@ -25,6 +24,10 @@ interface SQLBuilderWhereRowProps {
   onQueryChange: (query: BigQueryQueryNG) => void;
 }
 
+const buttonLabels = {
+  add: 'Add',
+  remove: 'Remove',
+};
 const emptyInitValue = { id: Utils.uuid(), type: 'group' } as const;
 const widgets: Widgets = {
   ...BasicConfig.widgets,
@@ -60,12 +63,13 @@ const settings: Settings = {
   maxNesting: 1,
   canReorder: false,
   showNot: false,
-  addRuleLabel: 'plus',
-  deleteLabel: 'times',
+  addRuleLabel: buttonLabels.add,
+  deleteLabel: buttonLabels.remove,
   renderConjs: function Conjunctions(conjProps) {
     return (
       <Select
         id={conjProps?.id}
+        aria-label="Conjunction"
         menuShouldPortal
         options={conjProps?.conjunctionOptions ? Object.keys(conjProps?.conjunctionOptions).map(toOption) : undefined}
         value={conjProps?.selectedConjunction}
@@ -77,6 +81,8 @@ const settings: Settings = {
     return (
       <Select
         id={fieldProps?.id}
+        width={25}
+        aria-label="Field"
         menuShouldPortal
         options={fieldProps?.items.map((f) => ({ label: f.label, value: f.key }))}
         value={fieldProps?.selectedKey}
@@ -87,12 +93,22 @@ const settings: Settings = {
     );
   },
   renderButton: function RAQBButton(buttonProps) {
-    return <Button onClick={buttonProps?.onClick} variant="secondary" size="md" icon={buttonProps?.label as any} />;
+    return (
+      <Button
+        type="button"
+        title={`${buttonProps?.label} filter`}
+        onClick={buttonProps?.onClick}
+        variant="secondary"
+        size="md"
+        icon={buttonProps?.label === buttonLabels.add ? 'plus' : 'times'}
+      />
+    );
   },
   renderOperator: function Operator(operatorProps) {
     return (
       <Select
         options={operatorProps?.items.map((op) => ({ label: op.label, value: op.key }))}
+        aria-label="Operator"
         menuShouldPortal
         value={operatorProps?.selectedKey}
         onChange={(val) => {
@@ -176,22 +192,22 @@ export function SQLBuilderWhereRow({ query, apiClient, onQueryChange }: SQLBuild
     }
   }, [query.sql.whereJsonTree, state.value, tree]);
 
-  const onTreeChange = (changedTree: ImmutableTree, config: Config) => {
-    setTree(changedTree);
-    const newQuery = {
-      ...query,
-      sql: {
-        ...query.sql,
-        whereJsonTree: Utils.getTree(changedTree),
-        whereString: Utils.sqlFormat(changedTree, config),
-      },
-    };
-    newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
-    onQueryChange(newQuery);
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedOnChange = useMemo(() => debounce(onTreeChange, 300), []);
+  const onTreeChange = useCallback(
+    (changedTree: ImmutableTree, config: Config) => {
+      setTree(changedTree);
+      const newQuery = {
+        ...query,
+        sql: {
+          ...query.sql,
+          whereJsonTree: Utils.getTree(changedTree),
+          whereString: Utils.sqlFormat(changedTree, config),
+        },
+      };
+      newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
+      onQueryChange(newQuery);
+    },
+    [apiClient, onQueryChange, query]
+  );
 
   if (state.loading) {
     return <div>Loading...</div>;
@@ -206,7 +222,7 @@ export function SQLBuilderWhereRow({ query, apiClient, onQueryChange }: SQLBuild
           widgets={widgets}
           settings={settings}
           value={tree}
-          onChange={debouncedOnChange}
+          onChange={onTreeChange}
           renderBuilder={(props) => <Builder {...props} />}
         />
       )}

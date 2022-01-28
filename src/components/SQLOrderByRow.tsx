@@ -32,6 +32,7 @@ export function SQLOrderByRow({ query, onQueryChange, apiClient }: SQLOrderByRow
       <EditorField label="Order by" width={25}>
         <>
           <Select
+            aria-label="Order by"
             options={state.value}
             value={query.sql?.orderBy?.property.name ? toOption(query.sql.orderBy.property.name) : null}
             isClearable
@@ -59,6 +60,7 @@ export function SQLOrderByRow({ query, onQueryChange, apiClient }: SQLOrderByRow
       <EditorField label="Limit" optional width={25}>
         <Input
           type="number"
+          id={`limit-${query.refId}`}
           value={query.sql.limit || ''}
           onChange={(e) => {
             const newQuery = { ...query, sql: { ...query.sql, limit: Number.parseInt(e.currentTarget.value, 10) } };

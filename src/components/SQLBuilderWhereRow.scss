@@ -1,5 +1,6 @@
 @mixin flex($direction) {
   display: flex;
+  /* autoprefixer: ignore next */
   gap: 8px;
   flex-direction: $direction;
 }

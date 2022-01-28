@@ -27,6 +27,7 @@ export function SQLBuilderSelectRow({ query, apiClient, onQueryChange }: SQLBuil
               <Select
                 value={getColumnValue(item)}
                 options={state.value}
+                inputId={`select-column-${index}-${query.refId}`}
                 menuShouldPortal
                 allowCustomValue
                 onChange={({ value }) => {
@@ -45,7 +46,6 @@ export function SQLBuilderSelectRow({ query, apiClient, onQueryChange }: SQLBuil
                   newQuery.rawSql = toRawSql(newQuery, apiClient.getDefaultProject());
                   onQueryChange(newQuery);
                 }}
-                disabled={!query.table || !query.dataset || !query.location}
                 isLoading={state.loading}
               />
             </EditorField>
@@ -53,6 +53,7 @@ export function SQLBuilderSelectRow({ query, apiClient, onQueryChange }: SQLBuil
             <EditorField label="Aggregation" optional width={25}>
               <Select
                 value={item.name ? toOption(item.name) : null}
+                inputId={`select-aggregation-${index}-${query.refId}`}
                 isClearable
                 menuShouldPortal
                 allowCustomValue

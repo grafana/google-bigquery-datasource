@@ -1,6 +1,5 @@
 import { QueryEditorProps } from '@grafana/data';
 import { EditorField, EditorMode, EditorRow, EditorRows, Space } from '@grafana/experimental';
-import { CodeEditor } from '@grafana/ui';
 import { CodeEditor as RawCodeEditor } from 'components/CodeEditor';
 import { SQLBuilderSelectRow } from 'components/SQLBuilderSelectRow';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -10,6 +9,7 @@ import { getApiClient } from '../api';
 import { QueryHeader } from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
+import { Preview } from './Preview';
 import { SQLBuilderWhereRow } from './SQLBuilderWhereRow';
 import { SQLGroupByRow } from './SQLGroupByRow';
 import { SQLOrderByRow } from './SQLOrderByRow';
@@ -24,7 +24,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
   const queryWithDefaults = applyQueryDefaults(query, datasource);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
     filter: !!queryWithDefaults.sql.whereString,
-    group: !!queryWithDefaults.sql.groupBy?.length,
+    group: !!queryWithDefaults.sql.groupBy?.[0]?.property.name,
     order: !!queryWithDefaults.sql.orderBy,
     preview: true,
   });
@@ -94,17 +94,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
           )}
           {queryRowFilter.preview && queryWithDefaults.rawSql && (
             <EditorRow>
-              <EditorField label="Preview" width="75%">
-                <div style={{ flexGrow: 1 }}>
-                  <CodeEditor
-                    height={80}
-                    language="sql"
-                    value={queryWithDefaults.rawSql}
-                    readOnly={true}
-                    showMiniMap={false}
-                  />
-                </div>
-              </EditorField>
+              <Preview rawSql={queryWithDefaults.rawSql} />
             </EditorRow>
           )}
         </EditorRows>
