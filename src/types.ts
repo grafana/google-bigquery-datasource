@@ -69,6 +69,7 @@ export interface SQLExpression {
   orderBy?: QueryEditorPropertyExpression;
   orderByDirection?: 'ASC' | 'DESC';
   limit?: number;
+  offset?: number;
 }
 
 export interface ResourceSelectorProps {

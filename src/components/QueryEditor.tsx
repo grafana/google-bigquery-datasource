@@ -1,22 +1,23 @@
 import { QueryEditorProps } from '@grafana/data';
 import { EditorField, EditorMode, EditorRow, EditorRows, Space } from '@grafana/experimental';
 import { CodeEditor as RawCodeEditor } from 'components/CodeEditor';
-import { SQLBuilderSelectRow } from 'components/SQLBuilderSelectRow';
+import { SQLBuilderSelectRow } from 'components/BQSQLBuilderSelectRow';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAsync } from 'react-use';
-import { applyQueryDefaults, isQueryValid } from 'utils';
+import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
 import { getApiClient } from '../api';
 import { QueryHeader } from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
-import { Preview } from './Preview';
+import { Preview } from './visual-query-builder/Preview';
 import { SQLBuilderWhereRow } from './SQLBuilderWhereRow';
-import { SQLGroupByRow } from './SQLGroupByRow';
-import { SQLOrderByRow } from './SQLOrderByRow';
+import { BQSQLGroupByRow } from './BQSQLGroupByRow';
+import { BQSQLOrderByRow } from './BQSQLOrderByRow';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
 export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) {
+  setDatasourceId(datasource.id);
   const { loading: apiLoading, error: apiError, value: apiClient } = useAsync(
     async () => await getApiClient(datasource.id),
     [datasource]
@@ -25,7 +26,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
     filter: !!queryWithDefaults.sql.whereString,
     group: !!queryWithDefaults.sql.groupBy?.[0]?.property.name,
-    order: !!queryWithDefaults.sql.orderBy,
+    order: !!queryWithDefaults.sql.orderBy?.property.name,
     preview: true,
   });
 
@@ -44,7 +45,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
     [onRunQuery]
   );
 
-  const onColumnsChange = (q: BigQueryQueryNG) => {
+  const onQueryChange = (q: BigQueryQueryNG) => {
     onChange(q);
     processQuery(q);
   };
@@ -71,25 +72,25 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
       {queryWithDefaults.editorMode !== EditorMode.Code && (
         <EditorRows>
           <EditorRow>
-            <SQLBuilderSelectRow query={queryWithDefaults} onQueryChange={onColumnsChange} apiClient={apiClient} />
+            <SQLBuilderSelectRow query={queryWithDefaults} onQueryChange={onQueryChange} />
           </EditorRow>
           {queryRowFilter.filter && (
             <EditorRow>
               <EditorField label="Filter by column value" optional>
-                <SQLBuilderWhereRow apiClient={apiClient} query={queryWithDefaults} onQueryChange={onColumnsChange} />
+                <SQLBuilderWhereRow apiClient={apiClient} query={queryWithDefaults} onQueryChange={onQueryChange} />
               </EditorField>
             </EditorRow>
           )}
           {queryRowFilter.group && (
             <EditorRow>
               <EditorField label="Group by column">
-                <SQLGroupByRow query={queryWithDefaults} onQueryChange={onColumnsChange} apiClient={apiClient} />
+                <BQSQLGroupByRow query={queryWithDefaults} onQueryChange={onQueryChange} />
               </EditorField>
             </EditorRow>
           )}
           {queryRowFilter.order && (
             <EditorRow>
-              <SQLOrderByRow query={queryWithDefaults} onQueryChange={onColumnsChange} apiClient={apiClient} />
+              <BQSQLOrderByRow query={queryWithDefaults} onQueryChange={onQueryChange} />
             </EditorRow>
           )}
           {queryRowFilter.preview && queryWithDefaults.rawSql && (

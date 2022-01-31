@@ -297,3 +297,13 @@ export function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource) {
 export const isQueryValid = (q: BigQueryQueryNG) => {
   return Boolean(q.location && q.rawSql);
 };
+
+let datasourceId: number;
+
+export function setDatasourceId(instance: number) {
+  datasourceId = instance;
+}
+
+export function getDatasourceId(): number {
+  return datasourceId;
+}

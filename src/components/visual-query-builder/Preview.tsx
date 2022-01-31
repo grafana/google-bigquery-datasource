@@ -9,6 +9,7 @@ type PreviewProps = {
 };
 
 export function Preview({ rawSql }: PreviewProps) {
+  // TODO: use zero index to give feedback about copy success
   const [_, copyToClipboard] = useCopyToClipboard();
   const styles = useStyles2(getStyles);
 
