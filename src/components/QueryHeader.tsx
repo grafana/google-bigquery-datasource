@@ -4,7 +4,7 @@ import { Button, ConfirmModal } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React, { useState } from 'react';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
-import { BigQueryQueryNG, QueryWithDefaults } from '../types';
+import { BigQueryQueryNG, QueryFormat, QueryWithDefaults } from '../types';
 // import { DatasetSelector } from './DatasetSelector';
 // import { TableSelector } from './TableSelector';
 
