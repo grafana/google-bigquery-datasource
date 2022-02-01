@@ -1,7 +1,7 @@
 import { QueryEditorProps } from '@grafana/data';
 import { EditorField, EditorMode, EditorRow, EditorRows, Space } from '@grafana/experimental';
 import { CodeEditor as RawCodeEditor } from 'components/CodeEditor';
-import { SQLBuilderSelectRow } from 'components/BQSQLBuilderSelectRow';
+import { BQSelectRow } from 'components/BQSelectRow';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAsync } from 'react-use';
 import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
@@ -10,9 +10,9 @@ import { QueryHeader } from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
 import { Preview } from './visual-query-builder/Preview';
-import { SQLBuilderWhereRow } from './SQLBuilderWhereRow';
-import { BQSQLGroupByRow } from './BQSQLGroupByRow';
-import { BQSQLOrderByRow } from './BQSQLOrderByRow';
+import { BQWhereRow } from './BQWhereRow';
+import { BQGroupByRow } from './BQGroupByRow';
+import { BQOrderByRow } from './BQOrderByRow';
 
 type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
 
@@ -72,25 +72,25 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
       {queryWithDefaults.editorMode !== EditorMode.Code && (
         <EditorRows>
           <EditorRow>
-            <SQLBuilderSelectRow query={queryWithDefaults} onQueryChange={onQueryChange} />
+            <BQSelectRow query={queryWithDefaults} onQueryChange={onQueryChange} />
           </EditorRow>
           {queryRowFilter.filter && (
             <EditorRow>
               <EditorField label="Filter by column value" optional>
-                <SQLBuilderWhereRow apiClient={apiClient} query={queryWithDefaults} onQueryChange={onQueryChange} />
+                <BQWhereRow apiClient={apiClient} query={queryWithDefaults} onQueryChange={onQueryChange} />
               </EditorField>
             </EditorRow>
           )}
           {queryRowFilter.group && (
             <EditorRow>
               <EditorField label="Group by column">
-                <BQSQLGroupByRow query={queryWithDefaults} onQueryChange={onQueryChange} />
+                <BQGroupByRow query={queryWithDefaults} onQueryChange={onQueryChange} />
               </EditorField>
             </EditorRow>
           )}
           {queryRowFilter.order && (
             <EditorRow>
-              <BQSQLOrderByRow query={queryWithDefaults} onQueryChange={onQueryChange} />
+              <BQOrderByRow query={queryWithDefaults} onQueryChange={onQueryChange} />
             </EditorRow>
           )}
           {queryRowFilter.preview && queryWithDefaults.rawSql && (

@@ -4,12 +4,12 @@ import { useColumns } from '../utils/useColumns';
 import { useSqlChange } from '../utils/useSqlChange';
 import { SQLSelectRow } from './visual-query-builder/SQLSelectRow';
 
-interface SQLBuilderSelectRowProps {
+interface BQSelectRowProps {
   query: QueryWithDefaults;
   onQueryChange: (query: BigQueryQueryNG) => void;
 }
 
-export function SQLBuilderSelectRow({ query, onQueryChange }: SQLBuilderSelectRowProps) {
+export function BQSelectRow({ query, onQueryChange }: BQSelectRowProps) {
   const columns = useColumns({ query });
   const { onSqlChange } = useSqlChange({ query, onQueryChange });
 

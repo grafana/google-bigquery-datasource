@@ -1,17 +1,17 @@
 import React from 'react';
-import { BigQueryQueryNG, QueryWithDefaults } from '../types';
+import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { useColumns } from '../utils/useColumns';
 import { useSqlChange } from '../utils/useSqlChange';
-import { SQLGroupByRow } from './visual-query-builder/SQLGroupByRow';
+import { SQLOrderByRow } from './visual-query-builder/SQLOrderByRow';
 
-interface SQLGroupByRowProps {
+type BQOrderByRowProps = {
   query: QueryWithDefaults;
   onQueryChange: (query: BigQueryQueryNG) => void;
-}
+};
 
-export function BQSQLGroupByRow({ query, onQueryChange }: SQLGroupByRowProps) {
+export function BQOrderByRow({ query, onQueryChange }: BQOrderByRowProps) {
   const columns = useColumns({ query, isOrderable: true });
   const { onSqlChange } = useSqlChange({ query, onQueryChange });
 
-  return <SQLGroupByRow columns={columns.value} sql={query.sql} onSqlChange={onSqlChange} />;
+  return <SQLOrderByRow sql={query.sql} onSqlChange={onSqlChange} columns={columns.value} />;
 }
