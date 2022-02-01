@@ -88,14 +88,6 @@ export interface BigQueryQueryNG extends DataQuery {
   rawSql: string;
   location?: string;
 
-  orderByCol?: string;
-  orderBySort?: string;
-  timeColumn?: string;
-  timeColumnType?: 'TIMESTAMP' | 'DATE' | 'DATETIME' | 'int4';
-  metricColumn?: string;
-  group?: Array<{ type: GroupType; params: string[] }>;
-  where?: any[];
-  select?: any[];
   partitioned?: boolean;
   partitionedField?: string;
   convertToUTC?: boolean;
