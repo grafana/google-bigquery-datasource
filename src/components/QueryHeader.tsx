@@ -1,6 +1,6 @@
 import { SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
-import { Button, ConfirmModal, InlineSwitch, RadioButtonGroup, Select } from '@grafana/ui';
+import { Button, ConfirmModal, InlineSwitch, RadioButtonGroup } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React, { useCallback, useState } from 'react';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
@@ -80,6 +80,15 @@ export function QueryHeader({
           menuShouldPortal
           onChange={({ value }) => value && onChange({ ...query, location: value || DEFAULT_REGION })}
           options={PROCESSING_LOCATIONS}
+        />
+
+        <InlineSelect
+          label="Format"
+          value={query.format}
+          placeholder="Select format"
+          menuShouldPortal
+          onChange={onFormatChange}
+          options={QUERY_FORMAT_OPTIONS}
         />
 
         {editorMode === EditorMode.Builder && (
@@ -164,16 +173,6 @@ export function QueryHeader({
           <Space v={0.5} />
 
           <EditorRow>
-            <EditorField label="Format" width={25}>
-              <Select
-                inputId={`bq-format-${query.refId}`}
-                options={QUERY_FORMAT_OPTIONS}
-                menuShouldPortal
-                value={query.format}
-                onChange={onFormatChange}
-              />
-            </EditorField>
-
             <EditorField label="Dataset" width={25}>
               <DatasetSelector
                 apiClient={apiClient}

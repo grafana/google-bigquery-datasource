@@ -3,7 +3,6 @@ import { BigQueryQueryNG } from '../../types';
 import { TableSchema } from 'api';
 import { getBigQueryCompletionProvider } from './bigqueryCompletionProvider';
 import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/experimental';
-import { isQueryValid } from 'utils';
 
 type Props = {
   query: BigQueryQueryNG;
@@ -30,15 +29,6 @@ export function QueryEditorRaw({
     getTables.current = apiGetTables;
   }, [apiGetColumns, apiGetTables]);
 
-  const processQuery = useCallback(
-    (q: BigQueryQueryNG) => {
-      if (isQueryValid(q) && onRunQuery) {
-        onRunQuery();
-      }
-    },
-    [onRunQuery]
-  );
-
   const onRawQueryChange = useCallback(
     (rawSql: string) => {
       const newQuery = {
@@ -47,9 +37,8 @@ export function QueryEditorRaw({
         rawSql,
       };
       onChange(newQuery);
-      processQuery(newQuery);
     },
-    [onChange, processQuery, query]
+    [onChange, query]
   );
 
   return (
