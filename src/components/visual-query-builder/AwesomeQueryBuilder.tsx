@@ -1,14 +1,28 @@
 import { toOption } from '@grafana/data';
 import { Button, Input, Select } from '@grafana/ui';
 import React from 'react';
-import { BasicConfig, Config, Settings, Utils, Widgets } from 'react-awesome-query-builder';
+import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from 'react-awesome-query-builder';
 
 const buttonLabels = {
   add: 'Add',
   remove: 'Remove',
 };
 
-export const emptyInitValue = { id: Utils.uuid(), type: 'group' } as const;
+export const emptyInitValue = {
+  id: Utils.uuid(),
+  type: 'group' as const,
+  children1: {
+    [Utils.uuid()]: {
+      type: 'rule',
+      properties: {
+        field: null,
+        operator: null,
+        value: [],
+        valueSrc: [],
+      },
+    } as JsonItem,
+  },
+};
 
 export const widgets: Widgets = {
   ...BasicConfig.widgets,

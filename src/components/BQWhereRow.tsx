@@ -1,6 +1,6 @@
-import { Icon } from '@grafana/ui';
 import { BigQueryAPI, TableSchema } from 'api';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDebounce } from 'react-use';
 import useAsync from 'react-use/lib/useAsync';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { useSqlChange } from 'utils/useSqlChange';
@@ -21,14 +21,34 @@ export function BQWhereRow({ query, apiClient, onQueryChange }: BQWhereRowProps)
     const tableSchema = await apiClient.getTableSchema(query.location, query.dataset, query.table);
     return getFields(tableSchema);
   }, [apiClient, query.dataset, query.location, query.table]);
+  const [sql, setSql] = useState(query.sql);
+  const [debouncedSql, setDebouncedSql] = useState(query.sql);
 
   const { onSqlChange } = useSqlChange({ query, onQueryChange });
 
-  if (state.loading || !state.value) {
-    return <Icon name="fa fa-spinner" />;
-  }
+  useEffect(() => {
+    onSqlChange(debouncedSql);
+    // it should be okay to exclude the onSqlChange from the dependency list
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSql]);
 
-  return <SQLWhereRow config={{ fields: state.value }} sql={query.sql} onSqlChange={onSqlChange} />;
+  useDebounce(
+    () => {
+      setDebouncedSql(sql);
+    },
+    500,
+    [sql]
+  );
+
+  return (
+    <SQLWhereRow
+      config={{ fields: state.value || {} }}
+      sql={sql}
+      onSqlChange={(val) => {
+        setSql(val);
+      }}
+    />
+  );
 }
 
 function getFields(tableSchema: TableSchema) {
