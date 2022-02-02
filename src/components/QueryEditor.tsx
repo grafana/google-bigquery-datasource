@@ -62,8 +62,6 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
         onQueryRowChange={setQueryRowFilter}
         queryRowFilter={queryRowFilter}
         query={queryWithDefaults}
-        // TODO: add proper dirty check
-        sqlCodeEditorIsDirty={!!queryWithDefaults.sql.columns?.length}
         apiClient={apiClient}
       />
 

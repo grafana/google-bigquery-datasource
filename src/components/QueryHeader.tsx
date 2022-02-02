@@ -1,10 +1,13 @@
 import { SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
-import { Button, ConfirmModal, InlineSwitch, RadioButtonGroup } from '@grafana/ui';
+import { Button, InlineSwitch, RadioButtonGroup } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React, { useCallback, useState } from 'react';
+import { useCopyToClipboard } from 'react-use';
+import { toRawSql } from 'utils/sql.utils';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
 import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
+import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
 import { TableSelector } from './TableSelector';
 
@@ -14,7 +17,6 @@ interface QueryHeaderProps {
   onRunQuery: () => void;
   onQueryRowChange: (queryRowFilter: QueryRowFilter) => void;
   queryRowFilter: QueryRowFilter;
-  sqlCodeEditorIsDirty: boolean;
   apiClient: BigQueryAPI;
 }
 
@@ -25,7 +27,6 @@ const editorModes = [
 
 export function QueryHeader({
   query,
-  sqlCodeEditorIsDirty,
   queryRowFilter,
   onChange,
   onRunQuery,
@@ -33,17 +34,18 @@ export function QueryHeader({
   apiClient,
 }: QueryHeaderProps) {
   const { location, editorMode } = query;
+  const [_, copyToClipboard] = useCopyToClipboard();
   const [showConfirm, setShowConfirm] = useState(false);
 
   const onEditorModeChange = useCallback(
     (newEditorMode: EditorMode) => {
-      if (sqlCodeEditorIsDirty && editorMode === EditorMode.Code) {
+      if (editorMode === EditorMode.Code) {
         setShowConfirm(true);
         return;
       }
       onChange({ ...query, editorMode: newEditorMode });
     },
-    [sqlCodeEditorIsDirty, editorMode, onChange, query]
+    [editorMode, onChange, query]
   );
 
   const onFormatChange = (e: SelectableValue) => {
@@ -155,16 +157,24 @@ export function QueryHeader({
 
         <ConfirmModal
           isOpen={showConfirm}
-          title="Are you sure?"
-          body="You will lose manual changes done to the query if you go back to the visual builder."
-          confirmText="Yes, I am sure."
-          dismissText="No, continue editing the query manually."
-          icon="exclamation-triangle"
-          onConfirm={() => {
+          onCopy={() => {
             setShowConfirm(false);
-            onChange({ ...query, editorMode: EditorMode.Builder });
+            copyToClipboard(query.rawSql);
+            onChange({
+              ...query,
+              rawSql: toRawSql(query, apiClient.getDefaultProject()),
+              editorMode: EditorMode.Builder,
+            });
           }}
-          onDismiss={() => setShowConfirm(false)}
+          onDiscard={() => {
+            setShowConfirm(false);
+            onChange({
+              ...query,
+              rawSql: toRawSql(query, apiClient.getDefaultProject()),
+              editorMode: EditorMode.Builder,
+            });
+          }}
+          onCancel={() => setShowConfirm(false)}
         />
       </EditorHeader>
 
