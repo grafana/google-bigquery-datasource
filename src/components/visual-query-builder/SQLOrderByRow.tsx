@@ -78,7 +78,7 @@ export function SQLOrderByRow({ sql, onSqlChange, columns, showOffset }: SQLOrde
         </>
       </EditorField>
       <EditorField label="Limit" optional width={25}>
-        <Input type="number" id={uniqueId('limit-')} value={sql.limit || ''} onChange={onLimitChange} />
+        <Input type="number" min={0} id={uniqueId('limit-')} value={sql.limit || ''} onChange={onLimitChange} />
       </EditorField>
       {showOffset && (
         <EditorField label="Offset" optional width={25}>

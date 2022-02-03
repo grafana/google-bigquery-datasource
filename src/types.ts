@@ -66,6 +66,7 @@ export interface SQLExpression {
   whereJsonTree?: JsonTree;
   whereString?: string;
   groupBy?: QueryEditorGroupByExpression[];
+  // TODO: Maybe change this to array in the future
   orderBy?: QueryEditorPropertyExpression;
   orderByDirection?: 'ASC' | 'DESC';
   limit?: number;
