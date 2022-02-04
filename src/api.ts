@@ -19,6 +19,7 @@ export interface BigQueryAPI {
   getTables: (location: string, dataset: string) => Promise<string[]>;
   getTableSchema: (location: string, dataset: string, table: string) => Promise<TableSchema>;
   getColumns: (location: string, dataset: string, table: string, isOrderable?: boolean) => Promise<string[]>;
+  validateQuery: (location: string, query: string) => Promise<string>;
   dispose: () => void;
 }
 
@@ -56,6 +57,14 @@ class BigQueryAPIClient implements BigQueryAPI {
       project: this.defaultProject,
       location,
       dataset,
+    });
+  };
+
+  validateQuery = async (location: string, query: string): Promise<string> => {
+    return await getBackendSrv().post(this.resourcesUrl + '/validateQuery', {
+      project: this.defaultProject,
+      location,
+      query,
     });
   };
 
