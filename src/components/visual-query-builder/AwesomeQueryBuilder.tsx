@@ -80,7 +80,11 @@ export const settings: Settings = {
         width={25}
         aria-label="Field"
         menuShouldPortal
-        options={fieldProps?.items.map((f) => ({ label: f.label, value: f.key }))}
+        options={fieldProps?.items.map((f) => ({
+          label: f.label,
+          value: f.key,
+          icon: (fieldProps.config?.fields[f.key] as any)?.mainWidgetProps?.customProps?.icon,
+        }))}
         value={fieldProps?.selectedKey}
         onChange={(val) => {
           fieldProps?.setField(val.label!);
