@@ -100,3 +100,9 @@ export interface BigQueryQueryNG extends DataQuery {
 }
 
 export type QueryWithDefaults = ReturnType<typeof applyQueryDefaults>;
+
+export interface QueryEditorProps {
+  apiClient: BigQueryAPI;
+  query: QueryWithDefaults;
+  onChange: (query: BigQueryQueryNG) => void;
+}

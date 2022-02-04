@@ -1,8 +1,8 @@
 import React from 'react';
-import { BigQueryQueryNG, QueryWithDefaults } from '../types';
-import { useColumns } from '../utils/useColumns';
-import { useSqlChange } from '../utils/useSqlChange';
-import { SQLSelectRow } from './visual-query-builder/SQLSelectRow';
+import { useColumns } from 'utils/useColumns';
+import { useSqlChange } from 'utils/useSqlChange';
+import { BigQueryQueryNG, QueryWithDefaults } from 'types';
+import { SQLSelectRow } from './SQLSelectRow';
 
 interface BQSelectRowProps {
   query: QueryWithDefaults;

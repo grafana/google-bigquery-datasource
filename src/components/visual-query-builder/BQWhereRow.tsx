@@ -5,8 +5,8 @@ import useAsync from 'react-use/lib/useAsync';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { mapColumnTypeToIcon } from 'utils/useColumns';
 import { useSqlChange } from 'utils/useSqlChange';
-import { Config } from './visual-query-builder/AwesomeQueryBuilder';
-import { SQLWhereRow } from './visual-query-builder/SQLWhereRow';
+import { Config } from './AwesomeQueryBuilder';
+import { SQLWhereRow } from './SQLWhereRow';
 
 interface BQWhereRowProps {
   query: QueryWithDefaults;

@@ -1,8 +1,8 @@
 import React from 'react';
+import { useColumns } from 'utils/useColumns';
+import { useSqlChange } from 'utils/useSqlChange';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
-import { useColumns } from '../utils/useColumns';
-import { useSqlChange } from '../utils/useSqlChange';
-import { SQLOrderByRow } from './visual-query-builder/SQLOrderByRow';
+import { SQLOrderByRow } from './SQLOrderByRow';
 
 type BQOrderByRowProps = {
   query: QueryWithDefaults;

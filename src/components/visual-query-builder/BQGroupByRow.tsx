@@ -1,8 +1,8 @@
 import React from 'react';
-import { BigQueryQueryNG, QueryWithDefaults } from '../types';
-import { useColumns } from '../utils/useColumns';
-import { useSqlChange } from '../utils/useSqlChange';
-import { SQLGroupByRow } from './visual-query-builder/SQLGroupByRow';
+import { BigQueryQueryNG, QueryWithDefaults } from '../../types';
+import { useColumns } from '../../utils/useColumns';
+import { useSqlChange } from '../../utils/useSqlChange';
+import { SQLGroupByRow } from './SQLGroupByRow';
 
 interface BQGroupByRowProps {
   query: QueryWithDefaults;
