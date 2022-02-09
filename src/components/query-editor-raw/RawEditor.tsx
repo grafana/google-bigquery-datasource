@@ -76,7 +76,7 @@ export function RawEditor({ apiClient, query, onChange, onRunQuery }: RawEditorP
 
       return apiClient.getTableSchema(location, dataset, table);
     },
-    [apiClient, query.location]
+    [apiClient]
   );
   return (
     <>
