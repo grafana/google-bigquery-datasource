@@ -1,5 +1,6 @@
-import { getBackendSrv } from '@grafana/runtime';
+import { getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import { lastValueFrom } from 'rxjs';
+import { BigQueryQueryNG } from 'types';
 
 export interface TableFieldSchema {
   name: string;
@@ -39,7 +40,7 @@ export interface BigQueryAPI {
   getTables: (location: string, dataset: string) => Promise<string[]>;
   getTableSchema: (location: string, dataset: string, table: string) => Promise<TableSchema>;
   getColumns: (location: string, dataset: string, table: string, isOrderable?: boolean) => Promise<string[]>;
-  validateQuery: (location: string, query: string) => Promise<ValidationResults>;
+  validateQuery: (query: BigQueryQueryNG) => Promise<ValidationResults>;
   dispose: () => void;
 }
 
@@ -80,11 +81,14 @@ class BigQueryAPIClient implements BigQueryAPI {
     });
   };
 
-  validateQuery = async (location: string, query: string): Promise<ValidationResults> => {
+  validateQuery = async (query: BigQueryQueryNG): Promise<ValidationResults> => {
     return await getBackendSrv().post(this.resourcesUrl + '/validateQuery', {
       project: this.defaultProject,
-      location,
-      query,
+      location: query.location,
+      query: {
+        ...query,
+        rawSql: getTemplateSrv().replace(query.rawSql),
+      },
     });
   };
 
