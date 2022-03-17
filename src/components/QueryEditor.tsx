@@ -76,20 +76,19 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
           query={queryWithDefaults}
           onChange={(q) => onQueryChange(q, false)}
           queryRowFilter={queryRowFilter}
+          onValidate={setIsQueryRunnable}
         />
       )}
 
       {queryWithDefaults.editorMode === EditorMode.Code && (
-        <>
-          <RawEditor
-            apiClient={apiClient}
-            query={queryWithDefaults}
-            queryToValidate={queryToValidate}
-            onChange={onQueryChange}
-            onRunQuery={onRunQuery}
-            onValidate={setIsQueryRunnable}
-          />
-        </>
+        <RawEditor
+          apiClient={apiClient}
+          query={queryWithDefaults}
+          queryToValidate={queryToValidate}
+          onChange={onQueryChange}
+          onRunQuery={onRunQuery}
+          onValidate={setIsQueryRunnable}
+        />
       )}
     </>
   );
