@@ -19,7 +19,7 @@ export function BQOrderByRow({ query, onQueryChange }: BQOrderByRowProps) {
     columnsWithIndices = [
       {
         value: '',
-        label: 'Indices',
+        label: 'Selected columns',
         options: query.sql.columns?.map((c, i) => ({
           value: i + 1,
           label: c.name
