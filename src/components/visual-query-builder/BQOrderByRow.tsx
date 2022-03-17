@@ -26,6 +26,7 @@ export function BQOrderByRow({ query, onQueryChange }: BQOrderByRowProps) {
             ? `${i + 1} - ${c.name}(${c.parameters?.map((p) => `${p.name}`)})`
             : c.parameters?.map((p) => `${i + 1} - ${p.name}`),
         })),
+        expanded: true,
       },
       ...columns.value,
     ];
