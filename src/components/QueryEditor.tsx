@@ -74,7 +74,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery }: Props) 
         <VisualEditor
           apiClient={apiClient}
           query={queryWithDefaults}
-          onChange={onQueryChange}
+          onChange={(q) => onQueryChange(q, false)}
           queryRowFilter={queryRowFilter}
         />
       )}
