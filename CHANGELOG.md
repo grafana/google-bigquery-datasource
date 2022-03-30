@@ -5,7 +5,7 @@
 - **Visual Query Builder**: Visual query builder has now a default limit set for a query (50).
 - **Visual Query Builder**: Queries built with visual query builder are no longer automatically executed- the Run query button is shown as in code editor.
 - **Visual Query Builder**: Query produced by visual query builder has table wrapped in backticks.
-- **Visual Query Builder**: Add aggregated columns to order by choices.
+- **Visual Query Builder**: Add aggregated columns to Order By select.
 - **Visual Query builder**: Fix bug when user changes the filter operator.
 - **Autocomplete**: Add completion for macros.
 - **Query validation**: Add time range to query validation API call. Fixes query validation errors when macros using the time range is used.
