@@ -1,6 +1,6 @@
 import { BigQueryAPI, TableSchema } from 'api';
 import React, { useEffect, useState } from 'react';
-import { useDebounce } from 'react-use';
+import { useDebounce, useDeepCompareEffect } from 'react-use';
 import useAsync from 'react-use/lib/useAsync';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { mapColumnTypeToIcon } from 'utils/useColumns';
@@ -40,6 +40,11 @@ export function BQWhereRow({ query, apiClient, onQueryChange }: BQWhereRowProps)
     500,
     [sql]
   );
+
+  // Need to keep the state in sync with the props
+  useDeepCompareEffect(() => {
+    setSql(query.sql);
+  }, [query.sql]);
 
   return (
     <SQLWhereRow
