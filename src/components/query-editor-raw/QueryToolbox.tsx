@@ -47,7 +47,7 @@ export function QueryToolbox({ showTools, onFormatCode, onExpand, isExpanded, ..
 
   let style = {};
 
-  if (!showTools && validationResult == undefined) {
+  if (!showTools && validationResult === undefined) {
     style = { height: 0, padding: 0, visibility: 'hidden' };
   }
 
