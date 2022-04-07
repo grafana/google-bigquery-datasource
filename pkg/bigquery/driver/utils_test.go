@@ -130,7 +130,7 @@ func Test_ConvertColumnValue(t *testing.T) {
 		},
 		{
 			name:          "GEOGRAPHY",
-			value:         bigquery.Value(bigquery.NullGeography{GeographyVal: "POINT(1.0 1.0)", Valid: true}),
+			value:         bigquery.Value("POINT(1.0 1.0)"),
 			columnType:    "GEOGRAPHY",
 			schema:        &bigquery.FieldSchema{Type: "GEOGRAPHY"},
 			expectedType:  "string",
