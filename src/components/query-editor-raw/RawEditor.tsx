@@ -1,12 +1,13 @@
 import { QueryEditorRaw } from './QueryEditorRaw';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useState } from 'react';
 import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
 import { BigQueryQueryNG, QueryEditorProps } from 'types';
 import { QueryToolbox } from './QueryToolbox';
-import { Modal, useTheme2 } from '@grafana/ui';
+import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
 import { css } from '@emotion/css';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import { useMeasure } from 'react-use';
+import { GrafanaTheme2 } from '@grafana/data';
 
 interface RawEditorProps extends Omit<QueryEditorProps, 'onChange'> {
   onRunQuery: () => void;
@@ -25,22 +26,10 @@ export function RawEditor({
   range,
 }: RawEditorProps) {
   const theme = useTheme2();
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const styles = useStyles2(getStyles);
+  const [isExpanded, setIsExpanded] = useState(false);
   const [toolboxRef, toolboxMeasure] = useMeasure<HTMLDivElement>();
   const [editorRef, editorMeasure] = useMeasure<HTMLDivElement>();
-
-  const styles = useMemo(() => {
-    return {
-      modal: css`
-        width: 95vw;
-        height: 95vh;
-      `,
-      modalContent: css`
-        height: 100%;
-        padding-top: 0;
-      `,
-    };
-  }, []);
 
   const getColumns = useCallback(
     // expects fully qualified table name: <project-id>.<dataset-id>.<table-id>
@@ -193,4 +182,17 @@ export function RawEditor({
       )}
     </>
   );
+}
+
+function getStyles(theme: GrafanaTheme2) {
+  return {
+    modal: css`
+      width: 95vw;
+      height: 95vh;
+    `,
+    modalContent: css`
+      height: 100%;
+      padding-top: 0;
+    `,
+  };
 }
