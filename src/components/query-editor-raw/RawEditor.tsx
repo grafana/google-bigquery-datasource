@@ -13,7 +13,6 @@ interface RawEditorProps extends Omit<QueryEditorProps, 'onChange'> {
   onChange: (q: BigQueryQueryNG, processQuery: boolean) => void;
   onValidate: (isValid: boolean) => void;
   queryToValidate: BigQueryQueryNG;
-  isQueryRunnable: boolean;
 }
 
 export function RawEditor({
@@ -23,7 +22,6 @@ export function RawEditor({
   onRunQuery,
   onValidate,
   queryToValidate,
-  isQueryRunnable,
   range,
 }: RawEditorProps) {
   const theme = useTheme2();
@@ -187,9 +185,6 @@ export function RawEditor({
           contentClassName={styles.modalContent}
           isOpen={isExpanded}
           onDismiss={() => {
-            if (isQueryRunnable) {
-              onRunQuery();
-            }
             setIsExpanded(false);
           }}
         >

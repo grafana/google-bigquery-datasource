@@ -89,7 +89,6 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range }: 
           onChange={onQueryChange}
           onRunQuery={onRunQuery}
           onValidate={setIsQueryRunnable}
-          isQueryRunnable={isQueryRunnable}
           range={range}
         />
       )}
