@@ -1,4 +1,5 @@
 import { injectGlobal } from '@emotion/css';
+import { isArray, mergeWith } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Builder, Config, ImmutableTree, Query, Utils } from 'react-awesome-query-builder';
 import { SQLExpression } from '../../types';
@@ -12,7 +13,15 @@ interface SQLBuilderWhereRowProps {
 
 export function SQLWhereRow({ sql, config, onSqlChange }: SQLBuilderWhereRowProps) {
   const [tree, setTree] = useState<ImmutableTree>();
-  const configWithDefaults = useMemo(() => ({ ...raqbConfig, ...config }), [config]);
+  const configWithDefaults = useMemo(() => {
+    const mergedConfig = mergeWith({}, raqbConfig, config, (objValue, srcValue) => {
+      if (isArray(objValue)) {
+        return objValue.concat(srcValue);
+      }
+      return;
+    });
+    return mergedConfig as Config;
+  }, [config]);
 
   useEffect(() => {
     // Set the initial tree

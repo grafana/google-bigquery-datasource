@@ -23,10 +23,50 @@ export function BQWhereRow({ query, apiClient, onQueryChange }: BQWhereRowProps)
   }, [apiClient, query.dataset, query.location, query.table]);
 
   const { onSqlChange } = useSqlChange({ query, onQueryChange });
+  const operators = ['is_null', 'is_not_null'];
+  const config: Partial<Config> = {
+    fields: state.value || {},
+    operators: {
+      is_null: {
+        label: 'Is null',
+        labelForFormat: 'IS NULL',
+        sqlOp: 'IS NULL',
+        cardinality: 0,
+        reversedOp: 'is_not_null',
+      },
+      is_not_null: {
+        label: 'Is not null',
+        labelForFormat: 'IS NOT NULL',
+        sqlOp: 'IS NOT NULL',
+        cardinality: 0,
+        reversedOp: 'is_null',
+      },
+    },
+    types: {
+      text: {
+        widgets: { text: { operators }, textarea: { operators }, field: { operators } },
+      },
+      number: {
+        widgets: { number: { operators } },
+      },
+      date: {
+        widgets: { date: { operators } },
+      },
+      time: {
+        widgets: { time: { operators } },
+      },
+      datetime: {
+        widgets: { datetime: { operators } },
+      },
+      boolean: {
+        widgets: { boolean: { operators } },
+      },
+    },
+  };
 
   return (
     <SQLWhereRow
-      config={{ fields: state.value || {} }}
+      config={config}
       sql={query.sql}
       onSqlChange={(val) => {
         onSqlChange(val);
