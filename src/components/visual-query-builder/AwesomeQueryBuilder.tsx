@@ -66,6 +66,8 @@ export const widgets: Widgets = {
   },
 };
 
+const { is_empty, is_not_empty, proximity, ...supportedOperators } = BasicConfig.operators;
+
 export const settings: Settings = {
   ...BasicConfig.settings,
   canRegroup: false,
@@ -136,6 +138,7 @@ export const raqbConfig: Config = {
   ...BasicConfig,
   widgets,
   settings,
+  operators: supportedOperators as typeof BasicConfig.operators,
 };
 
 export type { Config };
