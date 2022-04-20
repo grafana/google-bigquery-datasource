@@ -78,11 +78,17 @@ func (r *ResourceHandler) validateQuery(rw http.ResponseWriter, req *http.Reques
 	utils.SendResponse(res, err, rw)
 }
 
+func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
+	res, err := r.ds.Projects(req.Context())
+	utils.SendResponse(res, err, rw)
+}
+
 func (r *ResourceHandler) Routes() map[string]func(http.ResponseWriter, *http.Request) {
 	return map[string]func(http.ResponseWriter, *http.Request){
 		"/defaultProjects":      r.defaultProjects,
 		"/datasets":             r.datasets,
 		"/dataset/table/schema": r.tableSchema,
 		"/validateQuery":        r.validateQuery,
+		"/projects":             r.projects,
 	}
 }
