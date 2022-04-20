@@ -64,13 +64,13 @@ class BigQueryAPIClient implements BigQueryAPI {
     return this.defaultProject;
   }
 
-  getDatasets = async (location: string) => {
-    return await this.fromCache('datasets', this._getDatasets)(location);
+  getDatasets = async (location: string, project?: string) => {
+    return await this.fromCache('datasets', this._getDatasets)(location, project);
   };
 
-  private _getDatasets = async (location: string): Promise<string[]> => {
+  private _getDatasets = async (location: string, project = this.defaultProject): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/datasets', {
-      project: this.defaultProject,
+      project,
       location,
     });
   };
