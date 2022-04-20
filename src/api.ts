@@ -38,14 +38,19 @@ export interface ValidationResults {
   } | null;
 }
 
+interface GCEProject {
+  displayName: string;
+  projectId: string;
+}
+
 export interface BigQueryAPI {
   getDefaultProject: () => string;
-  getDatasets: (location: string) => Promise<string[]>;
-  getTables: (location: string, dataset: string) => Promise<string[]>;
+  getDatasets: (location: string, project?: string) => Promise<string[]>;
+  getTables: (location: string, project?: string, dataset?: string) => Promise<string[]>;
   getTableSchema: (location: string, dataset: string, table: string) => Promise<TableSchema>;
   getColumns: (location: string, dataset: string, table: string, isOrderable?: boolean) => Promise<string[]>;
   validateQuery: (query: BigQueryQueryNG, range?: TimeRange) => Promise<ValidationResults>;
-  getProjects: () => Promise<string[]>;
+  getProjects: () => Promise<GCEProject[]>;
   dispose: () => void;
 }
 
@@ -75,21 +80,21 @@ class BigQueryAPIClient implements BigQueryAPI {
     });
   };
 
-  private _getProjects = async (): Promise<string[]> => {
+  private _getProjects = async (): Promise<GCEProject[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/projects');
   };
 
-  getProjects = async (): Promise<string[]> => {
+  getProjects = async (): Promise<GCEProject[]> => {
     return this.fromCache('projects', this._getProjects)();
   };
 
-  getTables = async (location: string, dataset: string): Promise<string[]> => {
-    return this.fromCache('tables', this._getTables)(location, dataset);
+  getTables = async (location: string, project?: string, dataset?: string): Promise<string[]> => {
+    return this.fromCache('tables', this._getTables)(location, project, dataset);
   };
 
-  private _getTables = async (location: string, dataset: string): Promise<string[]> => {
+  private _getTables = async (location: string, project?: string, dataset?: string): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/tables', {
-      project: this.defaultProject,
+      project: project ?? this.defaultProject,
       location,
       dataset,
     });

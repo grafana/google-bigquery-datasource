@@ -63,26 +63,27 @@ export function RawEditor({
   );
 
   const getTables = useCallback(
-    async (d?: string) => {
+    async (p?: string) => {
       if (!apiClient) {
         return [];
       }
 
-      let datasets = [];
-      if (!d) {
-        datasets = await apiClient.getDatasets(query.location);
-        return datasets.map((d) => ({ name: d, completion: `\`${apiClient.getDefaultProject()}.${d}.` }));
+      let projects = [];
+
+      if (!p) {
+        projects = await apiClient.getProjects();
+        return projects.map((p) => ({ name: p.displayName, completion: `\`${p.projectId}.` }));
       } else {
-        const path = d.split('.').filter((s) => s);
+        const path = p.split('.').filter((s) => s);
         if (path.length > 2) {
           return [];
         }
         if (path[0] && path[1]) {
-          const tables = await apiClient.getTables(query.location, path[1]);
+          const tables = await apiClient.getTables(query.location, path[0], path[1]);
           return tables.map((t) => ({ name: t, completion: `${t}\`` }));
         } else if (path[0]) {
-          datasets = await apiClient.getDatasets(query.location);
-          return datasets.map((d) => ({ name: d, completion: `${d}` }));
+          const datasets = await apiClient.getDatasets(query.location, path[0]);
+          return datasets.map((d) => ({ name: d, completion: `${d}.` }));
         } else {
           return [];
         }
