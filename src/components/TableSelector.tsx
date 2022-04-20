@@ -6,6 +6,7 @@ import { ResourceSelectorProps } from '../types';
 
 interface TableSelectorProps extends ResourceSelectorProps {
   dataset?: string;
+  project?: string;
   value: string | null;
   onChange: (v: SelectableValue) => void;
 }
@@ -14,6 +15,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
   apiClient,
   location,
   value,
+  project,
   dataset,
   className,
   onChange,
@@ -22,9 +24,9 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
     if (!dataset) {
       return [];
     }
-    const tables = await apiClient.getTables(location, dataset);
+    const tables = await apiClient.getTables(location, project, dataset);
     return tables.map(toOption);
-  }, [location, dataset]);
+  }, [location, dataset, project]);
 
   return (
     <Select

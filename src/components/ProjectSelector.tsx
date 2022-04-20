@@ -1,37 +1,34 @@
-import { SelectableValue, toOption } from '@grafana/data';
+import { SelectableValue } from '@grafana/data';
 import { Select } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { useAsync } from 'react-use';
 import { ResourceSelectorProps } from 'types';
 
-interface DatasetSelectorProps extends ResourceSelectorProps {
+interface ProjectSelectorProps extends Omit<ResourceSelectorProps, 'location'> {
   value?: string;
-  project?: string;
   applyDefault?: boolean;
   disabled?: boolean;
   onChange: (v: SelectableValue) => void;
 }
 
-export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
+export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   apiClient,
-  location,
   value,
-  project,
   onChange,
   disabled,
   className,
   applyDefault,
 }) => {
   const state = useAsync(async () => {
-    const datasets = await apiClient.getDatasets(location, project);
-    return datasets.map(toOption);
-  }, [location, project]);
+    const projects = await apiClient.getProjects();
+    return projects.map((project) => ({ label: project.displayName, value: project.projectId }));
+  }, [location]);
 
   useEffect(() => {
     if (!applyDefault) {
       return;
     }
-    // Set default dataset when values are fetched
+    // Set default project when values are fetched
     if (!value) {
       if (state.value && state.value[0]) {
         onChange(state.value[0]);
@@ -44,12 +41,12 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
         }
       }
     }
-  }, [state.value, value, location, applyDefault, onChange]);
+  }, [state.value, value, applyDefault, onChange]);
 
   return (
     <Select
       className={className}
-      aria-label="Dataset selector"
+      aria-label="Project selector"
       value={value}
       options={state.value}
       onChange={onChange}

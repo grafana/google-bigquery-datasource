@@ -9,6 +9,7 @@ import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../c
 import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
+import { ProjectSelector } from './ProjectSelector';
 import { TableSelector } from './TableSelector';
 
 interface QueryHeaderProps {
@@ -63,6 +64,23 @@ export function QueryHeader({
     const next = {
       ...query,
       dataset: e.value,
+      table: undefined,
+      sql: undefined,
+      rawSql: '',
+    };
+
+    onChange(next);
+  };
+
+  const onProjectChange = (e: SelectableValue) => {
+    if (e.value === query.project) {
+      return;
+    }
+
+    const next = {
+      ...query,
+      project: e.value,
+      dataset: undefined,
       table: undefined,
       sql: undefined,
       rawSql: '',
@@ -212,11 +230,16 @@ export function QueryHeader({
           <Space v={0.5} />
 
           <EditorRow>
+            <EditorField label="Project" width={25}>
+              <ProjectSelector apiClient={apiClient} value={query.project} onChange={onProjectChange} />
+            </EditorField>
+
             <EditorField label="Dataset" width={25}>
               <DatasetSelector
                 apiClient={apiClient}
                 location={query.location}
                 value={query.dataset}
+                project={query.project}
                 onChange={onDatasetChange}
               />
             </EditorField>
@@ -226,6 +249,7 @@ export function QueryHeader({
                 apiClient={apiClient}
                 location={query.location}
                 dataset={query.dataset}
+                project={query.project}
                 value={query.table === undefined ? null : query.table}
                 onChange={onTableChange}
                 applyDefault

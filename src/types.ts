@@ -83,6 +83,7 @@ export interface ResourceSelectorProps {
 export interface BigQueryQueryNG extends DataQuery {
   dataset?: string;
   table?: string;
+  project?: string;
 
   format: QueryFormat;
   rawQuery?: boolean;
