@@ -5,7 +5,7 @@ import { useAsync } from 'react-use';
 import { ResourceSelectorProps } from 'types';
 
 interface DatasetSelectorProps extends ResourceSelectorProps {
-  value?: string;
+  value: string | null;
   project: string;
   applyDefault?: boolean;
   disabled?: boolean;

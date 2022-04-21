@@ -238,7 +238,7 @@ export function QueryHeader({
               <DatasetSelector
                 apiClient={apiClient}
                 location={query.location}
-                value={query.dataset}
+                value={query.dataset === undefined ? null : query.dataset}
                 project={query.project}
                 onChange={onDatasetChange}
               />
