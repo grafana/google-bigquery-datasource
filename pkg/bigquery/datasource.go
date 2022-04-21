@@ -33,7 +33,7 @@ type BigqueryDatasourceIface interface {
 	Datasets(ctx context.Context, args DatasetsArgs) ([]string, error)
 	TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error)
 	ValidateQuery(ctx context.Context, args ValidateQueryArgs) (*api.ValidateQueryResponse, error)
-	Projects(ctx context.Context) ([]*cloudresourcemanager.Project, error)
+	Projects() ([]*cloudresourcemanager.Project, error)
 }
 
 type conn struct {
@@ -44,9 +44,10 @@ type conn struct {
 type bqServiceFactory func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error)
 
 type BigQueryDatasource struct {
-	connections sync.Map
-	apiClients  sync.Map
-	bqFactory   bqServiceFactory
+	connections            sync.Map
+	apiClients             sync.Map
+	bqFactory              bqServiceFactory
+	resourceManagerService *cloudresourcemanager.Service
 }
 
 type ConnectionArgs struct {
@@ -85,6 +86,13 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	}
 
 	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, connectionSettings.Location, connectionSettings.Project)
+
+	if s.resourceManagerService == nil {
+		err := createResourceManagerService(settings, s)
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	c, exists := s.connections.Load(connectionKey)
 
@@ -137,6 +145,18 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		return db, nil
 	}
 
+}
+
+func createResourceManagerService(settings types.BigQuerySettings, s *BigQueryDatasource) error {
+	httpClient, err := newHTTPClient(settings, httpclient.Options{}, resourceManagerRoute)
+
+	if err != nil {
+		return errors.WithMessage(err, "Failed to crate http client for resource manager")
+	}
+
+	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
+	s.resourceManagerService = cloudresourcemanagerService
+	return nil
 }
 
 func (s *BigQueryDatasource) Converters() (sc []sqlutil.Converter) {
@@ -248,21 +268,8 @@ func (s *BigQueryDatasource) Columns(ctx context.Context, options sqlds.Options)
 	return apiClient.ListColumns(ctx, args.Dataset, args.Table, isOrderable)
 }
 
-func (s *BigQueryDatasource) Projects(ctx context.Context) ([]*cloudresourcemanager.Project, error) {
-	datasourceSettings := getDatasourceSettings(ctx)
-	settings, err := LoadSettings(datasourceSettings)
-	if err != nil {
-		return nil, err
-	}
-
-	httpClient, err := newHTTPClient(settings, httpclient.Options{}, resourceManagerRoute)
-
-	if err != nil {
-		return nil, errors.WithMessage(err, "Failed to crate http client")
-	}
-
-	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx, option.WithHTTPClient(httpClient))
-	response, err := cloudresourcemanagerService.Projects.Search().Do()
+func (s *BigQueryDatasource) Projects() ([]*cloudresourcemanager.Project, error) {
+	response, err := s.resourceManagerService.Projects.Search().Do()
 
 	if err != nil {
 		return nil, err

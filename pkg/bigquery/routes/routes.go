@@ -79,7 +79,7 @@ func (r *ResourceHandler) validateQuery(rw http.ResponseWriter, req *http.Reques
 }
 
 func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
-	res, err := r.ds.Projects(req.Context())
+	res, err := r.ds.Projects()
 	utils.SendResponse(res, err, rw)
 }
 
