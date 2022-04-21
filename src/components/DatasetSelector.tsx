@@ -6,7 +6,7 @@ import { ResourceSelectorProps } from 'types';
 
 interface DatasetSelectorProps extends ResourceSelectorProps {
   value?: string;
-  project?: string;
+  project: string;
   applyDefault?: boolean;
   disabled?: boolean;
   onChange: (v: SelectableValue) => void;

@@ -41,16 +41,16 @@ export function RawEditor({
       const tablePath = t.split('.');
 
       if (tablePath.length === 3) {
-        cols = await apiClient.getColumns(query.location, tablePath[1], tablePath[2]);
+        cols = await apiClient.getColumns(query.location, tablePath[1], tablePath[2], tablePath[0]);
       } else {
         if (!query.dataset) {
           return [];
         }
-        cols = await apiClient.getColumns(query.location, query.dataset, t!);
+        cols = await apiClient.getColumns(query.location, query.dataset, t!, tablePath[0]);
       }
 
       if (cols.length > 0) {
-        const schema = await apiClient.getTableSchema(query.location, tablePath[1], tablePath[2]);
+        const schema = await apiClient.getTableSchema(query.location, tablePath[1], tablePath[2], tablePath[0]);
         return cols.map((c) => {
           const cInfo = schema.schema ? getColumnInfoFromSchema(c, schema.schema) : null;
           return { name: c, ...cInfo };
@@ -93,14 +93,14 @@ export function RawEditor({
   );
 
   const getTableSchema = useCallback(
-    async (location: string, dataset: string, table: string) => {
+    async (project: string, dataset: string, table: string) => {
       if (!apiClient) {
         return null;
       }
 
-      return apiClient.getTableSchema(location, dataset, table);
+      return apiClient.getTableSchema(query.location, dataset, table, project);
     },
-    [apiClient]
+    [apiClient, query]
   );
 
   const renderQueryEditor = (width?: number, height?: number) => {

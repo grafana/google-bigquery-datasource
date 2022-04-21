@@ -45,10 +45,16 @@ interface GCEProject {
 
 export interface BigQueryAPI {
   getDefaultProject: () => string;
-  getDatasets: (location: string, project?: string) => Promise<string[]>;
-  getTables: (location: string, project?: string, dataset?: string) => Promise<string[]>;
-  getTableSchema: (location: string, dataset: string, table: string) => Promise<TableSchema>;
-  getColumns: (location: string, dataset: string, table: string, isOrderable?: boolean) => Promise<string[]>;
+  getDatasets: (location: string, project: string) => Promise<string[]>;
+  getTables: (location: string, project: string, dataset: string) => Promise<string[]>;
+  getTableSchema: (location: string, dataset: string, table: string, project: string) => Promise<TableSchema>;
+  getColumns: (
+    location: string,
+    dataset: string,
+    table: string,
+    project: string,
+    isOrderable?: boolean
+  ) => Promise<string[]>;
   validateQuery: (query: BigQueryQueryNG, range?: TimeRange) => Promise<ValidationResults>;
   getProjects: () => Promise<GCEProject[]>;
   dispose: () => void;
@@ -69,11 +75,11 @@ class BigQueryAPIClient implements BigQueryAPI {
     return this.defaultProject;
   }
 
-  getDatasets = async (location: string, project?: string) => {
+  getDatasets = async (location: string, project: string) => {
     return await this.fromCache('datasets', this._getDatasets)(location, project);
   };
 
-  private _getDatasets = async (location: string, project = this.defaultProject): Promise<string[]> => {
+  private _getDatasets = async (location: string, project: string): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/datasets', {
       project,
       location,
@@ -88,13 +94,13 @@ class BigQueryAPIClient implements BigQueryAPI {
     return this.fromCache('projects', this._getProjects)();
   };
 
-  getTables = async (location: string, project?: string, dataset?: string): Promise<string[]> => {
+  getTables = async (location: string, project: string, dataset: string): Promise<string[]> => {
     return this.fromCache('tables', this._getTables)(location, project, dataset);
   };
 
-  private _getTables = async (location: string, project?: string, dataset?: string): Promise<string[]> => {
+  private _getTables = async (location: string, project: string, dataset: string): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/tables', {
-      project: project ?? this.defaultProject,
+      project: project,
       location,
       dataset,
     });
@@ -129,18 +135,25 @@ class BigQueryAPIClient implements BigQueryAPI {
     return this.lastValidation!;
   };
 
-  getColumns = async (location: string, dataset: string, table: string, isOrderable?: boolean): Promise<string[]> => {
-    return this.fromCache('columns', this._getColumns)(location, dataset, table, isOrderable);
+  getColumns = async (
+    location: string,
+    dataset: string,
+    table: string,
+    project: string,
+    isOrderable?: boolean
+  ): Promise<string[]> => {
+    return this.fromCache('columns', this._getColumns)(location, dataset, table, project, isOrderable);
   };
 
   private _getColumns = async (
     location: string,
     dataset: string,
     table: string,
+    project: string,
     isOrderable?: boolean
   ): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/columns', {
-      project: this.defaultProject,
+      project,
       location,
       dataset,
       table,
@@ -148,11 +161,16 @@ class BigQueryAPIClient implements BigQueryAPI {
     });
   };
 
-  getTableSchema = async (location: string, dataset: string, table: string): Promise<TableSchema> => {
-    return this.fromCache('schema', this._getTableSchema)(location, dataset, table);
+  getTableSchema = async (location: string, dataset: string, table: string, project: string): Promise<TableSchema> => {
+    return this.fromCache('schema', this._getTableSchema)(location, dataset, table, project);
   };
 
-  private _getTableSchema = async (location: string, dataset: string, table: string): Promise<TableSchema> => {
+  private _getTableSchema = async (
+    location: string,
+    dataset: string,
+    table: string,
+    project: string
+  ): Promise<TableSchema> => {
     const result = await lastValueFrom(
       getBackendSrv().fetch<TableSchema>({
         method: 'POST',
@@ -160,7 +178,7 @@ class BigQueryAPIClient implements BigQueryAPI {
         showSuccessAlert: false,
         url: this.resourcesUrl + '/dataset/table/schema',
         data: {
-          project: this.defaultProject,
+          project,
           location,
           dataset,
           table,

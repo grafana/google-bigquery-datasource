@@ -18,7 +18,7 @@ import { BQ_OPERATORS } from './bigQueryOperators';
 interface CompletionProviderGetterArgs {
   getColumns: React.MutableRefObject<(t: string) => Promise<ColumnDefinition[]>>;
   getTables: React.MutableRefObject<(d?: string) => Promise<TableDefinition[]>>;
-  getTableSchema: React.MutableRefObject<(l: string, d: string, t: string) => Promise<TableSchema | null>>;
+  getTableSchema: React.MutableRefObject<(p: string, d: string, t: string) => Promise<TableSchema | null>>;
 }
 
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider = ({
@@ -139,7 +139,7 @@ export const customSuggestionKinds: (
           const timePartitioningSetup = schema.timePartitioning;
           if (timePartitioningSetup) {
             if (timePartitioningSetup.field) {
-              // TODO: add suport for field partitioning
+              // TODO: add support for field partitioning
             }
 
             if (timePartitioningSetup.type) {

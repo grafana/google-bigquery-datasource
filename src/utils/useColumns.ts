@@ -20,8 +20,8 @@ export function useColumns({ query, isOrderable = false }: Options) {
       return;
     }
 
-    const columns = await apiClient.getColumns(query.location, query.dataset, query.table, isOrderable);
-    const schema = await apiClient.getTableSchema(query.location, query.dataset, query.table);
+    const columns = await apiClient.getColumns(query.location, query.dataset, query.table, query.project, isOrderable);
+    const schema = await apiClient.getTableSchema(query.location, query.dataset, query.table, query.project);
     const colTypes = new Map<string, SelectableValue[]>();
 
     for (let i = 0; i < columns.length; i++) {
