@@ -76,11 +76,12 @@ export const customStatementPlacement: StatementPlacementProvider = () => [
         currentToken?.is(TokenType.Delimiter, '.') ||
           (currentToken?.is(TokenType.Whitespace) && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
           (currentToken?.value === '`' && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
+          (currentToken?.isNumber() && currentToken.value.endsWith('.')) || // number with dot at the end like "projectname-21342."
           (currentToken?.value === '`' && isTypingTableIn(currentToken))
       );
     },
   },
-  // Overriding default befaviour of AfterFrom resolver
+  // Overriding default behaviour of AfterFrom resolver
   {
     id: StatementPosition.AfterFrom,
     overrideDefault: true,
@@ -190,7 +191,7 @@ function getTablePath(token: LinkedToken) {
   let processedToken = token;
   let tablePath = '';
   while (processedToken?.previous && !processedToken.previous.isWhiteSpace()) {
-    tablePath = processedToken.previous.value + tablePath;
+    tablePath = processedToken.value + tablePath;
     processedToken = processedToken.previous;
   }
 
