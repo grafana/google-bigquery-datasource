@@ -29,7 +29,7 @@ Google BigQuery datasource provides two ways of authentication:
 
 #### Google Service Account authentication
 
-[Create a Google Cloud Platform (GCP) Service Account](https://cloud.google.com/iam/docs/creating-managing-service-accounts). The BigQuery Data Viewer role and the Job User role provide all the permissions that Grafana needs. [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) has to be enabled on GCP for the data source to work.
+[Create a Google Cloud Platform (GCP) Service Account](https://cloud.google.com/iam/docs/creating-managing-service-accounts). The BigQuery Data Viewer role and the Job User role provide all the permissions that Grafana needs. [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) and [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com) have to be enabled on GCP for the data source to work.
 
 #### Google metadata server
 
