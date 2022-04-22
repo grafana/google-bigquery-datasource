@@ -38,7 +38,7 @@ export interface ValidationResults {
   } | null;
 }
 
-interface GCEProject {
+interface GCPProject {
   displayName: string;
   projectId: string;
 }
@@ -137,9 +137,9 @@ class BigQueryAPIClient implements BigQueryAPI {
 
   getColumns = async (
     location: string,
+    project: string,
     dataset: string,
     table: string,
-    project: string,
     isOrderable?: boolean
   ): Promise<string[]> => {
     return this.fromCache('columns', this._getColumns)(location, dataset, table, project, isOrderable);
@@ -147,9 +147,9 @@ class BigQueryAPIClient implements BigQueryAPI {
 
   private _getColumns = async (
     location: string,
+    project: string,
     dataset: string,
     table: string,
-    project: string,
     isOrderable?: boolean
   ): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/columns', {
@@ -161,15 +161,15 @@ class BigQueryAPIClient implements BigQueryAPI {
     });
   };
 
-  getTableSchema = async (location: string, dataset: string, table: string, project: string): Promise<TableSchema> => {
+  getTableSchema = async (location: string, project: string, dataset: string, table: string): Promise<TableSchema> => {
     return this.fromCache('schema', this._getTableSchema)(location, dataset, table, project);
   };
 
   private _getTableSchema = async (
     location: string,
+    project: string,
     dataset: string,
     table: string,
-    project: string
   ): Promise<TableSchema> => {
     const result = await lastValueFrom(
       getBackendSrv().fetch<TableSchema>({
