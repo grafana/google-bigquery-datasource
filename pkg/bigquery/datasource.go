@@ -33,7 +33,7 @@ type BigqueryDatasourceIface interface {
 	Datasets(ctx context.Context, args DatasetsArgs) ([]string, error)
 	TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error)
 	ValidateQuery(ctx context.Context, args ValidateQueryArgs) (*api.ValidateQueryResponse, error)
-	Projects() ([]*cloudresourcemanager.Project, error)
+	Projects(options ProjectsArgs) ([]*cloudresourcemanager.Project, error)
 }
 
 type conn struct {
@@ -44,10 +44,10 @@ type conn struct {
 type bqServiceFactory func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error)
 
 type BigQueryDatasource struct {
-	connections            sync.Map
-	apiClients             sync.Map
-	bqFactory              bqServiceFactory
-	resourceManagerService *cloudresourcemanager.Service
+	connections             sync.Map
+	apiClients              sync.Map
+	bqFactory               bqServiceFactory
+	resourceManagerServices map[string]*cloudresourcemanager.Service
 }
 
 type ConnectionArgs struct {
@@ -58,7 +58,8 @@ type ConnectionArgs struct {
 
 func New() *BigQueryDatasource {
 	return &BigQueryDatasource{
-		bqFactory: bq.NewClient,
+		bqFactory:               bq.NewClient,
+		resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
 	}
 }
 
@@ -87,8 +88,8 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 
 	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, connectionSettings.Location, connectionSettings.Project)
 
-	if s.resourceManagerService == nil {
-		err := createResourceManagerService(settings, s)
+	if s.resourceManagerServices[fmt.Sprint(config.ID)] == nil {
+		err := createResourceManagerService(settings, fmt.Sprint(config.ID), s)
 		if err != nil {
 			return nil, err
 		}
@@ -147,7 +148,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 
 }
 
-func createResourceManagerService(settings types.BigQuerySettings, s *BigQueryDatasource) error {
+func createResourceManagerService(settings types.BigQuerySettings, id string, s *BigQueryDatasource) error {
 	httpClient, err := newHTTPClient(settings, httpclient.Options{}, resourceManagerRoute)
 
 	if err != nil {
@@ -155,7 +156,7 @@ func createResourceManagerService(settings types.BigQuerySettings, s *BigQueryDa
 	}
 
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
-	s.resourceManagerService = cloudresourcemanagerService
+	s.resourceManagerServices[id] = cloudresourcemanagerService
 	return nil
 }
 
@@ -268,8 +269,12 @@ func (s *BigQueryDatasource) Columns(ctx context.Context, options sqlds.Options)
 	return apiClient.ListColumns(ctx, args.Dataset, args.Table, isOrderable)
 }
 
-func (s *BigQueryDatasource) Projects() ([]*cloudresourcemanager.Project, error) {
-	response, err := s.resourceManagerService.Projects.Search().Do()
+type ProjectsArgs struct {
+	DatasourceID string `json:"datasourceId"`
+}
+
+func (s *BigQueryDatasource) Projects(options ProjectsArgs) ([]*cloudresourcemanager.Project, error) {
+	response, err := s.resourceManagerServices[options.DatasourceID].Projects.Search().Do()
 
 	if err != nil {
 		return nil, err

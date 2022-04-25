@@ -58,9 +58,11 @@ class BigQueryAPIClient implements BigQueryAPI {
   private RESULTS_CACHE = new Map<string, any>();
   private baseUrl: string;
   private resourcesUrl: string;
+  private datasourceId: number;
   private lastValidation: ValidationResults | null = null;
 
   constructor(datasourceId: number, private defaultProject: string) {
+    this.datasourceId = datasourceId;
     this.baseUrl = `/api/datasources/${datasourceId}`;
     this.resourcesUrl = `${this.baseUrl}/resources`;
   }
@@ -81,11 +83,13 @@ class BigQueryAPIClient implements BigQueryAPI {
   };
 
   private _getProjects = async (): Promise<GCPProject[]> => {
-    return await getBackendSrv().post(this.resourcesUrl + '/projects');
+    return await getBackendSrv().post(this.resourcesUrl + '/projects', {
+      datasourceId: `${this.datasourceId}`,
+    });
   };
 
   getProjects = async (): Promise<GCPProject[]> => {
-    return this.fromCache('projects', this._getProjects)();
+    return this.fromCache('projects', this._getProjects)(this.datasourceId);
   };
 
   getTables = async (query: BigQueryQueryNG): Promise<string[]> => {

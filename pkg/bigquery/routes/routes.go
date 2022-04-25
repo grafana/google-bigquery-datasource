@@ -79,7 +79,14 @@ func (r *ResourceHandler) validateQuery(rw http.ResponseWriter, req *http.Reques
 }
 
 func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
-	res, err := r.ds.Projects()
+	result := bigquery.ProjectsArgs{}
+	err := utils.UnmarshalBody(req.Body, &result)
+	if err != nil {
+		rw.WriteHeader(http.StatusBadRequest)
+		utils.WriteResponse(rw, []byte(err.Error()))
+		return
+	}
+	res, err := r.ds.Projects(result)
 	utils.SendResponse(res, err, rw)
 }
 
