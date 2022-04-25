@@ -16,14 +16,12 @@ const (
 
 type routeInfo struct {
 	method string
-	url    string
 	scopes []string
 }
 
 var routes = map[string]routeInfo{
 	bigQueryRoute: {
 		method: "GET",
-		url:    "https://www.googleapis.com/auth/bigquery",
 		scopes: []string{"https://www.googleapis.com/auth/bigquery",
 			"https://www.googleapis.com/auth/bigquery.insertdata",
 			"https://www.googleapis.com/auth/cloud-platform",
@@ -34,7 +32,6 @@ var routes = map[string]routeInfo{
 	},
 	resourceManagerRoute: {
 		method: "GET",
-		url:    "https://cloudresourcemanager.googleapis.com",
 		scopes: []string{"https://www.googleapis.com/auth/cloudplatformprojects"},
 	},
 }

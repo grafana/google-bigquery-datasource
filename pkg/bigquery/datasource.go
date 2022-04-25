@@ -157,6 +157,11 @@ func createResourceManagerService(settings types.BigQuerySettings, id string, s 
 
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
 	s.resourceManagerServices[id] = cloudresourcemanagerService
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
