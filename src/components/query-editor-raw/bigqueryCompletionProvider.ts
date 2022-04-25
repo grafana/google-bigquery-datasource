@@ -114,6 +114,7 @@ export const customSuggestionKinds: (
       return t.map((table) => ({
         label: table.name,
         insertText: table.completion ?? table.name,
+        command: { id: 'editor.action.triggerSuggest', title: '' },
         kind: CompletionItemKind.Field,
         sortText: CompletionItemPriority.High,
         range: {
