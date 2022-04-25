@@ -22,7 +22,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   const state = useAsync(async () => {
     const projects = await apiClient.getProjects();
     return projects.map((project) => ({ label: project.displayName, value: project.projectId }));
-  }, [location]);
+  }, []);
 
   useEffect(() => {
     if (!applyDefault) {

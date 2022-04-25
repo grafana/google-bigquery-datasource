@@ -41,16 +41,26 @@ export function RawEditor({
       const tablePath = t.split('.');
 
       if (tablePath.length === 3) {
-        cols = await apiClient.getColumns(query.location, tablePath[1], tablePath[2], tablePath[0]);
+        cols = await apiClient.getColumns({
+          ...query,
+          dataset: tablePath[1],
+          table: tablePath[2],
+          project: tablePath[0],
+        });
       } else {
         if (!query.dataset) {
           return [];
         }
-        cols = await apiClient.getColumns(query.location, query.dataset, t!, tablePath[0]);
+        cols = await apiClient.getColumns({ ...query, table: t, project: tablePath[0] });
       }
 
       if (cols.length > 0) {
-        const schema = await apiClient.getTableSchema(query.location, tablePath[1], tablePath[2], tablePath[0]);
+        const schema = await apiClient.getTableSchema({
+          ...query,
+          dataset: tablePath[1],
+          table: tablePath[2],
+          project: tablePath[0],
+        });
         return cols.map((c) => {
           const cInfo = schema.schema ? getColumnInfoFromSchema(c, schema.schema) : null;
           return { name: c, ...cInfo };
@@ -59,7 +69,7 @@ export function RawEditor({
         return [];
       }
     },
-    [apiClient, query.location, query.dataset]
+    [apiClient, query]
   );
 
   const getTables = useCallback(
@@ -79,7 +89,7 @@ export function RawEditor({
           return [];
         }
         if (path[0] && path[1]) {
-          const tables = await apiClient.getTables(query.location, path[0], path[1]);
+          const tables = await apiClient.getTables({ ...query, project: path[0], dataset: path[1] });
           return tables.map((t) => ({ name: t, completion: `${t}\`` }));
         } else if (path[0]) {
           const datasets = await apiClient.getDatasets(query.location, path[0]);
@@ -89,7 +99,7 @@ export function RawEditor({
         }
       }
     },
-    [apiClient, query.location]
+    [apiClient, query]
   );
 
   const getTableSchema = useCallback(
@@ -98,7 +108,7 @@ export function RawEditor({
         return null;
       }
 
-      return apiClient.getTableSchema(query.location, dataset, table, project);
+      return apiClient.getTableSchema({ ...query, dataset, table, project });
     },
     [apiClient, query]
   );

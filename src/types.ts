@@ -75,7 +75,6 @@ export interface SQLExpression {
 
 export interface ResourceSelectorProps {
   apiClient: BigQueryAPI;
-  location: string;
   disabled?: boolean;
   className?: string;
   applyDefault?: boolean;

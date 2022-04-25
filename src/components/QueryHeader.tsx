@@ -209,7 +209,7 @@ export function QueryHeader({
             copyToClipboard(query.rawSql);
             onChange({
               ...query,
-              rawSql: toRawSql(query, apiClient.getDefaultProject()),
+              rawSql: toRawSql(query),
               editorMode: EditorMode.Builder,
             });
           }}
@@ -217,7 +217,7 @@ export function QueryHeader({
             setShowConfirm(false);
             onChange({
               ...query,
-              rawSql: toRawSql(query, apiClient.getDefaultProject()),
+              rawSql: toRawSql(query),
               editorMode: EditorMode.Builder,
             });
           }}
@@ -247,9 +247,7 @@ export function QueryHeader({
             <EditorField label="Table" width={25}>
               <TableSelector
                 apiClient={apiClient}
-                location={query.location}
-                dataset={query.dataset}
-                project={query.project}
+                query={query}
                 value={query.table === undefined ? null : query.table}
                 onChange={onTableChange}
                 applyDefault
