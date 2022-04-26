@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { BigQueryQueryNG, BigQueryOptions, GoogleAuthType, QueryModel, QueryFormat } from './types';
+import { getApiClient } from 'api';
 import {
   DataFrame,
   DataQuery,
@@ -94,6 +95,21 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
         resolve(res.data[0] || { fields: [] });
       });
     });
+  }
+
+  async testDatasource() {
+    const client = getApiClient(this.id);
+    const resp = (await client).getProjects();
+    try {
+      await resp;
+    } catch (err) {
+      throw {
+        message: 'Could not access the resource manager API.',
+        details:
+          'In order to list projects available, Grafana needs access to the resource manager API (https://cloud.google.com/resource-manager/reference/rest)',
+      };
+    }
+    return resp;
   }
 
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
