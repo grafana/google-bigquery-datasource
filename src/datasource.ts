@@ -106,12 +106,11 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     const client = await getApiClient(this.id);
     try {
       await client.getProjects();
-    } catch (err) {
+    } catch (err: any) {
       return {
         status: 'error',
-        message: 'Could not access the resource manager API.',
-        details:
-          'In order to list projects available, Grafana needs access to the resource manager API (https://cloud.google.com/resource-manager/reference/rest)',
+        message: err.data.message,
+        details: err.data.details,
       };
     }
     return {

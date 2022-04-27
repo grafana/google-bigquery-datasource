@@ -152,7 +152,7 @@ func createResourceManagerService(settings types.BigQuerySettings, id string, s 
 	httpClient, err := newHTTPClient(settings, httpclient.Options{}, resourceManagerRoute)
 
 	if err != nil {
-		return errors.WithMessage(err, "Failed to crate http client for resource manager")
+		return errors.WithMessage(err, "Failed to create http client for resource manager")
 	}
 
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
