@@ -22,7 +22,7 @@ Follow [these instructions](https://grafana.com/docs/grafana/latest/datasources/
 
 ### Requirements
 
-The following APIs need to be enabled first:
+The following Google APIs need to be enabled for the plugin to work:
 
 - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
 - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
