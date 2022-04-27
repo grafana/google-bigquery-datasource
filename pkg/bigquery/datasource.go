@@ -121,12 +121,12 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	} else {
 		client, err := newHTTPClient(settings, httpclient.Options{}, bigQueryRoute)
 		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to crate http client")
+			return nil, errors.WithMessage(err, "Failed to create http client")
 		}
 
 		bqClient, err := s.bqFactory(context.Background(), connectionSettings.Project, option.WithHTTPClient(client))
 		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to crate BigQuery client")
+			return nil, errors.WithMessage(err, "Failed to create BigQuery client")
 		}
 
 		dr, db, err := driver.Open(connectionSettings, bqClient)
