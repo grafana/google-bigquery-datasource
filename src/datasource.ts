@@ -109,8 +109,8 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     } catch (err: any) {
       return {
         status: 'error',
-        message: err.data.message,
-        details: err.data.details,
+        message: err.data?.message || 'Error connecting to resource manager.',
+        details: err.data?.details,
       };
     }
     return {
