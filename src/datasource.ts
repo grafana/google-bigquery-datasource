@@ -103,10 +103,9 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
       return { status: 'error', message: health.message, details: health.details };
     }
 
-    const client = getApiClient(this.id);
-    const resp = (await client).getProjects();
+    const client = await getApiClient(this.id);
     try {
-      await resp;
+      await client.getProjects();
     } catch (err) {
       return {
         status: 'error',
