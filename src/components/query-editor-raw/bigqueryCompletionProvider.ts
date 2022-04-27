@@ -188,13 +188,15 @@ export const customSuggestionKinds: (
   },
 ];
 
-function getTablePath(token: LinkedToken) {
+export function getTablePath(token: LinkedToken) {
   let processedToken = token;
   let tablePath = '';
   while (processedToken?.previous && !processedToken.previous.isWhiteSpace()) {
     tablePath = processedToken.value + tablePath;
     processedToken = processedToken.previous;
   }
+
+  tablePath = tablePath.trim();
 
   if (tablePath.startsWith('`')) {
     tablePath = tablePath.slice(1);
