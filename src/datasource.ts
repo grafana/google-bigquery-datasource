@@ -118,8 +118,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     return {
       status: 'success',
       message: 'Success',
-      details:
-        'In order to list projects available, Grafana needs access to the resource manager API (https://cloud.google.com/resource-manager/reference/rest)',
+      details: 'Success',
     };
   }
 
