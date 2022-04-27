@@ -98,18 +98,29 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
   }
 
   async testDatasource() {
+    const health = await this.callHealthCheck();
+    if (health.status.toLowerCase() === 'error') {
+      return { status: 'error', message: health.message, details: health.details };
+    }
+
     const client = getApiClient(this.id);
     const resp = (await client).getProjects();
     try {
       await resp;
     } catch (err) {
-      throw {
+      return {
+        status: 'error',
         message: 'Could not access the resource manager API.',
         details:
           'In order to list projects available, Grafana needs access to the resource manager API (https://cloud.google.com/resource-manager/reference/rest)',
       };
     }
-    return resp;
+    return {
+      status: 'success',
+      message: 'Success',
+      details:
+        'In order to list projects available, Grafana needs access to the resource manager API (https://cloud.google.com/resource-manager/reference/rest)',
+    };
   }
 
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
