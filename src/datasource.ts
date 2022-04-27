@@ -116,7 +116,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     }
     return {
       status: 'success',
-      message: 'Success',
+      message: 'Data source is working',
       details: 'Success',
     };
   }
