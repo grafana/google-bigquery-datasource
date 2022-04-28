@@ -230,9 +230,7 @@ export function QueryHeader({
           <Space v={0.5} />
 
           <EditorRow>
-            <EditorField label="Project" width={25}>
-              <ProjectSelector apiClient={apiClient} value={query.project} onChange={onProjectChange} />
-            </EditorField>
+            <ProjectSelector apiClient={apiClient} value={query.project} onChange={onProjectChange} />
 
             <EditorField label="Dataset" width={25}>
               <DatasetSelector
