@@ -85,7 +85,12 @@ func WriteResponse(rw http.ResponseWriter, b []byte) {
 func SendResponse(res interface{}, err error, rw http.ResponseWriter) {
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
-		marshaledError, err := json.Marshal(err.(*googleapi.Error))
+		googleApiError, success := err.(*googleapi.Error)
+		if !success {
+			WriteResponse(rw, []byte(err.Error()))
+			return
+		}
+		marshaledError, err := json.Marshal(googleApiError)
 		if err != nil {
 			WriteResponse(rw, []byte(err.Error()))
 			return
