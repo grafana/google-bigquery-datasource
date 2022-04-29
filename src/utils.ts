@@ -289,7 +289,7 @@ export function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource, a
   const result = {
     ...q,
     project: q.project || apiClient?.getDefaultProject() || '',
-    location: q.location || ds.jsonData.defaultRegion || DEFAULT_REGION,
+    location: q.location || ds.jsonData.processingLocation || DEFAULT_REGION,
     format: q.format !== undefined ? q.format : QueryFormat.Table,
     rawSql: q.rawSql || '',
     editorMode,
