@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+This release comes with a new feature which enables using different projects for different queries. In order to see projects listed in the query editor you need to enable the [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com).
+
+- **Feature**: Add support for multi-project setup (#112)
+- **Chore**: Update @grafana/experimental dependency (#115)
+- **Fix**: location reset when code editor query changes (#114)
+
 ## 1.0.3
 
 - **Data types support**: Add support for querying array of primitive types.
