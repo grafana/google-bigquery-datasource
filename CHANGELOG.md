@@ -2,11 +2,11 @@
 
 ## 1.1.0
 
-This release comes with a new feature which enables using different projects for different queries. In order to see projects listed in the query editor you need to enable the [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com).
+This release comes with a new feature that enables using multiple BigQuery projects using a single data source. In order to see GCP projects listed in the query editor, you need to enable the [Google Cloud Resource Manager API](https://cloud.google.com/resource-manager).
 
-- **Feature**: Add support for multi-project setup (#112)
-- **Chore**: Update @grafana/experimental dependency (#115)
-- **Fix**: location reset when code editor query changes (#114)
+- **Feature**: Add support for multi-project setup. (#112)
+- **Chore**: Update @grafana/experimental dependency. (#115)
+- **Fix**: Processing location is no longer reset when code editor query changes. (#114)
 
 ## 1.0.3
 
