@@ -1,4 +1,4 @@
-import React, { useState, useCallback, isValidElement } from 'react';
+import React, { useState, useCallback } from 'react';
 import { isObject } from 'lodash';
 import { FileDropzone, TextArea, LinkButton, useTheme2, Field, Button } from '@grafana/ui';
 import { TEST_IDS } from 'utils/testIds';
@@ -73,7 +73,7 @@ export const JWTConfigEditor: React.FC<Props> = ({ onChange }) => {
           {isPasting !== true && (
             <div data-testid={TEST_IDS.dropZone}>
               {/* Backward compatibility check. FileDropzone added in 8.1 */}
-              {isValidElement(FileDropzone) && (
+              {FileDropzone && (
                 <FileDropzone
                   options={{ multiple: false, accept: 'application/json' }}
                   readAs="readAsText"
