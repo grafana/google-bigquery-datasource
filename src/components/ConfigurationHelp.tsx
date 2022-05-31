@@ -47,7 +47,7 @@ export const ConfigurationHelp = () => {
             className="external-link"
             rel="noreferrer"
             target="_blank"
-            href="https://doitintl.github.io/bigquery-grafana/"
+            href="https://cloud.google.com/iam/docs/creating-managing-service-accounts"
           >
             here
           </a>
