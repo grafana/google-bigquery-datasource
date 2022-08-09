@@ -1,11 +1,16 @@
 # Changelog
 
+## 1.2.1
+
+- **Querying**: Fix an issue when query location would not be set correctly. (#140)
+
 ## 1.2.0
-- **Datasource config**: Add support for using private key path in datasource configuration
+
+- **Datasource config**: Add support for using private key path in datasource configuration.
 
 ## 1.1.1
 
-- **Fix:** Compatibility issue with Grafana version 8.0.0 (#121)
+- **Fix:** Compatibility issue with Grafana version 8.0.0. (#121)
 
 ## 1.1.0
 
