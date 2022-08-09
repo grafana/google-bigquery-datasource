@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Button, Field, Input, Tooltip } from '@grafana/ui';
 import { BigQueryOptions } from 'types';
 import { TEST_IDS } from 'utils/testIds';
 
 interface JWTFormProps {
   options: BigQueryOptions;
+  hasPrivateKeyConfigured: boolean;
   onReset: () => void;
   onChange: (key: keyof BigQueryOptions) => (e: React.SyntheticEvent<HTMLInputElement | HTMLSelectElement>) => void;
 }
@@ -18,8 +19,15 @@ const getInitialPrivateKeyConfig = (options: BigQueryOptions): PrivateKeyConfig 
   return 'privateKeyPath' in options && options.privateKeyPath !== '' ? PrivateKeyConfig.PATH : PrivateKeyConfig.JWT;
 };
 
-export const JWTForm: React.FC<JWTFormProps> = ({ options, onReset, onChange }) => {
+export const JWTForm: React.FC<JWTFormProps> = ({ options, hasPrivateKeyConfigured, onReset, onChange }) => {
   const [privateKeyConfig, setPrivateKeyConfig] = React.useState<PrivateKeyConfig>(getInitialPrivateKeyConfig(options));
+  const privateKeyInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (hasPrivateKeyConfigured && privateKeyInputRef && privateKeyInputRef.current) {
+      privateKeyInputRef.current.value = '';
+    }
+  }, [hasPrivateKeyConfigured]);
 
   const togglePrivateKeyFields = (): void => {
     if (privateKeyConfig === PrivateKeyConfig.JWT) {
@@ -77,20 +85,23 @@ export const JWTForm: React.FC<JWTFormProps> = ({ options, onReset, onChange }) 
       )}
 
       {privateKeyConfig === PrivateKeyConfig.JWT && (
-        <Field label="Private key" description={Description} disabled>
+        <Field label="Private key" description={Description} disabled={hasPrivateKeyConfigured}>
           {/* @ts-ignore */}
           <Input
+            ref={privateKeyInputRef}
             width={60}
             id="privateKey"
-            readOnly
-            placeholder={options.privateKeyPath === '' ? 'Private key configured' : ''}
+            readOnly={hasPrivateKeyConfigured}
+            placeholder={hasPrivateKeyConfigured ? 'Private key configured' : 'Paste your private key'}
             data-testid={TEST_IDS.privateKeyInput}
             addonAfter={
-              <Tooltip content="Click to clear the uploaded JWT token and upload a new one">
-                <Button data-testid={TEST_IDS.resetJwtButton} icon="sync" size="xs" onClick={onReset} fill="outline">
-                  Reset token
-                </Button>
-              </Tooltip>
+              hasPrivateKeyConfigured ? (
+                <Tooltip content="Click to clear the uploaded JWT token and upload a new one">
+                  <Button data-testid={TEST_IDS.resetJwtButton} icon="sync" size="xs" onClick={onReset} fill="outline">
+                    Reset token
+                  </Button>
+                </Tooltip>
+              ) : undefined
             }
           />
         </Field>

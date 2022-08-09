@@ -26,6 +26,7 @@ describe('ConfigEditor', () => {
         options={
           {
             jsonData: {},
+            secureJsonFields: {},
           } as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
         onOptionsChange={() => {}}
@@ -41,6 +42,7 @@ describe('ConfigEditor', () => {
         options={
           {
             jsonData: {},
+            secureJsonFields: {},
           } as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
         onOptionsChange={() => {}}
@@ -56,6 +58,7 @@ describe('ConfigEditor', () => {
         options={
           {
             jsonData: {},
+            secureJsonFields: {},
           } as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
         onOptionsChange={() => {}}
@@ -74,6 +77,7 @@ describe('ConfigEditor', () => {
         defaultOptions={
           {
             jsonData: {},
+            secureJsonFields: {},
           } as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
       >
@@ -127,6 +131,7 @@ describe('ConfigEditor', () => {
         defaultOptions={
           {
             jsonData: {},
+            secureJsonFields: {},
           } as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
       >
@@ -219,6 +224,7 @@ describe('ConfigEditor', () => {
               defaultProject: 'test-project',
               privateKeyPath: 'private/key/path',
             },
+            secureJsonFields: {},
           } as unknown) as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
         onOptionsChange={() => {}}
@@ -245,6 +251,7 @@ describe('ConfigEditor', () => {
               tokenUri: 'https://accounts.google.com/o/oauth2/token',
               defaultProject: 'test-project',
             },
+            secureJsonFields: {},
           } as unknown) as DataSourceSettings<BigQueryOptions, BigQuerySecureJsonData>
         }
         onOptionsChange={onOptionsChangeSpy}
@@ -257,6 +264,7 @@ describe('ConfigEditor', () => {
     expect(onOptionsChangeSpy).toHaveBeenCalledWith({
       jsonData: { authenticationType: GoogleAuthType.GCE },
       secureJsonData: {},
+      secureJsonFields: { privateKey: false },
     });
   });
 });

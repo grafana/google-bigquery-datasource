@@ -61,6 +61,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     setConfigEditorVisible(false);
     onOptionsChange({
       ...options,
+      secureJsonFields: { ...options.secureJsonFields, privateKey: false },
       secureJsonData: nextSecureJsonData,
       jsonData: nextJsonData,
     });
@@ -88,7 +89,12 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       {jwtAuth && (
         <FieldSet label="JWT Key Details">
           {configEditorVisible ? (
-            <JWTForm options={options.jsonData} onReset={() => onResetApiKey()} onChange={onJWTFormChange} />
+            <JWTForm
+              options={options.jsonData}
+              hasPrivateKeyConfigured={Boolean(options.secureJsonFields.privateKey)}
+              onReset={() => onResetApiKey()}
+              onChange={onJWTFormChange}
+            />
           ) : (
             <JWTConfigEditor
               showConfigEditor={showConfigEditor}
