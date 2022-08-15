@@ -64,7 +64,7 @@ export function QueryEditorRaw({
       height={height}
       query={query.rawSql}
       onChange={onRawQueryChange}
-      language={{ id: 'bigquery', completionProvider, formatter: formatSQL }}
+      language={{ id: 'sql', completionProvider, formatter: formatSQL }}
     >
       {children}
     </SQLEditor>
