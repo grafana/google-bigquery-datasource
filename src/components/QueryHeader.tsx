@@ -1,12 +1,24 @@
 import { SelectableValue } from '@grafana/data';
-import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
-import { Button, InlineField, InlineSwitch, RadioButtonGroup, Select, Tooltip } from '@grafana/ui';
+import {
+  Button,
+  EditorField,
+  EditorHeader,
+  EditorRow,
+  FlexItem,
+  InlineField,
+  InlineSelect,
+  InlineSwitch,
+  RadioButtonGroup,
+  Select,
+  Space,
+  Tooltip,
+} from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React, { useCallback, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 import { toRawSql } from 'utils/sql.utils';
 import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
-import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
+import { BigQueryQueryNG, EditorMode, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
 import { ErrorBoundary } from './ErrorBoundary';

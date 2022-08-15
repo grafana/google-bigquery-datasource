@@ -1,6 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { AccessoryButton, EditorList, InputGroup } from '@grafana/experimental';
-import { Select } from '@grafana/ui';
+import { AccessoryButton, EditorList, InputGroup, Select } from '@grafana/ui';
 import { QueryEditorGroupByExpression } from 'expressions';
 import React, { useCallback } from 'react';
 import { SQLExpression } from 'types';

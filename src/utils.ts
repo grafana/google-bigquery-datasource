@@ -21,11 +21,10 @@
 // SOFTWARE.
 
 import { DataQueryRequest, dateTime, DurationUnit } from '@grafana/data';
-import { EditorMode } from '@grafana/experimental';
 import { BigQueryAPI } from 'api';
 import { BigQueryDatasource } from 'datasource';
 import SqlParser from 'sql_parser';
-import { BigQueryQueryNG, QueryFormat } from 'types';
+import { BigQueryQueryNG, EditorMode, QueryFormat } from 'types';
 import { createFunctionField, setGroupByField } from 'utils/sql.utils';
 import { DEFAULT_REGION } from './constants';
 

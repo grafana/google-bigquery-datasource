@@ -1,5 +1,4 @@
 import { DataQuery, DataSourceJsonData, TimeRange } from '@grafana/data';
-import { EditorMode } from '@grafana/experimental';
 import { BigQueryAPI } from 'api';
 import {
   QueryEditorFunctionExpression,
@@ -59,6 +58,11 @@ export interface QueryModel extends DataQuery {
     table: string;
     location: string;
   };
+}
+
+export enum EditorMode {
+  Builder = 'builder',
+  Code = 'code',
 }
 
 export interface SQLExpression {
