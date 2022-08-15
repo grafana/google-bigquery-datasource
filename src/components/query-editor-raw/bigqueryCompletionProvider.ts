@@ -9,6 +9,7 @@ import {
   StatementPosition,
   SuggestionKindProvider,
   TableDefinition,
+  TableIdentifier,
   TokenType,
 } from '@grafana/experimental';
 import { PartitioningType, TableSchema } from 'api';
@@ -33,24 +34,24 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
     },
     parseName: (token: LinkedToken) => {
       let processedToken = token;
-      let tablePath = processedToken.value;
+      let tablePath = processedToken?.value ?? '';
 
-      while (processedToken.next && processedToken?.next?.value !== '`') {
+      while (processedToken?.next && processedToken?.next?.value !== '`') {
         tablePath += processedToken.next.value;
         processedToken = processedToken.next;
       }
 
       if (tablePath.trim().startsWith('`')) {
-        return tablePath.slice(1);
+        return { table: tablePath.slice(1) };
       }
 
-      return tablePath;
+      return { table: tablePath };
     },
   },
 
   columns: {
-    resolve: async (t: string) => {
-      return await getColumns.current(t);
+    resolve: async (t?: TableIdentifier) => {
+      return t?.table ? await getColumns.current(t?.table) : [];
     },
   },
   supportedFunctions: () => BQ_AGGREGATE_FNS,
@@ -76,6 +77,9 @@ export const customStatementPlacement: StatementPlacementProvider = () => [
         currentToken?.is(TokenType.Delimiter, '.') ||
           (currentToken?.is(TokenType.Whitespace) && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
           (currentToken?.value === '`' && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
+          (currentToken?.isIdentifier() &&
+            currentToken?.value.endsWith('.') &&
+            previousKeyword?.getNextNonWhiteSpaceToken()?.value === '`') || //identifiers with a dot at the end like "`projectname."
           (currentToken?.isNumber() && currentToken.value.endsWith('.')) || // number with dot at the end like "projectname-21342."
           (currentToken?.value === '`' && isTypingTableIn(currentToken))
       );
