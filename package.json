@@ -33,7 +33,7 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@grafana/toolkit": "canary",
+    "@grafana/toolkit": "9.1.0",
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^12.1.0",
     "@types/lodash": "^4.14.173",
