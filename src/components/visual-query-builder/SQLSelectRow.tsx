@@ -1,6 +1,7 @@
 import { css } from '@emotion/css';
 import { SelectableValue } from '@grafana/data';
-import { Button, EditorField, Select, Stack, useStyles2 } from '@grafana/ui';
+import { EditorField, Stack } from '@grafana/experimental';
+import { useStyles2, Select, Button } from '@grafana/ui';
 import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
 import { uniqueId } from 'lodash';
 import React, { useCallback } from 'react';

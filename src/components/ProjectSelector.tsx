@@ -1,5 +1,6 @@
 import { SelectableValue } from '@grafana/data';
-import { EditorField, Select, useTheme2 } from '@grafana/ui';
+import { EditorField } from '@grafana/experimental';
+import { Select, useTheme2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { css } from '@emotion/css';
 import { useAsync } from 'react-use';

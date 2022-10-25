@@ -6,7 +6,7 @@ import { BQWhereRow } from './BQWhereRow';
 import { Preview } from './Preview';
 import { BQGroupByRow } from './BQGroupByRow';
 import { QueryToolbox } from 'components/query-editor-raw/QueryToolbox';
-import { EditorRows, EditorRow, EditorField } from '@grafana/ui';
+import { EditorRows, EditorRow, EditorField } from '@grafana/experimental';
 
 interface VisualEditorProps extends QueryEditorProps {
   queryRowFilter: QueryRowFilter;

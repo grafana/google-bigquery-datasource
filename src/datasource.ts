@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { BigQueryQueryNG, BigQueryOptions, GoogleAuthType, QueryModel, QueryFormat, EditorMode } from './types';
+import { BigQueryQueryNG, BigQueryOptions, GoogleAuthType, QueryModel, QueryFormat } from './types';
 import { getApiClient } from 'api';
 import {
   DataFrame,
@@ -11,6 +11,7 @@ import {
   vectorator,
 } from '@grafana/data';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
+import { EditorMode } from '@grafana/experimental';
 import { interpolateVariable } from './utils/interpolateVariable';
 import { DEFAULT_REGION } from './constants';
 
