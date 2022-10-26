@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2
+
+- **Chore**: Update to Golang 1.19 #149
+
 ## 1.2.1
 
 - **Querying**: Fix an issue when query location would not be set correctly. (#140)
