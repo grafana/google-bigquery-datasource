@@ -1,6 +1,3 @@
-import _ from 'lodash';
-import { BigQueryQueryNG, BigQueryOptions, GoogleAuthType, QueryModel, QueryFormat } from './types';
-import { getApiClient } from 'api';
 import {
   DataFrame,
   DataQuery,
@@ -8,12 +5,14 @@ import {
   DataQueryResponse,
   DataSourceInstanceSettings,
   ScopedVars,
-  vectorator,
+  vectorator
 } from '@grafana/data';
-import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { EditorMode } from '@grafana/experimental';
-import { interpolateVariable } from './utils/interpolateVariable';
+import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
+import { getApiClient } from 'api';
 import { DEFAULT_REGION } from './constants';
+import { BigQueryOptions, BigQueryQueryNG, GoogleAuthType, QueryFormat, QueryModel } from './types';
+import { interpolateVariable } from './utils/interpolateVariable';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   jsonData: BigQueryOptions;
