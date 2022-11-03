@@ -3,7 +3,7 @@ package bigquery
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
@@ -24,7 +24,7 @@ func readPrivateKeyFromFile(rsaPrivateKeyLocation string) (string, error) {
 		return "", fmt.Errorf("missing file location for private key")
 	}
 
-	privateKey, err := ioutil.ReadFile(rsaPrivateKeyLocation)
+	privateKey, err := os.ReadFile(rsaPrivateKeyLocation)
 	if err != nil {
 		return "", fmt.Errorf("could not read private key file from file system: %w", err)
 	}

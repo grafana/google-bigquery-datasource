@@ -4,12 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 
 	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/grafana/sqlds/v2"
 	"google.golang.org/api/googleapi"
 )
 
@@ -50,21 +48,8 @@ func isFieldOrderable(f *bq.FieldSchema) bool {
 	return f.Type != bq.GeographyFieldType && f.Type != bq.RecordFieldType
 }
 
-func ParseBody(body io.ReadCloser) (sqlds.Options, error) {
-	reqBody := sqlds.Options{}
-	b, err := ioutil.ReadAll(body)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(b, &reqBody)
-	if err != nil {
-		return nil, err
-	}
-	return reqBody, nil
-}
-
 func UnmarshalBody(body io.ReadCloser, reqBody interface{}) error {
-	b, err := ioutil.ReadAll(body)
+	b, err := io.ReadAll(body)
 	if err != nil {
 		return err
 	}
