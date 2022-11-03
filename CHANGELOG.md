@@ -1,5 +1,9 @@
 # Changelog
 
+## Next
+
+- **Chore**: Upgrade grafana/experimental to 1.0.1 #144
+
 ## 1.2.2
 
 - **Chore**: Update to Golang 1.19 #149
