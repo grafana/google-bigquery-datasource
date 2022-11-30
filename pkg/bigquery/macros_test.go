@@ -21,7 +21,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "1w"},
-			"TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(`created_at`), 604800) * 604800)",
+			"TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(created_at), 604800) * 604800)",
 			nil,
 		},
 		{
@@ -29,7 +29,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "1d"},
-			"TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(`created_at`), 86400) * 86400)",
+			"TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(created_at), 86400) * 86400)",
 			nil,
 		},
 		{
@@ -37,7 +37,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "1M"},
-			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM `created_at`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `created_at`)) AS STRING),'-','01'))))",
+			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,
 		},
 		{
@@ -45,7 +45,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "'1M'"},
-			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM `created_at`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `created_at`)) AS STRING),'-','01'))))",
+			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,
 		},
 		{
@@ -53,7 +53,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "\"1M\""},
-			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM `created_at`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `created_at`)) AS STRING),'-','01'))))",
+			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,
 		},
 	}
