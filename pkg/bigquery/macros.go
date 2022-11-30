@@ -28,7 +28,7 @@ func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
 
 	// when month interval
 	if last == "M" {
-		return fmt.Sprintf("TIMESTAMP((PARSE_DATE(\"%%Y-%%m-%%d\",CONCAT( CAST((EXTRACT(YEAR FROM `%s`)) AS STRING),'-',CAST((EXTRACT(MONTH FROM `%s`)) AS STRING),'-','01'))))", timeVar, timeVar), nil
+		return fmt.Sprintf("TIMESTAMP((PARSE_DATE(\"%%Y-%%m-%%d\",CONCAT( CAST((EXTRACT(YEAR FROM %s)) AS STRING),'-',CAST((EXTRACT(MONTH FROM %s)) AS STRING),'-','01'))))", timeVar, timeVar), nil
 	}
 
 	interval, err := gtime.ParseInterval(intervalVar)
@@ -38,7 +38,7 @@ func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
 
 	}
 
-	return fmt.Sprintf("TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(`%s`), %v) * %v)", timeVar, interval.Seconds(), interval.Seconds()), nil
+	return fmt.Sprintf("TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(%s), %v) * %v)", timeVar, interval.Seconds(), interval.Seconds()), nil
 }
 
 var macros = map[string]sqlds.MacroFunc{
