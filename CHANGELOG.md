@@ -3,7 +3,7 @@
 ## 1.2.3
 
 - **Chore**: Upgrade grafana/experimental to 1.0.1 #144
-- **Fix:**: Update time macros to unquote time variables #155
+- **Fix**: Update time macros to unquote time variables #155
 - **Fix**: Don't panic in macro timegroup #156
 
 ## 1.2.2
