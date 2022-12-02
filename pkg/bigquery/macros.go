@@ -22,8 +22,12 @@ func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
 		return "", fmt.Errorf("%w: expected 2 arguments, received %d", errors.New("macro $__timeGroup needs time column and interval"), len(args))
 	}
 	
-	if(args[0] == "" || args[1] == "") {
-		return "", fmt.Errorf("macro $__timeGroup expects column name and interval but got %s and %s instead", args[0], args[1])
+	if(args[0] == "") {
+		return "", fmt.Errorf("the first paramater(time column) for $__timeGroup macro cannot be empty")
+	}
+
+	if (args[1] == "") {
+		return "", fmt.Errorf("the second paramater(interval) for $__timeGroup macro cannot be empty")
 	}
 
 	timeVar := args[0]
