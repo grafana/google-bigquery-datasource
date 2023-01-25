@@ -20,13 +20,11 @@ export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
   { label: 'European Union (EU)', value: 'EU' },
 
   // Americas
+  { label: 'Columbus, Ohio (us-east5)', value: 'us-east5' },
   { label: 'Iowa (us-central1)', value: 'us-central1' },
   { label: 'Los Angeles (us-west2)', value: 'us-west2' },
   { label: 'Las Vegas (us-west4)', value: 'us-west4' },
-  {
-    label: 'Montréal (northamerica-northeast1)',
-    value: 'northamerica-northeast1',
-  },
+  { label: 'Montréal (northamerica-northeast1)', value: 'northamerica-northeast1',  },
   { label: 'Northern Virginia (us-east4)', value: 'us-east4' },
   { label: 'Oregon (us-west1)', value: 'us-west1' },
   { label: 'Salt Lake City (us-west3)', value: 'us-west3' },
@@ -40,7 +38,10 @@ export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
   { label: 'Finland (europe-north1)', value: 'europe-north1' },
   { label: 'Frankfurt (europe-west3)', value: 'europe-west3' },
   { label: 'London (europe-west2)', value: 'europe-west2' },
+  { label: 'Madrid (europe-southwest1)', value: 'europe-southwest1' },
+  { label: 'Milan (europe-west8)', value: 'europe-west8' },
   { label: 'Netherlands (europe-west4)', value: 'europe-west4' },
+  { label: 'Paris (europe-west9)', value: 'europe-west9' },
   { label: 'Warsaw (europe-central2)', value: 'europe-central2' },
   { label: 'Zürich (europe-west6)', value: 'europe-west6' },
 
