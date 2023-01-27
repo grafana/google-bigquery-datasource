@@ -193,18 +193,18 @@ export function escapeLiteral(value: any) {
 }
 
 export function quoteFiledName(value: string) {
-  const vals = value.split('.');
+  const values = value.split('.');
   let res = '';
-  for (let i = 0; i < vals.length; i++) {
-    res = res + '`' + String(vals[i]) + '`';
-    if (vals.length > 1 && i + 1 < vals.length) {
+  for (let i = 0; i < values.length; i++) {
+    res = res + '`' + String(values[i]) + '`';
+    if (values.length > 1 && i + 1 < values.length) {
       res = res + '.';
     }
   }
   return res;
 }
 
-export function formatDateToString(inputDate: Date, separator = '', addtime = false) {
+export function formatDateToString(inputDate: Date, separator = '', addTime = false) {
   const date = new Date(inputDate);
   // 01, 02, 03, ... 29, 30, 31
   const DD = (date.getDate() < 10 ? '0' : '') + date.getDate();
@@ -215,7 +215,7 @@ export function formatDateToString(inputDate: Date, separator = '', addtime = fa
 
   // create the format you want
   let dateStr = YYYY + separator + MM + separator + DD;
-  if (addtime === true) {
+  if (addTime === true) {
     dateStr += ' ' + date.toTimeString().substr(0, 8);
   }
   return dateStr;

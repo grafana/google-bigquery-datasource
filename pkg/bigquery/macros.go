@@ -23,11 +23,11 @@ func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
 	}
 	
 	if(args[0] == "") {
-		return "", fmt.Errorf("the first paramater(time column) for $__timeGroup macro cannot be empty")
+		return "", fmt.Errorf("the first parameter(time column) for $__timeGroup macro cannot be empty")
 	}
 
 	if (args[1] == "") {
-		return "", fmt.Errorf("the second paramater(interval) for $__timeGroup macro cannot be empty")
+		return "", fmt.Errorf("the second parameter(interval) for $__timeGroup macro cannot be empty")
 	}
 
 	timeVar := args[0]

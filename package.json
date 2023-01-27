@@ -14,7 +14,8 @@
     "build:sign": "yarn run build && yarn run sign",
     "lint": "yarn run lint:ts",
     "lint:ts": "eslint . --ext .js,.tsx,.ts --cache",
-    "lint:fix": "yarn lint:ts --fix"
+    "lint:fix": "yarn lint:ts --fix",
+    "spellcheck": "cspell -c cspell.config.json \"**/*.{ts,tsx,js,go,md,mdx,yml,yaml,json,scss,css}\""
   },
   "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
   "license": "MIT",
@@ -38,6 +39,7 @@
     "@testing-library/react": "^12.1.0",
     "@types/lodash": "^4.14.173",
     "@types/react-virtualized-auto-sizer": "^1.0.1",
-    "@types/uuid": "^8.3.1"
+    "@types/uuid": "^8.3.1",
+    "cspell": "^6.19.2"
   }
 }

@@ -85,7 +85,7 @@ export const customStatementPlacement: StatementPlacementProvider = () => [
       );
     },
   },
-  // Overriding default behaviour of AfterFrom resolver
+  // Overriding default behavior of AfterFrom resolver
   {
     id: StatementPosition.AfterFrom,
     overrideDefault: true,

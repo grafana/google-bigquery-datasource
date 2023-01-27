@@ -32,7 +32,7 @@ func readPrivateKeyFromFile(rsaPrivateKeyLocation string) (string, error) {
 	return string(privateKey), nil
 }
 
-// LoadSettings will read and validate Settings from the DataSourceConfg
+// LoadSettings will read and validate Settings from the DataSourceInstanceSettings
 func LoadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySettings, error) {
 	settings := types.BigQuerySettings{}
 	if err := json.Unmarshal(config.JSONData, &settings); err != nil {

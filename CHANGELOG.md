@@ -96,7 +96,7 @@ This release comes with a new feature that enables using multiple BigQuery proje
 
 - **Code editor**: Add option to format the query.
 - **Code editor**: Do not run the query when user blurs the code editor.
-- **Query validation**: Do not re-validate query if it hasn's changed.
+- **Query validation**: Do not re-validate query if it hasn't changed.
 
 ## 0.1.9
 
@@ -112,7 +112,7 @@ This release comes with a new feature that enables using multiple BigQuery proje
 ## 0.1.7
 
 - **Autocomplete**: Add suggestions for ingestion-time partitioned table filters.
-- **Code editor**: Make autocomplete case insentive for keywords and operators.
+- **Code editor**: Make autocomplete case insensitive for keywords and operators.
 - **Code editor**: Make query bytes estimate more user friendly.
 
 ## 0.1.6

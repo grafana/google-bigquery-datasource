@@ -39,7 +39,7 @@ export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): str
     rawQuery += `${sql.orderByDirection} `;
   }
 
-  // Altough LIMIT 0 doesn't make sense, it is still possible to have LIMIT 0
+  // Although LIMIT 0 doesn't make sense, it is still possible to have LIMIT 0
   if (sql.limit !== undefined && sql.limit >= 0) {
     rawQuery += `LIMIT ${sql.limit} `;
   }
