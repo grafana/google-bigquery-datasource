@@ -22,13 +22,12 @@ type Credentials struct {
 // LoadSettings will read and validate Settings from the DataSourceInstanceSettings
 func LoadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySettings, error) {
 	settings := types.BigQuerySettings{}
-	var err error
-	if err = json.Unmarshal(config.JSONData, &settings); err != nil {
+	err := json.Unmarshal(config.JSONData, &settings) 
+	if err != nil {
 		return settings, fmt.Errorf("could not unmarshal DataSourceInfo json: %w", err)
 	}
 
 	settings.PrivateKey, err = utils.GetPrivateKey(config)
-
 	if err != nil {
 		return settings, err
 	}
