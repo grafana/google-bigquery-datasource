@@ -2,7 +2,7 @@
 
 ## NEXT
 
-- **Chore**: Migrate to create-plugin
+- **Chore**: Migrate to create-plugin #165 
 
 ## 1.2.3
 
