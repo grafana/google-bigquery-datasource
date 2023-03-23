@@ -1,5 +1,9 @@
 # Changelog
 
+## NEXT
+
+- **Chore**: Upgrade to latest grafana-google-sdks #166
+
 ## 1.2.3
 
 - **Chore**: Upgrade grafana/experimental to 1.0.1 #144
