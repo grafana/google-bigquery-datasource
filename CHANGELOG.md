@@ -1,5 +1,9 @@
 # Changelog
 
+## NEXT
+
+- **Chore**: Migrate to create-plugin
+
 ## 1.2.3
 
 - **Chore**: Upgrade grafana/experimental to 1.0.1 #144

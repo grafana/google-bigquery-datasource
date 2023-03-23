@@ -49,6 +49,8 @@
         "timeshift",
         "TINYINT",
         "tokenprovider",
+        "typecheck",
         "vectorator"
-    ]
+    ],
+    "language": "en-US"
 }

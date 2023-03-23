@@ -4,13 +4,12 @@
   "type": "datasource",
   "name": "Google BigQuery",
   "metrics": true,
-  "tables": true,
   "annotations": true,
   "alerting": true,
   "backend": true,
-  "executable": "grafana-bq-ds",
+  "executable": "gpx_bigquery",
   "dependencies": {
-    "grafanaDependency": "8.x || 9.x"
+    "grafanaDependency": ">=8.1.0"
   },
   "queryOptions": {
     "maxDataPoints": true
