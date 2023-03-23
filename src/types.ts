@@ -9,11 +9,6 @@ import {
 import { JsonTree } from 'react-awesome-query-builder';
 import { applyQueryDefaults } from 'utils';
 
-export enum GoogleAuthType {
-  JWT = 'jwt',
-  GCE = 'gce',
-}
-
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',
   Batch = 'BATCH',
@@ -27,7 +22,7 @@ export interface QueryRowFilter {
 }
 
 export interface BigQueryOptions extends DataSourceJsonData {
-  authenticationType: GoogleAuthType;
+  authenticationType: string;
   flatRateProject?: string;
   processingLocation?: string;
   queryPriority?: QueryPriority;

@@ -5,6 +5,7 @@ import (
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
+	sdkUtils "github.com/grafana/grafana-google-sdk-go/pkg/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 )
 
@@ -29,7 +30,7 @@ func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Requ
 			utils.SendResponse(s.DefaultProject, nil, rw)
 			return
 		}
-		res, err := r.ds.GetGCEDefaultProject(req.Context())
+		res, err := sdkUtils.GCEDefaultProject(req.Context(), bigquery.BigQueryScope)
 		utils.SendResponse(res, err, rw)
 	} else {
 		utils.SendResponse(s.DefaultProject, nil, rw)

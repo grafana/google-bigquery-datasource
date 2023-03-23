@@ -29,7 +29,6 @@ var PluginConfigFromContext = httpadapter.PluginConfigFromContext
 
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
-	GetGCEDefaultProject(ctx context.Context) (string, error)
 	Datasets(ctx context.Context, args DatasetsArgs) ([]string, error)
 	TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error)
 	ValidateQuery(ctx context.Context, args ValidateQueryArgs) (*api.ValidateQueryResponse, error)
@@ -79,7 +78,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	connectionSettings := getConnectionSettings(settings, args)
 
 	if settings.AuthenticationType == "gce" && connectionSettings.Project == "" {
-		defaultProject, err := utils.GCEDefaultProject(context.Background(), "https://www.googleapis.com/auth/bigquery")
+		defaultProject, err := utils.GCEDefaultProject(context.Background(), BigQueryScope)
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to retrieve default GCE project")
 		}

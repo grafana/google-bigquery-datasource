@@ -7,11 +7,12 @@ import {
   ScopedVars,
   vectorator
 } from '@grafana/data';
+import { GoogleAuthType } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/experimental';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { getApiClient } from 'api';
 import { DEFAULT_REGION } from './constants';
-import { BigQueryOptions, BigQueryQueryNG, GoogleAuthType, QueryFormat, QueryModel } from './types';
+import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {

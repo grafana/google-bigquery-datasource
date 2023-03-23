@@ -12,6 +12,7 @@ import (
 const (
 	bigQueryRoute        = "bigQuery"
 	resourceManagerRoute = "cloudresourcemanager"
+	BigQueryScope        = "https://www.googleapis.com/auth/bigquery"
 )
 
 type routeInfo struct {
@@ -22,7 +23,7 @@ type routeInfo struct {
 var routes = map[string]routeInfo{
 	bigQueryRoute: {
 		method: "GET",
-		scopes: []string{"https://www.googleapis.com/auth/bigquery",
+		scopes: []string{BigQueryScope,
 			"https://www.googleapis.com/auth/bigquery.insertdata",
 			"https://www.googleapis.com/auth/cloud-platform",
 			"https://www.googleapis.com/auth/cloud-platform.read-only",

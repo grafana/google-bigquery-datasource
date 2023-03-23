@@ -1974,6 +1974,11 @@
     "@types/uuid" "^8.3.3"
     uuid "^8.3.2"
 
+"@grafana/google-sdk@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@grafana/google-sdk/-/google-sdk-0.1.1.tgz#bfc4d8ad9880c2cdac26eed1001e5555c26be4a4"
+  integrity sha512-PKwF2eZkO9OA6fdfYWJyXiKfafll9jO4C2/sRRbH+93M+mbvQ+zFhG5cZudpGIirbAFJMLSmTcCXhCYNaoMH7g==
+
 "@grafana/runtime@9.1.0":
   version "9.1.0"
   resolved "https://registry.yarnpkg.com/@grafana/runtime/-/runtime-9.1.0.tgz#820a06cbc294e9bea9182bd46f82d8ab53df5036"
