@@ -1,4 +1,5 @@
-import { DataQuery, DataSourceJsonData, TimeRange } from '@grafana/data';
+import { DataQuery, TimeRange } from '@grafana/data';
+import { DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/experimental';
 import { BigQueryAPI } from 'api';
 import {
@@ -21,20 +22,13 @@ export interface QueryRowFilter {
   preview: boolean;
 }
 
-export interface BigQueryOptions extends DataSourceJsonData {
-  authenticationType: string;
+export interface BigQueryOptions extends DataSourceOptions {
   flatRateProject?: string;
   processingLocation?: string;
   queryPriority?: QueryPriority;
-  tokenUri?: string;
-  clientEmail?: string;
-  defaultProject?: string;
-  privateKeyPath?: string;
 }
 
-export interface BigQuerySecureJsonData {
-  privateKey?: string;
-}
+export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}
 
 export enum GroupType {
   Time = 'time',
