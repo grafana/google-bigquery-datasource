@@ -1,6 +1,6 @@
 # Changelog
 
-## NEXT
+## 1.2.4
 
 - **Chore**: Upgrade to latest grafana-google-sdks #166
 - **Chore**: Migrate to create-plugin #165
