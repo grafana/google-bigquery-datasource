@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.5
+
+- **Chore**: Bump go version
+
 ## 1.2.4
 
 - **Chore**: Upgrade to latest grafana-google-sdks #166
