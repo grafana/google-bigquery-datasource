@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.6
+
+- **Chore** - CI pipeline updated with GO 1.20.4
+
 ## 1.2.5
 
 - **Chore**: Bump go version
