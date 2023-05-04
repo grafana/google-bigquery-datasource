@@ -2,7 +2,7 @@
 
 ## 1.2.6
 
-- **Chore** - CI pipeline updated with GO 1.20.4
+- **Chore** - Backend binaries are now compiled with golang 1.20.4
 
 ## 1.2.5
 
