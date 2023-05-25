@@ -1,7 +1,7 @@
 import { SelectableValue } from '@grafana/data';
 import { AccessoryButton, EditorList, InputGroup } from '@grafana/experimental';
 import { Select } from '@grafana/ui';
-import { QueryEditorGroupByExpression } from 'expressions';
+import { QueryEditorExpressionType, QueryEditorGroupByExpression } from 'expressions';
 import React, { useCallback } from 'react';
 import { SQLExpression } from 'types';
 import { toOption } from 'utils/data';
@@ -15,9 +15,15 @@ interface SQLGroupByRowProps {
 
 export function SQLGroupByRow({ sql, columns, onSqlChange }: SQLGroupByRowProps) {
   const onGroupByChange = useCallback(
-    (item: Array<Partial<QueryEditorGroupByExpression>>) => {
+    (items: unknown[]) => {
       // As new (empty object) items come in, we need to make sure they have the correct type
-      const cleaned = item.map((v) => setGroupByField(v.property?.name));
+      const cleaned = items.map((v) => {
+        // Narrow the type for item to QueryEditorGroupByExpression
+        if (isQueryEditorGroupByExpression(v)) {
+          return setGroupByField(v.property?.name);
+        }
+        return setGroupByField();
+      });
       const newSql = { ...sql, groupBy: cleaned };
       onSqlChange(newSql);
     },
@@ -25,7 +31,7 @@ export function SQLGroupByRow({ sql, columns, onSqlChange }: SQLGroupByRowProps)
   );
 
   return (
-    <EditorList<QueryEditorGroupByExpression>
+    <EditorList
       items={sql.groupBy!}
       onChange={onGroupByChange}
       renderItem={makeRenderColumn({
@@ -37,14 +43,14 @@ export function SQLGroupByRow({ sql, columns, onSqlChange }: SQLGroupByRowProps)
 
 function makeRenderColumn({ options }: { options?: Array<SelectableValue<string>> }) {
   const renderColumn = function (
-    item: Partial<QueryEditorGroupByExpression>,
-    onChangeItem: (item: QueryEditorGroupByExpression) => void,
+    item: unknown,
+    onChangeItem: (item: unknown) => void,
     onDeleteItem: () => void
   ) {
     return (
       <InputGroup>
         <Select
-          value={item.property?.name ? toOption(item.property.name) : null}
+          value={isQueryEditorGroupByExpression(item) && item.property?.name ? toOption(item.property.name) : null}
           aria-label="Group by"
           options={options}
           menuShouldPortal
@@ -55,4 +61,9 @@ function makeRenderColumn({ options }: { options?: Array<SelectableValue<string>
     );
   };
   return renderColumn;
+}
+
+// Type guard for QueryEditorGroupByExpression
+function isQueryEditorGroupByExpression(item: unknown): item is QueryEditorGroupByExpression {
+  return typeof item === 'object' && item != null && 'type' in item && item.type === QueryEditorExpressionType.GroupBy;
 }
