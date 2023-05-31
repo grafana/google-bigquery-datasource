@@ -44,6 +44,7 @@
     "Timeseries",
     "timeshift",
     "TINYINT",
+    "tempvar",
     "tokenprovider",
     "typecheck",
     "vectorator"
