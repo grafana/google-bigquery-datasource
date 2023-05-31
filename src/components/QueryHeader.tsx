@@ -21,6 +21,7 @@ interface QueryHeaderProps {
   queryRowFilter: QueryRowFilter;
   apiClient: BigQueryAPI;
   isQueryRunnable: boolean;
+  showRunButton?: boolean;
 }
 
 const editorModes = [
@@ -36,6 +37,7 @@ export function QueryHeader({
   onQueryRowChange,
   apiClient,
   isQueryRunnable,
+  showRunButton = true,
 }: QueryHeaderProps) {
   const { location, editorMode } = query;
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -103,6 +105,35 @@ export function QueryHeader({
     };
     onChange(next);
   };
+
+  function renderRunButton(): React.ReactNode {
+    if (!showRunButton) {
+      return null;
+    }
+    if (isQueryRunnable) {
+      return (
+        <Button icon="play" variant="primary" size="sm" onClick={() => onRunQuery()}>
+          Run query
+        </Button>
+      );
+    }
+    return (
+      <Tooltip
+        theme="error"
+        content={
+          <>
+            Your query is invalid. Check below for details. <br />
+            However, you can still run this query.
+          </>
+        }
+        placement="top"
+      >
+        <Button icon="exclamation-triangle" variant="secondary" size="sm" onClick={() => onRunQuery()}>
+          Run query
+        </Button>
+      </Tooltip>
+    );
+  }
 
   return (
     <>
@@ -209,26 +240,7 @@ export function QueryHeader({
 
         <FlexItem grow={1} />
 
-        {isQueryRunnable ? (
-          <Button icon="play" variant="primary" size="sm" onClick={() => onRunQuery()}>
-            Run query
-          </Button>
-        ) : (
-          <Tooltip
-            theme="error"
-            content={
-              <>
-                Your query is invalid. Check below for details. <br />
-                However, you can still run this query.
-              </>
-            }
-            placement="top"
-          >
-            <Button icon="exclamation-triangle" variant="secondary" size="sm" onClick={() => onRunQuery()}>
-              Run query
-            </Button>
-          </Tooltip>
-        )}
+        {renderRunButton()}
 
         <RadioButtonGroup options={editorModes} size="sm" value={editorMode} onChange={onEditorModeChange} />
 

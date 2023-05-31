@@ -11,15 +11,18 @@ import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
 import { VisualEditor } from './visual-query-builder/VisualEditor';
 
-type Props = QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions>;
+interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions> {
+  showRunButton?: boolean;
+}
 
-export function QueryEditor({ datasource, query, onChange, onRunQuery, range }: Props) {
+export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton }: Props) {
   setDatasourceId(datasource.id);
   const [isQueryRunnable, setIsQueryRunnable] = useState(true);
-  const { loading: apiLoading, error: apiError, value: apiClient } = useAsync(
-    async () => await getApiClient(datasource.id),
-    [datasource]
-  );
+  const {
+    loading: apiLoading,
+    error: apiError,
+    value: apiClient,
+  } = useAsync(async () => await getApiClient(datasource.id), [datasource]);
   const queryWithDefaults = applyQueryDefaults(query, datasource, apiClient);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
     filter: !!queryWithDefaults.sql.whereString,
@@ -76,6 +79,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range }: 
         query={queryWithDefaults}
         apiClient={apiClient}
         isQueryRunnable={isQueryRunnable}
+        showRunButton={showRunButton}
       />
 
       <Space v={0.5} />
