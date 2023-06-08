@@ -19,7 +19,7 @@ func NewResourceHandler(ds *BigQueryDatasource) *ResourceHandler {
 
 func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Request) {
 	p := httpadapter.PluginConfigFromContext(req.Context())
-	s, err := LoadSettings(p.DataSourceInstanceSettings)
+	s, err := loadSettings(p.DataSourceInstanceSettings)
 
 	if err != nil {
 		utils.SendResponse(nil, err, rw)

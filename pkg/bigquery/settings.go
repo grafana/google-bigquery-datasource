@@ -19,10 +19,10 @@ type Credentials struct {
 	TokenURI    string `json:"token_uri"`
 }
 
-// LoadSettings will read and validate Settings from the DataSourceInstanceSettings
-func LoadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySettings, error) {
+// loadSettings will read and validate Settings from the DataSourceInstanceSettings
+func loadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySettings, error) {
 	settings := types.BigQuerySettings{}
-	err := json.Unmarshal(config.JSONData, &settings) 
+	err := json.Unmarshal(config.JSONData, &settings)
 	if err != nil {
 		return settings, fmt.Errorf("could not unmarshal DataSourceInfo json: %w", err)
 	}

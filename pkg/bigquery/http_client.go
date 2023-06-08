@@ -21,7 +21,7 @@ type routeInfo struct {
 	scopes []string
 }
 
-var apiRoutes = map[string]routeInfo{
+var routes = map[string]routeInfo{
 	bigQueryRoute: {
 		method: "GET",
 		scopes: []string{BigQueryScope,
@@ -41,10 +41,10 @@ var apiRoutes = map[string]routeInfo{
 func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclient.Middleware, error) {
 	providerConfig := tokenprovider.Config{
 		RoutePath:         routePath,
-		RouteMethod:       apiRoutes[routePath].method,
+		RouteMethod:       routes[routePath].method,
 		DataSourceID:      settings.DatasourceId,
 		DataSourceUpdated: settings.Updated,
-		Scopes:            apiRoutes[routePath].scopes,
+		Scopes:            routes[routePath].scopes,
 	}
 
 	var provider tokenprovider.TokenProvider
