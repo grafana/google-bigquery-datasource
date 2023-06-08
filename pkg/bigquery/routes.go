@@ -1,25 +1,25 @@
-package routes
+package bigquery
 
 import (
 	"net/http"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
 	sdkUtils "github.com/grafana/grafana-google-sdk-go/pkg/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
+
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
 )
 
 type ResourceHandler struct {
-	ds bigquery.BigqueryDatasourceIface
+	ds BigqueryDatasourceIface
 }
 
-func New(ds *bigquery.BigQueryDatasource) *ResourceHandler {
+func NewResourceHandler(ds *BigQueryDatasource) *ResourceHandler {
 	return &ResourceHandler{ds: ds}
 }
 
 func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Request) {
 	p := httpadapter.PluginConfigFromContext(req.Context())
-	s, err := bigquery.LoadSettings(p.DataSourceInstanceSettings)
+	s, err := LoadSettings(p.DataSourceInstanceSettings)
 
 	if err != nil {
 		utils.SendResponse(nil, err, rw)
@@ -30,7 +30,7 @@ func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Requ
 			utils.SendResponse(s.DefaultProject, nil, rw)
 			return
 		}
-		res, err := sdkUtils.GCEDefaultProject(req.Context(), bigquery.BigQueryScope)
+		res, err := sdkUtils.GCEDefaultProject(req.Context(), BigQueryScope)
 		utils.SendResponse(res, err, rw)
 	} else {
 		utils.SendResponse(s.DefaultProject, nil, rw)
@@ -38,7 +38,7 @@ func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Requ
 }
 
 func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
-	result := bigquery.DatasetsArgs{}
+	result := DatasetsArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 
 	if err != nil {
@@ -52,7 +52,7 @@ func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
 }
 
 func (r *ResourceHandler) tableSchema(rw http.ResponseWriter, req *http.Request) {
-	result := bigquery.TableSchemaArgs{}
+	result := TableSchemaArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
@@ -66,7 +66,7 @@ func (r *ResourceHandler) tableSchema(rw http.ResponseWriter, req *http.Request)
 }
 
 func (r *ResourceHandler) validateQuery(rw http.ResponseWriter, req *http.Request) {
-	result := bigquery.ValidateQueryArgs{}
+	result := ValidateQueryArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
@@ -80,7 +80,7 @@ func (r *ResourceHandler) validateQuery(rw http.ResponseWriter, req *http.Reques
 }
 
 func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
-	result := bigquery.ProjectsArgs{}
+	result := ProjectsArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)

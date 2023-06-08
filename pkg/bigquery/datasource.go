@@ -9,9 +9,6 @@ import (
 	"sync"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-google-sdk-go/pkg/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
@@ -23,6 +20,10 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
+
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
 var PluginConfigFromContext = httpadapter.PluginConfigFromContext

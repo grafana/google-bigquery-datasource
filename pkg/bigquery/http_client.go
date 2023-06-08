@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-google-sdk-go/pkg/tokenprovider"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
+
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
 const (
@@ -20,7 +21,7 @@ type routeInfo struct {
 	scopes []string
 }
 
-var routes = map[string]routeInfo{
+var apiRoutes = map[string]routeInfo{
 	bigQueryRoute: {
 		method: "GET",
 		scopes: []string{BigQueryScope,
@@ -40,10 +41,10 @@ var routes = map[string]routeInfo{
 func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclient.Middleware, error) {
 	providerConfig := tokenprovider.Config{
 		RoutePath:         routePath,
-		RouteMethod:       routes[routePath].method,
+		RouteMethod:       apiRoutes[routePath].method,
 		DataSourceID:      settings.DatasourceId,
 		DataSourceUpdated: settings.Updated,
-		Scopes:            routes[routePath].scopes,
+		Scopes:            apiRoutes[routePath].scopes,
 	}
 
 	var provider tokenprovider.TokenProvider
