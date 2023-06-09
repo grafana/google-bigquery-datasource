@@ -47,7 +47,8 @@
     "tempvar",
     "tokenprovider",
     "typecheck",
-    "vectorator"
+    "vectorator",
+    "instancemgmt"
   ],
   "language": "en-US"
 }
