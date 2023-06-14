@@ -13,7 +13,7 @@ type ResourceHandler struct {
 	ds BigqueryDatasourceIface
 }
 
-func NewResourceHandler(ds *BigQueryDatasource) *ResourceHandler {
+func newResourceHandler(ds *BigQueryDatasource) *ResourceHandler {
 	return &ResourceHandler{ds: ds}
 }
 

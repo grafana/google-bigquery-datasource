@@ -3,11 +3,8 @@ package main
 import (
 	"os"
 
-	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/grafana/sqlds/v2"
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
 )
@@ -20,20 +17,10 @@ func main() {
 
 	if err := datasource.Manage(
 		"grafana-bigquery-datasource",
-		newDatasource,
+		bigquery.NewDatasource,
 		datasource.ManageOpts{},
 	); err != nil {
 		log.DefaultLogger.Error(err.Error())
 		os.Exit(1)
 	}
-}
-
-func newDatasource(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-	s := bigquery.New()
-	ds := sqlds.NewDatasource(s)
-	ds.Completable = s
-	ds.EnableMultipleConnections = true
-	ds.CustomRoutes = bigquery.NewResourceHandler(s).Routes()
-
-	return ds.NewDatasource(settings)
 }

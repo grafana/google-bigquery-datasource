@@ -9,12 +9,10 @@ import (
 	"sync"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-google-sdk-go/pkg/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
@@ -23,6 +21,10 @@ import (
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
+
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
 var PluginConfigFromContext = httpadapter.PluginConfigFromContext
@@ -55,7 +57,17 @@ type ConnectionArgs struct {
 	Location string `json:"location,omitempty"`
 }
 
-func New() *BigQueryDatasource {
+func NewDatasource(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
+	s := newBigQueryDatasource()
+	ds := sqlds.NewDatasource(s)
+	ds.Completable = s
+	ds.EnableMultipleConnections = true
+	ds.CustomRoutes = newResourceHandler(s).Routes()
+
+	return ds.NewDatasource(settings)
+}
+
+func newBigQueryDatasource() *BigQueryDatasource {
 	return &BigQueryDatasource{
 		bqFactory:               bq.NewClient,
 		resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
