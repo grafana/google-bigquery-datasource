@@ -49,6 +49,7 @@
     "typecheck",
     "vectorator",
     "instancemgmt",
+    "pluginv2",
     "genproto"
   ],
   "language": "en-US"

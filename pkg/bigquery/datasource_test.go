@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
-	pluginV2 "github.com/grafana/grafana-plugin-sdk-go/genproto/pluginv2"
+	"github.com/grafana/grafana-plugin-sdk-go/genproto/pluginv2"
 	"github.com/grafana/sqlds/v2"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -396,9 +396,9 @@ func newPluginClient(addr string) (*testPluginClient, shutdownFunc, error) {
 	}
 
 	plugin := &testPluginClient{
-		diagnosticsClient: pluginV2.NewDiagnosticsClient(c),
-		dataClient:        pluginV2.NewDataClient(c),
-		resourceClient:    pluginV2.NewResourceClient(c),
+		diagnosticsClient: pluginv2.NewDiagnosticsClient(c),
+		dataClient:        pluginv2.NewDataClient(c),
+		resourceClient:    pluginv2.NewResourceClient(c),
 	}
 
 	return plugin, func() error {
@@ -407,9 +407,9 @@ func newPluginClient(addr string) (*testPluginClient, shutdownFunc, error) {
 }
 
 type testPluginClient struct {
-	dataClient        pluginV2.DataClient
-	diagnosticsClient pluginV2.DiagnosticsClient
-	resourceClient    pluginV2.ResourceClient
+	dataClient        pluginv2.DataClient
+	diagnosticsClient pluginv2.DiagnosticsClient
+	resourceClient    pluginv2.ResourceClient
 }
 
 type shutdownFunc func() error
@@ -430,7 +430,7 @@ func (p *testPluginClient) QueryData(ctx context.Context, r *backend.QueryDataRe
 }
 
 func (p *testPluginClient) CheckHealth(ctx context.Context, r *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	req := &pluginV2.CheckHealthRequest{
+	req := &pluginv2.CheckHealthRequest{
 		PluginContext: backend.ToProto().PluginContext(r.PluginContext),
 	}
 
