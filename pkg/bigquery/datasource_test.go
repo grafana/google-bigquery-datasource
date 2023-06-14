@@ -11,7 +11,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
-	"github.com/grafana/grafana-plugin-sdk-go/genproto/pluginv2"
+	pluginV2 "github.com/grafana/grafana-plugin-sdk-go/genproto/pluginv2"
 	"github.com/grafana/sqlds/v2"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -255,8 +255,8 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 		return i, err
 	})
 
-	instancePrvdr := datasource.NewInstanceProvider(factory)
-	instanceMgr := instancemgmt.New(instancePrvdr)
+	instanceProvider := datasource.NewInstanceProvider(factory)
+	instanceMgr := instancemgmt.New(instanceProvider)
 
 	go func() {
 		err := backend.StandaloneServe(backend.ServeOpts{
@@ -383,7 +383,7 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 		})
 	})
 
-	require.Lenf(t, instances, 3, "expected 3 instances, got %d", len(instances))
+	require.Len(t, instances, 3)
 	require.NotEqual(t, instances[0], instances[1])
 	require.NotEqual(t, instances[0], instances[2])
 	require.NotEqual(t, instances[1], instances[2])
@@ -396,9 +396,9 @@ func newPluginClient(addr string) (*testPluginClient, shutdownFunc, error) {
 	}
 
 	plugin := &testPluginClient{
-		diagnosticsClient: pluginv2.NewDiagnosticsClient(c),
-		dataClient:        pluginv2.NewDataClient(c),
-		resourceClient:    pluginv2.NewResourceClient(c),
+		diagnosticsClient: pluginV2.NewDiagnosticsClient(c),
+		dataClient:        pluginV2.NewDataClient(c),
+		resourceClient:    pluginV2.NewResourceClient(c),
 	}
 
 	return plugin, func() error {
@@ -407,9 +407,9 @@ func newPluginClient(addr string) (*testPluginClient, shutdownFunc, error) {
 }
 
 type testPluginClient struct {
-	dataClient        pluginv2.DataClient
-	diagnosticsClient pluginv2.DiagnosticsClient
-	resourceClient    pluginv2.ResourceClient
+	dataClient        pluginV2.DataClient
+	diagnosticsClient pluginV2.DiagnosticsClient
+	resourceClient    pluginV2.ResourceClient
 }
 
 type shutdownFunc func() error
@@ -430,7 +430,7 @@ func (p *testPluginClient) QueryData(ctx context.Context, r *backend.QueryDataRe
 }
 
 func (p *testPluginClient) CheckHealth(ctx context.Context, r *backend.CheckHealthRequest) (*backend.CheckHealthResult, error) {
-	req := &pluginv2.CheckHealthRequest{
+	req := &pluginV2.CheckHealthRequest{
 		PluginContext: backend.ToProto().PluginContext(r.PluginContext),
 	}
 

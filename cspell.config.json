@@ -48,7 +48,8 @@
     "tokenprovider",
     "typecheck",
     "vectorator",
-    "instancemgmt"
+    "instancemgmt",
+    "genproto"
   ],
   "language": "en-US"
 }
