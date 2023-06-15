@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.7
+
+- **Chore**: Update variable editor to use new API. This will also fix an issue with timeFilter macro. #174
+
 ## 1.2.6
 
 - **Chore** - Backend binaries are now compiled with golang 1.20.4

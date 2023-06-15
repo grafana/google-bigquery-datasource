@@ -1,19 +1,17 @@
 import {
-  DataFrame,
   DataQuery,
-  DataQueryRequest,
-  DataQueryResponse,
   DataSourceInstanceSettings,
   ScopedVars,
-  vectorator
+  VariableSupportType
 } from '@grafana/data';
-import { GoogleAuthType } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/experimental';
+import { GoogleAuthType } from '@grafana/google-sdk';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { getApiClient } from 'api';
 import { DEFAULT_REGION } from './constants';
 import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
+import { VariableEditor } from './components/VariableEditor';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   jsonData: BigQueryOptions;
@@ -26,6 +24,12 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
 
     this.jsonData = instanceSettings.jsonData;
     this.authenticationType = instanceSettings.jsonData.authenticationType || GoogleAuthType.JWT;
+    this.variables = {
+      getType: () => VariableSupportType.Custom,
+      // Have to use any here as DatasourceApi will not be the same as BigQueryDatasource
+      editor: VariableEditor as any,
+      query: this.query.bind(this),
+    }
   }
 
   filterQuery(query: BigQueryQueryNG) {
@@ -65,36 +69,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     }
 
     return Promise.resolve(importedQueries) as any;
-  }
-
-  async metricFindQuery(query: BigQueryQueryNG) {
-    if (!query.rawSql) {
-      return [];
-    }
-    const frame = await this.runQuery(query);
-
-    if (frame.fields?.length === 0) {
-      return [];
-    }
-
-    if (frame?.fields?.length === 1) {
-      return vectorator(frame?.fields[0]?.values).map((text) => ({ text, value: text }));
-    }
-
-    // convention - assume the first field is an id field
-    const ids = frame?.fields[0]?.values;
-    return vectorator(frame?.fields[1]?.values).map((text, i) => ({ text, value: ids.get(i) }));
-  }
-
-  runQuery(query: Partial<BigQueryQueryNG>): Promise<DataFrame> {
-    return new Promise((resolve) => {
-      const req = {
-        targets: [{ ...query, refId: String(Math.random()) }],
-      } as DataQueryRequest<BigQueryQueryNG>;
-      this.query(req).subscribe((res: DataQueryResponse) => {
-        resolve(res.data[0] || { fields: [] });
-      });
-    });
   }
 
   async testDatasource() {
