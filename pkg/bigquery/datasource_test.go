@@ -298,11 +298,8 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 	}()
 
 	// TODO when plugin SDK is updated
-	//t.Setenv("GF_PLUGIN_GRPC_ADDRESS_BIGQUERY_DATASOURCE", addr)
-	//t.Setenv("GF_PLUGIN_GRPC_STANDALONE_BIGQUERY_DATASOURCE", "true")
-	//
 	//go func() {
-	//	err := datasource.Manage("bigquery-datasource", factory, datasource.ManageOpts{})
+	//	err := datasource.ManageForTest(factory, datasource.ManageTestOpts{Address: addr, Dir: t.TempDir()})
 	//	require.NoError(t, err)
 	//}()
 
