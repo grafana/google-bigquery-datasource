@@ -1,5 +1,6 @@
 import {
   DataQuery,
+  DataQueryRequest,
   DataSourceInstanceSettings,
   ScopedVars,
   VariableSupportType
@@ -8,10 +9,11 @@ import { EditorMode } from '@grafana/experimental';
 import { GoogleAuthType } from '@grafana/google-sdk';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { getApiClient } from 'api';
+import { uniqueId } from 'lodash';
+import { VariableEditor } from './components/VariableEditor';
 import { DEFAULT_REGION } from './constants';
 import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
-import { VariableEditor } from './components/VariableEditor';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   jsonData: BigQueryOptions;
@@ -28,8 +30,14 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
       getType: () => VariableSupportType.Custom,
       // Have to use any here as DatasourceApi will not be the same as BigQueryDatasource
       editor: VariableEditor as any,
-      query: this.query.bind(this),
-    }
+      query: (request: DataQueryRequest<BigQueryQueryNG>) => {
+        // Make sure that every query has a refId
+        const queries = request.targets.map((query) => {
+          return { ...query, refId: query.refId ||  uniqueId('tempVar') };
+        });
+        return this.query({ ...request, targets: queries });
+      },
+    };
   }
 
   filterQuery(query: BigQueryQueryNG) {
