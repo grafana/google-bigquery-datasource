@@ -24,6 +24,7 @@ var routes = map[string]routeInfo{
 	bigQueryRoute: {
 		method: "GET",
 		scopes: []string{BigQueryScope,
+			"https://www.googleapis.com/auth/drive",
 			"https://www.googleapis.com/auth/bigquery.insertdata",
 			"https://www.googleapis.com/auth/cloud-platform",
 			"https://www.googleapis.com/auth/cloud-platform.read-only",
