@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.8
+
+- **Fix**: Variable query error because missing refId #180
+
 ## 1.2.7
 
 - **Chore**: Update variable editor to use new API. This will also fix an issue with timeFilter macro. #174
