@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.9
+
+- **Chore**: Use SQLDS in every plugin instance.
 ## 1.2.8
 
 - **Fix**: Variable query error because missing refId #180
