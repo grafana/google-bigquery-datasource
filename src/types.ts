@@ -26,6 +26,7 @@ export interface BigQueryOptions extends DataSourceOptions {
   flatRateProject?: string;
   processingLocation?: string;
   queryPriority?: QueryPriority;
+  enableSecureSocksProxy?: boolean;
 }
 
 export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}
