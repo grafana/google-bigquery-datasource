@@ -51,7 +51,8 @@
     "instancemgmt",
     "pluginv2",
     "genproto",
-    "datasourcetest"
+    "datasourcetest",
+    "proxying"
   ],
   "language": "en-US"
 }
