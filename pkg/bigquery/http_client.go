@@ -82,6 +82,5 @@ func validateDataSourceSettings(settings types.BigQuerySettings) error {
 	if settings.DefaultProject == "" || settings.ClientEmail == "" || settings.PrivateKey == "" || settings.TokenUri == "" {
 		return fmt.Errorf("datasource is missing authentication details")
 	}
-
 	return nil
 }

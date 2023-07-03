@@ -53,7 +53,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err := RunConnection(ds, []byte("{}"))
 		assert.Nil(t, err)
 
-		_, exists := ds.connections.Load("1/us-west1:raintank-dev")
+		_, exists := ds.connections.Load(mapKey{connectionKey: "1/us-west1:raintank-dev"})
 		assert.True(t, exists)
 	})
 
@@ -61,7 +61,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err1 := RunConnection(ds, []byte(`{"location": "us-west2"}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west2:raintank-dev")
+		_, exists := ds.connections.Load(mapKey{connectionKey: "1/us-west2:raintank-dev"})
 		assert.True(t, exists)
 	})
 
@@ -72,9 +72,9 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err2 := RunConnection(ds, []byte(`{"location": "us-west3"}`))
 		assert.Nil(t, err2)
 
-		_, conn1Exists := ds.connections.Load("1/us-west2:raintank-dev")
+		_, conn1Exists := ds.connections.Load(mapKey{connectionKey: "1/us-west2:raintank-dev"})
 		assert.True(t, conn1Exists)
-		_, conn2Exists := ds.connections.Load("1/us-west3:raintank-dev")
+		_, conn2Exists := ds.connections.Load(mapKey{connectionKey: "1/us-west3:raintank-dev"})
 		assert.True(t, conn2Exists)
 	})
 
@@ -91,14 +91,14 @@ func Test_datasourceConnection(t *testing.T) {
 			resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
 		}
 
-		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
+		ds.apiClients.Store(mapKey{connectionKey: "1/us-west2:raintank-dev"}, api.New(&bq.Client{
 			Location: "us-west1",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{"location": "us-west2"}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west2:raintank-dev")
+		_, exists := ds.connections.Load(mapKey{connectionKey: "1/us-west2:raintank-dev"})
 		assert.True(t, exists)
 		assert.Equal(t, 0, clientsFactoryCallsCount)
 	})
@@ -116,19 +116,19 @@ func Test_datasourceConnection(t *testing.T) {
 			resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
 		}
 
-		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
+		ds.apiClients.Store(mapKey{connectionKey: "1/us-west2:raintank-dev"}, api.New(&bq.Client{
 			Location: "us-west1",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west1:raintank-dev")
+		_, exists := ds.connections.Load(mapKey{connectionKey: "1/us-west1:raintank-dev"})
 		assert.True(t, exists)
 
-		_, apiClient1Exists := ds.apiClients.Load("1/us-west2:raintank-dev")
+		_, apiClient1Exists := ds.apiClients.Load(mapKey{connectionKey: "1/us-west2:raintank-dev"})
 		assert.True(t, apiClient1Exists)
-		_, apiClient2Exists := ds.apiClients.Load("1/us-west1:raintank-dev")
+		_, apiClient2Exists := ds.apiClients.Load(mapKey{connectionKey: "1/us-west1:raintank-dev"})
 		assert.True(t, apiClient2Exists)
 
 		assert.Equal(t, 1, clientsFactoryCallsCount)
@@ -179,7 +179,7 @@ func Test_getApi(t *testing.T) {
 		_, err := ds.getApi(context.Background(), "raintank-dev", "us-west1")
 		assert.Nil(t, err)
 
-		_, apiConnExists := ds.apiClients.Load("1/us-west1:raintank-dev")
+		_, apiConnExists := ds.apiClients.Load(mapKey{connectionKey: "1/us-west1:raintank-dev"})
 		assert.True(t, apiConnExists)
 	})
 
@@ -196,12 +196,12 @@ func Test_getApi(t *testing.T) {
 		}
 		_, err1 := ds.getApi(context.Background(), "raintank-dev", "us-west1")
 		assert.Nil(t, err1)
-		_, apiConn1Exists := ds.apiClients.Load("1/us-west1:raintank-dev")
+		_, apiConn1Exists := ds.apiClients.Load(mapKey{connectionKey: "1/us-west1:raintank-dev"})
 		assert.True(t, apiConn1Exists)
 
 		_, err2 := ds.getApi(context.Background(), "raintank-prod", "us-west2")
 		assert.Nil(t, err2)
-		_, apiConn2Exists := ds.apiClients.Load("1/us-west2:raintank-prod")
+		_, apiConn2Exists := ds.apiClients.Load(mapKey{connectionKey: "1/us-west2:raintank-prod"})
 		assert.True(t, apiConn2Exists)
 
 		assert.Equal(t, clientsFactoryCallsCount, 2)
@@ -219,7 +219,7 @@ func Test_getApi(t *testing.T) {
 			},
 		}
 
-		ds.apiClients.Store("1/us-west1:raintank-dev", api.New(&bq.Client{
+		ds.apiClients.Store(mapKey{connectionKey: "1/us-west1:raintank-dev"}, api.New(&bq.Client{
 			Location: "us-west1",
 		}))
 

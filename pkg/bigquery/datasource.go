@@ -14,6 +14,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/proxy"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
@@ -40,6 +41,11 @@ type BigqueryDatasourceIface interface {
 type conn struct {
 	db     *sql.DB
 	driver *driver.Driver
+}
+
+type mapKey struct {
+	connectionKey string
+	secureProxy   bool
 }
 
 type bqServiceFactory func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error)
@@ -100,13 +106,19 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, connectionSettings.Location, connectionSettings.Project)
 
 	if s.resourceManagerServices[fmt.Sprint(config.ID)] == nil {
-		err := createResourceManagerService(settings, fmt.Sprint(config.ID), s)
+		err := createResourceManagerService(config, settings, fmt.Sprint(config.ID), s)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	c, exists := s.connections.Load(connectionKey)
+	opts, err := config.HTTPClientOptions()
+	if err != nil {
+		return nil, err
+	}
+
+	key := mapKey{connectionKey: connectionKey, secureProxy: proxy.SecureSocksProxyEnabled(opts.ProxyOptions)}
+	c, exists := s.connections.Load(key)
 
 	if exists {
 		connection := c.(conn)
@@ -118,7 +130,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		log.DefaultLogger.Debug("Creating new connection to BigQuery")
 	}
 
-	aC, exists := s.apiClients.Load(connectionKey)
+	aC, exists := s.apiClients.Load(key)
 
 	// If we have already instantiated API client for given connection details then reuse it's underlying big query
 	// client for db connection.
@@ -127,10 +139,15 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to connect to database")
 		}
-		s.connections.Store(connectionKey, conn{db: db, driver: dr})
+		s.connections.Store(key, conn{db: db, driver: dr})
 		return db, nil
 	} else {
-		client, err := newHTTPClient(settings, httpclient.Options{}, bigQueryRoute)
+		httpOptions, err := config.HTTPClientOptions()
+		if err != nil {
+			return nil, err
+		}
+
+		client, err := newHTTPClient(settings, httpOptions, bigQueryRoute)
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to create http client")
 		}
@@ -145,7 +162,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to connect to database")
 		}
-		s.connections.Store(connectionKey, conn{db: db, driver: dr})
+		s.connections.Store(key, conn{db: db, driver: dr})
 
 		apiInstance := api.New(bqClient)
 		apiInstance.SetLocation(connectionSettings.Location)
@@ -153,22 +170,25 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to create BigQuery API client")
 		}
-		s.apiClients.Store(connectionKey, apiInstance)
+		s.apiClients.Store(key, apiInstance)
 		return db, nil
 	}
 
 }
 
-func createResourceManagerService(settings types.BigQuerySettings, id string, s *BigQueryDatasource) error {
-	httpClient, err := newHTTPClient(settings, httpclient.Options{}, resourceManagerRoute)
+func createResourceManagerService(config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, id string, s *BigQueryDatasource) error {
+	httpOptions, err := config.HTTPClientOptions()
+	if err != nil {
+		return err
+	}
 
+	httpClient, err := newHTTPClient(settings, httpOptions, resourceManagerRoute)
 	if err != nil {
 		return errors.WithMessage(err, "Failed to create http client for resource manager")
 	}
 
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
 	s.resourceManagerServices[id] = cloudresourcemanagerService
-
 	if err != nil {
 		return err
 	}
@@ -328,8 +348,16 @@ func (s *BigQueryDatasource) TableSchema(ctx context.Context, args TableSchemaAr
 
 func (s *BigQueryDatasource) getApi(ctx context.Context, project, location string) (*api.API, error) {
 	datasourceSettings := getDatasourceSettings(ctx)
+
+	opts, err := datasourceSettings.HTTPClientOptions()
+	if err != nil {
+		return nil, err
+	}
+
 	connectionKey := fmt.Sprintf("%d/%s:%s", datasourceSettings.ID, location, project)
-	cClient, exists := s.apiClients.Load(connectionKey)
+
+	key := mapKey{connectionKey: connectionKey, secureProxy: proxy.SecureSocksProxyEnabled(opts.ProxyOptions)}
+	cClient, exists := s.apiClients.Load(key)
 
 	if exists {
 		log.DefaultLogger.Debug("Reusing existing BigQuery API client")
@@ -341,8 +369,12 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		return nil, err
 	}
 
-	httpClient, err := newHTTPClient(settings, httpclient.Options{}, bigQueryRoute)
+	httpOptions, err := datasourceSettings.HTTPClientOptions()
+	if err != nil {
+		return nil, err
+	}
 
+	httpClient, err := newHTTPClient(settings, httpOptions, bigQueryRoute)
 	if err != nil {
 		return nil, errors.WithMessage(err, "Failed to crate http client")
 	}
@@ -359,7 +391,7 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		apiInstance.SetLocation(settings.ProcessingLocation)
 	}
 
-	s.apiClients.Store(connectionKey, apiInstance)
+	s.apiClients.Store(key, apiInstance)
 
 	return apiInstance, nil
 
