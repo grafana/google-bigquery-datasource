@@ -1,5 +1,6 @@
 import {
   DataSourcePluginOptionsEditorProps,
+  onUpdateDatasourceJsonDataOptionChecked,
   onUpdateDatasourceJsonDataOptionSelect,
 } from '@grafana/data';
 import { Field, FieldSet, Select, InlineField, Switch } from '@grafana/ui';
@@ -79,7 +80,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             <div className={styles.toggle}>
               <Switch
                 value={options.jsonData.enableSecureSocksProxy}
-                onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'enableSecureSocksProxy')}
+                onChange={onUpdateDatasourceJsonDataOptionChecked(props, 'enableSecureSocksProxy')}
               />
             </div>
           </InlineField>
