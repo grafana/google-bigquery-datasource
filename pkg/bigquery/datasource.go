@@ -141,12 +141,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		s.connections.Store(key, conn{db: db, driver: dr})
 		return db, nil
 	} else {
-		httpOptions, err := config.HTTPClientOptions()
-		if err != nil {
-			return nil, err
-		}
-
-		client, err := newHTTPClient(settings, httpOptions, bigQueryRoute)
+		client, err := newHTTPClient(settings, opts, bigQueryRoute)
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to create http client")
 		}
