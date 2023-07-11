@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/proxy"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
@@ -40,11 +39,6 @@ type BigqueryDatasourceIface interface {
 type conn struct {
 	db     *sql.DB
 	driver *driver.Driver
-}
-
-type mapKey struct {
-	connectionKey string
-	secureProxy   bool
 }
 
 type bqServiceFactory func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error)
@@ -116,8 +110,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		return nil, err
 	}
 
-	key := mapKey{connectionKey: connectionKey, secureProxy: proxy.SecureSocksProxyEnabled(opts.ProxyOptions)}
-	c, exists := s.connections.Load(key)
+	c, exists := s.connections.Load(connectionKey)
 
 	if exists {
 		connection := c.(conn)
@@ -129,7 +122,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		log.DefaultLogger.Debug("Creating new connection to BigQuery")
 	}
 
-	aC, exists := s.apiClients.Load(key)
+	aC, exists := s.apiClients.Load(connectionKey)
 
 	// If we have already instantiated API client for given connection details then reuse it's underlying big query
 	// client for db connection.
@@ -138,7 +131,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to connect to database")
 		}
-		s.connections.Store(key, conn{db: db, driver: dr})
+		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 		return db, nil
 	} else {
 		client, err := newHTTPClient(settings, opts, bigQueryRoute)
@@ -156,7 +149,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to connect to database")
 		}
-		s.connections.Store(key, conn{db: db, driver: dr})
+		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 
 		apiInstance := api.New(bqClient)
 		apiInstance.SetLocation(connectionSettings.Location)
@@ -164,7 +157,7 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to create BigQuery API client")
 		}
-		s.apiClients.Store(key, apiInstance)
+		s.apiClients.Store(connectionKey, apiInstance)
 		return db, nil
 	}
 
@@ -342,16 +335,8 @@ func (s *BigQueryDatasource) TableSchema(ctx context.Context, args TableSchemaAr
 
 func (s *BigQueryDatasource) getApi(ctx context.Context, project, location string) (*api.API, error) {
 	datasourceSettings := getDatasourceSettings(ctx)
-
-	opts, err := datasourceSettings.HTTPClientOptions()
-	if err != nil {
-		return nil, err
-	}
-
 	connectionKey := fmt.Sprintf("%d/%s:%s", datasourceSettings.ID, location, project)
-
-	key := mapKey{connectionKey: connectionKey, secureProxy: proxy.SecureSocksProxyEnabled(opts.ProxyOptions)}
-	cClient, exists := s.apiClients.Load(key)
+	cClient, exists := s.apiClients.Load(connectionKey)
 
 	if exists {
 		log.DefaultLogger.Debug("Reusing existing BigQuery API client")
@@ -385,7 +370,7 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		apiInstance.SetLocation(settings.ProcessingLocation)
 	}
 
-	s.apiClients.Store(key, apiInstance)
+	s.apiClients.Store(connectionKey, apiInstance)
 
 	return apiInstance, nil
 
