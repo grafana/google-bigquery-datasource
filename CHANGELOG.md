@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.0
+
+- **Feature:** Add support for PDC.
+
 ## 1.2.9
 
 - **Chore**: Use SQLDS in every plugin instance.
