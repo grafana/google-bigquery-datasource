@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.1
+
+- **Chore**: Update the grafana-plugin-sdk-go to 0.171.0
+
 ## 1.3.0
 
 - **Feature:** Add support for PDC.
