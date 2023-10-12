@@ -161,12 +161,12 @@ FROM `project.dataset.table`
 WHERE $__timeFilter(time_column)
 ```
 
-| Macro example                         | Description                                                                                                                              |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| _$\_\_timeFilter(timeColumn)_         | Will be replaced by a time range filter using the specified name.                                                                        |
-| _$\_\_timeGroup(timeColumn,interval)_ | Will be replaced by an expression usable in the GROUP BY clause.                                                                             |
-| _$\_\_from_ or _$\_\_to_              | Will be replaced by a Unix millisecond representation of the time filter start or end time. For example, `timestamp_millis($__to)`              |
-| _${\_\_from:date}_ or _${\_\_to:date}_| Will be replaced by a date (ISO 8601/RFC 3339) representation of the time filter start or end time. For example, `SELECT DATE('${__from:date}')`|
+| Macro example                          | Description                                                                                                                                      |
+| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| _$\_\_timeFilter(timeColumn)_          | Will be replaced by a time range filter using the specified name.                                                                                |
+| _$\_\_timeGroup(timeColumn,interval)_  | Will be replaced by an expression usable in the GROUP BY clause.                                                                                 |
+| _$\_\_from_ or _$\_\_to_               | Will be replaced by a Unix millisecond representation of the time filter start or end time. For example, `timestamp_millis($__to)`               |
+| _${\_\_from:date}_ or _${\_\_to:date}_ | Will be replaced by a date (ISO 8601/RFC 3339) representation of the time filter start or end time. For example, `SELECT DATE('${__from:date}')` |
 
 ### Templates and variables
 

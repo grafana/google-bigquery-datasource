@@ -189,21 +189,23 @@ class BigQueryAPIClient implements BigQueryAPI {
     return result.data;
   };
 
-  private fromCache = <T>(scope: string, fn: (...args: any[]) => Promise<T>) => async (...args: any[]): Promise<T> => {
-    let id = `${scope}/${args.join('.')}`;
+  private fromCache =
+    <T>(scope: string, fn: (...args: any[]) => Promise<T>) =>
+    async (...args: any[]): Promise<T> => {
+      let id = `${scope}/${args.join('.')}`;
 
-    if (args[0]?.location) {
-      id = `${scope}/${args[0].project}.${args[0].location}.${args[0].dataset}.${args[0].table}`;
-    }
+      if (args[0]?.location) {
+        id = `${scope}/${args[0].project}.${args[0].location}.${args[0].dataset}.${args[0].table}`;
+      }
 
-    if (this.RESULTS_CACHE.has(id)) {
-      return Promise.resolve(this.RESULTS_CACHE.get(id)!);
-    } else {
-      const res = await fn(...args);
-      this.RESULTS_CACHE.set(id, res);
-      return res;
-    }
-  };
+      if (this.RESULTS_CACHE.has(id)) {
+        return Promise.resolve(this.RESULTS_CACHE.get(id)!);
+      } else {
+        const res = await fn(...args);
+        this.RESULTS_CACHE.set(id, res);
+        return res;
+      }
+    };
 
   dispose() {
     this.RESULTS_CACHE.clear();

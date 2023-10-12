@@ -3,7 +3,7 @@ import {
   DataQueryRequest,
   DataSourceInstanceSettings,
   ScopedVars,
-  VariableSupportType
+  VariableSupportType,
 } from '@grafana/data';
 import { EditorMode } from '@grafana/experimental';
 import { GoogleAuthType } from '@grafana/google-sdk';
@@ -33,7 +33,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
       query: (request: DataQueryRequest<BigQueryQueryNG>) => {
         // Make sure that every query has a refId
         const queries = request.targets.map((query) => {
-          return { ...query, refId: query.refId ||  uniqueId('tempVar') };
+          return { ...query, refId: query.refId || uniqueId('tempVar') };
         });
         return this.query({ ...request, targets: queries });
       },

@@ -18,7 +18,7 @@ export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
   { label: 'Iowa (us-central1)', value: 'us-central1' },
   { label: 'Los Angeles (us-west2)', value: 'us-west2' },
   { label: 'Las Vegas (us-west4)', value: 'us-west4' },
-  { label: 'Montréal (northamerica-northeast1)', value: 'northamerica-northeast1',  },
+  { label: 'Montréal (northamerica-northeast1)', value: 'northamerica-northeast1' },
   { label: 'Northern Virginia (us-east4)', value: 'us-east4' },
   { label: 'Oregon (us-west1)', value: 'us-west1' },
   { label: 'Salt Lake City (us-west3)', value: 'us-west3' },
