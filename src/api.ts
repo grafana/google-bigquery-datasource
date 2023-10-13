@@ -61,7 +61,10 @@ class BigQueryAPIClient implements BigQueryAPI {
   private datasourceId: number;
   private lastValidation: ValidationResults | null = null;
 
-  constructor(datasourceId: number, private defaultProject: string) {
+  constructor(
+    datasourceId: number,
+    private defaultProject: string
+  ) {
     this.datasourceId = datasourceId;
     this.baseUrl = `/api/datasources/${datasourceId}`;
     this.resourcesUrl = `${this.baseUrl}/resources`;

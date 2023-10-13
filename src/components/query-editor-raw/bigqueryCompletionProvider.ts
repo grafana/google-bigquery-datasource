@@ -105,91 +105,90 @@ export const customStatementPlacement: StatementPlacementProvider = () => [
 export const customSuggestionKinds: (
   getTables: CompletionProviderGetterArgs['getTables'],
   getTableSchema: CompletionProviderGetterArgs['getTableSchema']
-) => SuggestionKindProvider = (getTables, getTableSchema) => () =>
-  [
-    {
-      id: CustomSuggestionKind.TablesWithinDataset,
-      applyTo: [CustomStatementPlacement.AfterDataset],
-      suggestionsResolver: async (ctx) => {
-        const tablePath = ctx.currentToken ? getTablePath(ctx.currentToken) : '';
-        const t = await getTables.current(tablePath);
+) => SuggestionKindProvider = (getTables, getTableSchema) => () => [
+  {
+    id: CustomSuggestionKind.TablesWithinDataset,
+    applyTo: [CustomStatementPlacement.AfterDataset],
+    suggestionsResolver: async (ctx) => {
+      const tablePath = ctx.currentToken ? getTablePath(ctx.currentToken) : '';
+      const t = await getTables.current(tablePath);
 
-        return t.map((table) => ({
-          label: table.name,
-          insertText: table.completion ?? table.name,
-          command: { id: 'editor.action.triggerSuggest', title: '' },
-          kind: CompletionItemKind.Field,
-          sortText: CompletionItemPriority.High,
-          range: {
-            ...ctx.range,
-            startColumn: ctx.range.endColumn,
-            endColumn: ctx.range.endColumn,
-          },
-        }));
-      },
+      return t.map((table) => ({
+        label: table.name,
+        insertText: table.completion ?? table.name,
+        command: { id: 'editor.action.triggerSuggest', title: '' },
+        kind: CompletionItemKind.Field,
+        sortText: CompletionItemPriority.High,
+        range: {
+          ...ctx.range,
+          startColumn: ctx.range.endColumn,
+          endColumn: ctx.range.endColumn,
+        },
+      }));
     },
+  },
 
-    {
-      id: CustomSuggestionKind.Partition,
-      applyTo: [StatementPosition.AfterFrom],
-      suggestionsResolver: async (ctx) => {
-        const tablePath = ctx.currentToken ? getTablePath(ctx.currentToken) : '';
-        const path = tablePath.split('.').filter((s) => s);
-        const suggestions = [];
+  {
+    id: CustomSuggestionKind.Partition,
+    applyTo: [StatementPosition.AfterFrom],
+    suggestionsResolver: async (ctx) => {
+      const tablePath = ctx.currentToken ? getTablePath(ctx.currentToken) : '';
+      const path = tablePath.split('.').filter((s) => s);
+      const suggestions = [];
 
-        if (path.length === 3) {
-          const schema = await getTableSchema.current(path[0], path[1], path[2]);
+      if (path.length === 3) {
+        const schema = await getTableSchema.current(path[0], path[1], path[2]);
 
-          if (schema) {
-            const timePartitioningSetup = schema.timePartitioning;
-            if (timePartitioningSetup) {
-              if (timePartitioningSetup.field) {
-                // TODO: add support for field partitioning
-              }
+        if (schema) {
+          const timePartitioningSetup = schema.timePartitioning;
+          if (timePartitioningSetup) {
+            if (timePartitioningSetup.field) {
+              // TODO: add support for field partitioning
+            }
 
-              if (timePartitioningSetup.type) {
-                // Ingestion-time partition
-                // https://cloud.google.com/bigquery/docs/querying-partitioned-tables#query_an_ingestion-time_partitioned_table
+            if (timePartitioningSetup.type) {
+              // Ingestion-time partition
+              // https://cloud.google.com/bigquery/docs/querying-partitioned-tables#query_an_ingestion-time_partitioned_table
+              suggestions.push({
+                label: '_PARTITIONTIME BETWEEN',
+                insertText: 'WHERE _PARTITIONTIME BETWEEN TIMESTAMP("$1") AND TIMESTAMP("$2")',
+                kind: CompletionItemKind.Snippet,
+                insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+                sortText: CompletionItemPriority.MediumLow,
+              });
+              suggestions.push({
+                label: '_PARTITIONTIME EQUALS',
+                insertText: 'WHERE DATE(_PARTITIONTIME) = "$1"',
+                kind: CompletionItemKind.Snippet,
+                insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
+                sortText: CompletionItemPriority.MediumLow,
+              });
+
+              if (timePartitioningSetup.type && timePartitioningSetup.type === PartitioningType.Day) {
                 suggestions.push({
-                  label: '_PARTITIONTIME BETWEEN',
-                  insertText: 'WHERE _PARTITIONTIME BETWEEN TIMESTAMP("$1") AND TIMESTAMP("$2")',
+                  label: '_PARTITIONDATE BETWEEN',
+                  insertText: 'WHERE _PARTITIONDATE BETWEEN DATE("$1") AND DATE("$2")',
                   kind: CompletionItemKind.Snippet,
                   insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
                   sortText: CompletionItemPriority.MediumLow,
                 });
                 suggestions.push({
-                  label: '_PARTITIONTIME EQUALS',
-                  insertText: 'WHERE DATE(_PARTITIONTIME) = "$1"',
+                  label: '_PARTITIONDATE EQUALS',
+                  insertText: 'WHERE DATE(_PARTITIONDATE) = "$1"',
                   kind: CompletionItemKind.Snippet,
                   insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
                   sortText: CompletionItemPriority.MediumLow,
                 });
-
-                if (timePartitioningSetup.type && timePartitioningSetup.type === PartitioningType.Day) {
-                  suggestions.push({
-                    label: '_PARTITIONDATE BETWEEN',
-                    insertText: 'WHERE _PARTITIONDATE BETWEEN DATE("$1") AND DATE("$2")',
-                    kind: CompletionItemKind.Snippet,
-                    insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
-                    sortText: CompletionItemPriority.MediumLow,
-                  });
-                  suggestions.push({
-                    label: '_PARTITIONDATE EQUALS',
-                    insertText: 'WHERE DATE(_PARTITIONDATE) = "$1"',
-                    kind: CompletionItemKind.Snippet,
-                    insertTextRules: CompletionItemInsertTextRule.InsertAsSnippet,
-                    sortText: CompletionItemPriority.MediumLow,
-                  });
-                }
               }
             }
           }
         }
+      }
 
-        return suggestions;
-      },
+      return suggestions;
     },
-  ];
+  },
+];
 
 export function getTablePath(token: LinkedToken) {
   let processedToken = token;
