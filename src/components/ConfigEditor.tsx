@@ -1,18 +1,16 @@
+import { css } from '@emotion/css';
 import {
   DataSourcePluginOptionsEditorProps,
   onUpdateDatasourceJsonDataOptionChecked,
   onUpdateDatasourceJsonDataOptionSelect,
 } from '@grafana/data';
-import { Field, FieldSet, Select, InlineField, Switch } from '@grafana/ui';
 import { AuthConfig, GOOGLE_AUTH_TYPE_OPTIONS } from '@grafana/google-sdk';
 import { config } from '@grafana/runtime';
-
+import { Field, FieldSet, InlineField, Select, Switch } from '@grafana/ui';
 import React from 'react';
-import { ConfigurationHelp } from './/ConfigurationHelp';
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData } from '../types';
-import { gte } from 'semver';
-import { css } from '@emotion/css';
+import { ConfigurationHelp } from './/ConfigurationHelp';
 
 const styles = {
   toggle: css`
@@ -60,7 +58,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           />
         </Field>
 
-        {config.featureToggles['secureSocksDSProxyEnabled'] && gte(config.buildInfo.version, '10.0.0-0') && (
+        {config.secureSocksDSProxyEnabled && (
           <>
             <InlineField
               label="Secure Socks Proxy"

@@ -1,13 +1,13 @@
 import { DataQuery, TimeRange } from '@grafana/data';
-import { DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/experimental';
+import { DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
+import { JsonTree } from '@react-awesome-query-builder/ui';
 import { BigQueryAPI } from 'api';
 import {
   QueryEditorFunctionExpression,
   QueryEditorGroupByExpression,
   QueryEditorPropertyExpression,
 } from 'expressions';
-import { JsonTree } from 'react-awesome-query-builder';
 import { applyQueryDefaults } from 'utils';
 
 export enum QueryPriority {

@@ -42,7 +42,7 @@ export function SQLGroupByRow({ sql, columns, onSqlChange }: SQLGroupByRowProps)
 }
 
 function makeRenderColumn({ options }: { options?: Array<SelectableValue<string>> }) {
-  const renderColumn = function (item: unknown, onChangeItem: (item: unknown) => void, onDeleteItem: () => void) {
+  const renderColumn = function (item: Partial<unknown>, onChangeItem: (item: Partial<unknown>) => void, onDeleteItem: () => void) {
     return (
       <InputGroup>
         <Select

@@ -1,7 +1,7 @@
 import { dateTime } from '@grafana/data';
 import { Button, DateTimePicker, Input, Select } from '@grafana/ui';
+import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from '@react-awesome-query-builder/ui';
 import React from 'react';
-import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from 'react-awesome-query-builder';
 import { toOption } from 'utils/data';
 
 const buttonLabels = {
