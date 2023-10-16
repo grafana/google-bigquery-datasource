@@ -11,6 +11,7 @@ import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
 import { ProjectSelector } from './ProjectSelector';
 import { TableSelector } from './TableSelector';
+import { v4 as uuidv4 } from 'uuid';
 
 interface QueryHeaderProps {
   query: QueryWithDefaults;
@@ -159,7 +160,7 @@ export function QueryHeader({
         {editorMode === EditorMode.Builder && (
           <>
             <InlineSwitch
-              id="bq-filter"
+              id={`bq-filter-${uuidv4()}}`}
               label="Filter"
               transparent={true}
               showLabel={true}
@@ -171,7 +172,7 @@ export function QueryHeader({
             />
 
             <InlineSwitch
-              id="bq-group"
+              id={`bq-group-${uuidv4()}}`}
               label="Group"
               transparent={true}
               showLabel={true}
@@ -183,7 +184,7 @@ export function QueryHeader({
             />
 
             <InlineSwitch
-              id="bq-order"
+              id={`bq-order-${uuidv4()}}`}
               label="Order"
               transparent={true}
               showLabel={true}
@@ -195,7 +196,7 @@ export function QueryHeader({
             />
 
             <InlineSwitch
-              id="bq-preview"
+              id={`bq-preview-${uuidv4()}}`}
               label="Preview"
               transparent={true}
               showLabel={true}
