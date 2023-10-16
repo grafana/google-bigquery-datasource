@@ -1,5 +1,9 @@
 {
-  "ignorePaths": ["node_modules/**", "src/dashboards/arrays.json", "dist/**"],
+  "ignorePaths": [
+    "node_modules/**",
+    "src/dashboards/arrays.json",
+    "dist/**"
+  ],
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
@@ -53,6 +57,7 @@
     "TINYINT",
     "tokenprovider",
     "typecheck",
+    "uuidv",
     "vectorator"
   ],
   "language": "en-US"
