@@ -1,37 +1,38 @@
-import { css } from '@emotion/css';
-import {
-  DataSourcePluginOptionsEditorProps,
-  onUpdateDatasourceJsonDataOptionChecked,
-  onUpdateDatasourceJsonDataOptionSelect,
-} from '@grafana/data';
+import { DataSourcePluginOptionsEditorProps, onUpdateDatasourceJsonDataOptionSelect } from '@grafana/data';
 import { AuthConfig, GOOGLE_AUTH_TYPE_OPTIONS } from '@grafana/google-sdk';
 import { config } from '@grafana/runtime';
-import { Field, FieldSet, InlineField, Select, Switch } from '@grafana/ui';
+import { Divider, Field, SecureSocksProxySettings, Select } from '@grafana/ui';
 import React from 'react';
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData } from '../types';
 import { ConfigurationHelp } from './/ConfigurationHelp';
-
-const styles = {
-  toggle: css`
-    margin-top: 7px;
-    margin-left: 5px;
-  `,
-};
+import { ConfigSection, DataSourceDescription } from '@grafana/experimental';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 
 export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props) => {
-  const { options } = props;
+  const { options, onOptionsChange } = props;
   const { jsonData } = options;
 
   return (
     <>
+      <DataSourceDescription
+        dataSourceName="Google BigQuery"
+        docsLink="https://grafana.com/grafana/plugins/grafana-bigquery-datasource/"
+        hasRequiredFields={false}
+      />
+
+      <Divider />
+
       <ConfigurationHelp />
+
+      <Divider />
 
       <AuthConfig {...props} authOptions={GOOGLE_AUTH_TYPE_OPTIONS} />
 
-      <FieldSet label="Other settings">
+      <Divider />
+
+      <ConfigSection title="Additional Settings" isCollapsible>
         <Field
           label="Processing location"
           description={
@@ -59,32 +60,9 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
         </Field>
 
         {config.secureSocksDSProxyEnabled && (
-          <>
-            <InlineField
-              label="Secure Socks Proxy"
-              tooltip={
-                <>
-                  Enable proxying the datasource connection through the secure socks proxy to a different network. See{' '}
-                  <a
-                    href="https://grafana.com/docs/grafana/next/setup-grafana/configure-grafana/proxy/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Configure a datasource connection proxy.
-                  </a>
-                </>
-              }
-            >
-              <div className={styles.toggle}>
-                <Switch
-                  value={options.jsonData.enableSecureSocksProxy}
-                  onChange={onUpdateDatasourceJsonDataOptionChecked(props, 'enableSecureSocksProxy')}
-                />
-              </div>
-            </InlineField>
-          </>
+          <SecureSocksProxySettings options={options} onOptionsChange={onOptionsChange} />
         )}
-      </FieldSet>
+      </ConfigSection>
     </>
   );
 };
