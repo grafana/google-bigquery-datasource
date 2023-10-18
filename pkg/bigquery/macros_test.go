@@ -3,7 +3,7 @@ package bigquery
 import (
 	"testing"
 
-	"github.com/grafana/sqlds/v2"
+	"github.com/grafana/sqlds/v3"
 	"github.com/pkg/errors"
 )
 

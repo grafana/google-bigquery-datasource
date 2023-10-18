@@ -16,7 +16,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
-	"github.com/grafana/sqlds/v2"
+	"github.com/grafana/sqlds/v3"
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
@@ -56,14 +56,14 @@ type ConnectionArgs struct {
 	Location string `json:"location,omitempty"`
 }
 
-func NewDatasource(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
+func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
 	s := newBigQueryDatasource()
 	ds := sqlds.NewDatasource(s)
 	ds.Completable = s
 	ds.EnableMultipleConnections = true
 	ds.CustomRoutes = newResourceHandler(s).Routes()
 
-	return ds.NewDatasource(settings)
+	return ds.NewDatasource(ctx, settings)
 }
 
 func newBigQueryDatasource() *BigQueryDatasource {
@@ -73,7 +73,7 @@ func newBigQueryDatasource() *BigQueryDatasource {
 	}
 }
 
-func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, queryArgs json.RawMessage) (*sql.DB, error) {
+func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSourceInstanceSettings, queryArgs json.RawMessage) (*sql.DB, error) {
 	log.DefaultLogger.Debug("Connecting to BigQuery")
 
 	settings, err := loadSettings(&config)
@@ -99,13 +99,13 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, connectionSettings.Location, connectionSettings.Project)
 
 	if s.resourceManagerServices[fmt.Sprint(config.ID)] == nil {
-		err := createResourceManagerService(config, settings, fmt.Sprint(config.ID), s)
+		err := createResourceManagerService(ctx, config, settings, fmt.Sprint(config.ID), s)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	opts, err := config.HTTPClientOptions()
+	opts, err := config.HTTPClientOptions(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -163,8 +163,8 @@ func (s *BigQueryDatasource) Connect(config backend.DataSourceInstanceSettings, 
 
 }
 
-func createResourceManagerService(config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, id string, s *BigQueryDatasource) error {
-	httpOptions, err := config.HTTPClientOptions()
+func createResourceManagerService(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, id string, s *BigQueryDatasource) error {
+	httpOptions, err := config.HTTPClientOptions(ctx)
 	if err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func (s *BigQueryDatasource) FillMode() *data.FillMissing {
 	}
 }
 
-func (s *BigQueryDatasource) Settings(_ backend.DataSourceInstanceSettings) sqlds.DriverSettings {
+func (s *BigQueryDatasource) Settings(_ context.Context, _ backend.DataSourceInstanceSettings) sqlds.DriverSettings {
 	return sqlds.DriverSettings{
 		FillMode: &data.FillMissing{
 			Mode: data.FillModeNull,
@@ -348,7 +348,7 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		return nil, err
 	}
 
-	httpOptions, err := datasourceSettings.HTTPClientOptions()
+	httpOptions, err := datasourceSettings.HTTPClientOptions(ctx)
 	if err != nil {
 		return nil, err
 	}

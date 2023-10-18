@@ -12,7 +12,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/experimental/datasourcetest"
-	"github.com/grafana/sqlds/v2"
+	"github.com/grafana/sqlds/v3"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/cloudresourcemanager/v3"
@@ -21,7 +21,7 @@ import (
 )
 
 func RunConnection(ds *BigQueryDatasource, connectionArgs json.RawMessage) (*sql.DB, error) {
-	return ds.Connect(backend.DataSourceInstanceSettings{
+	return ds.Connect(context.Background(), backend.DataSourceInstanceSettings{
 		ID: 1,
 		DecryptedSecureJSONData: map[string]string{
 			"privateKey": "randomPrivateKey",
@@ -40,7 +40,7 @@ func Test_datasourceConnection(t *testing.T) {
 	}
 
 	t.Run("errors if authentication details are not configured connection", func(t *testing.T) {
-		db, err := ds.Connect(backend.DataSourceInstanceSettings{
+		db, err := ds.Connect(context.Background(), backend.DataSourceInstanceSettings{
 			ID:       1,
 			JSONData: []byte(`{"authenticationType":"jwt"}`),
 		}, []byte("{}"))
@@ -239,9 +239,9 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 
 	var instances []sqlds.Completable
 	factoryInvocations := 0
-	factory := datasource.InstanceFactoryFunc(func(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
+	factory := datasource.InstanceFactoryFunc(func(ctx context.Context, settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
 		factoryInvocations++
-		i, err := NewDatasource(settings)
+		i, err := NewDatasource(ctx, settings)
 		if c, ok := i.(sqlds.Completable); ok {
 			instances = append(instances, c)
 		}
@@ -251,8 +251,9 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 	tp, err := datasourcetest.Manage(factory, datasourcetest.ManageOpts{Address: addr})
 	require.NoError(t, err)
 	defer func() {
-		err = tp.Shutdown()
-		t.Log("plugin shutdown error", err)
+		if err = tp.Shutdown(); err != nil {
+			t.Log("plugin shutdown error", err)
+		}
 	}()
 
 	pCtx := backend.PluginContext{DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{
@@ -266,7 +267,6 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 	t.Run("Request without tenant information creates an instance", func(t *testing.T) {
 		qdr := &backend.QueryDataRequest{PluginContext: pCtx}
 		crr := &backend.CallResourceRequest{PluginContext: pCtx}
-		chr := &backend.CheckHealthRequest{PluginContext: pCtx}
 		responseSender := newTestCallResourceResponseSender()
 		ctx := context.Background()
 
@@ -292,11 +292,8 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 			require.NotNil(t, resp)
 			require.Equal(t, 2, factoryInvocations)
 
-			var chRes *backend.CheckHealthResult
-			chRes, err = tp.Client.CheckHealth(ctx, chr)
+			err = tp.Client.CallResource(ctx, crr, responseSender)
 			require.NoError(t, err)
-			require.NotNil(t, chRes)
-			require.Equal(t, 2, factoryInvocations)
 
 			t.Run("Request from tenant #2 creates new instance", func(t *testing.T) {
 				ctx = metadata.AppendToOutgoingContext(context.Background(), "tenantID", tenantID2)
@@ -318,9 +315,8 @@ func TestBigQueryMultiTenancy(t *testing.T) {
 			require.NotNil(t, resp)
 			require.Equal(t, 3, factoryInvocations)
 
-			chRes, err = tp.Client.CheckHealth(ctx, chr)
+			err = tp.Client.CallResource(ctx, crr, responseSender)
 			require.NoError(t, err)
-			require.NotNil(t, chRes)
 			require.Equal(t, 3, factoryInvocations)
 		})
 	})
