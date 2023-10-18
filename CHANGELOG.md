@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0
+
+- **Chore**: Update go and npm dependencies.
+- **Fix**: Fix A11y issues in the query editor.
+- **Feature**: Add support for querying databases from drive.
+
 ## 1.3.1
 
 - **Chore**: Update the grafana-plugin-sdk-go to 0.171.0
