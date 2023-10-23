@@ -1,12 +1,13 @@
 import { DataSourcePluginOptionsEditorProps, onUpdateDatasourceJsonDataOptionSelect } from '@grafana/data';
 import { AuthConfig, GOOGLE_AUTH_TYPE_OPTIONS } from '@grafana/google-sdk';
 import { config } from '@grafana/runtime';
-import { Divider, Field, SecureSocksProxySettings, Select } from '@grafana/ui';
+import { Field, SecureSocksProxySettings, Select } from '@grafana/ui';
 import React from 'react';
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData } from '../types';
 import { ConfigurationHelp } from './/ConfigurationHelp';
 import { ConfigSection, DataSourceDescription } from '@grafana/experimental';
+import { Divider } from './Divider';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 
