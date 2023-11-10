@@ -11,11 +11,11 @@ import {
   TableDefinition,
   TableIdentifier,
   TokenType,
-  getStandardSQLCompletionProvider,
 } from '@grafana/experimental';
 import { PartitioningType, TableSchema } from 'api';
 import { BQ_AGGREGATE_FNS } from './bigQueryFunctions';
 import { BQ_OPERATORS } from './bigQueryOperators';
+import { MACROS } from './macros';
 
 interface CompletionProviderGetterArgs {
   getColumns: React.MutableRefObject<(t: string) => Promise<ColumnDefinition[]>>;
@@ -25,8 +25,8 @@ interface CompletionProviderGetterArgs {
 
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables, getTableSchema }) =>
-  (monaco, language) => ({
-    ...(language && getStandardSQLCompletionProvider(monaco, language)),
+  () => ({
+    triggerCharacters: ['.', ' ', '$', ',', '(', "'"],
     tables: {
       resolve: async () => {
         return await getTables.current();
@@ -57,6 +57,7 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
     supportedOperators: () => BQ_OPERATORS,
     customSuggestionKinds: customSuggestionKinds(getTables, getTableSchema),
     customStatementPlacement,
+    supportedMacros: () => MACROS,
   });
 
 export enum CustomStatementPlacement {

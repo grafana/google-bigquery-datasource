@@ -57,6 +57,7 @@
     "TINYINT",
     "tokenprovider",
     "typecheck",
+    "UNIXTIME",
     "uuidv",
     "vectorator"
   ],
