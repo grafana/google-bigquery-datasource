@@ -11,6 +11,7 @@ import {
   TableDefinition,
   TableIdentifier,
   TokenType,
+  getStandardSQLCompletionProvider,
 } from '@grafana/experimental';
 import { PartitioningType, TableSchema } from 'api';
 import { BQ_AGGREGATE_FNS } from './bigQueryFunctions';
@@ -24,8 +25,8 @@ interface CompletionProviderGetterArgs {
 
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables, getTableSchema }) =>
-  () => ({
-    triggerCharacters: ['.', ' ', '$', ',', '(', "'"],
+  (monaco, language) => ({
+    ...(language && getStandardSQLCompletionProvider(monaco, language)),
     tables: {
       resolve: async () => {
         return await getTables.current();
