@@ -1,9 +1,5 @@
 # Changelog
 
-## 1.4.1
-
-- **Chore**: Update the grafana-plugin-sdk-go to 0.193.0
-
 ## 1.4.0
 
 - **Chore**: Update go and npm dependencies.
