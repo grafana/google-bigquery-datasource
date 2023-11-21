@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.4.1
+
+- **Feature**: Add macros autocomplete for code editor
+- **Chore**: Upgrade grafana-plugin-sdk-go to latest
+
 ## 1.4.0
 
 - **Chore**: Update go and npm dependencies.
