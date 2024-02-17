@@ -1,6 +1,6 @@
 {
   "name": "grafana-bigquery-datasource",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Google BigQuery datasource for Grafana",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",

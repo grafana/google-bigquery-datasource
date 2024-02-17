@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.2
+
+- **Feature**: Hide sensitive project information from the Frontend
+
 ## 1.4.1
 
 - **Feature**: Add macros autocomplete for code editor
