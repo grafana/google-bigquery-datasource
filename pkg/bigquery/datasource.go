@@ -33,7 +33,7 @@ type BigqueryDatasourceIface interface {
 	Datasets(ctx context.Context, args DatasetsArgs) ([]string, error)
 	TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error)
 	ValidateQuery(ctx context.Context, args ValidateQueryArgs) (*api.ValidateQueryResponse, error)
-	Projects(options ProjectsArgs) ([]*cloudresourcemanager.Project, error)
+	Projects(options ProjectsArgs) ([]*Project, error)
 }
 
 type conn struct {
