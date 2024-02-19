@@ -280,20 +280,24 @@ type ProjectsArgs struct {
 	DatasourceID string `json:"datasourceId"`
 }
 
-func (s *BigQueryDatasource) Projects(options ProjectsArgs) ([]*cloudresourcemanager.Project, error) {
+type Project struct {
+	ProjectId   string `json:"projectId"`
+	DisplayName string `json:"displayName"`
+}
+
+func (s *BigQueryDatasource) Projects(options ProjectsArgs) ([]*Project, error) {
 	response, err := s.resourceManagerServices[options.DatasourceID].Projects.Search().Do()
 
 	if err != nil {
 		return nil, err
 	}
 
-	// Nullify sensitive project information
+	projects := make([]*Project, 0, len(response.Projects))
 	for _, project := range response.Projects {
-		project.Parent = ""
-		project.Labels = nil
+		projects = append(projects, &Project{project.ProjectId, project.DisplayName})
 	}
 
-	return response.Projects, nil
+	return projects, nil
 }
 
 type ValidateQueryArgs struct {
