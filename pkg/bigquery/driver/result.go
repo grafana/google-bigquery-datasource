@@ -10,7 +10,7 @@ func (r *result) LastInsertId() (int64, error) {
 	return r.lastInsertID, nil
 }
 
-//RowsAffected is just passing through a zero value
+// RowsAffected is just passing through a zero value
 func (r *result) RowsAffected() (int64, error) {
 	return r.rowsAffected, nil
 }
