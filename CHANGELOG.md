@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.5.0
+
+- **Chore**: Add missing processing locations (#231)
+- **Feature**: Hide sensitive project information from the Frontend (#236)
+- **Chore**: Update create-plugin and dependencies #240
+- **Feature**: Attach grafana-http-headers as config labels for queries (#241)
+
 ## 1.4.1
 
 - **Feature**: Add macros autocomplete for code editor
