@@ -35,10 +35,6 @@ func loadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySet
 	settings.DatasourceId = config.ID
 	settings.Updated = config.Updated
 
-	if settings.ProcessingLocation == "" {
-		settings.ProcessingLocation = "US"
-	}
-
 	return settings, nil
 }
 

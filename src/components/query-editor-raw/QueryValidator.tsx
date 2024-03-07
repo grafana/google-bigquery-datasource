@@ -37,7 +37,7 @@ export function QueryValidator({ apiClient, query, onValidate, range }: QueryVal
 
   const [state, validateQuery] = useAsyncFn(
     async (q: BigQueryQueryNG) => {
-      if (!q.location || q.rawSql.trim() === '') {
+      if (q.rawSql.trim() === '') {
         return null;
       }
 

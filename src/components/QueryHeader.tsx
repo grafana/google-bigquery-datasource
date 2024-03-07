@@ -5,7 +5,7 @@ import { BigQueryAPI } from 'api';
 import React, { useCallback, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 import { toRawSql } from 'utils/sql.utils';
-import { DEFAULT_REGION, PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
+import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
 import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
 import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
@@ -144,7 +144,7 @@ export function QueryHeader({
           placeholder="Select location"
           allowCustomValue
           menuShouldPortal
-          onChange={({ value }) => value && onChange({ ...query, location: value || DEFAULT_REGION })}
+          onChange={({ value }) => value != null && onChange({ ...query, location: value || '' })}
           options={PROCESSING_LOCATIONS}
         />
 
