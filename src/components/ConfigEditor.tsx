@@ -98,6 +98,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           <Input
             className="width-30"
             placeholder="Optional, example 5242880"
+            type={'number'}
             value={jsonData.maxBillableBytes || ''}
             onChange={onMaxBillableBytesChange}
           />
