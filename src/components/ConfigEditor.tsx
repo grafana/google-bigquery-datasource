@@ -97,7 +97,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
         >
           <Input
             className="width-30"
-            placeholder="Optional"
+            placeholder="Optional, example 5242880"
             value={jsonData.maxBillableBytes || ''}
             onChange={onMaxBillableBytesChange}
           />
@@ -106,8 +106,8 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           label="On-demand compute price (cost per terabyte)"
           description={
             <span>
-              Only used for display purposes. If not defined, estimates will be shown as bytes. Read more about Bigquery
-              pricing{' '}
+              Only used for display purposes. If not defined, estimates will still be shown as bytes. Read more about
+              Bigquery pricing{' '}
               <a
                 href="https://cloud.google.com/bigquery/pricing"
                 rel="noreferrer"
@@ -121,7 +121,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
         >
           <Input
             className="width-30"
-            placeholder="Optional, Example 6.25"
+            placeholder="Optional, example 6.25"
             type={'number'}
             value={jsonData.onDemandComputePrice || ''}
             onChange={onOnDemandComputePriceChange}
