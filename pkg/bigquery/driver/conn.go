@@ -124,6 +124,11 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 	q := c.client.Query(query)
 
 	q.QueryConfig.Labels = c.headersAsLabels()
+
+	if c.cfg.MaxBillableBytes > 0 {
+		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBillableBytes
+	}
+
 	// q.DefaultProjectID = c.cfg.Project // allows omitting project in table reference
 	// q.DefaultDatasetID = c.cfg.Dataset // allows omitting dataset in table reference
 
@@ -227,6 +232,10 @@ func (c *Conn) queryContext(ctx context.Context, query string, args []driver.Val
 	q.Location = c.client.Location
 
 	q.QueryConfig.Labels = c.headersAsLabels()
+
+	if c.cfg.MaxBillableBytes > 0 {
+		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBillableBytes
+	}
 
 	rowsIterator, err := q.Read(ctx)
 	if err != nil {

@@ -47,6 +47,7 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		Project:            settings.DefaultProject,
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
+		MaxBillableBytes:   settings.MaxBillableBytes,
 	}
 
 	if queryArgs.Location != "" {
