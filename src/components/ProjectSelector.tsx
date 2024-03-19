@@ -63,8 +63,8 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ apiClient, val
       <EditorField label="Project" width={25} error={getErrorMessage()} invalid={!!state.error}>
         <Select
           aria-label="Project selector"
-          value={value}
-          options={state.value || [{ label: value, value }]}
+          value={state.loading ? null : value}
+          options={state.loading ? [] : state.value || [{ label: value, value }]}
           onChange={onChange}
           isLoading={state.loading}
           menuShouldPortal={true}
