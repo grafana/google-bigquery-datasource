@@ -87,7 +87,9 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		return nil, err
 	}
 
-	connectionSettings := getConnectionSettings(settings, args)
+	isQueryArgsNil := args == nil
+
+	connectionSettings := getConnectionSettings(settings, args, isQueryArgsNil)
 
 	if settings.AuthenticationType == "gce" && connectionSettings.Project == "" {
 		defaultProject, err := utils.GCEDefaultProject(context.Background(), BigQueryScope)

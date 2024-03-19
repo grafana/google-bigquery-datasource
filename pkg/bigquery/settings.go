@@ -38,14 +38,14 @@ func loadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySet
 	return settings, nil
 }
 
-func getConnectionSettings(settings types.BigQuerySettings, queryArgs *ConnectionArgs) types.ConnectionSettings {
+func getConnectionSettings(settings types.BigQuerySettings, queryArgs *ConnectionArgs, isQueryArgsNil bool) types.ConnectionSettings {
 	connectionSettings := types.ConnectionSettings{
 		Project:            settings.DefaultProject,
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
 	}
 
-	if queryArgs.Location != "" {
+	if !isQueryArgsNil  {
 		connectionSettings.Location = queryArgs.Location
 	}
 
