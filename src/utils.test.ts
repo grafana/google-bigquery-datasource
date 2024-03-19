@@ -1,4 +1,6 @@
-import { extractFromClause, findTimeField, formatBigqueryError, getShiftPeriod } from 'utils';
+import { EditorMode } from '@grafana/experimental';
+import { QueryFormat } from 'types';
+import { applyQueryDefaults, extractFromClause, findTimeField, formatBigqueryError, getShiftPeriod } from 'utils';
 
 describe('Utils', () => {
   test('formatBigqueryError', () => {
@@ -34,5 +36,31 @@ describe('Utils', () => {
     const timeFields = new Array(fl);
     const res = findTimeField(sql, timeFields);
     expect(res.text).toBe('tm');
+  });
+
+  test('applyQueryDefaults should handle location change from auto to US', () => {
+    const query = {
+      location: '',
+      refId: 'A',
+      rawSql: 'select * from `prj.ds.dt`',
+      format: QueryFormat.Table,
+      editorMode: EditorMode.Builder,
+    };
+    const res = applyQueryDefaults(query, { jsonData: { processingLocation: '' } } as any);
+
+    expect(res.location).toBe('');
+  });
+
+  test('applyQueryDefaults should handle location change from US to auto', () => {
+    const query = {
+      location: '',
+      refId: 'A',
+      rawSql: 'select * from `prj.ds.dt`',
+      format: QueryFormat.Table,
+      editorMode: EditorMode.Builder,
+    };
+    const res = applyQueryDefaults(query, { jsonData: { processingLocation: 'US' } } as any);
+
+    expect(res.location).toBe('');
   });
 });
