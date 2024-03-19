@@ -38,14 +38,15 @@ func loadSettings(config *backend.DataSourceInstanceSettings) (types.BigQuerySet
 	return settings, nil
 }
 
-func getConnectionSettings(settings types.BigQuerySettings, queryArgs *ConnectionArgs, isQueryArgsNil bool) types.ConnectionSettings {
+func getConnectionSettings(settings types.BigQuerySettings, queryArgs *ConnectionArgs, isQueryArgsSet bool) types.ConnectionSettings {
 	connectionSettings := types.ConnectionSettings{
 		Project:            settings.DefaultProject,
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
 	}
 
-	if !isQueryArgsNil  {
+	// We want to set the location to empty string only if query args are set
+	if isQueryArgsSet  {
 		connectionSettings.Location = queryArgs.Location
 	}
 
