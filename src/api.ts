@@ -96,14 +96,14 @@ class BigQueryAPIClient implements BigQueryAPI {
   };
 
   getTables = async (query: BigQueryQueryNG): Promise<string[]> => {
-    return this.fromCache('tables', this._getTables)(query);
+    return this.fromCache('tables', this._getTables)(query.project, query.location, query.dataset);
   };
 
-  private _getTables = async (query: BigQueryQueryNG): Promise<string[]> => {
+  private _getTables = async (project: string, location: string, dataset: string): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/tables', {
-      project: query.project,
-      location: query.location,
-      dataset: query.dataset,
+      project,
+      location,
+      dataset,
     });
   };
 
@@ -156,24 +156,41 @@ class BigQueryAPIClient implements BigQueryAPI {
   };
 
   getColumns = async (query: BigQueryQueryNG, isOrderable?: boolean): Promise<string[]> => {
-    return this.fromCache('columns', this._getColumns)(query, isOrderable);
+    return this.fromCache('columns', this._getColumns)(
+      query.project,
+      query.location,
+      query.dataset,
+      query.table,
+      isOrderable
+    );
   };
 
-  private _getColumns = async (query: BigQueryQueryNG, isOrderable?: boolean): Promise<string[]> => {
+  private _getColumns = async (
+    project: string,
+    location: string,
+    dataset: string,
+    table: string,
+    isOrderable?: boolean
+  ): Promise<string[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/columns', {
-      project: query.project,
-      location: query.location,
-      dataset: query.dataset,
-      table: query.table,
+      project,
+      location,
+      dataset,
+      table,
       isOrderable: isOrderable ? 'true' : 'false',
     });
   };
 
   getTableSchema = async (query: BigQueryQueryNG): Promise<TableSchema> => {
-    return this.fromCache('schema', this._getTableSchema)(query);
+    return this.fromCache('schema', this._getTableSchema)(query.project, query.location, query.dataset, query.table);
   };
 
-  private _getTableSchema = async (query: BigQueryQueryNG): Promise<TableSchema> => {
+  private _getTableSchema = async (
+    project: string,
+    location: string,
+    dataset: string,
+    table: string
+  ): Promise<TableSchema> => {
     const result = await lastValueFrom(
       getBackendSrv().fetch<TableSchema>({
         method: 'POST',
@@ -181,10 +198,10 @@ class BigQueryAPIClient implements BigQueryAPI {
         showSuccessAlert: false,
         url: this.resourcesUrl + '/dataset/table/schema',
         data: {
-          project: query.project,
-          location: query.location,
-          dataset: query.dataset,
-          table: query.table,
+          project,
+          location,
+          dataset,
+          table,
         },
       })
     );

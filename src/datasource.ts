@@ -11,7 +11,6 @@ import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { getApiClient } from 'api';
 import { uniqueId } from 'lodash';
 import { VariableEditor } from './components/VariableEditor';
-import { DEFAULT_REGION } from './constants';
 import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
 
@@ -69,7 +68,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
 
         importedQueries.push({
           ...commonQueryProps,
-          location: (queries[i] as any).location || DEFAULT_REGION,
+          location: (queries[i] as any).location || '',
           format: (queries[i] as any).format === 'time_series' ? QueryFormat.Timeseries : QueryFormat.Table,
           editorMode: EditorMode.Code,
         } as BigQueryQueryNG);

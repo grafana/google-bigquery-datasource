@@ -16,7 +16,7 @@ export function useColumns({ query, isOrderable = false }: Options) {
   const { value: apiClient } = useAsync(async () => await getApiClient(datasourceId), []);
 
   const state = useAsync(async () => {
-    if (!query.location || !query.dataset || !query.table || !apiClient) {
+    if (!query.dataset || !query.table || !apiClient) {
       return;
     }
 
