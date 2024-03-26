@@ -144,7 +144,7 @@ export function QueryHeader({
           placeholder="Select location"
           allowCustomValue
           menuShouldPortal
-          onChange={({ value }) => value && onChange({ ...query, location: value })}
+          onChange={({ value }) => value != null && onChange({ ...query, location: value || '' })}
           options={PROCESSING_LOCATIONS}
         />
 
