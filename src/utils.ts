@@ -27,7 +27,6 @@ import { BigQueryDatasource } from 'datasource';
 import SqlParser from 'sql_parser';
 import { BigQueryQueryNG, QueryFormat } from 'types';
 import { createFunctionField, setGroupByField } from 'utils/sql.utils';
-import { DEFAULT_REGION } from './constants';
 
 export const SHIFTED = '_shifted';
 
@@ -289,7 +288,7 @@ export function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource, a
   const result = {
     ...q,
     project: q.project || apiClient?.getDefaultProject() || '',
-    location: q.location || ds.jsonData.processingLocation || DEFAULT_REGION,
+    location: q.location ?? (ds.jsonData.processingLocation || ''),
     format: q.format !== undefined ? q.format : QueryFormat.Table,
     rawSql: q.rawSql || '',
     editorMode,
@@ -304,7 +303,7 @@ export function applyQueryDefaults(q: BigQueryQueryNG, ds: BigQueryDatasource, a
 }
 
 export const isQueryValid = (q: BigQueryQueryNG) => {
-  return Boolean(q.location && q.rawSql);
+  return Boolean(q.rawSql);
 };
 
 let datasourceId: number;

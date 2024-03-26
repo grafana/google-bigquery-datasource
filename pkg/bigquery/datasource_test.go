@@ -26,7 +26,7 @@ func RunConnection(ds *BigQueryDatasource, connectionArgs json.RawMessage) (*sql
 		DecryptedSecureJSONData: map[string]string{
 			"privateKey": "randomPrivateKey",
 		},
-		JSONData: []byte(`{"authenticationType":"jwt","defaultProject": "raintank-dev", "processingLocation": "us-west1","tokenUri":"token","clientEmail":"test@grafana.com"}`),
+		JSONData: []byte(`{"authenticationType":"jwt","defaultProject": "raintank-dev","tokenUri":"token","clientEmail":"test@grafana.com"}`),
 	}, connectionArgs)
 }
 func Test_datasourceConnection(t *testing.T) {
@@ -53,7 +53,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err := RunConnection(ds, []byte("{}"))
 		assert.Nil(t, err)
 
-		_, exists := ds.connections.Load("1/us-west1:raintank-dev")
+		_, exists := ds.connections.Load("1/:raintank-dev")
 		assert.True(t, exists)
 	})
 
@@ -117,18 +117,18 @@ func Test_datasourceConnection(t *testing.T) {
 		}
 
 		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
-			Location: "us-west1",
+			Location: "",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west1:raintank-dev")
+		_, exists := ds.connections.Load("1/:raintank-dev")
 		assert.True(t, exists)
 
 		_, apiClient1Exists := ds.apiClients.Load("1/us-west2:raintank-dev")
 		assert.True(t, apiClient1Exists)
-		_, apiClient2Exists := ds.apiClients.Load("1/us-west1:raintank-dev")
+		_, apiClient2Exists := ds.apiClients.Load("1/:raintank-dev")
 		assert.True(t, apiClient2Exists)
 
 		assert.Equal(t, 1, clientsFactoryCallsCount)

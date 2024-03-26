@@ -87,7 +87,9 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		return nil, err
 	}
 
-	connectionSettings := getConnectionSettings(settings, args)
+	isQueryArgsSet := args != nil
+
+	connectionSettings := getConnectionSettings(settings, args, isQueryArgsSet)
 
 	if settings.AuthenticationType == "gce" && connectionSettings.Project == "" {
 		defaultProject, err := utils.GCEDefaultProject(context.Background(), BigQueryScope)
@@ -236,8 +238,8 @@ func (s *BigQueryDatasource) Tables(ctx context.Context, options sqlds.Options) 
 		Location: options["location"],
 	}
 
-	if args.Project == "" || args.Dataset == "" || args.Location == "" {
-		return nil, errors.New("project, dataset and location must be specified")
+	if args.Project == "" || args.Dataset == "" {
+		return nil, errors.New("project and dataset must be specified")
 	}
 
 	apiClient, err := s.getApi(ctx, args.Project, args.Location)
@@ -258,7 +260,7 @@ func (s *BigQueryDatasource) Columns(ctx context.Context, options sqlds.Options)
 		Location: options["location"],
 	}
 
-	if args.Project == "" || args.Dataset == "" || args.Location == "" || args.Table == "" {
+	if args.Project == "" || args.Dataset == "" || args.Table == "" {
 		return nil, errors.New("missing required arguments")
 	}
 
@@ -376,11 +378,7 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 	}
 	apiInstance := api.New(client)
 
-	if location != "" {
-		apiInstance.SetLocation(location)
-	} else {
-		apiInstance.SetLocation(settings.ProcessingLocation)
-	}
+	apiInstance.SetLocation(location)
 
 	s.apiClients.Store(connectionKey, apiInstance)
 

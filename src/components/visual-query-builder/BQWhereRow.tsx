@@ -15,7 +15,7 @@ interface BQWhereRowProps {
 
 export function BQWhereRow({ query, apiClient, onQueryChange }: BQWhereRowProps) {
   const state = useAsync(async () => {
-    if (!query.location || !query.dataset || !query.table) {
+    if (!query.dataset || !query.table) {
       return;
     }
     const tableSchema = await apiClient.getTableSchema(query);
