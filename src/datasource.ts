@@ -122,7 +122,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
             : this.jsonData.processingLocation!,
       },
     };
-    console.log(result);
     return result;
   }
 }
