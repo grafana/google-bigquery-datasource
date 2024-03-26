@@ -17,7 +17,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({ apiClient, query, 
       return [];
     }
     const tables = await apiClient.getTables(query);
-    return tables.map(toOption);
+    return tables.map((table) => ({ label: table, value: table })); // Adjust label and value properties based on table structure
   }, [query]);
 
   return (
@@ -26,7 +26,8 @@ export const TableSelector: React.FC<TableSelectorProps> = ({ apiClient, query, 
       disabled={state.loading}
       aria-label="Table selector"
       value={value}
-      options={state.value}
+      allowCustomValue
+      options={state.value || [{ label: value, value }]}
       onChange={onChange}
       isLoading={state.loading}
       menuShouldPortal={true}

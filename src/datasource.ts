@@ -103,21 +103,26 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
 
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
     const interpolatedSql = getTemplateSrv().replace(queryModel.rawSql, scopedVars, interpolateVariable);
-
     const result = {
       refId: queryModel.refId,
       hide: queryModel.hide,
       key: queryModel.key,
       queryType: queryModel.queryType,
-      datasource: queryModel.datasource,
+      datasource: this.getRef(),
       rawSql: interpolatedSql,
       format: queryModel.format,
       connectionArgs: {
         dataset: queryModel.dataset!,
         table: queryModel.table!,
-        location: queryModel.location!,
+        // eslint-disable-next-line prettier/prettier
+        location: queryModel.location !== 'UD' && queryModel.location !== undefined  // eslint-disable-next-line prettier/prettier
+          ? queryModel.location  // eslint-disable-next-line prettier/prettier
+          : queryModel.location === undefined
+            ? DEFAULT_REGION
+            : this.jsonData.processingLocation!,
       },
     };
+    console.log(result);
     return result;
   }
 }

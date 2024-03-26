@@ -25,8 +25,12 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   applyDefault,
 }) => {
   const state = useAsync(async () => {
-    const datasets = await apiClient.getDatasets(location, project);
-    return datasets.map(toOption);
+    try {
+      const datasets = await apiClient.getDatasets(location, project);
+      return datasets.map((dataset) => ({ label: dataset, value: dataset }));
+    } catch (error) {
+      return [];
+    }
   }, [location, project]);
 
   useEffect(() => {
@@ -47,13 +51,13 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       }
     }
   }, [state.value, value, location, applyDefault, onChange]);
-
   return (
     <Select
       className={className}
       aria-label="Dataset selector"
       value={value}
-      options={state.value}
+      allowCustomValue
+      options={state.value || [{ label: value, value }]}
       onChange={onChange}
       disabled={disabled}
       isLoading={state.loading}

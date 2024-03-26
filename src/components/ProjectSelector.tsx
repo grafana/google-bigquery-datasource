@@ -66,6 +66,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ apiClient, val
           value={value}
           options={state.value || [{ label: value, value }]}
           onChange={onChange}
+          allowCustomValue
           isLoading={state.loading}
           menuShouldPortal={true}
         />

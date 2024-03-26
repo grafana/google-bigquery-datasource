@@ -68,7 +68,6 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
   if (apiLoading || apiError || !apiClient) {
     return null;
   }
-
   return (
     <>
       <QueryHeader

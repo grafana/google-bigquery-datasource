@@ -10,6 +10,7 @@ export const DEFAULT_REGION = 'US';
 
 export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
   // Multi-regional locations
+  { label: 'Default', value: 'UD' },
   { label: 'United States (US)', value: 'US' },
   { label: 'European Union (EU)', value: 'EU' },
 
