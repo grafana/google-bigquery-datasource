@@ -20,7 +20,7 @@
       "name": "Grafana Labs",
       "url": "https://grafana.com"
     },
-    "keywords": ["bigquery"],
+    "keywords": ["bigquery", "database", "sql"],
     "logos": {
       "small": "img/logo.png",
       "large": "img/logo.png"
