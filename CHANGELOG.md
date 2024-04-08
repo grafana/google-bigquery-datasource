@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.0
+
+- **Chore**: Update dependencies, plugin keywords
+- **Feature**: Query editor: Automatic location selection (#244)
+- **Feature**: Query editor: Better project selection flow (#239)
+
 ## 1.5.0
 
 - **Chore**: Add missing processing locations (#231)
