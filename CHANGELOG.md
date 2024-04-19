@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.6.1
+- **Chore**: Update dependencies
+
 ## 1.6.0
 
 - **Chore**: Update dependencies, plugin keywords
