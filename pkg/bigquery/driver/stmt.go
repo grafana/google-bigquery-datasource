@@ -26,7 +26,7 @@ func (s *stmt) NumInput() int {
 
 // Deprecated: Drivers should implement StmtExecContext instead (or additionally).
 func (s *stmt) Exec(args []driver.Value) (driver.Result, error) {
-	log.DefaultLogger.Debug("Got stmt.Exec", s.query)
+	log.DefaultLogger.Debug("Got stmt.Exec", "query", s.query)
 	return s.c.Exec(s.query, args)
 }
 
@@ -36,7 +36,7 @@ func (s *stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (drive
 
 // Deprecated: Drivers should implement StmtQueryContext instead (or additionally).
 func (s *stmt) Query(args []driver.Value) (driver.Rows, error) {
-	log.DefaultLogger.Debug("Got stmt.Query", s.query)
+	log.DefaultLogger.Debug("Got stmt.Query", "query", s.query)
 	return s.c.Query(s.query, args)
 }
 
