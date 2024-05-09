@@ -90,7 +90,7 @@ func prepareQuery(query string, args []driver.Value) (out string, err error) {
 					query = strings.Replace(query, "?", fmt.Sprintf("FROM_BASE64('%s')", data64), 1)
 				}
 			default:
-				log.DefaultLogger.Info("unknown type: %s", reflect.TypeOf(value).String())
+				log.DefaultLogger.Warn(fmt.Sprintf("Unknown query arg type: %s", reflect.TypeOf(value).String()))
 				query = strings.Replace(query, "?", fmt.Sprintf("'%s'", value), 1)
 			}
 
@@ -204,7 +204,7 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 		return
 	}
 
-	log.DefaultLogger.Info("Successful Ping", job.LastStatus().State)
+	log.DefaultLogger.Info("Successful Ping", "status", job.LastStatus().State)
 	return
 }
 
