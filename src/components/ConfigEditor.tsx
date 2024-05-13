@@ -15,12 +15,12 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
   const { options, onOptionsChange } = props;
   const { jsonData } = options;
 
-  const onMaxBillableBytesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const onMaxBytesBilledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onOptionsChange({
       ...options,
       jsonData: {
         ...jsonData,
-        maxBillableBytes: Number(event.target.value),
+        MaxBytesBilled: Number(event.target.value),
       },
     });
   };
@@ -70,10 +70,10 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           />
         </Field>
         <Field
-          label="Max billable bytes"
+          label="Max bytes billed"
           description={
             <span>
-              Prevent queries that would process more than this amount of bytes. Read more about max billable bytes{' '}
+              Prevent queries that would process more than this amount of bytes. Read more about max bytes billed{' '}
               <a
                 href="https://cloud.google.com/bigquery/docs/best-practices-costs"
                 rel="noreferrer"
@@ -89,8 +89,8 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             className="width-30"
             placeholder="Optional, example 5242880"
             type={'number'}
-            value={jsonData.maxBillableBytes || ''}
-            onChange={onMaxBillableBytesChange}
+            value={jsonData.MaxBytesBilled || ''}
+            onChange={onMaxBytesBilledChange}
           />
         </Field>
 

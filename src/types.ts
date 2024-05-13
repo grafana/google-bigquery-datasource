@@ -27,7 +27,7 @@ export interface BigQueryOptions extends DataSourceOptions {
   processingLocation?: string;
   queryPriority?: QueryPriority;
   enableSecureSocksProxy?: boolean;
-  maxBillableBytes?: number;
+  maxBytesBilled?: number;
 }
 
 export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}

@@ -125,8 +125,8 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 
 	q.QueryConfig.Labels = c.headersAsLabels()
 
-	if c.cfg.MaxBillableBytes > 0 {
-		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBillableBytes
+	if c.cfg.MaxBytesBilled > 0 {
+		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBytesBilled
 	}
 
 	// q.DefaultProjectID = c.cfg.Project // allows omitting project in table reference
@@ -233,8 +233,8 @@ func (c *Conn) queryContext(ctx context.Context, query string, args []driver.Val
 
 	q.QueryConfig.Labels = c.headersAsLabels()
 
-	if c.cfg.MaxBillableBytes > 0 {
-		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBillableBytes
+	if c.cfg.MaxBytesBilled > 0 {
+		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBytesBilled
 	}
 
 	rowsIterator, err := q.Read(ctx)
