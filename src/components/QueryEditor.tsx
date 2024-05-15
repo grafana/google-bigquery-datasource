@@ -6,10 +6,11 @@ import { useAsync } from 'react-use';
 import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
 import { haveColumns } from 'utils/sql.utils';
 import { getApiClient } from '../api';
-import { QueryHeader } from '../components/QueryHeader';
+import { QueryHeader } from './QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
 import { VisualEditor } from './visual-query-builder/VisualEditor';
+import { DatasourceContextProvider } from '../context/datasource-context';
 
 interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions> {
   showRunButton?: boolean;
@@ -17,6 +18,7 @@ interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, Bi
 
 export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton }: Props) {
   setDatasourceId(datasource.id);
+
   const [isQueryRunnable, setIsQueryRunnable] = useState(true);
   const {
     loading: apiLoading,
@@ -70,7 +72,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
   }
 
   return (
-    <>
+    <DatasourceContextProvider jsonData={datasource.jsonData}>
       <QueryHeader
         onChange={onQueryHeaderChange}
         onRunQuery={onRunQuery}
@@ -106,6 +108,6 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
           range={range}
         />
       )}
-    </>
+    </DatasourceContextProvider>
   );
 }

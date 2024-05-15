@@ -1,11 +1,12 @@
 import { css } from '@emotion/css';
-import { formattedValueToString, getValueFormat, TimeRange } from '@grafana/data';
-import { Icon, Spinner, useTheme2 } from '@grafana/ui';
+import { formattedValueToString, getValueFormat, GrafanaTheme2, TimeRange } from '@grafana/data';
+import { Icon, Spinner, useStyles2 } from '@grafana/ui';
 import { BigQueryAPI, ValidationResults } from 'api';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useContext } from 'react';
 import { useAsyncFn } from 'react-use';
 import useDebounce from 'react-use/lib/useDebounce';
 import { BigQueryQueryNG } from 'types';
+import { DatasourceContext } from '../../context/datasource-context';
 
 export interface QueryValidatorProps {
   apiClient: BigQueryAPI;
@@ -14,26 +15,26 @@ export interface QueryValidatorProps {
   onValidate: (isValid: boolean) => void;
 }
 
-export function QueryValidator({ apiClient, query, onValidate, range }: QueryValidatorProps) {
-  const [validationResult, setValidationResult] = useState<ValidationResults | null>();
-  const theme = useTheme2();
-  const valueFormatter = useMemo(() => getValueFormat('bytes'), []);
+const getStyles = (theme: GrafanaTheme2) => {
+  return {
+    error: css`
+      color: ${theme.colors.error.text};
+      font-size: ${theme.typography.bodySmall.fontSize};
+      font-family: ${theme.typography.fontFamilyMonospace};
+    `,
+    valid: css`
+      color: ${theme.colors.success.text};
+    `,
+    info: css`
+      color: ${theme.colors.text.secondary};
+    `,
+  };
+};
 
-  const styles = useMemo(() => {
-    return {
-      error: css`
-        color: ${theme.colors.error.text};
-        font-size: ${theme.typography.bodySmall.fontSize};
-        font-family: ${theme.typography.fontFamilyMonospace};
-      `,
-      valid: css`
-        color: ${theme.colors.success.text};
-      `,
-      info: css`
-        color: ${theme.colors.text.secondary};
-      `,
-    };
-  }, [theme]);
+export function QueryValidator({ apiClient, query, onValidate, range }: QueryValidatorProps) {
+  const styles = useStyles2(getStyles);
+
+  const [validationResult, setValidationResult] = useState<ValidationResults | null>();
 
   const [state, validateQuery] = useAsyncFn(
     async (q: BigQueryQueryNG) => {
@@ -74,30 +75,22 @@ export function QueryValidator({ apiClient, query, onValidate, range }: QueryVal
 
   const error = state.value?.error ? processErrorMessage(state.value.error) : '';
 
-  return (
-    <>
-      {state.loading && (
-        <div className={styles.info}>
-          <Spinner inline={true} size={12} /> Validating query...
-        </div>
-      )}
-      {!state.loading && state.value && (
-        <>
-          <>
-            {state.value.isValid && state.value.statistics && (
-              <div className={styles.valid}>
-                <Icon name="check" /> This query will process{' '}
-                <strong>{formattedValueToString(valueFormatter(state.value.statistics.TotalBytesProcessed))}</strong>{' '}
-                when run.
-              </div>
-            )}
-          </>
+  if (state.loading) {
+    return (
+      <div className={styles.info}>
+        <Spinner inline={true} size={12} /> Validating query...
+      </div>
+    );
+  }
 
-          <>{state.value.isError && <div className={styles.error}>{error}</div>}</>
-        </>
+  return state.value ? (
+    <>
+      {state.value.isValid && state.value.statistics && (
+        <ValidMessage bytes={state.value.statistics.TotalBytesProcessed} />
       )}
+      {state.value.isError && <div className={styles.error}>{error}</div>}
     </>
-  );
+  ) : null;
 }
 
 function processErrorMessage(error: string) {
@@ -107,3 +100,30 @@ function processErrorMessage(error: string) {
   }
   return error;
 }
+
+const ValidMessage = ({ bytes }: { bytes: number }) => {
+  const styles = useStyles2(getStyles);
+  const { onDemandComputePrice } = useContext(DatasourceContext);
+
+  const valueFormatter = useMemo(() => getValueFormat('bytes'), []);
+  const currencyFormatter = useMemo(() => getValueFormat('currency:$'), []);
+
+  const costPerByte = useMemo(() => {
+    if (!onDemandComputePrice) {
+      return undefined;
+    }
+    const bytesInATB = 1024 * 1024 * 1024 * 1024;
+    const perByte = onDemandComputePrice / bytesInATB;
+
+    return formattedValueToString(currencyFormatter(bytes * perByte, 4));
+  }, [bytes, currencyFormatter, onDemandComputePrice]);
+
+  const formattedBytes = formattedValueToString(valueFormatter(bytes));
+
+  return (
+    <div className={styles.valid}>
+      <Icon name="check" /> This query will process <strong>{formattedBytes}</strong> when run
+      {costPerByte ? <>, costing approximately {costPerByte}</> : '.'}
+    </div>
+  );
+};
