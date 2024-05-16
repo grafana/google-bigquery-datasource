@@ -1,7 +1,7 @@
 import { DataSourcePluginOptionsEditorProps, onUpdateDatasourceJsonDataOptionSelect } from '@grafana/data';
 import { AuthConfig, GOOGLE_AUTH_TYPE_OPTIONS } from '@grafana/google-sdk';
 import { config } from '@grafana/runtime';
-import { Field, SecureSocksProxySettings, Select } from '@grafana/ui';
+import { Field, Input, SecureSocksProxySettings, Select } from '@grafana/ui';
 import React from 'react';
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData } from '../types';
@@ -14,6 +14,16 @@ export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQu
 export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props) => {
   const { options, onOptionsChange } = props;
   const { jsonData } = options;
+
+  const onMaxBytesBilledChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        MaxBytesBilled: Number(event.target.value),
+      },
+    });
+  };
 
   return (
     <>
@@ -57,6 +67,30 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             options={PROCESSING_LOCATIONS}
             onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'processingLocation')}
             menuShouldPortal={true}
+          />
+        </Field>
+        <Field
+          label="Max bytes billed"
+          description={
+            <span>
+              Prevent queries that would process more than this amount of bytes. Read more about max bytes billed{' '}
+              <a
+                href="https://cloud.google.com/bigquery/docs/best-practices-costs"
+                rel="noreferrer"
+                className="external-link"
+                target="_blank"
+              >
+                here
+              </a>
+            </span>
+          }
+        >
+          <Input
+            className="width-30"
+            placeholder="Optional, example 5242880"
+            type={'number'}
+            value={jsonData.MaxBytesBilled || ''}
+            onChange={onMaxBytesBilledChange}
           />
         </Field>
 
