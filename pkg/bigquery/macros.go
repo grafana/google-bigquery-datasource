@@ -46,7 +46,7 @@ func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
 
 	}
 
-	return fmt.Sprintf("TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(%s), %v) * %v)", timeVar, interval.Seconds(), interval.Seconds()), nil
+	return fmt.Sprintf("TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(%s), %v) * %v)", timeVar, interval.Milliseconds(), interval.Milliseconds()), nil
 }
 
 var macros = map[string]sqlds.MacroFunc{

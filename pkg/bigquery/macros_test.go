@@ -21,7 +21,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "1w"},
-			"TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(created_at), 604800) * 604800)",
+			"TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(created_at), 604800000) * 604800000)",
 			nil,
 		},
 		{
@@ -29,7 +29,7 @@ func Test_macros(t *testing.T) {
 			"timeGroup",
 			&sqlds.Query{},
 			[]string{"created_at", "1d"},
-			"TIMESTAMP_SECONDS(DIV(UNIX_SECONDS(created_at), 86400) * 86400)",
+			"TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(created_at), 86400000) * 86400000)",
 			nil,
 		},
 		{
