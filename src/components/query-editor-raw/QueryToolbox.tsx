@@ -73,7 +73,7 @@ export function QueryToolbox({ showTools, onFormatCode, onExpand, isExpanded, ..
             {onExpand && (
               <IconButton
                 onClick={() => onExpand(!isExpanded)}
-                name={isExpanded ? 'compress-arrows' : ('expand-arrows-alt' as any)}
+                name={isExpanded ? 'angle-double-up' : 'angle-double-down'}
                 size="xs"
                 tooltip={isExpanded ? 'Collapse editor' : 'Expand editor'}
               />
