@@ -6,18 +6,19 @@ import (
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/gtime"
+	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
 	"github.com/grafana/sqlds/v3"
 )
 
-func macroColumn(query *sqlds.Query, args []string) (string, error) {
+func macroColumn(query *sqlutil.Query, args []string) (string, error) {
 	return "", errors.New("$__column macro is not supported")
 }
 
-func macroTable(query *sqlds.Query, args []string) (string, error) {
+func macroTable(query *sqlutil.Query, args []string) (string, error) {
 	return "", errors.New("$__table macro is not supported")
 }
 
-func macroTimeGroup(query *sqlds.Query, args []string) (string, error) {
+func macroTimeGroup(query *sqlutil.Query, args []string) (string, error) {
 	if len(args) < 2 {
 		return "", fmt.Errorf("%w: expected 2 arguments, received %d", errors.New("macro $__timeGroup needs time column and interval"), len(args))
 	}
