@@ -3,7 +3,7 @@ package bigquery
 import (
 	"testing"
 
-	"github.com/grafana/sqlds/v3"
+	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
 	"github.com/pkg/errors"
 )
 
@@ -11,7 +11,7 @@ func Test_macros(t *testing.T) {
 	tests := []struct {
 		description string
 		macro       string
-		query       *sqlds.Query
+		query       *sqlutil.Query
 		args        []string
 		expected    string
 		expectedErr error
@@ -19,7 +19,7 @@ func Test_macros(t *testing.T) {
 		{
 			"time groups 1w",
 			"timeGroup",
-			&sqlds.Query{},
+			&sqlutil.Query{},
 			[]string{"created_at", "1w"},
 			"TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(created_at), 604800000) * 604800000)",
 			nil,
@@ -27,7 +27,7 @@ func Test_macros(t *testing.T) {
 		{
 			"time groups 1d",
 			"timeGroup",
-			&sqlds.Query{},
+			&sqlutil.Query{},
 			[]string{"created_at", "1d"},
 			"TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(created_at), 86400000) * 86400000)",
 			nil,
@@ -35,7 +35,7 @@ func Test_macros(t *testing.T) {
 		{
 			"time groups 1M",
 			"timeGroup",
-			&sqlds.Query{},
+			&sqlutil.Query{},
 			[]string{"created_at", "1M"},
 			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,
@@ -43,7 +43,7 @@ func Test_macros(t *testing.T) {
 		{
 			"time groups '1M'",
 			"timeGroup",
-			&sqlds.Query{},
+			&sqlutil.Query{},
 			[]string{"created_at", "'1M'"},
 			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,
@@ -51,7 +51,7 @@ func Test_macros(t *testing.T) {
 		{
 			"time groups \"1M\"",
 			"timeGroup",
-			&sqlds.Query{},
+			&sqlutil.Query{},
 			[]string{"created_at", "\"1M\""},
 			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,

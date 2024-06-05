@@ -307,7 +307,7 @@ func (s *BigQueryDatasource) Projects(options ProjectsArgs) ([]*Project, error) 
 type ValidateQueryArgs struct {
 	Project   string            `json:"project"`
 	Location  string            `json:"location"`
-	Query     sqlds.Query       `json:"query"`
+	Query     sqlutil.Query     `json:"query"`
 	TimeRange backend.TimeRange `json:"range"`
 }
 
