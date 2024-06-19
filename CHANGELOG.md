@@ -1,6 +1,17 @@
 # Changelog
 
+## 1.7.0
+
+- **Feature**: Allow specifying Max Billable Bytes (#254)
+- **Fix**: Handle sub-second intervals in the timeGroup macro (#262)
+- **Fix**: Fixed log line formatting (#255)
+- **Fix**: Make editor labels clickable (#256)
+- **Fix**: Update docs to list correct macros (#259)
+- **Chore**: Update dependencies (#264)
+- **Chore**: Consistent icons (#261)
+
 ## 1.6.1
+
 - **Chore**: Update dependencies
 
 ## 1.6.0
