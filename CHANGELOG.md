@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.1
+
+- **Fix**: Remove change incompatible with grafana9 (#273)
+
 ## 1.7.0
 
 - **Feature**: Allow specifying Max Billable Bytes (#254)
