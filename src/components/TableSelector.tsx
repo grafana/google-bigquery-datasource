@@ -9,17 +9,9 @@ interface TableSelectorProps extends ResourceSelectorProps {
   value: string | null;
   query: QueryWithDefaults;
   onChange: (v: SelectableValue) => void;
-  inputId?: string;
 }
 
-export const TableSelector: React.FC<TableSelectorProps> = ({
-  apiClient,
-  query,
-  value,
-  className,
-  onChange,
-  inputId,
-}) => {
+export const TableSelector: React.FC<TableSelectorProps> = ({ apiClient, query, value, className, onChange }) => {
   const state = useAsync(async () => {
     if (!query.dataset) {
       return [];
@@ -32,7 +24,6 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
     <Select
       className={className}
       disabled={state.loading}
-      inputId={inputId}
       aria-label="Table selector"
       value={value}
       options={state.value}

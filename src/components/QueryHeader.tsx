@@ -2,7 +2,7 @@ import { SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
-import React, { useCallback, useId, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 import { toRawSql } from 'utils/sql.utils';
 import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
@@ -11,6 +11,7 @@ import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
 import { ProjectSelector } from './ProjectSelector';
 import { TableSelector } from './TableSelector';
+import { v4 as uuidv4 } from 'uuid';
 
 interface QueryHeaderProps {
   query: QueryWithDefaults;
@@ -41,7 +42,6 @@ export function QueryHeader({
   const { location, editorMode } = query;
   const [_, copyToClipboard] = useCopyToClipboard();
   const [showConfirm, setShowConfirm] = useState(false);
-  const htmlId = useId();
 
   const onEditorModeChange = useCallback(
     (newEditorMode: EditorMode) => {
@@ -160,7 +160,7 @@ export function QueryHeader({
         {editorMode === EditorMode.Builder && (
           <>
             <InlineSwitch
-              id={`bq-filter-${htmlId}}`}
+              id={`bq-filter-${uuidv4()}}`}
               label="Filter"
               transparent={true}
               showLabel={true}
@@ -172,7 +172,7 @@ export function QueryHeader({
             />
 
             <InlineSwitch
-              id={`bq-group-${htmlId}}`}
+              id={`bq-group-${uuidv4()}}`}
               label="Group"
               transparent={true}
               showLabel={true}
@@ -184,7 +184,7 @@ export function QueryHeader({
             />
 
             <InlineSwitch
-              id={`bq-order-${htmlId}}`}
+              id={`bq-order-${uuidv4()}}`}
               label="Order"
               transparent={true}
               showLabel={true}
@@ -196,7 +196,7 @@ export function QueryHeader({
             />
 
             <InlineSwitch
-              id={`bq-preview-${htmlId}}`}
+              id={`bq-preview-${uuidv4()}}`}
               label="Preview"
               transparent={true}
               showLabel={true}
@@ -243,19 +243,12 @@ export function QueryHeader({
           <Space v={0.5} />
 
           <EditorRow>
-            <ProjectSelector
-              apiClient={apiClient}
-              value={query.project}
-              onChange={onProjectChange}
-              applyDefault
-              inputId={`bq-project-${htmlId}`}
-            />
+            <ProjectSelector apiClient={apiClient} value={query.project} onChange={onProjectChange} applyDefault />
 
             <EditorField label="Dataset" width={25}>
               <DatasetSelector
                 apiClient={apiClient}
                 location={query.location}
-                inputId={`bq-dataset-${htmlId}`}
                 value={query.dataset === undefined ? null : query.dataset}
                 project={query.project}
                 onChange={onDatasetChange}
@@ -266,7 +259,6 @@ export function QueryHeader({
               <TableSelector
                 apiClient={apiClient}
                 query={query}
-                inputId={`bq-table-${htmlId}`}
                 value={query.table === undefined ? null : query.table}
                 onChange={onTableChange}
                 applyDefault

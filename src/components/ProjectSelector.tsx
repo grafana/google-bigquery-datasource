@@ -10,16 +10,9 @@ interface ProjectSelectorProps extends Omit<ResourceSelectorProps, 'location'> {
   value?: string;
   applyDefault?: boolean;
   onChange: (v: SelectableValue) => void;
-  inputId?: string;
 }
 
-export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
-  apiClient,
-  value,
-  onChange,
-  applyDefault,
-  inputId,
-}) => {
+export const ProjectSelector: React.FC<ProjectSelectorProps> = ({ apiClient, value, onChange, applyDefault }) => {
   const theme = useTheme2();
   const state = useAsync(async () => {
     const projects = await apiClient.getProjects();
@@ -70,7 +63,6 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
       <EditorField label="Project" width={25} error={getErrorMessage()} invalid={!!state.error}>
         <Select
           aria-label="Project selector"
-          inputId={inputId}
           value={state.loading ? null : value}
           options={state.loading ? [] : state.value || [{ label: value, value }]}
           onChange={onChange}
