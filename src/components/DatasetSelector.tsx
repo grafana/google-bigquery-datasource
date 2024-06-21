@@ -12,7 +12,6 @@ interface DatasetSelectorProps extends ResourceSelectorProps {
   applyDefault?: boolean;
   disabled?: boolean;
   onChange: (v: SelectableValue) => void;
-  inputId?: string;
 }
 
 export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
@@ -24,7 +23,6 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   disabled,
   className,
   applyDefault,
-  inputId,
 }) => {
   const state = useAsync(async () => {
     const datasets = await apiClient.getDatasets(location, project);
@@ -54,7 +52,6 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
     <Select
       className={className}
       aria-label="Dataset selector"
-      inputId={inputId}
       value={value}
       options={state.value}
       onChange={onChange}
