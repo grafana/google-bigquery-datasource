@@ -1,5 +1,9 @@
 # Changelog
 
+## NEXT (probably 1.8.0)
+
+- **Chore**: Plugin now requirest Grafana 10.3.6 or newer (#275)
+
 ## 1.7.1
 
 - **Fix**: Remove change incompatible with grafana9 (#273)

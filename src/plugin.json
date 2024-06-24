@@ -9,7 +9,7 @@
   "backend": true,
   "executable": "gpx_bigquery",
   "dependencies": {
-    "grafanaDependency": ">=9.0.0"
+    "grafanaDependency": ">=10.3.6"
   },
   "queryOptions": {
     "maxDataPoints": true
