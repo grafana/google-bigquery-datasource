@@ -2,7 +2,7 @@
 
 ## NEXT (probably 1.8.0)
 
-- **Chore**: Plugin now requirest Grafana 10.3.6 or newer (#275)
+- **Chore**: Plugin now requires Grafana 10.3.6 or newer (#275)
 
 ## 1.7.1
 
