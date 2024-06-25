@@ -11,10 +11,6 @@ import (
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
-const (
-	ConnectionStringEnvKey = "BIGQUERY_CONNECTION_STRING"
-)
-
 var (
 	openFromSessionMutex sync.Mutex
 	openFromSessionCount int

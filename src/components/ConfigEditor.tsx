@@ -25,6 +25,16 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     });
   };
 
+  const onCustomEndpointChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        customEndpoint: String(event.target.value),
+      },
+    });
+  };
+
   return (
     <>
       <DataSourceDescription
@@ -67,6 +77,15 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             options={PROCESSING_LOCATIONS}
             onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'processingLocation')}
             menuShouldPortal={true}
+          />
+        </Field>
+        <Field label="Custom API endpoint" description={<span>Use a custom API endpoint.</span>}>
+          <Input
+            className="width-30"
+            placeholder="Optional, example https://bigquery.googleapis.com/bigquery/v2/"
+            type={'string'}
+            value={jsonData.customEndpoint || ''}
+            onChange={onCustomEndpointChange}
           />
         </Field>
         <Field
