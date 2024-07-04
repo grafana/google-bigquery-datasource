@@ -95,7 +95,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             placeholder="Optional, example https://bigquery.googleapis.com/bigquery/v2/"
             type={'string'}
             value={jsonData.customEndpoint || ''}
-            onChange={onCustomEndpointChange}
+            onChange={onUpdateDatasourceJsonDataOption(props, 'customEndpoint')}
           />
         </Field>
         <Field
