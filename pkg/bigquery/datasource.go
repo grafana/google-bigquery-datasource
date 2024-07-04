@@ -143,8 +143,8 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		}
 
 		options := []option.ClientOption{option.WithHTTPClient(client)}
-		if settings.CustomEndpoint != "" {
-			options = append(options, option.WithEndpoint(settings.CustomEndpoint))
+		if settings.ServiceEndpoint != "" {
+			options = append(options, option.WithEndpoint(settings.ServiceEndpoint))
 		}
 
 		bqClient, err := s.bqFactory(context.Background(), connectionSettings.Project, options...)

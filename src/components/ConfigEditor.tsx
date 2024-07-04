@@ -25,16 +25,6 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     });
   };
 
-  const onCustomEndpointChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onOptionsChange({
-      ...options,
-      jsonData: {
-        ...jsonData,
-        customEndpoint: String(event.target.value),
-      },
-    });
-  };
-
   return (
     <>
       <DataSourceDescription
@@ -79,7 +69,10 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             menuShouldPortal={true}
           />
         </Field>
-        <Field label="Service endpoint" description={<span>
+        <Field
+          label="Service Endpoint"
+          description={
+            <span>
               Specifies the network address of an API service. Read more about service endpoint{' '}
               <a
                 href="https://cloud.google.com/bigquery/docs/reference/rest#service-endpoint"
@@ -89,13 +82,15 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
               >
                 here
               </a>
-            </span>}>
+            </span>
+          }
+        >
           <Input
             className="width-30"
             placeholder="Optional, example https://bigquery.googleapis.com/bigquery/v2/"
             type={'string'}
-            value={jsonData.customEndpoint || ''}
-            onChange={onUpdateDatasourceJsonDataOption(props, 'customEndpoint')}
+            value={jsonData.serviceEndpoint || ''}
+            onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'serviceEndpoint')}
           />
         </Field>
         <Field
