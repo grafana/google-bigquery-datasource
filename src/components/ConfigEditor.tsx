@@ -79,7 +79,17 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             menuShouldPortal={true}
           />
         </Field>
-        <Field label="Custom API endpoint" description={<span>Use a custom API endpoint.</span>}>
+        <Field label="Service endpoint" description={<span>
+              Specifies the network address of an API service. Read more about service endpoint{' '}
+              <a
+                href="https://cloud.google.com/bigquery/docs/reference/rest#service-endpoint"
+                rel="noreferrer"
+                className="external-link"
+                target="_blank"
+              >
+                here
+              </a>
+            </span>}>
           <Input
             className="width-30"
             placeholder="Optional, example https://bigquery.googleapis.com/bigquery/v2/"
