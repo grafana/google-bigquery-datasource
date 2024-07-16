@@ -1,4 +1,8 @@
-import { DataSourcePluginOptionsEditorProps, onUpdateDatasourceJsonDataOptionSelect } from '@grafana/data';
+import {
+  DataSourcePluginOptionsEditorProps,
+  onUpdateDatasourceJsonDataOptionSelect,
+  onUpdateDatasourceJsonDataOption,
+} from '@grafana/data';
 import { AuthConfig, GOOGLE_AUTH_TYPE_OPTIONS } from '@grafana/google-sdk';
 import { config } from '@grafana/runtime';
 import { Field, Input, SecureSocksProxySettings, Select } from '@grafana/ui';
@@ -70,7 +74,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           />
         </Field>
         <Field
-          label="Service Endpoint"
+          label="Service endpoint"
           description={
             <span>
               Specifies the network address of an API service. Read more about service endpoint{' '}
@@ -90,7 +94,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             placeholder="Optional, example https://bigquery.googleapis.com/bigquery/v2/"
             type={'string'}
             value={jsonData.serviceEndpoint || ''}
-            onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'serviceEndpoint')}
+            onChange={onUpdateDatasourceJsonDataOption(props, 'serviceEndpoint')}
           />
         </Field>
         <Field
