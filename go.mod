@@ -1,4 +1,4 @@
-module github.com/grafana/grafana-bigquery-datasource
+module github.com/grafana/google-bigquery-datasource
 
 go 1.22
 
