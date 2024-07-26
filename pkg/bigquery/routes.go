@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	sdkUtils "github.com/grafana/grafana-google-sdk-go/pkg/utils"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
 )
@@ -18,7 +18,7 @@ func newResourceHandler(ds *BigQueryDatasource) *ResourceHandler {
 }
 
 func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Request) {
-	p := httpadapter.PluginConfigFromContext(req.Context())
+	p := backend.PluginConfigFromContext(req.Context())
 	s, err := loadSettings(p.DataSourceInstanceSettings)
 
 	if err != nil {
