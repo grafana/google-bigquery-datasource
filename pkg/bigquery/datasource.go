@@ -144,6 +144,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 		options := []option.ClientOption{option.WithHTTPClient(client)}
 		if settings.ServiceEndpoint != "" {
+			log.DefaultLogger.Debug("Using custom service endpoint URL", "url", settings.ServiceEndpoint)
 			options = append(options, option.WithEndpoint(settings.ServiceEndpoint))
 		}
 
