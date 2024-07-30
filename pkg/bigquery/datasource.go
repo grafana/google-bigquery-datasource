@@ -13,7 +13,6 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/resource/httpadapter"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
 	"github.com/grafana/sqlds/v3"
@@ -26,7 +25,7 @@ import (
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 )
 
-var PluginConfigFromContext = httpadapter.PluginConfigFromContext
+var PluginConfigFromContext = backend.PluginConfigFromContext
 
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
