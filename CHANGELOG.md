@@ -3,7 +3,8 @@
 ## 1.9.0
 
 - **Feature**: Add support for custom service endpoint (#266)
-- **Chore**: Update `github.com/grafana/grafana-plugin-sdk-go` to `v0.241.0`
+- **Chore**: Add logging for custom service endpoint (#286)
+- **Chore**: Update `github.com/grafana/grafana-plugin-sdk-go` to `v0.241.0` (#285)
 
 ## 1.8.0
 
