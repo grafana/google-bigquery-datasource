@@ -4,7 +4,7 @@
 
 - **Chore**: Update `github.com/grafana/grafana-plugin-sdk-go` to v0.245.0 (#293)
 - **Chore**: Update `micromatch` from 4.0.5 to 4.0.8 (#292)
-- **Chore**: Update webpack from 5.86.0 to 5.94.0 (#291)
+- **Chore**: Update `webpack` from 5.86.0 to 5.94.0 (#291)
 
 ## 1.9.0
 
