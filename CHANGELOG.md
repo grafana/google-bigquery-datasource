@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.2
+
+- **Chore**: Bump path-to-regexp from 1.8.0 to 1.9.0 (#296)
+- **Chore**: Bump github.com/grafana/grafana-plugin-sdk-go from 0.245.0 to 0.250.0 (#297)
+- **Chore**: Bump dompurify from 3.1.0 to 3.1.6 (#298)
+
 ## 1.9.1
 
 - **Chore**: Update `github.com/grafana/grafana-plugin-sdk-go` to v0.245.0 (#293)
