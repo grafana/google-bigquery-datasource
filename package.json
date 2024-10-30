@@ -1,6 +1,6 @@
 {
   "name": "grafana-bigquery-datasource",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "Google BigQuery datasource for Grafana",
   "license": "Apache-2.0",
   "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
@@ -23,6 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "resolutions": {
+    "uplot": "1.6.31",
     "jackspeak": "2.1.1"
   },
   "dependencies": {
