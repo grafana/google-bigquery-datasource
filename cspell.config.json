@@ -60,6 +60,7 @@
     "tokenprovider",
     "typecheck",
     "UNIXTIME",
+    "uplot",
     "uuidv",
     "vectorator"
   ],
