@@ -28,55 +28,66 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
 
   useEffect(() => {
     if (!applyDefault) {
-      return;
+        return;
     }
+
     // Set default project when values are fetched
     if (!value) {
-      if (state.value && state.value[0]) {
-        onChange(state.value[0]);
-      }
-    } else {
-      if (state.value && state.value.find((v) => v.value === value) === undefined) {
-        // if value is set and newly fetched values does not contain selected value
-        if (state.value.length > 0) {
-          onChange(state.value[0]);
+        if (state.value && state.value.length > 0) {
+            onChange(state.value[0]);
         }
-      }
+    } else {
+        if (state.value && state.value.find((v) => v.value === value) === undefined) {
+            // if value is set and newly fetched values does not contain selected value
+            if (state.value.length > 0) {
+                onChange(state.value[0]);
+            }
+        }
     }
-  }, [state.value, value, applyDefault, onChange]);
+}, [state.value, value, applyDefault, onChange]);
 
-  const getErrorMessage = () => {
-    const errorData = (state.error as any)?.data;
-    if (errorData?.message) {
+const getErrorMessage = () => {
+  if (!state.error) {
+      return null;
+  }
+
+  const errorData = (state.error as any)?.data;
+  if (errorData?.message) {
       const url = errorData.message.match(/(https?:\/\/[^ ]*)/g)?.[0];
       return (
-        <>
-          {errorData.message.split('.')[0]}{' '}
-          {url ? (
-            <a target="_blank" rel="noreferrer" href={url}>
-              Click here to enable it
-            </a>
-          ) : (
-            ''
-          )}
-        </>
+          <>
+              {errorData.message.split('.')[0]}
+              {url? (
+                  <a target="_blank" rel="noreferrer" href={url}>
+                      Click here to enable it
+                  </a>
+              ) : (
+                  ''
+              )}
+          </>
       );
-    }
-    return state.error?.message;
-  };
+  }
 
+  return state.error.message;
+};
   return (
     <div className={css({ width: theme.spacing(25) })}>
       <EditorField label="Project" width={25} error={getErrorMessage()} invalid={!!state.error}>
-        <Select
-          aria-label="Project selector"
-          inputId={inputId}
-          value={state.loading ? null : value}
-          options={state.loading ? [] : state.value || [{ label: value, value }]}
-          onChange={onChange}
-          isLoading={state.loading}
-          menuShouldPortal={true}
-        />
+      <Select
+    aria-label="Project selector"
+    inputId={inputId}
+    value={state.loading? null : value}
+    options={state.loading
+       ? []
+        : state.value
+          ? state.value.map((v) => ({ label: v.label, value: v.value }))
+           : value
+          ? [{ label: value, value }]
+           : []}
+    onChange={onChange}
+    isLoading={state.loading}
+    menuShouldPortal={true}
+/>
       </EditorField>
     </div>
   );
