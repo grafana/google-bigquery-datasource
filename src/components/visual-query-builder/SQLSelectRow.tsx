@@ -1,6 +1,6 @@
 import { css } from '@emotion/css';
 import { SelectableValue } from '@grafana/data';
-import { EditorField } from '@grafana/experimental';
+import { EditorField } from '@grafana/plugin-ui';
 import { useStyles2, Select, Button, Stack } from '@grafana/ui';
 import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
 import { uniqueId } from 'lodash';

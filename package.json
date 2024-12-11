@@ -29,7 +29,6 @@
   "dependencies": {
     "@emotion/css": "11.10.6",
     "@grafana/data": "10.4.2",
-    "@grafana/experimental": "1.7.3",
     "@grafana/google-sdk": "0.1.2",
     "@grafana/plugin-ui": "^0.9.2",
     "@grafana/runtime": "10.4.2",

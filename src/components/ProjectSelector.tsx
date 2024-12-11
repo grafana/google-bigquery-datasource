@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { EditorField } from '@grafana/experimental';
+import { EditorField } from '@grafana/plugin-ui';
 import { Select, useTheme2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { css } from '@emotion/css';
@@ -67,9 +67,9 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
 
   return (
     <div className={css({ width: theme.spacing(25) })}>
-      <EditorField label="Project" width={25} error={getErrorMessage()} invalid={!!state.error}>
+      <EditorField label="Project selectooor" width={25} error={getErrorMessage()} invalid={!!state.error}>
         <Select
-          aria-label="Project selector"
+          aria-label="Project selectooor"
           inputId={inputId}
           value={state.loading ? null : value}
           options={state.loading ? [] : state.value || [{ label: value, value }]}
