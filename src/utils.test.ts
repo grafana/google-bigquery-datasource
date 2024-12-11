@@ -1,4 +1,4 @@
-import { EditorMode } from '@grafana/experimental';
+import { EditorMode } from '@grafana/plugin-ui';
 import { QueryFormat } from 'types';
 import { applyQueryDefaults, extractFromClause, findTimeField, formatBigqueryError, getShiftPeriod } from 'utils';
 

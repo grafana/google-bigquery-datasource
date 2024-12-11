@@ -1,5 +1,5 @@
 import { QueryEditorProps } from '@grafana/data';
-import { EditorMode, Space } from '@grafana/experimental';
+import { EditorMode, Space } from '@grafana/plugin-ui';
 import { RawEditor } from 'components/query-editor-raw/RawEditor';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAsync } from 'react-use';

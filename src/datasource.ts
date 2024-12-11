@@ -5,7 +5,7 @@ import {
   ScopedVars,
   VariableSupportType,
 } from '@grafana/data';
-import { EditorMode } from '@grafana/experimental';
+import { EditorMode } from '@grafana/plugin-ui';
 import { GoogleAuthType } from '@grafana/google-sdk';
 import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { getApiClient } from 'api';

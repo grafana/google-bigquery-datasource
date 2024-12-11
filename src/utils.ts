@@ -21,7 +21,7 @@
 // SOFTWARE.
 
 import { DataQueryRequest, dateTime, DurationUnit } from '@grafana/data';
-import { EditorMode } from '@grafana/experimental';
+import { EditorMode } from '@grafana/plugin-ui';
 import { BigQueryAPI } from 'api';
 import { BigQueryDatasource } from 'datasource';
 import SqlParser from 'sql_parser';

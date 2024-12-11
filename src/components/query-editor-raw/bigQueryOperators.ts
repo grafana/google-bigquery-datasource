@@ -1,4 +1,4 @@
-import { OperatorType } from '@grafana/experimental';
+import { OperatorType } from '@grafana/plugin-ui';
 
 export const BQ_OPERATORS = [
   { type: OperatorType.Comparison, id: 'LESS_THAN', operator: '<', description: 'Returns TRUE if X is less than Y.' },

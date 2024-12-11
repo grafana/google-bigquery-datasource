@@ -10,7 +10,7 @@ import React from 'react';
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData } from '../types';
 import { ConfigurationHelp } from './/ConfigurationHelp';
-import { ConfigSection, DataSourceDescription } from '@grafana/experimental';
+import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { Divider } from './Divider';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
