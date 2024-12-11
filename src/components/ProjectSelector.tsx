@@ -67,9 +67,9 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
 
   return (
     <div className={css({ width: theme.spacing(25) })}>
-      <EditorField label="Project selectooor" width={25} error={getErrorMessage()} invalid={!!state.error}>
+      <EditorField label="Project" width={25} error={getErrorMessage()} invalid={!!state.error}>
         <Select
-          aria-label="Project selectooor"
+          aria-label="Project selector"
           inputId={inputId}
           value={state.loading ? null : value}
           options={state.loading ? [] : state.value || [{ label: value, value }]}
