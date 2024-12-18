@@ -1,5 +1,5 @@
 import { DataQuery, TimeRange } from '@grafana/data';
-import { EditorMode } from '@grafana/experimental';
+import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { JsonTree } from '@react-awesome-query-builder/ui';
 import { BigQueryAPI } from 'api';

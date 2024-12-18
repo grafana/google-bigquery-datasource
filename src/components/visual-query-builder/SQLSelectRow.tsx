@@ -1,7 +1,7 @@
 import { css } from '@emotion/css';
 import { SelectableValue } from '@grafana/data';
-import { EditorField, Stack } from '@grafana/experimental';
-import { useStyles2, Select, Button } from '@grafana/ui';
+import { EditorField } from '@grafana/plugin-ui';
+import { useStyles2, Select, Button, Stack } from '@grafana/ui';
 import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
 import { uniqueId } from 'lodash';
 import React, { useCallback } from 'react';
@@ -78,7 +78,7 @@ export function SQLSelectRow({ sql, columns, onSqlChange }: SQLSelectRowProps) {
   }, [onSqlChange, sql]);
 
   return (
-    <Stack gap={2} alignItems="end" wrap direction="column">
+    <Stack gap={2} alignItems="end" wrap="wrap" direction="column">
       {sql.columns?.map((item, index) => (
         <div key={index}>
           <Stack gap={2} alignItems="end">

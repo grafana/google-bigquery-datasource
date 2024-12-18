@@ -1,4 +1,4 @@
-import { MacroType } from '@grafana/experimental';
+import { MacroType } from '@grafana/plugin-ui';
 
 export const MACROS = [
   {

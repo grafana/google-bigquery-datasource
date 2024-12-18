@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/experimental';
+import { EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space, EditorField } from '@grafana/plugin-ui';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip } from '@grafana/ui';
 import { BigQueryAPI } from 'api';
 import React, { useCallback, useId, useState } from 'react';

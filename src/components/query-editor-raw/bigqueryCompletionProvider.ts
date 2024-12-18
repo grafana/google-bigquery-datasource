@@ -11,7 +11,7 @@ import {
   TableDefinition,
   TableIdentifier,
   TokenType,
-} from '@grafana/experimental';
+} from '@grafana/plugin-ui';
 import { PartitioningType, TableSchema } from 'api';
 import { BQ_AGGREGATE_FNS } from './bigQueryFunctions';
 import { BQ_OPERATORS } from './bigQueryOperators';

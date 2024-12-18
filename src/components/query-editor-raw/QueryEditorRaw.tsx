@@ -1,4 +1,4 @@
-import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/experimental';
+import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/plugin-ui';
 import { TableSchema } from 'api';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BigQueryQueryNG } from '../../types';

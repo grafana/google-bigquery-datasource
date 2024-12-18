@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { EditorField, InputGroup, Space } from '@grafana/experimental';
+import { InputGroup, Space, EditorField } from '@grafana/plugin-ui';
 import { Select, Input, RadioButtonGroup } from '@grafana/ui';
 import { uniqueId } from 'lodash';
 import React, { useCallback } from 'react';
