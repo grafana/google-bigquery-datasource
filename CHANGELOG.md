@@ -2,7 +2,7 @@
 
 ## 2.0.0
 
-- **Chore**: Plugin now requires Grafana 10.4.0 or newer
+- **Chore**: Plugin now requires Grafana 10.4.8 or newer
 
 ## 1.9.3
 
