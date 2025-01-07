@@ -371,16 +371,16 @@ func Test_ConvertColumnValue(t *testing.T) {
 			value:         bigquery.Value(time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC)),
 			columnType:    "TIMESTAMP",
 			schema:        &bigquery.FieldSchema{Type: "TIMESTAMP"},
-			expectedType:  "string",
-			expectedValue: "2009-11-10 23:00:00.000000 UTC",
+			expectedType:  "time.Time",
+			expectedValue: "2009-11-10 23:00:00 +0000 UTC",
 		},
 		{
 			name:          "TIMESTAMP repeated",
 			value:         bigquery.Value([]bigquery.Value{time.Date(2009, time.November, 10, 23, 0, 0, 0, time.UTC), time.Date(2019, time.November, 10, 23, 30, 0, 0, time.UTC)}),
 			columnType:    "TIMESTAMP",
 			schema:        &bigquery.FieldSchema{Type: "TIMESTAMP", Repeated: true},
-			expectedType:  "string",
-			expectedValue: "2009-11-10 23:00:00.000000 UTC,2019-11-10 23:30:00.000000 UTC",
+			expectedType:  "time.Time",
+			expectedValue: "2009-11-10 23:00:00 +0000 UTC,2019-11-10 23:30:00 +0000 UTC",
 		},
 	}
 
