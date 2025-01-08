@@ -1,9 +1,5 @@
 {
-  "ignorePaths": [
-    "node_modules/**",
-    "src/dashboards/arrays.json",
-    "dist/**"
-  ],
+  "ignorePaths": ["node_modules/**", "src/dashboards/arrays.json", "dist/**"],
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
@@ -15,6 +11,7 @@
     "conv",
     "COUNTIF",
     "Dammam",
+    "DATAPROXY",
     "datasource",
     "datasources",
     "datasourcetest",
@@ -43,14 +40,17 @@
     "pluginv2",
     "projectname",
     "proxying",
+    "PTRACE",
     "raintank",
     "RAQB",
+    "seccomp",
     "sharded",
     "SMALLINT",
     "southamerica",
     "sqlds",
     "sqlutil",
     "stretchr",
+    "subresource",
     "tempvar",
     "testid",
     "timegroup",
