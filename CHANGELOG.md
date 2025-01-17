@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+- **Chore**: Update release workflow
+
 ## 2.0.0
 
 - **Chore**: Plugin now requires Grafana 10.4.8 or newer
