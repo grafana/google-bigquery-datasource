@@ -26,6 +26,7 @@
     "jackspeak": "2.1.1"
   },
   "dependencies": {
+    "@changesets/cli": "^2.27.12",
     "@emotion/css": "11.10.6",
     "@grafana/data": "10.4.8",
     "@grafana/google-sdk": "0.1.2",

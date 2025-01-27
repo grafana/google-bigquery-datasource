@@ -46,14 +46,14 @@ Make sure you have the following dependencies installed first:
    mage -v
    ```
 
-## Build a release for the Google BigQuery data source plugin
+## Submitting PR
 
-You need to have commit rights to the GitHub repository to publish a release.
+If you are creating a PR, ensure to run `yarn changeset` from your branch. Provide the details accordingly. It will create `*.md` file inside `./.changeset` folder. Later during the release, based on these changesets, package version will be bumped and changelog will be generated.
 
-1. Update the version number in the `package.json` file.
-2. Update the `CHANGELOG.md` with the changes contained in the release.
-3. Commit the changes to `main` branch and push to GitHub.
-4. Follow the Drone release process that you can find [here](https://github.com/grafana/integrations-team/wiki/Plugin-Release-Process#drone-release-process)
+## Releasing & Bumping version
+
+To create a new release, execute `yarn changeset version`. This will update the Changelog and bump the version in `package.json` file. Commit those changes. Run the `Plugins - CD` GitHub Action to publish the new release.
+
 
 # Plugin Technical Documentation
 
