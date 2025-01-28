@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.2
+
+### Patch Changes
+
+⚙️ Bump `github.com/grafana/grafana-plugin-sdk-go` to 0.263.0
+
 ## 2.0.1
 
 - **Chore**: Update release workflow
