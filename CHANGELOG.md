@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4
+
+🐛 Improve health check by returning errors properly
+⚙️ Update `golang.org/x/net` from 0.35.0 to 0.36.0
+⚙️ Update frontend dependencies
+
 ## 2.0.3
 
 ⚙️ Update `github.com/grafana/grafana-plugin-sdk-go` to 0.268.0
