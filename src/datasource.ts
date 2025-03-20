@@ -7,7 +7,7 @@ import {
 } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
 import { GoogleAuthType } from '@grafana/google-sdk';
-import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
+import { DataSourceWithBackend, getTemplateSrv, HealthCheckError } from '@grafana/runtime';
 import { getApiClient } from 'api';
 import { uniqueId } from 'lodash';
 import { VariableEditor } from './components/VariableEditor';
@@ -81,18 +81,22 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
   async testDatasource() {
     const health = await this.callHealthCheck();
     if (health.status?.toLowerCase() === 'error') {
-      return { status: 'error', message: health.message, details: health.details };
+      return Promise.reject({
+        status: 'error',
+        message: health.message,
+        error: new HealthCheckError(health.message, health.details),
+      });
     }
 
     const client = await getApiClient(this.id);
     try {
       await client.getProjects();
     } catch (err: any) {
-      return {
+      return Promise.reject({
         status: 'error',
         message: err.data?.message || 'Error connecting to resource manager.',
-        details: err.data?.details,
-      };
+        error: new HealthCheckError(err.data?.message, err.data?.details),
+      });
     }
     return {
       status: 'OK',
