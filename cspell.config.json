@@ -1,5 +1,12 @@
 {
-  "ignorePaths": ["node_modules/**", "src/dashboards/arrays.json", "dist/**"],
+  "ignorePaths": [
+    "node_modules/**",
+    "src/dashboards/arrays.json",
+    "dist/**",
+    "package.json",
+    "yarn.lock",
+    "provisioning/**"
+  ],
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
