@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.5
+
+⚙️ Update `golang.org/x/net` from 0.36.0 to 0.38.0
+⚙️ Update `prismjs` to 1.30.0
+
 ## 2.0.4
 
 🐛 Improve health check by returning errors properly
