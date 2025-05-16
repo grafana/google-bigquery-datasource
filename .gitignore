@@ -145,6 +145,7 @@ TEST-results.xml
 package-lock.json
 /todo.txt
 todo.txt
+install-state.gz
 
 # dist directory
 dist/
