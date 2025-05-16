@@ -50,20 +50,35 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 	var provider tokenprovider.TokenProvider
 	switch settings.AuthenticationType {
 	case "gce":
-		provider = tokenprovider.NewGceAccessTokenProvider(providerConfig)
+		if settings.UsingImpersonation {
+			providerConfig.TargetPrincipal = settings.ServiceAccountToImpersonate
+			provider = tokenprovider.NewImpersonatedGceAccessTokenProvider(providerConfig)
+		} else {
+			provider = tokenprovider.NewGceAccessTokenProvider(providerConfig)
+		}
+
 	case "jwt":
 		err := validateDataSourceSettings(settings)
 
 		if err != nil {
 			return nil, err
 		}
-
-		providerConfig.JwtTokenConfig = &tokenprovider.JwtTokenConfig{
-			Email:      settings.ClientEmail,
-			URI:        settings.TokenUri,
-			PrivateKey: []byte(settings.PrivateKey),
+		if settings.UsingImpersonation {
+			providerConfig.TargetPrincipal = settings.ServiceAccountToImpersonate
+			providerConfig.JwtTokenConfig = &tokenprovider.JwtTokenConfig{
+				Email:      settings.ClientEmail,
+				URI:        settings.TokenUri,
+				PrivateKey: []byte(settings.PrivateKey),
+			}
+			provider = tokenprovider.NewImpersonatedJwtAccessTokenProvider(providerConfig)
+		} else {
+			providerConfig.JwtTokenConfig = &tokenprovider.JwtTokenConfig{
+				Email:      settings.ClientEmail,
+				URI:        settings.TokenUri,
+				PrivateKey: []byte(settings.PrivateKey),
+			}
+			provider = tokenprovider.NewJwtAccessTokenProvider(providerConfig)
 		}
-		provider = tokenprovider.NewJwtAccessTokenProvider(providerConfig)
 	}
 
 	return tokenprovider.AuthMiddleware(provider), nil

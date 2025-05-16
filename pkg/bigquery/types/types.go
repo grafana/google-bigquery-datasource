@@ -7,18 +7,20 @@ import (
 )
 
 type BigQuerySettings struct {
-	DatasourceId       int64  `json:"datasourceId"`
-	ClientEmail        string `json:"clientEmail"`
-	DefaultProject     string `json:"defaultProject"`
-	FlatRateProject    string `json:"flatRateProject"`
-	TokenUri           string `json:"tokenUri"`
-	QueryPriority      string `json:"queryPriority"`
-	ProcessingLocation string `json:"processingLocation"`
-	MaxBytesBilled     int64  `json:"MaxBytesBilled,omitempty"`
-	Updated            time.Time
-	AuthenticationType string `json:"authenticationType"`
-	PrivateKeyPath     string `json:"privateKeyPath"`
-	ServiceEndpoint    string `json:"serviceEndpoint"`
+	DatasourceId                int64  `json:"datasourceId"`
+	ClientEmail                 string `json:"clientEmail"`
+	DefaultProject              string `json:"defaultProject"`
+	FlatRateProject             string `json:"flatRateProject"`
+	TokenUri                    string `json:"tokenUri"`
+	QueryPriority               string `json:"queryPriority"`
+	ProcessingLocation          string `json:"processingLocation"`
+	MaxBytesBilled              int64  `json:"MaxBytesBilled,omitempty"`
+	Updated                     time.Time
+	AuthenticationType          string `json:"authenticationType"`
+	PrivateKeyPath              string `json:"privateKeyPath"`
+	ServiceEndpoint             string `json:"serviceEndpoint"`
+	UsingImpersonation          bool   `json:"usingImpersonation"`
+	ServiceAccountToImpersonate string `json:"serviceAccountToImpersonate"`
 
 	// Saved in secure JSON
 	PrivateKey string `json:"-"`
