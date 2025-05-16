@@ -1,58 +1,58 @@
 package driver
 
 import (
-	"cloud.google.com/go/bigquery"
-	bq "cloud.google.com/go/bigquery"
 	"context"
 	"database/sql/driver"
 	"encoding/base64"
 	"fmt"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
-	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
-	"google.golang.org/api/iterator"
 	"reflect"
 	"strings"
 	"time"
+
+	bq "cloud.google.com/go/bigquery"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"google.golang.org/api/iterator"
 )
 
 type Dataset interface {
 	// Create creates a dataset in the BigQuery service. An error will be returned if the
 	// dataset already exists. Pass in a DatasetMetadata value to configure the dataset.
-	Create(ctx context.Context, md *bigquery.DatasetMetadata) (err error)
+	Create(ctx context.Context, md *bq.DatasetMetadata) (err error)
 	// Delete deletes the dataset.  Delete will fail if the dataset is not empty.
 	Delete(ctx context.Context) (err error)
 	// DeleteWithContents deletes the dataset, as well as contained resources.
 	DeleteWithContents(ctx context.Context) (err error)
 	// Metadata fetches the metadata for the dataset.
-	Metadata(ctx context.Context) (md *bigquery.DatasetMetadata, err error)
+	Metadata(ctx context.Context) (md *bq.DatasetMetadata, err error)
 	// Update modifies specific Dataset metadata fields.
 	// To perform a read-modify-write that protects against intervening reads,
 	// set the etag argument to the DatasetMetadata.ETag field from the read.
 	// Pass the empty string for etag for a "blind write" that will always succeed.
-	Update(ctx context.Context, dm bigquery.DatasetMetadataToUpdate, etag string) (md *bigquery.DatasetMetadata, err error)
+	Update(ctx context.Context, dm bq.DatasetMetadataToUpdate, etag string) (md *bq.DatasetMetadata, err error)
 	// Table creates a handle to a BigQuery table in the dataset.
 	// To determine if a table exists, call Table.Metadata.
 	// If the table does not already exist, use Table.Create to create it.
-	Table(tableID string) *bigquery.Table
+	Table(tableID string) *bq.Table
 	// Tables returns an iterator over the tables in the Dataset.
-	Tables(ctx context.Context) *bigquery.TableIterator
+	Tables(ctx context.Context) *bq.TableIterator
 	// Model creates a handle to a BigQuery model in the dataset.
 	// To determine if a model exists, call Model.Metadata.
 	// If the model does not already exist, you can create it via execution
 	// of a CREATE MODEL query.
-	Model(modelID string) *bigquery.Model
+	Model(modelID string) *bq.Model
 	// Models returns an iterator over the models in the Dataset.
-	Models(ctx context.Context) *bigquery.ModelIterator
+	Models(ctx context.Context) *bq.ModelIterator
 	// Routine creates a handle to a BigQuery routine in the dataset.
 	// To determine if a routine exists, call Routine.Metadata.
-	Routine(routineID string) *bigquery.Routine
+	Routine(routineID string) *bq.Routine
 	// Routines returns an iterator over the routines in the Dataset.
-	Routines(ctx context.Context) *bigquery.RoutineIterator
+	Routines(ctx context.Context) *bq.RoutineIterator
 }
 
 type Conn struct {
 	cfg    *types.ConnectionSettings
-	client *bigquery.Client
+	client *bq.Client
 	bad    bool
 	closed bool
 }
@@ -123,10 +123,10 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 
 	q := c.client.Query(query)
 
-	q.QueryConfig.Labels = c.headersAsLabels()
+	q.Labels = c.headersAsLabels()
 
 	if c.cfg.MaxBytesBilled > 0 {
-		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBytesBilled
+		q.MaxBytesBilled = c.cfg.MaxBytesBilled
 	}
 
 	// q.DefaultProjectID = c.cfg.Project // allows omitting project in table reference
@@ -138,7 +138,7 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 	}
 
 	for {
-		var row []bigquery.Value
+		var row []bq.Value
 		err := it.Next(&row)
 		if err == iterator.Done {
 			break
@@ -172,7 +172,7 @@ func NewConn(ctx context.Context, cfg types.ConnectionSettings, client *bq.Clien
 
 type BigQueryConnector struct {
 	Info       map[string]string
-	Client     *bigquery.Client
+	Client     *bq.Client
 	settings   types.ConnectionSettings
 	connection *Conn
 	bqClient   *bq.Client
@@ -201,7 +201,7 @@ func (c *BigQueryConnector) Driver() driver.Driver {
 func (c *Conn) Ping(ctx context.Context) (err error) {
 	q := c.client.Query("SELECT 1")
 
-	q.QueryConfig.DryRun = true
+	q.DryRun = true
 	job, err := q.Run(ctx)
 
 	if err != nil {
@@ -214,27 +214,23 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 }
 
 // Deprecated: Drivers should implement QueryerContext instead.
-func (c *Conn) Query(query string, args []driver.Value) (rows driver.Rows, err error) {
-	return c.queryContext(context.Background(), query, args)
+func (c *Conn) Query(query string) (rows driver.Rows, err error) {
+	return c.queryContext(context.Background(), query)
 }
 
 func (c *Conn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
 	log.DefaultLogger.Info("QueryContext")
-	_args, err := namedValueToValue(args)
-	if err != nil {
-		return nil, err
-	}
-	return c.queryContext(ctx, query, _args)
+	return c.queryContext(ctx, query)
 }
 
-func (c *Conn) queryContext(ctx context.Context, query string, args []driver.Value) (driver.Rows, error) {
+func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, error) {
 	q := c.client.Query(query)
 	q.Location = c.client.Location
 
-	q.QueryConfig.Labels = c.headersAsLabels()
+	q.Labels = c.headersAsLabels()
 
 	if c.cfg.MaxBytesBilled > 0 {
-		q.QueryConfig.MaxBytesBilled = c.cfg.MaxBytesBilled
+		q.MaxBytesBilled = c.cfg.MaxBytesBilled
 	}
 
 	rowsIterator, err := q.Read(ctx)
@@ -247,7 +243,7 @@ func (c *Conn) queryContext(ctx context.Context, query string, args []driver.Val
 		conn: c,
 	}
 	for {
-		var row []bigquery.Value
+		var row []bq.Value
 		err := rowsIterator.Next(&row)
 		if err == iterator.Done {
 			break
