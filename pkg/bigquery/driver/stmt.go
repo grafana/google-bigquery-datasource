@@ -37,7 +37,7 @@ func (s *stmt) ExecContext(ctx context.Context, args []driver.NamedValue) (drive
 // Deprecated: Drivers should implement StmtQueryContext instead (or additionally).
 func (s *stmt) Query(args []driver.Value) (driver.Rows, error) {
 	log.DefaultLogger.Debug("Got stmt.Query", "query", s.query)
-	return s.c.Query(s.query, args)
+	return s.c.Query(s.query)
 }
 
 func (s *stmt) QueryContext(ctx context.Context, args []driver.NamedValue) (driver.Rows, error) {

@@ -58,7 +58,7 @@ export const widgets: Widgets = {
       return (
         <DateTimePicker
           onChange={(e) => {
-            props?.setValue(e.format(BasicConfig.widgets.datetime.valueFormat));
+            props?.setValue(e?.format(BasicConfig.widgets.datetime.valueFormat));
           }}
           date={dateTime(props?.value).utc()}
         />
