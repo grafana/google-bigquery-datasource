@@ -162,9 +162,6 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		apiInstance := api.New(bqClient)
 		apiInstance.SetLocation(connectionSettings.Location)
 
-		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to create BigQuery API client")
-		}
 		s.apiClients.Store(connectionKey, apiInstance)
 		return db, nil
 	}
