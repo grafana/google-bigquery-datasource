@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.1.0
+
+### Minor Changes
+
+🚀 Feat: Support service account impersonation
+
+### Patch Changes
+
+⚙️ Bump `github.com/getkin/kin-openapi` from 0.129.0 to 0.131.0
+
 ## 2.0.5
 
 ⚙️ Update `golang.org/x/net` from 0.36.0 to 0.38.0
