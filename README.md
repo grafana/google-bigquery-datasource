@@ -45,8 +45,7 @@ When Grafana is running on a Google Compute Engine (GCE) virtual machine, it is 
 ### Service account impersonation
 
 You can also configure the plugin to use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation).
-You need to ensure the service account used by this plugin has the `iam.serviceAccounts.getAccessToken` permission. This permission is in roles like the [Service Account Token Creator role](https://cloud.google.com/iam/docs/understanding-roles#iam.serviceAccountTokenCreator) (roles/iam.serviceAccountTokenCreator). Also, the service account impersonated
-by this plugin needs logging read and project list permissions.
+You need to ensure the service account used by this plugin has the `iam.serviceAccounts.getAccessToken` permission. This permission is in roles like the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (roles/iam.serviceAccountTokenCreator). Also, the service account impersonated by this plugin needs [BigQuery Data Viewer](https://cloud.google.com/iam/docs/roles-permissions/bigquery#bigquery.dataViewer) and [BigQuery Job User](https://cloud.google.com/iam/docs/roles-permissions/bigquery#bigquery.jobUser) roles.
 
 ### Provisioning
 
