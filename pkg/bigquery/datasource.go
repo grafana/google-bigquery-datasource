@@ -23,6 +23,7 @@ import (
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	ut "github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
 )
 
 var PluginConfigFromContext = backend.PluginConfigFromContext
@@ -147,9 +148,15 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			options = append(options, option.WithEndpoint(settings.ServiceEndpoint))
 		}
 
-		bqClient, err := s.bqFactory(context.Background(), connectionSettings.Project, options...)
+		bqClient, err := s.bqFactory(ctx, connectionSettings.Project, options...)
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to create BigQuery client")
+		}
+
+		// TODO: Add possibility to use custom endpoint for storage read client
+		err = bqClient.EnableStorageReadClient(ctx, option.WithTokenSource(ut.JWTConfigFromDataSourceSettings(settings).TokenSource(ctx)))
+		if err != nil {
+			return nil, errors.WithMessage(err, "Failed to enable storage read client")
 		}
 
 		dr, db, err := driver.Open(connectionSettings, bqClient)

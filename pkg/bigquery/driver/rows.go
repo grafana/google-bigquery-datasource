@@ -30,7 +30,8 @@ func (r *rows) Columns() []string {
 }
 
 func (r *rows) Close() error {
-	return r.conn.Close()
+	// This is called after a query run from SQLDS but we don't want to close the connection here
+	return nil
 }
 
 func (r *rows) Next(dest []driver.Value) error {
