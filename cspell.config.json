@@ -28,6 +28,7 @@
     "etag",
     "fillmode",
     "genproto",
+    "getkin",
     "googleapi",
     "grafana",
     "gtime",

@@ -1703,15 +1703,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grafana/google-sdk@npm:0.1.2":
-  version: 0.1.2
-  resolution: "@grafana/google-sdk@npm:0.1.2"
+"@grafana/google-sdk@npm:0.3.1":
+  version: 0.3.1
+  resolution: "@grafana/google-sdk@npm:0.3.1"
   peerDependencies:
-    "@grafana/data": 9.4.1
-    "@grafana/ui": 9.4.1
-    react: 17.0.2
-    react-dom: 17.0.2
-  checksum: 10c0/5050fb179e1ee5d9e70c9dcdde4e5a9f89260027fee70ba3eb0e11cfaf1aedd251939d2eee2db6ca7ffefb87fc6e5ce0903b7272a2d82356d2d23055276700e1
+    "@grafana/data": ">=10.4.0"
+    "@grafana/ui": ">=10.4.0"
+    react: ^18.2.0
+    react-dom: ^18.2.0
+  checksum: 10c0/0e1c415445553a8921a0ef6163734f534d493b6c46e2718430ab3ec41aae5566fbeecccd4683eba1b53bff10fbcd0c988345a0021f38d73187a7dcac5d34d2b7
   languageName: node
   linkType: hard
 
@@ -7804,7 +7804,7 @@ __metadata:
     "@grafana/data": "npm:^11.5.3"
     "@grafana/e2e-selectors": "npm:^11.5.3"
     "@grafana/eslint-config": "npm:^8.0.0"
-    "@grafana/google-sdk": "npm:0.1.2"
+    "@grafana/google-sdk": "npm:0.3.1"
     "@grafana/plugin-e2e": "npm:^2.0.2"
     "@grafana/plugin-ui": "npm:^0.10.4"
     "@grafana/runtime": "npm:^11.5.3"
