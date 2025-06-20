@@ -42,6 +42,11 @@ Google BigQuery datasource provides two ways of authentication:
 
 When Grafana is running on a Google Compute Engine (GCE) virtual machine, it is possible for the Google BigQuery datasource to automatically retrieve the default project id and authentication token from the metadata server. For this to work, you need to make sure that you have a service account that is setup as the default account for the virtual machine and that the service account has been given read access to the BigQuery API.
 
+### Service account impersonation
+
+You can also configure the plugin to use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation).
+You need to ensure the service account used by this plugin has the `iam.serviceAccounts.getAccessToken` permission. This permission is in roles like the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (roles/iam.serviceAccountTokenCreator). Also, the service account impersonated by this plugin needs [BigQuery Data Viewer](https://cloud.google.com/iam/docs/roles-permissions/bigquery#bigquery.dataViewer) and [BigQuery Job User](https://cloud.google.com/iam/docs/roles-permissions/bigquery#bigquery.jobUser) roles.
+
 ### Provisioning
 
 It is possible to configure data sources using configuration files with Grafana’s provisioning system. To read about how it works, including and all the settings that you can set for this data source, refer to [Provisioning Grafana data sources](https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources).
