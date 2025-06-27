@@ -153,7 +153,6 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			return nil, errors.WithMessage(err, "Failed to create BigQuery client")
 		}
 
-		// TODO: Add possibility to use custom endpoint for storage read client
 		err = bqClient.EnableStorageReadClient(ctx, option.WithTokenSource(ut.JWTConfigFromDataSourceSettings(settings).TokenSource(ctx)))
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to enable storage read client")
