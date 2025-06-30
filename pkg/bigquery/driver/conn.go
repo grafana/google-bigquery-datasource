@@ -219,7 +219,6 @@ func (c *Conn) Query(query string) (rows driver.Rows, err error) {
 }
 
 func (c *Conn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
-	log.DefaultLogger.Info("QueryContext")
 	return c.queryContext(ctx, query)
 }
 
@@ -249,9 +248,10 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 		return nil, err
 	}
 
+	log.DefaultLogger.Debug("Executed query", "queryID", rowsIterator.QueryID(), "usingStorageAPI", rowsIterator.IsAccelerated())
+
 	res := &rows{
-		rs:   resultSet{},
-		conn: c,
+		rs: resultSet{},
 	}
 	for {
 		var row []bq.Value
