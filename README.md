@@ -53,7 +53,7 @@ It is possible to configure data sources using configuration files with Grafanaâ
 
 Below you will find some provisioning examples
 
-#### Using service account
+#### Using service account keys
 
 ```yaml
 # config file version (with private key in secureJsonData)
@@ -100,6 +100,23 @@ datasources:
     enabled: true
     jsonData:
       authenticationType: gce
+```
+
+#### Using Google Metadata Server with Service Account Impersonation
+
+```yaml
+# config file version
+apiVersion: 1
+datasources:
+  - name: BigQuery DS
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: gce
+      usingImpersonation: true
+      serviceAccountToImpersonate: <email of GCP service account to be impersonated>
+      defaultProject: <project where queries will be performed>
 ```
 
 ## Importing queries created with DoiT International BigQuery DataSource plugin
