@@ -1,6 +1,11 @@
 import { DataQuery, TimeRange } from '@grafana/data';
+import {
+  DataSourceOptions,
+  DataSourceSecureJsonData,
+  GOOGLE_AUTH_TYPE_OPTIONS,
+  GoogleAuthType,
+} from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/plugin-ui';
-import { DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { JsonTree } from '@react-awesome-query-builder/ui';
 import { BigQueryAPI } from 'api';
 import {
@@ -29,7 +34,18 @@ export interface BigQueryOptions extends DataSourceOptions {
   enableSecureSocksProxy?: boolean;
   MaxBytesBilled?: number;
   serviceEndpoint?: string;
+  oauthPassThru?: boolean;
 }
+
+export const BigQueryAuth = {
+  ...GoogleAuthType,
+  ForwardOAuthIdentity: 'forwardOAuthIdentity',
+} as const;
+
+export const bigQueryAuthTypes = [
+  { label: 'Forward OAuth Identity', value: BigQueryAuth.ForwardOAuthIdentity },
+  ...GOOGLE_AUTH_TYPE_OPTIONS,
+];
 
 export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}
 
