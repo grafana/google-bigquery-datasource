@@ -2,13 +2,14 @@ import {
   DataSourcePluginOptionsEditorProps,
   onUpdateDatasourceJsonDataOptionSelect,
   onUpdateDatasourceJsonDataOption,
+  onUpdateDatasourceJsonDataOptionChecked,
 } from '@grafana/data';
-import { AuthConfig, GOOGLE_AUTH_TYPE_OPTIONS } from '@grafana/google-sdk';
+import { AuthConfig } from '@grafana/google-sdk';
 import { config } from '@grafana/runtime';
-import { Field, Input, SecureSocksProxySettings, Select } from '@grafana/ui';
+import { Field, FieldSet, Input, SecureSocksProxySettings, Select, Switch } from '@grafana/ui';
 import React from 'react';
 import { PROCESSING_LOCATIONS } from '../constants';
-import { BigQueryOptions, BigQuerySecureJsonData } from '../types';
+import { BigQueryAuth, bigQueryAuthTypes, BigQueryOptions, BigQuerySecureJsonData } from '../types';
 import { ConfigurationHelp } from './/ConfigurationHelp';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { Divider } from './Divider';
@@ -28,6 +29,8 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       },
     });
   };
+  const showServiceAccountImpersonation =
+    jsonData.authenticationType === BigQueryAuth.JWT || jsonData.authenticationType === BigQueryAuth.GCE;
 
   return (
     <>
@@ -43,7 +46,27 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
 
       <Divider />
 
-      <AuthConfig {...props} authOptions={GOOGLE_AUTH_TYPE_OPTIONS} />
+      <AuthConfig
+        {...props}
+        authOptions={bigQueryAuthTypes}
+        showServiceAccountImpersonationConfig={showServiceAccountImpersonation}
+      />
+
+      {jsonData.authenticationType === BigQueryAuth.ForwardOAuthIdentity && (
+        <FieldSet label="Forward OAuth Identity">
+          <Field
+            label="Enable"
+            htmlFor="http-settings-forward-oauth"
+            description="Forward the user's upstream OAuth identity to the data source (Their access token gets passed along)."
+          >
+            <Switch
+              id="http-settings-forward-oauth"
+              value={options.jsonData.oauthPassThru || false}
+              onChange={onUpdateDatasourceJsonDataOptionChecked(props, 'oauthPassThru')}
+            />
+          </Field>
+        </FieldSet>
+      )}
 
       <Divider />
 

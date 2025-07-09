@@ -85,6 +85,10 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 }
 
 func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options, route string) (*http.Client, error) {
+	if settings.OAuthPassthroughEnabled {
+		opts.ForwardHTTPHeaders = true
+		return httpclient.New(opts)
+	}
 	m, err := getMiddleware(settings, route)
 	if err != nil {
 		return nil, err
