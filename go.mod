@@ -2,6 +2,12 @@ module github.com/grafana/grafana-bigquery-datasource
 
 go 1.24.3
 
+// Go 1.24 enabled the post-quantum key exchange mechanism
+// X25519MLKEM768 by default. It can cause issues with some TLS servers
+// that do not handle large records correctly.
+// It can be disabled using the following command:
+godebug tlsmlkem=0
+
 require (
 	cloud.google.com/go v0.120.0
 	cloud.google.com/go/bigquery v1.67.0
