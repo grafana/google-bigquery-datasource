@@ -84,6 +84,17 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 	return tokenprovider.AuthMiddleware(provider), nil
 }
 
+func quotaProjectMiddleware(quotaProject string) httpclient.Middleware {
+	return httpclient.NamedMiddlewareFunc("quota-project", func(opts httpclient.Options, next http.RoundTripper) http.RoundTripper {
+		return httpclient.RoundTripperFunc(func(req *http.Request) (*http.Response, error) {
+			if quotaProject != "" {
+				req.Header.Set("X-Goog-User-Project", quotaProject)
+			}
+			return next.RoundTrip(req)
+		})
+	})
+}
+
 func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options, route string) (*http.Client, error) {
 	m, err := getMiddleware(settings, route)
 	if err != nil {
@@ -91,6 +102,12 @@ func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options, rou
 	}
 
 	opts.Middlewares = append(opts.Middlewares, m)
+
+	// Add quota project middleware if specified
+	if settings.QuotaProject != "" {
+		opts.Middlewares = append(opts.Middlewares, quotaProjectMiddleware(settings.QuotaProject))
+	}
+
 	return httpclient.New(opts)
 }
 
