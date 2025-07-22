@@ -98,6 +98,30 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           />
         </Field>
         <Field
+          label="Quota Project"
+          description={
+            <span>
+              Specifies the a project id to use for quota and billing purposes. Read more about quota project settings{' '}
+              <a
+                href="https://cloud.google.com/apis/docs/system-parameters"
+                rel="noreferrer"
+                className="external-link"
+                target="_blank"
+              >
+                here
+              </a>
+            </span>
+          }
+        >
+          <Input
+            className="width-30"
+            placeholder="Optional, quota project id"
+            type={'string'}
+            value={jsonData.quotaProject || ''}
+            onChange={onUpdateDatasourceJsonDataOption(props, 'quotaProject')}
+          />
+        </Field>
+        <Field
           label="Max bytes billed"
           description={
             <span>

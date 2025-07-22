@@ -42,6 +42,10 @@ Google BigQuery datasource provides two ways of authentication:
 
 When Grafana is running on a Google Compute Engine (GCE) virtual machine, it is possible for the Google BigQuery datasource to automatically retrieve the default project id and authentication token from the metadata server. For this to work, you need to make sure that you have a service account that is setup as the default account for the virtual machine and that the service account has been given read access to the BigQuery API.
 
+### Specify a quota project
+
+Specify a BigQuery project to use for quota or billing purposes, separate from your default project.  Note that the calling user must have the serviceusage.services.use permission on the quota project. 
+
 ### Service account impersonation
 
 You can also configure the plugin to use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation).
@@ -117,6 +121,26 @@ datasources:
       usingImpersonation: true
       serviceAccountToImpersonate: <email of GCP service account to be impersonated>
       defaultProject: <project where queries will be performed>
+```
+
+#### Using Quota Project
+
+```yaml
+# config file version (with private key in secureJsonData)
+apiVersion: 1
+datasources:
+  - name: BigQuery DS
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: jwt
+      clientEmail: your-client-email
+      defaultProject: your-default-bigquery-project
+      tokenUri: https://oauth2.googleapis.com/token
+      quotaProject: your-quota-project
+    secureJsonData:
+      privateKey: your-private-key
 ```
 
 ## Importing queries created with DoiT International BigQuery DataSource plugin

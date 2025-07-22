@@ -147,6 +147,11 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			options = append(options, option.WithEndpoint(settings.ServiceEndpoint))
 		}
 
+		if settings.QuotaProject != "" {
+			log.DefaultLogger.Debug("Using quota project id", "quotaProject", settings.QuotaProject)
+			options = append(options, option.WithQuotaProject(settings.QuotaProject))
+		}
+
 		bqClient, err := s.bqFactory(context.Background(), connectionSettings.Project, options...)
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to create BigQuery client")

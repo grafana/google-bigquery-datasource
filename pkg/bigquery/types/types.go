@@ -15,6 +15,7 @@ type BigQuerySettings struct {
 	QueryPriority               string `json:"queryPriority"`
 	ProcessingLocation          string `json:"processingLocation"`
 	MaxBytesBilled              int64  `json:"MaxBytesBilled,omitempty"`
+	QuotaProject				string `json:"quotaProject"`
 	Updated                     time.Time
 	AuthenticationType          string `json:"authenticationType"`
 	PrivateKeyPath              string `json:"privateKeyPath"`
@@ -33,6 +34,7 @@ type ConnectionSettings struct {
 	Dataset            string
 	Headers            map[string][]string
 	MaxBytesBilled     int64
+	QuotaProject	   string
 }
 type TableFieldSchema struct {
 	Name        string       `json:"name"`
