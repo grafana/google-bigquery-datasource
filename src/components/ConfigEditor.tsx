@@ -65,6 +65,14 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
               onChange={onUpdateDatasourceJsonDataOptionChecked(props, 'oauthPassThru')}
             />
           </Field>
+          <Field label="Default project">
+            <Input
+              id="defaultProject"
+              width={60}
+              value={options.jsonData.defaultProject || ''}
+              onChange={onUpdateDatasourceJsonDataOption(props, 'defaultProject')}
+            />
+          </Field>
         </FieldSet>
       )}
 
