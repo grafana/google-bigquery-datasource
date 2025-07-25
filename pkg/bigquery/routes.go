@@ -87,7 +87,7 @@ func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
 		utils.WriteResponse(rw, []byte(err.Error()))
 		return
 	}
-	res, err := r.ds.Projects(result)
+	res, err := r.ds.Projects(req.Context(), result)
 	utils.SendResponse(res, err, rw)
 }
 
