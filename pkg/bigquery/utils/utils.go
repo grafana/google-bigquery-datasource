@@ -93,3 +93,69 @@ func SendResponse(res interface{}, err error, rw http.ResponseWriter) {
 	rw.Header().Add("Content-Type", "application/json")
 	WriteResponse(rw, bytes)
 }
+
+// ErrorResponse represents a structured error response
+type ErrorResponse struct {
+	Error   string `json:"error"`
+	Message string `json:"message,omitempty"`
+	Code    int    `json:"code,omitempty"`
+}
+
+// HandleError processes an error, logs it appropriately, and returns a structured error response
+// It specifically handles Google API errors with enhanced logging and proper HTTP status codes
+func HandleError(err error, context string) (ErrorResponse, int) {
+	if err == nil {
+		return ErrorResponse{}, 0
+	}
+
+	// Check if it's a Google API error
+	if googleApiError, ok := err.(*googleapi.Error); ok {
+		// Log Google API error with details
+		log.DefaultLogger.Error("Google API error",
+			"context", context,
+			"code", googleApiError.Code,
+			"message", googleApiError.Message,
+			"details", googleApiError.Details,
+		)
+
+		// Return structured response with Google API error details
+		return ErrorResponse{
+			Error:   googleApiError.Message,
+			Message: fmt.Sprintf("Google API error: %s", googleApiError.Message),
+			Code:    googleApiError.Code,
+		}, googleApiError.Code
+	}
+
+	// Handle generic errors
+	log.DefaultLogger.Error("Error occurred",
+		"context", context,
+		"error", err.Error(),
+	)
+
+	return ErrorResponse{
+		Error:   err.Error(),
+		Message: fmt.Sprintf("Error in %s: %s", context, err.Error()),
+	}, http.StatusInternalServerError
+}
+
+// SendErrorResponse is a convenience function that handles an error and writes the response
+func SendErrorResponse(err error, context string, rw http.ResponseWriter) {
+	if err == nil {
+		return
+	}
+
+	errorResp, statusCode := HandleError(err, context)
+	
+	rw.WriteHeader(statusCode)
+	rw.Header().Set("Content-Type", "application/json")
+	
+	responseBytes, marshalErr := json.Marshal(errorResp)
+	if marshalErr != nil {
+		log.DefaultLogger.Error("Failed to marshal error response", "error", marshalErr.Error())
+		WriteResponse(rw, []byte(`{"error":"Internal server error"}`))
+		return
+	}
+	
+	WriteResponse(rw, responseBytes)
+}
+
