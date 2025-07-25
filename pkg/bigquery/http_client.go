@@ -85,6 +85,15 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 }
 
 func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options, route string) (*http.Client, error) {
+	if settings.AuthenticationType == "forwardOAuthIdentity" && settings.OAuthPassthroughEnabled {
+		opts.ForwardHTTPHeaders = true
+
+		// We need to set the Accept-Encoding header to identity to avoid the
+		// compression of the response. This is a workaround for the issue https://github.com/googleapis/google-api-go-client/issues/219
+		opts.Header.Set("Accept-Encoding", "identity")
+
+		return httpclient.New(opts)
+	}
 	m, err := getMiddleware(settings, route)
 	if err != nil {
 		return nil, err

@@ -42,40 +42,52 @@ func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
 	err := utils.UnmarshalBody(req.Body, &result)
 
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		utils.WriteResponse(rw, []byte(err.Error()))
+		utils.SendErrorResponse(err, "parsing datasets request body", rw)
 		return
 	}
+	
 	res, err := r.ds.Datasets(req.Context(), result)
+	if err != nil {
+		utils.SendErrorResponse(err, "fetching BigQuery datasets", rw)
+		return
+	}
 
-	utils.SendResponse(res, err, rw)
+	utils.SendResponse(res, nil, rw)
 }
 
 func (r *ResourceHandler) tableSchema(rw http.ResponseWriter, req *http.Request) {
 	result := TableSchemaArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		utils.WriteResponse(rw, []byte(err.Error()))
+		utils.SendErrorResponse(err, "parsing table schema request body", rw)
 		return
 	}
 
 	res, err := r.ds.TableSchema(req.Context(), result)
+	if err != nil {
+		utils.SendErrorResponse(err, "fetching BigQuery table schema", rw)
+		return
+	}
+
 	rw.Header().Set("Content-Type", "application/json")
-	utils.SendResponse(res, err, rw)
+	utils.SendResponse(res, nil, rw)
 }
 
 func (r *ResourceHandler) validateQuery(rw http.ResponseWriter, req *http.Request) {
 	result := ValidateQueryArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		utils.WriteResponse(rw, []byte(err.Error()))
+		utils.SendErrorResponse(err, "parsing validate query request body", rw)
 		return
 	}
 	result.Query.TimeRange = result.TimeRange
 
 	res, err := r.ds.ValidateQuery(req.Context(), result)
+	if err != nil {
+		utils.SendErrorResponse(err, "validating BigQuery query", rw)
+		return
+	}
+
 	utils.SendResponse(res, err, rw)
 }
 
@@ -83,11 +95,15 @@ func (r *ResourceHandler) projects(rw http.ResponseWriter, req *http.Request) {
 	result := ProjectsArgs{}
 	err := utils.UnmarshalBody(req.Body, &result)
 	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		utils.WriteResponse(rw, []byte(err.Error()))
+		utils.SendErrorResponse(err, "parsing projects request body", rw)
 		return
 	}
-	res, err := r.ds.Projects(result)
+	res, err := r.ds.Projects(req.Context(), result)
+	if err != nil {
+		utils.SendErrorResponse(err, "fetching BigQuery projects", rw)
+		return
+	}
+
 	utils.SendResponse(res, err, rw)
 }
 
