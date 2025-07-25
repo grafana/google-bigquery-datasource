@@ -15,7 +15,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
-	"github.com/grafana/sqlds/v3"
+	"github.com/grafana/sqlds/v4"
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
