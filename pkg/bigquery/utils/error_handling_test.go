@@ -88,6 +88,6 @@ func ExampleHandleError() {
 	errorResp, statusCode := HandleError(googleErr, "BigQuery query execution")
 
 	// Use the structured response
-	_ = errorResp // ErrorResponse{Error: "Invalid query", Message: "Google API error: Invalid query", Code: 400}
+	_ = errorResp  // ErrorResponse{Error: "Invalid query", Message: "Google API error: Invalid query", Code: 400}
 	_ = statusCode // 400
-} 
+}
