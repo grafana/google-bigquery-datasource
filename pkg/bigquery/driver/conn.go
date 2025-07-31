@@ -210,10 +210,10 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 		errorResponse, statusCode := utils.HandleError(err, "Failed to connect with BigQuery")
 		if statusCode == 403 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
 			log.DefaultLogger.Error("Forbidden", "error", errorResponse.Error)
-			return errors.New("connected to BigQuery but missing permissions to run queries")
+			return backend.DownstreamError(errors.New("connected to BigQuery but missing permissions to run queries"))
 		} else if statusCode == 401 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
 			log.DefaultLogger.Error("Unauthorized", "error", errorResponse.Error)
-			return errors.New("unauthorized to connect to BigQuery")
+			return backend.DownstreamError(errors.New("unauthorized to connect to BigQuery"))
 		}
 		log.DefaultLogger.Error("Failed to connect with BigQuery", "error", errorResponse.Error)
 		return

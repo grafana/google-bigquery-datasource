@@ -49,9 +49,9 @@ You need to ensure the service account used by this plugin has the `iam.serviceA
 
 ### Forward OAuth Identity
 
-You can also configure the plugin to use Forward OAuth Identity. This is useful if you want to use Grafana's Google OAuth authentication with BigQuery. The `Default project` field is required. You need to add the `https://www.googleapis.com/auth/bigquery` scope to the OAuth application.
+You can configure the plugin to use Forward OAuth Identity. This is useful if you want to use Grafana's Google OAuth authentication with BigQuery. The `Default project` field is required. You need to add the `https://www.googleapis.com/auth/bigquery` scope to the OAuth application.
 
-Note: Some Grafana features will not function as expected e.g. alerting. Grafana backend features require credentials to always be in scope which will not be the case with this authentication method.
+> **Note:**  Some Grafana features will not function as expected e.g. alerting. Grafana backend features require credentials to always be in scope which will not be the case with this authentication method.
 
 ### Provisioning
 
