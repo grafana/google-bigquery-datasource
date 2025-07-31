@@ -57,7 +57,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           <Field
             label="Enable"
             htmlFor="http-settings-forward-oauth"
-            description="Forward the user's upstream OAuth identity to the data source (Their access token gets passed along)."
+            description="Forward the user's upstream OAuth identity to the data source (their access token gets passed along)."
           >
             <Switch
               id="http-settings-forward-oauth"
