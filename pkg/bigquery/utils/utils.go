@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	bq "cloud.google.com/go/bigquery"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"google.golang.org/api/googleapi"
 )
@@ -96,9 +97,10 @@ func SendResponse(res interface{}, err error, rw http.ResponseWriter) {
 
 // ErrorResponse represents a structured error response
 type ErrorResponse struct {
-	Error   string `json:"error"`
-	Message string `json:"message,omitempty"`
-	Code    int    `json:"code,omitempty"`
+	Error   string              `json:"error"`
+	Message string              `json:"message,omitempty"`
+	Code    int                 `json:"code,omitempty"`
+	Source  backend.ErrorSource `json:"source,omitempty"`
 }
 
 // HandleError processes an error, logs it appropriately, and returns a structured error response
@@ -111,7 +113,7 @@ func HandleError(err error, context string) (ErrorResponse, int) {
 	// Check if it's a Google API error
 	if googleApiError, ok := err.(*googleapi.Error); ok {
 		// Log Google API error with details
-		log.DefaultLogger.Error("Google API error",
+		log.DefaultLogger.Warn("Google API error",
 			"context", context,
 			"code", googleApiError.Code,
 			"message", googleApiError.Message,
@@ -123,6 +125,7 @@ func HandleError(err error, context string) (ErrorResponse, int) {
 			Error:   googleApiError.Message,
 			Message: fmt.Sprintf("Google API error: %s", googleApiError.Message),
 			Code:    googleApiError.Code,
+			Source:  backend.ErrorSourceFromHTTPStatus(googleApiError.Code),
 		}, googleApiError.Code
 	}
 
@@ -145,17 +148,16 @@ func SendErrorResponse(err error, context string, rw http.ResponseWriter) {
 	}
 
 	errorResp, statusCode := HandleError(err, context)
-	
+
 	rw.WriteHeader(statusCode)
 	rw.Header().Set("Content-Type", "application/json")
-	
+
 	responseBytes, marshalErr := json.Marshal(errorResp)
 	if marshalErr != nil {
 		log.DefaultLogger.Error("Failed to marshal error response", "error", marshalErr.Error())
 		WriteResponse(rw, []byte(`{"error":"Internal server error"}`))
 		return
 	}
-	
+
 	WriteResponse(rw, responseBytes)
 }
-

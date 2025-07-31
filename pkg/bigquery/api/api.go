@@ -8,7 +8,6 @@ import (
 	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
-	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
 )
@@ -116,8 +115,6 @@ func (a *API) ValidateQuery(ctx context.Context, query string) *ValidateQueryRes
 	q.DryRun = true
 	job, err := q.Run(ctx)
 	response := &ValidateQueryResponse{}
-
-	backend.Logger.Debug("Validating query", "job", job, "err", err, "query", query)
 
 	if err != nil {
 		response.IsError = true

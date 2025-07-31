@@ -43,8 +43,8 @@ export const BigQueryAuth = {
 } as const;
 
 export const bigQueryAuthTypes = [
-  { label: 'Forward OAuth Identity', value: BigQueryAuth.ForwardOAuthIdentity },
   ...GOOGLE_AUTH_TYPE_OPTIONS,
+  { label: 'Forward OAuth Identity', value: BigQueryAuth.ForwardOAuthIdentity },
 ];
 
 export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}
