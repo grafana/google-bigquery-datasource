@@ -7,7 +7,7 @@ import (
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/gtime"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
-	"github.com/grafana/sqlds/v3"
+	"github.com/grafana/sqlds/v4"
 )
 
 func macroColumn(query *sqlutil.Query, args []string) (string, error) {

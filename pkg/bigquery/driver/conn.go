@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -11,6 +12,8 @@ import (
 
 	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"google.golang.org/api/iterator"
 )
@@ -200,16 +203,25 @@ func (c *BigQueryConnector) Driver() driver.Driver {
 // Ping the BigQuery service and make sure it's reachable
 func (c *Conn) Ping(ctx context.Context) (err error) {
 	q := c.client.Query("SELECT 1")
+	logger := log.DefaultLogger.FromContext(ctx)
 
 	q.DryRun = true
 	job, err := q.Run(ctx)
 
 	if err != nil {
-		log.DefaultLogger.Info("Failed to connect with BigQuery")
+		errorResponse, statusCode := utils.HandleError(err, "Failed to connect with BigQuery")
+		if statusCode == 403 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
+			logger.Warn("Forbidden", "error", errorResponse.Error)
+			return backend.DownstreamError(errors.New("connected to BigQuery but missing permissions to run queries"))
+		} else if statusCode == 401 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
+			logger.Warn("Unauthorized", "error", errorResponse.Error)
+			return backend.DownstreamError(errors.New("unauthorized to connect to BigQuery"))
+		}
+		logger.Warn("Failed to connect with BigQuery", "error", errorResponse.Error)
 		return
 	}
 
-	log.DefaultLogger.Info("Successful Ping", "status", job.LastStatus().State)
+	logger.Info("Successful Ping", "status", job.LastStatus().State)
 	return
 }
 
@@ -219,7 +231,6 @@ func (c *Conn) Query(query string) (rows driver.Rows, err error) {
 }
 
 func (c *Conn) QueryContext(ctx context.Context, query string, args []driver.NamedValue) (driver.Rows, error) {
-	log.DefaultLogger.Info("QueryContext")
 	return c.queryContext(ctx, query)
 }
 
