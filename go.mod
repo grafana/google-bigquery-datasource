@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	cloud.google.com/go v0.120.0
 	cloud.google.com/go/bigquery v1.67.0
-	github.com/grafana/grafana-google-sdk-go v0.4.1
+	github.com/grafana/grafana-google-sdk-go v0.4.2
 	github.com/grafana/grafana-plugin-sdk-go v0.278.0
 	github.com/grafana/sqlds/v4 v4.2.6
 	github.com/pkg/errors v0.9.1
