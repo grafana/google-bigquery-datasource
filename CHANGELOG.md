@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.2.0
+
+🚀 Feat: Add OAuth passthrough
+
+🐛 Bump `github.com/grafana/grafana-google-sdk-go` to 0.4.2
+
 ## 2.1.0
 
 🚀 Feat: Support service account impersonation
