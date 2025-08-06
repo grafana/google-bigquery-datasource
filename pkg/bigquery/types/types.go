@@ -21,6 +21,7 @@ type BigQuerySettings struct {
 	ServiceEndpoint             string `json:"serviceEndpoint"`
 	UsingImpersonation          bool   `json:"usingImpersonation"`
 	ServiceAccountToImpersonate string `json:"serviceAccountToImpersonate"`
+	OAuthPassthroughEnabled     bool   `json:"oauthPassThru"`
 
 	// Saved in secure JSON
 	PrivateKey string `json:"-"`

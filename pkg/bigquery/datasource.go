@@ -15,7 +15,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
-	"github.com/grafana/sqlds/v3"
+	"github.com/grafana/sqlds/v4"
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
@@ -33,7 +33,7 @@ type BigqueryDatasourceIface interface {
 	Datasets(ctx context.Context, args DatasetsArgs) ([]string, error)
 	TableSchema(ctx context.Context, args TableSchemaArgs) (*types.TableMetadataResponse, error)
 	ValidateQuery(ctx context.Context, args ValidateQueryArgs) (*api.ValidateQueryResponse, error)
-	Projects(options ProjectsArgs) ([]*Project, error)
+	Projects(ctx context.Context, options ProjectsArgs) ([]*Project, error)
 }
 
 type conn struct {
@@ -297,7 +297,18 @@ type Project struct {
 	DisplayName string `json:"displayName"`
 }
 
-func (s *BigQueryDatasource) Projects(options ProjectsArgs) ([]*Project, error) {
+func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs) ([]*Project, error) {
+	settings := getDatasourceSettings(ctx)
+	bqSettings, err := loadSettings(settings)
+	if err != nil {
+		return nil, err
+	}
+
+	// If OAuth passthrough is enabled, return the default project
+	if bqSettings.AuthenticationType == "forwardOAuthIdentity" {
+		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
+	}
+
 	response, err := s.resourceManagerServices[options.DatasourceID].Projects.Search().Do()
 
 	if err != nil {

@@ -47,13 +47,19 @@ When Grafana is running on a Google Compute Engine (GCE) virtual machine, it is 
 You can also configure the plugin to use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation).
 You need to ensure the service account used by this plugin has the `iam.serviceAccounts.getAccessToken` permission. This permission is in roles like the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (roles/iam.serviceAccountTokenCreator). Also, the service account impersonated by this plugin needs [BigQuery Data Viewer](https://cloud.google.com/iam/docs/roles-permissions/bigquery#bigquery.dataViewer) and [BigQuery Job User](https://cloud.google.com/iam/docs/roles-permissions/bigquery#bigquery.jobUser) roles.
 
+### Forward OAuth Identity
+
+You can configure the plugin to use Forward OAuth Identity. This is useful if you want to use Grafana's Google OAuth authentication with BigQuery. The `Default project` field is required. You need to add the `https://www.googleapis.com/auth/bigquery` scope to the OAuth application.
+
+> **Note:**  Some Grafana features will not function as expected e.g. alerting. Grafana backend features require credentials to always be in scope which will not be the case with this authentication method.
+
 ### Provisioning
 
 It is possible to configure data sources using configuration files with Grafana’s provisioning system. To read about how it works, including and all the settings that you can set for this data source, refer to [Provisioning Grafana data sources](https://grafana.com/docs/grafana/latest/administration/provisioning/#data-sources).
 
 Below you will find some provisioning examples
 
-#### Using service account
+#### Using service account keys
 
 ```yaml
 # config file version (with private key in secureJsonData)
@@ -100,6 +106,39 @@ datasources:
     enabled: true
     jsonData:
       authenticationType: gce
+```
+
+#### Using Google Metadata Server with Service Account Impersonation
+
+```yaml
+# config file version
+apiVersion: 1
+datasources:
+  - name: BigQuery DS
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: gce
+      usingImpersonation: true
+      serviceAccountToImpersonate: <email of GCP service account to be impersonated>
+      defaultProject: <project where queries will be performed>
+```
+
+#### Using Forward OAuth Identity
+
+```yaml
+# config file version
+apiVersion: 1
+datasources:
+  - name: BigQuery DS
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: forwardOAuthIdentity
+      defaultProject: <project where queries will be performed>
+      oauthPassThru: true
 ```
 
 ## Importing queries created with DoiT International BigQuery DataSource plugin
