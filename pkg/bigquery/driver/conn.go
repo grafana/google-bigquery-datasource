@@ -246,7 +246,7 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 
 	rowsIterator, err := q.Read(ctx)
 	if err != nil {
-		return nil, err
+		return nil, backend.DownstreamError(err)
 	}
 
 	res := &rows{
@@ -260,7 +260,7 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, backend.DownstreamError(err)
 		}
 		res.rs.data = append(res.rs.data, row)
 	}
