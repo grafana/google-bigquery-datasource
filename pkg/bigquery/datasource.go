@@ -51,10 +51,11 @@ type BigQueryDatasource struct {
 }
 
 type ConnectionArgs struct {
-	Dataset  string              `json:"dataset,omitempty"`
-	Table    string              `json:"table,omitempty"`
-	Location string              `json:"location,omitempty"`
-	Headers  map[string][]string `json:"grafana-http-headers,omitempty"`
+	Dataset          string              `json:"dataset,omitempty"`
+	Table            string              `json:"table,omitempty"`
+	Location         string              `json:"location,omitempty"`
+	EnableStorageAPI bool                `json:"enableStorageAPI,omitempty"`
+	Headers          map[string][]string `json:"grafana-http-headers,omitempty"`
 }
 
 func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
@@ -99,7 +100,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		connectionSettings.Project = defaultProject
 	}
 
-	connectionKey := fmt.Sprintf("%d/%s:%s", config.ID, connectionSettings.Location, connectionSettings.Project)
+	connectionKey := fmt.Sprintf("%d/%s:%s:%t", config.ID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
 
 	if s.resourceManagerServices[fmt.Sprint(config.ID)] == nil {
 		err := createResourceManagerService(ctx, config, settings, fmt.Sprint(config.ID), s)
@@ -153,9 +154,11 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			return nil, errors.WithMessage(err, "Failed to create BigQuery client")
 		}
 
-		err = bqClient.EnableStorageReadClient(ctx, option.WithTokenSource(ut.JWTConfigFromDataSourceSettings(settings).TokenSource(ctx)))
-		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to enable storage read client")
+		if connectionSettings.EnableStorageAPI {
+			err = bqClient.EnableStorageReadClient(ctx, option.WithTokenSource(ut.JWTConfigFromDataSourceSettings(settings).TokenSource(ctx)))
+			if err != nil {
+				return nil, errors.WithMessage(err, "Failed to enable storage read client")
+			}
 		}
 
 		dr, db, err := driver.Open(connectionSettings, bqClient)

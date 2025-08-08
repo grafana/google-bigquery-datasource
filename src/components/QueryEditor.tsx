@@ -1,7 +1,8 @@
 import { QueryEditorProps } from '@grafana/data';
-import { EditorMode, Space } from '@grafana/plugin-ui';
+import { EditorMode, EditorRow, QueryOptionGroup, Space } from '@grafana/plugin-ui';
+import { InlineSwitch } from '@grafana/ui';
 import { RawEditor } from 'components/query-editor-raw/RawEditor';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useId, useState } from 'react';
 import { useAsync } from 'react-use';
 import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
 import { haveColumns } from 'utils/sql.utils';
@@ -18,6 +19,7 @@ interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, Bi
 export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton }: Props) {
   setDatasourceId(datasource.id);
   const [isQueryRunnable, setIsQueryRunnable] = useState(true);
+  const htmlId = useId();
   const {
     loading: apiLoading,
     error: apiError,
@@ -65,6 +67,11 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
     onChange(q);
   };
 
+  const onStorageApiChange = () => {
+    const next = { ...queryWithDefaults, enableStorageAPI: !queryWithDefaults.enableStorageAPI };
+    onChange(next);
+  };
+
   if (apiLoading || apiError || !apiClient) {
     return null;
   }
@@ -106,6 +113,21 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
           range={range}
         />
       )}
+      <EditorRow>
+        <QueryOptionGroup
+          title="Options"
+          collapsedInfo={[`Storage API: ${queryWithDefaults.enableStorageAPI ? 'enabled' : 'disabled'}`]}
+        >
+          <InlineSwitch
+            id={`${htmlId}-storage-api`}
+            label="Enable Storage API"
+            transparent={true}
+            showLabel={true}
+            value={queryWithDefaults.enableStorageAPI}
+            onChange={onStorageApiChange}
+          />
+        </QueryOptionGroup>
+      </EditorRow>
     </>
   );
 }
