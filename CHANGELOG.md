@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.2.1
+
+🐛 Fix: Return downstream error when query fails
+
 ## 2.2.0
 
 🚀 Feat: Add OAuth passthrough
