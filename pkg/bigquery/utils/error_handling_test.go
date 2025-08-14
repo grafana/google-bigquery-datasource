@@ -17,7 +17,7 @@ func TestHandleError_GoogleAPIError(t *testing.T) {
 	}
 
 	// Test HandleError function
-	errorResp, statusCode := HandleError(context.Background(), googleErr, "test operation")
+	errorResp, statusCode := HandleError(t.Context(), googleErr, "test operation")
 
 	// Verify the response
 	if statusCode != 403 {
@@ -43,7 +43,7 @@ func TestHandleError_GenericError(t *testing.T) {
 	genericErr := errors.New("connection timeout")
 
 	// Test HandleError function
-	errorResp, statusCode := HandleError(context.Background(), genericErr, "database connection")
+	errorResp, statusCode := HandleError(t.Context(), genericErr, "database connection")
 
 	// Verify the response
 	if statusCode != http.StatusInternalServerError {
@@ -66,7 +66,7 @@ func TestHandleError_GenericError(t *testing.T) {
 
 func TestHandleError_NilError(t *testing.T) {
 	// Test with nil error
-	errorResp, statusCode := HandleError(context.Background(), nil, "test operation")
+	errorResp, statusCode := HandleError(t.Context(), nil, "test operation")
 
 	// Verify the response
 	if statusCode != 0 {
