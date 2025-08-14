@@ -39,11 +39,6 @@ var routes = map[string]routeInfo{
 }
 
 func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclient.Middleware, error) {
-	// Validate authentication type
-	if settings.AuthenticationType == "" {
-		return nil, fmt.Errorf("authentication type is required but not specified")
-	}
-
 	providerConfig := tokenprovider.Config{
 		RoutePath:         routePath,
 		RouteMethod:       routes[routePath].method,
@@ -63,6 +58,8 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 		}
 
 	case "jwt":
+		fallthrough
+	default:
 		err := validateDataSourceSettings(settings)
 
 		if err != nil {
@@ -84,8 +81,6 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 			}
 			provider = tokenprovider.NewJwtAccessTokenProvider(providerConfig)
 		}
-	default:
-		return nil, fmt.Errorf("unsupported authentication type: %s. Supported types are: 'gce', 'jwt'", settings.AuthenticationType)
 	}
 
 	return tokenprovider.AuthMiddleware(provider), nil

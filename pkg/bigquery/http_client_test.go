@@ -19,27 +19,24 @@ func TestGetMiddleware(t *testing.T) {
 		TokenUri:       "https://oauth2.googleapis.com/token",
 	}
 
-	t.Run("returns error when authentication type is empty", func(t *testing.T) {
+	t.Run("treats empty authentication type as jwt and validates datasource settings", func(t *testing.T) {
 		settings := baseSettings
 		settings.AuthenticationType = ""
 
 		middleware, err := getMiddleware(settings, bigQueryRoute)
 
-		assert.Nil(t, middleware)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "authentication type is required but not specified")
+		assert.NotNil(t, middleware)
+		assert.NoError(t, err)
 	})
 
-	t.Run("returns error for unsupported authentication type", func(t *testing.T) {
+	t.Run("treats unsupported authentication type as jwt and validates datasource settings", func(t *testing.T) {
 		settings := baseSettings
 		settings.AuthenticationType = "unsupported-auth-type"
 
 		middleware, err := getMiddleware(settings, bigQueryRoute)
 
-		assert.Nil(t, middleware)
-		require.Error(t, err)
-		assert.Contains(t, err.Error(), "unsupported authentication type: unsupported-auth-type")
-		assert.Contains(t, err.Error(), "Supported types are: 'gce', 'jwt'")
+		assert.NotNil(t, middleware)
+		assert.NoError(t, err)
 	})
 
 	t.Run("succeeds for valid gce authentication type", func(t *testing.T) {
@@ -62,10 +59,34 @@ func TestGetMiddleware(t *testing.T) {
 		assert.NoError(t, err)
 	})
 
-	t.Run("returns error for jwt authentication when required fields are missing", func(t *testing.T) {
+	t.Run("returns error when datasource settings are missing for jwt authentication", func(t *testing.T) {
 		settings := baseSettings
 		settings.AuthenticationType = "jwt"
 		settings.ClientEmail = "" // Missing required field
+
+		middleware, err := getMiddleware(settings, bigQueryRoute)
+
+		assert.Nil(t, middleware)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "datasource is missing authentication details")
+	})
+
+	t.Run("returns error when datasource settings are missing for empty authentication type", func(t *testing.T) {
+		settings := baseSettings
+		settings.AuthenticationType = ""
+		settings.DefaultProject = "" // Missing required field
+
+		middleware, err := getMiddleware(settings, bigQueryRoute)
+
+		assert.Nil(t, middleware)
+		require.Error(t, err)
+		assert.Contains(t, err.Error(), "datasource is missing authentication details")
+	})
+
+	t.Run("returns error when datasource settings are missing for unsupported authentication type", func(t *testing.T) {
+		settings := baseSettings
+		settings.AuthenticationType = "unsupported-type"
+		settings.PrivateKey = "" // Missing required field
 
 		middleware, err := getMiddleware(settings, bigQueryRoute)
 
