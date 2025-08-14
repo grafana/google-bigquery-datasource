@@ -74,7 +74,7 @@ func newBigQueryDatasource() *BigQueryDatasource {
 	return &BigQueryDatasource{
 		bqFactory:               bq.NewClient,
 		resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
-		logger:                  backend.NewLoggerWith("bigquery datasource"),
+		logger:                  backend.Logger,
 	}
 }
 
@@ -142,7 +142,8 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	} else {
 		client, err := newHTTPClient(settings, opts, bigQueryRoute)
 		if err != nil {
-			return nil, ErrFailedToConnect
+			loggerWithContext.Warn("Failed to get http client options", "error", err)
+			return nil, err
 		}
 
 		options := []option.ClientOption{option.WithHTTPClient(client)}
@@ -151,16 +152,17 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			options = append(options, option.WithEndpoint(settings.ServiceEndpoint))
 		}
 
-		bqClient, err := s.bqFactory(context.Background(), connectionSettings.Project, options...)
+		bqClient, err := s.bqFactory(ctx, connectionSettings.Project, options...)
 		if err != nil {
+			loggerWithContext.Warn("Failed to create bigquery client", "error", err)
 			return nil, ErrFailedToConnect
 		}
 
 		dr, db, err := driver.Open(connectionSettings, bqClient)
-
 		if err != nil {
 			return nil, ErrFailedToConnect
 		}
+		
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 
 		apiInstance := api.New(bqClient)
