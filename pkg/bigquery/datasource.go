@@ -79,6 +79,7 @@ func newBigQueryDatasource() *BigQueryDatasource {
 }
 
 func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSourceInstanceSettings, queryArgs json.RawMessage) (*sql.DB, error) {
+	loggerWithContext := s.logger.FromContext(ctx)
 	settings, err := loadSettings(&config)
 	if err != nil {
 		return nil, err
@@ -120,11 +121,11 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	if exists {
 		connection := c.(conn)
 		if !connection.driver.Closed() {
-			s.logger.FromContext(ctx).Debug("Reusing existing connection to BigQuery")
+			loggerWithContext.Debug("Reusing existing connection to BigQuery")
 			return connection.db, nil
 		}
 	} else {
-		s.logger.FromContext(ctx).Debug("Creating new connection to BigQuery")
+		loggerWithContext.Debug("Creating new connection to BigQuery")
 	}
 
 	aC, exists := s.apiClients.Load(connectionKey)
@@ -146,7 +147,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 		options := []option.ClientOption{option.WithHTTPClient(client)}
 		if settings.ServiceEndpoint != "" {
-			s.logger.FromContext(ctx).Debug("Using custom service endpoint URL", "url", settings.ServiceEndpoint)
+			loggerWithContext.Debug("Using custom service endpoint URL", "url", settings.ServiceEndpoint)
 			options = append(options, option.WithEndpoint(settings.ServiceEndpoint))
 		}
 
@@ -172,22 +173,23 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 }
 
 func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, id string) error {
+	loggerWithContext := s.logger.FromContext(ctx)
 	httpOptions, err := config.HTTPClientOptions(ctx)
 	if err != nil {
-		s.logger.FromContext(ctx).Warn("Failed to get http client options", "error", err)
+		loggerWithContext.Warn("Failed to get http client options", "error", err)
 		return err
 	}
 
 	httpClient, err := newHTTPClient(settings, httpOptions, resourceManagerRoute)
 	if err != nil {
-		s.logger.FromContext(ctx).Warn("Failed to create http client for resource manager", "error", err)
+		loggerWithContext.Warn("Failed to create http client for resource manager", "error", err)
 		return err
 	}
 
 	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
 	s.resourceManagerServices[id] = cloudresourcemanagerService
 	if err != nil {
-		s.logger.FromContext(ctx).Warn("Failed to create resource manager service", "error", err)
+		loggerWithContext.Warn("Failed to create resource manager service", "error", err)
 		return err
 	}
 
