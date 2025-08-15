@@ -58,6 +58,8 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 		}
 
 	case "jwt":
+		fallthrough
+	default:
 		err := validateDataSourceSettings(settings)
 
 		if err != nil {

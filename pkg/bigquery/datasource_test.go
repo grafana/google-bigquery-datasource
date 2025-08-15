@@ -37,6 +37,7 @@ func Test_datasourceConnection(t *testing.T) {
 			}, nil
 		},
 		resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
+		logger:                  backend.NewLoggerWith("bigquery datasource"),
 	}
 
 	t.Run("errors if authentication details are not configured connection", func(t *testing.T) {
@@ -89,6 +90,7 @@ func Test_datasourceConnection(t *testing.T) {
 				}, nil
 			},
 			resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
+			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
 		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
@@ -114,6 +116,7 @@ func Test_datasourceConnection(t *testing.T) {
 				}, nil
 			},
 			resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
+			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
 		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
@@ -142,6 +145,7 @@ func Test_datasourceConnection(t *testing.T) {
 				}, nil
 			},
 			resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
+			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
 		_, err1 := RunConnection(ds, []byte(`{}`))
@@ -175,6 +179,7 @@ func Test_getApi(t *testing.T) {
 					Location: "test",
 				}, nil
 			},
+			logger: backend.NewLoggerWith("bigquery datasource"),
 		}
 		_, err := ds.getApi(context.Background(), "raintank-dev", "us-west1")
 		assert.Nil(t, err)
@@ -193,6 +198,7 @@ func Test_getApi(t *testing.T) {
 					Location: "test",
 				}, nil
 			},
+			logger: backend.NewLoggerWith("bigquery datasource"),
 		}
 		_, err1 := ds.getApi(context.Background(), "raintank-dev", "us-west1")
 		assert.Nil(t, err1)
@@ -217,6 +223,7 @@ func Test_getApi(t *testing.T) {
 					Location: "test",
 				}, nil
 			},
+			logger: backend.NewLoggerWith("bigquery datasource"),
 		}
 
 		ds.apiClients.Store("1/us-west1:raintank-dev", api.New(&bq.Client{
