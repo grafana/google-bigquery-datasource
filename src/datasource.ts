@@ -1,5 +1,4 @@
 import {
-  DataQuery,
   DataQueryRequest,
   DataSourceInstanceSettings,
   ScopedVars,
@@ -12,6 +11,7 @@ import { uniqueId } from 'lodash';
 import { VariableEditor } from './components/VariableEditor';
 import { BigQueryOptions, BigQueryQueryNG, BigQueryAuth, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
+import { DataQuery } from '@grafana/schema';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   jsonData: BigQueryOptions;
