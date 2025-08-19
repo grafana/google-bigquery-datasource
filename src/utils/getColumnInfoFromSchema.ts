@@ -10,7 +10,7 @@ export const getColumnInfoFromSchema = (
     const f = schema.find((f) => f.name === c[i]);
 
     if (f && c[i + 1] !== undefined) {
-      return getColumnInfoFromSchema(column.substr(c[i].length + 1), f?.schema);
+      return getColumnInfoFromSchema(column.substring(c[i].length + 1), f?.schema);
     } else if (f) {
       return { type: f.repeated ? `Repeated ${f.type}` : f.type, description: f.description };
     }

@@ -50,7 +50,7 @@ export function formatBigqueryError(error: any) {
 
 export function getShiftPeriod(strInterval: string): [DurationUnit, string] {
   const shift = strInterval.match(/\d+/)![0];
-  strInterval = strInterval.substr(shift.length, strInterval.length);
+  strInterval = strInterval.substring(shift.length, strInterval.length);
 
   if (strInterval.trim() === 'min') {
     strInterval = 'm';
@@ -156,11 +156,11 @@ export function updatePartition(q: string, options: DataQueryRequest<BigQueryQue
   if (q.indexOf('AND _PARTITIONTIME <') < 1) {
     return q;
   }
-  const from = q.substr(q.indexOf('AND _PARTITIONTIME >= ') + 22, 21);
+  const from = q.substring(q.indexOf('AND _PARTITIONTIME >= ') + 22, 21);
 
   const newFrom = "'" + formatDateToString(options.range.from.toDate(), '-', true) + "'";
   q = q.replace(from, newFrom);
-  const to = q.substr(q.indexOf('AND _PARTITIONTIME < ') + 21, 21);
+  const to = q.substring(q.indexOf('AND _PARTITIONTIME < ') + 21, 21);
   const newTo = "'" + formatDateToString(options.range.to.toDate(), '-', true) + "'";
 
   q = q.replace(to, newTo) + '\n ';
@@ -172,11 +172,11 @@ export function updateTableSuffix(q: string, options: DataQueryRequest<BigQueryQ
   if (ind < 1) {
     return q;
   }
-  const from = q.substr(ind + 28, 8);
+  const from = q.substring(ind + 28, 8);
 
   const newFrom = formatDateToString(options.range.from.toDate());
   q = q.replace(from, newFrom);
-  const to = q.substr(ind + 43, 8);
+  const to = q.substring(ind + 43, 8);
   const newTo = formatDateToString(options.range.to.toDate());
   q = q.replace(to, newTo) + '\n ';
   return q;
@@ -215,7 +215,7 @@ export function formatDateToString(inputDate: Date, separator = '', addTime = fa
   // create the format you want
   let dateStr = YYYY + separator + MM + separator + DD;
   if (addTime === true) {
-    dateStr += ' ' + date.toTimeString().substr(0, 8);
+    dateStr += ' ' + date.toTimeString().substring(0, 8);
   }
   return dateStr;
 }
@@ -264,7 +264,7 @@ export function getTimeShift(q: string) {
   let result = null;
 
   if (res) {
-    result = res[0].substr(1 + res[0].lastIndexOf('('));
+    result = res[0].substring(1 + res[0].lastIndexOf('('));
   }
   return result;
 }
