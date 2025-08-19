@@ -59,6 +59,8 @@ export function SQLOrderByRow({ sql, onSqlChange, columns, showOffset }: SQLOrde
     <>
       <EditorField label="Order by" width={25}>
         <InputGroup>
+          {/* TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now */}
+          {/* eslint-disable-next-line deprecation/deprecation */}
           <Select
             aria-label="Order by"
             options={columns}

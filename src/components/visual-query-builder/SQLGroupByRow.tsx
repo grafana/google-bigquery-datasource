@@ -49,6 +49,8 @@ function makeRenderColumn({ options }: { options?: Array<SelectableValue<string>
   ) {
     return (
       <InputGroup>
+        {/* TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now */}
+        {/* eslint-disable-next-line deprecation/deprecation */}
         <Select
           value={isQueryEditorGroupByExpression(item) && item.property?.name ? toOption(item.property.name) : null}
           aria-label="Group by"
