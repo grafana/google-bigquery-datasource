@@ -1,7 +1,6 @@
 import { css } from '@emotion/css';
-import { SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
-import { useStyles2, Select, Button, Stack } from '@grafana/ui';
+import { useStyles2, Button, Stack, Combobox, ComboboxOption, Select } from '@grafana/ui';
 import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
 import { uniqueId } from 'lodash';
 import React, { useCallback } from 'react';
@@ -9,6 +8,7 @@ import { toOption } from 'utils/data';
 import { createFunctionField } from 'utils/sql.utils';
 import { SQLExpression } from '../../types';
 import { BQ_AGGREGATE_FNS } from '../query-editor-raw/bigQueryFunctions';
+import { SelectableValue } from '@grafana/data';
 
 interface SQLSelectRowProps {
   sql: SQLExpression;
@@ -44,7 +44,7 @@ export function SQLSelectRow({ sql, columns, onSqlChange }: SQLSelectRowProps) {
   );
 
   const onAggregationChange = useCallback(
-    (item: QueryEditorFunctionExpression, index: number) => (aggregation: SelectableValue<string>) => {
+    (item: QueryEditorFunctionExpression, index: number) => (aggregation: ComboboxOption<string> | null) => {
       const newItem = {
         ...item,
         name: aggregation?.value,
@@ -94,12 +94,11 @@ export function SQLSelectRow({ sql, columns, onSqlChange }: SQLSelectRowProps) {
             </EditorField>
 
             <EditorField label="Aggregation" optional width={25}>
-              <Select
+              <Combobox
                 value={item.name ? toOption(item.name) : null}
-                inputId={`select-aggregation-${index}-${uniqueId()}`}
+                id={`select-aggregation-${index}-${uniqueId()}`}
                 isClearable
-                menuShouldPortal
-                allowCustomValue
+                createCustomValue
                 options={aggregateFnOptions}
                 onChange={onAggregationChange(item, index)}
               />
@@ -134,7 +133,7 @@ const getStyles = () => {
 
 const aggregateFnOptions = BQ_AGGREGATE_FNS.map((v) => toOption(v.name));
 
-function getColumnValue({ parameters }: QueryEditorFunctionExpression): SelectableValue<string> | null {
+function getColumnValue({ parameters }: QueryEditorFunctionExpression): ComboboxOption<string> | null {
   const column = parameters?.find((p) => p.type === QueryEditorExpressionType.FunctionParameter);
   if (column?.name) {
     return toOption(column.name);

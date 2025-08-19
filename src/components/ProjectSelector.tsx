@@ -1,6 +1,6 @@
 import { SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
-import { Select, useTheme2 } from '@grafana/ui';
+import { Combobox, useTheme2 } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { css } from '@emotion/css';
 import { useAsync } from 'react-use';
@@ -68,14 +68,13 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   return (
     <div className={css({ width: theme.spacing(25) })}>
       <EditorField label="Project" width={25} error={getErrorMessage()} invalid={!!state.error}>
-        <Select
+        <Combobox
           aria-label="Project selector"
-          inputId={inputId}
+          id={inputId}
           value={state.loading ? null : value}
           options={state.loading ? [] : state.value || [{ label: value, value }]}
           onChange={onChange}
-          isLoading={state.loading}
-          menuShouldPortal={true}
+          loading={state.loading}
         />
       </EditorField>
     </div>

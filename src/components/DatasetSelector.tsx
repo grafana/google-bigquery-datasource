@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { Select } from '@grafana/ui';
+import { Combobox } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { useAsync } from 'react-use';
 import { ResourceSelectorProps } from 'types';
@@ -22,7 +22,6 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   project,
   onChange,
   disabled,
-  className,
   applyDefault,
   inputId,
 }) => {
@@ -51,16 +50,14 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   }, [state.value, value, location, applyDefault, onChange]);
 
   return (
-    <Select
-      className={className}
+    <Combobox
       aria-label="Dataset selector"
-      inputId={inputId}
+      id={inputId}
       value={value}
-      options={state.value}
+      options={state.value ?? []}
       onChange={onChange}
       disabled={disabled}
-      isLoading={state.loading}
-      menuShouldPortal={true}
+      loading={state.loading}
     />
   );
 };

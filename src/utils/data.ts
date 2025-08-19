@@ -1,5 +1,4 @@
-import { SelectableValue, toOption as toOptionFromData } from '@grafana/data';
+import { ComboboxOption } from '@grafana/ui';
 
-const backWardToOption = (value: string) => ({ label: value, value }) as SelectableValue<string>;
 
-export const toOption = toOptionFromData ?? backWardToOption;
+export const toOption = (value: string) => ({ label: value, value }) as ComboboxOption<string>;

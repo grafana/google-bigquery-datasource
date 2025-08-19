@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { Select } from '@grafana/ui';
+import { Combobox } from '@grafana/ui';
 import React from 'react';
 import { useAsync } from 'react-use';
 import { toOption } from 'utils/data';
@@ -16,7 +16,6 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
   apiClient,
   query,
   value,
-  className,
   onChange,
   inputId,
 }) => {
@@ -29,16 +28,14 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
   }, [query]);
 
   return (
-    <Select
-      className={className}
+    <Combobox
       disabled={state.loading}
-      inputId={inputId}
+      id={inputId}
       aria-label="Table selector"
       value={value}
-      options={state.value}
+      options={state.value ?? []}
       onChange={onChange}
-      isLoading={state.loading}
-      menuShouldPortal={true}
+      loading={state.loading}
       placeholder={state.loading ? 'Loading tables' : 'Select table'}
     />
   );
