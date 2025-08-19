@@ -2,7 +2,7 @@ import {
   DataSourcePluginOptionsEditorProps,
   DataSourceSettings,
   onUpdateDatasourceJsonDataOption,
-  onUpdateDatasourceJsonDataOptionSelect
+  onUpdateDatasourceJsonDataOptionSelect,
 } from '@grafana/data';
 import { AuthConfig, DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';

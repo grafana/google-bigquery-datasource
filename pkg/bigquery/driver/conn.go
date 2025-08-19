@@ -15,6 +15,7 @@ import (
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
 
@@ -209,16 +210,27 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 	job, err := q.Run(ctx)
 
 	if err != nil {
-		errorResponse, statusCode := utils.HandleError(err, "Failed to connect with BigQuery")
+		// Unwrap the error to get to the root cause
+		rootErr := err
+		for rootErr != nil {
+			// If the error is a Google API error, we handle it in the HandleError function
+			if _, ok := rootErr.(*googleapi.Error); ok {
+				break
+			}
+			if unwrapped := errors.Unwrap(rootErr); unwrapped != nil {
+				rootErr = unwrapped
+			} else {
+				break
+			}
+		}
+
+		_, statusCode := utils.HandleError(ctx, rootErr, fmt.Sprintf("Failed to connect with authentication type: %s", c.cfg.AuthenticationType))
 		if statusCode == 403 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
-			logger.Warn("Forbidden", "error", errorResponse.Error)
 			return backend.DownstreamError(errors.New("connected to BigQuery but missing permissions to run queries"))
 		} else if statusCode == 401 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
-			logger.Warn("Unauthorized", "error", errorResponse.Error)
 			return backend.DownstreamError(errors.New("unauthorized to connect to BigQuery"))
 		}
-		logger.Warn("Failed to connect with BigQuery", "error", errorResponse.Error)
-		return
+		return rootErr
 	}
 
 	logger.Info("Successful Ping", "status", job.LastStatus().State)
