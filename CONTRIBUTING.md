@@ -45,6 +45,14 @@ Make sure you have the following dependencies installed first:
    yarn server
    ```
 
+## Testing
+
+1. Testing the frontend
+
+   ```bash
+   yarn test
+   ```
+
 ## Submitting PR
 
 If you are creating a PR, ensure to run `yarn changeset` from your branch. Provide the details accordingly. It will create `*.md` file inside `./.changeset` folder. Later during the release, based on these changesets, package version will be bumped and changelog will be generated.
