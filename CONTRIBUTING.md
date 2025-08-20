@@ -19,14 +19,19 @@ Make sure you have the following dependencies installed first:
    ```bash
    yarn install
    ```
+2. Install playwright
+   
+   ```bash
+      yarn playwright install   
+   ```
 
-2. Build plugin in development mode
+3. Build plugin in development mode
 
    ```bash
    yarn dev
    ```
 
-3. Build plugin in production mode
+4. Build plugin in production mode
 
    ```bash
    yarn build
@@ -51,6 +56,11 @@ Make sure you have the following dependencies installed first:
 
    ```bash
    yarn test
+   ```
+2. Running e2e tests
+
+   ```bash
+   yarn e2e
    ```
 
 ## Submitting PR
