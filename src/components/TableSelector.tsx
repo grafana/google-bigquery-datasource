@@ -1,5 +1,5 @@
 import { SelectableValue } from '@grafana/data';
-import { Combobox } from '@grafana/ui';
+import { Select } from '@grafana/ui';
 import React from 'react';
 import { useAsync } from 'react-use';
 import { toOption } from 'utils/data';
@@ -16,6 +16,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
   apiClient,
   query,
   value,
+  className,
   onChange,
   inputId,
 }) => {
@@ -28,14 +29,21 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
   }, [query]);
 
   return (
-    <Combobox
+    // There is a known issue with ComboBox where user needs to start typing into the input to see the options.
+    // See: https://github.com/grafana/grafana/issues/108400
+    // Likely not ideal to migrate to ComboBox at this point.
+    // TODO: Migrate to ComboBox when the issue is resolved.z
+    // eslint-disable-next-line deprecation/deprecation
+    <Select
+      className={className}
       disabled={state.loading}
-      id={inputId}
+      inputId={inputId}
       aria-label="Table selector"
       value={value}
-      options={state.value ?? []}
+      options={state.value}
       onChange={onChange}
-      loading={state.loading}
+      isLoading={state.loading}
+      menuShouldPortal={true}
       placeholder={state.loading ? 'Loading tables' : 'Select table'}
     />
   );
