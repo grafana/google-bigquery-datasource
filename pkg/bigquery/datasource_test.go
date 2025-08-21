@@ -54,7 +54,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err := RunConnection(ds, []byte("{}"))
 		assert.Nil(t, err)
 
-		_, exists := ds.connections.Load("1/:raintank-dev")
+		_, exists := ds.connections.Load("1/:raintank-dev:false")
 		assert.True(t, exists)
 	})
 
@@ -62,7 +62,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err1 := RunConnection(ds, []byte(`{"location": "us-west2"}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west2:raintank-dev")
+		_, exists := ds.connections.Load("1/us-west2:raintank-dev:false")
 		assert.True(t, exists)
 	})
 
@@ -73,9 +73,9 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err2 := RunConnection(ds, []byte(`{"location": "us-west3"}`))
 		assert.Nil(t, err2)
 
-		_, conn1Exists := ds.connections.Load("1/us-west2:raintank-dev")
+		_, conn1Exists := ds.connections.Load("1/us-west2:raintank-dev:false")
 		assert.True(t, conn1Exists)
-		_, conn2Exists := ds.connections.Load("1/us-west3:raintank-dev")
+		_, conn2Exists := ds.connections.Load("1/us-west3:raintank-dev:false")
 		assert.True(t, conn2Exists)
 	})
 
@@ -93,14 +93,14 @@ func Test_datasourceConnection(t *testing.T) {
 			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
-		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
+		ds.apiClients.Store("1/us-west2:raintank-dev:false", api.New(&bq.Client{
 			Location: "us-west1",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{"location": "us-west2"}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west2:raintank-dev")
+		_, exists := ds.connections.Load("1/us-west2:raintank-dev:false")
 		assert.True(t, exists)
 		assert.Equal(t, 0, clientsFactoryCallsCount)
 	})
@@ -119,19 +119,19 @@ func Test_datasourceConnection(t *testing.T) {
 			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
-		ds.apiClients.Store("1/us-west2:raintank-dev", api.New(&bq.Client{
+		ds.apiClients.Store("1/us-west2:raintank-dev:false", api.New(&bq.Client{
 			Location: "",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/:raintank-dev")
+		_, exists := ds.connections.Load("1/:raintank-dev:false")
 		assert.True(t, exists)
 
-		_, apiClient1Exists := ds.apiClients.Load("1/us-west2:raintank-dev")
+		_, apiClient1Exists := ds.apiClients.Load("1/us-west2:raintank-dev:false")
 		assert.True(t, apiClient1Exists)
-		_, apiClient2Exists := ds.apiClients.Load("1/:raintank-dev")
+		_, apiClient2Exists := ds.apiClients.Load("1/:raintank-dev:false")
 		assert.True(t, apiClient2Exists)
 
 		assert.Equal(t, 1, clientsFactoryCallsCount)

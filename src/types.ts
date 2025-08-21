@@ -66,6 +66,7 @@ export interface QueryModel extends DataQuery {
     dataset: string;
     table: string;
     location: string;
+    enableStorageAPI: boolean;
   };
 }
 
@@ -97,6 +98,7 @@ export interface BigQueryQueryNG extends DataQuery {
   rawQuery?: boolean;
   rawSql: string;
   location?: string;
+  enableStorageAPI?: boolean;
 
   partitioned?: boolean;
   partitionedField?: string;
