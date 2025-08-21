@@ -85,7 +85,7 @@ export function SQLSelectRow({ sql, columns, onSqlChange }: SQLSelectRowProps) {
         <div key={index}>
           <Stack gap={2} alignItems="end">
             <EditorField label="Column" width={25}>
-              {/* TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now */}
+              {/* TODO: migrate this to ComboBox when we find a way to use ComboBox options with icons. Disabling lint warning for now */}
               {/* eslint-disable-next-line deprecation/deprecation */}
               <Select
                 value={getColumnValue(item)}
