@@ -1,8 +1,10 @@
-import { SelectableValue } from '@grafana/data';
-import { Select } from '@grafana/ui';
 import React from 'react';
 import { useAsync } from 'react-use';
+
+import { SelectableValue } from '@grafana/data';
+import { Select } from '@grafana/ui';
 import { toOption } from 'utils/data';
+
 import { QueryWithDefaults, ResourceSelectorProps } from '../types';
 
 interface TableSelectorProps extends ResourceSelectorProps {

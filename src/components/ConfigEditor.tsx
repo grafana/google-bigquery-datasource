@@ -1,3 +1,5 @@
+import React from 'react';
+
 import {
   DataSourcePluginOptionsEditorProps,
   DataSourceSettings,
@@ -7,10 +9,11 @@ import {
 import { AuthConfig, DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
-import { Field, Input, SecureSocksProxySettings, Combobox } from '@grafana/ui';
-import React from 'react';
+import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
+
 import { PROCESSING_LOCATIONS } from '../constants';
-import { BigQueryAuth, bigQueryAuthTypes, BigQueryOptions, BigQuerySecureJsonData } from '../types';
+import { BigQueryAuth, BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
+
 import { ConfigurationHelp } from './/ConfigurationHelp';
 import { Divider } from './Divider';
 

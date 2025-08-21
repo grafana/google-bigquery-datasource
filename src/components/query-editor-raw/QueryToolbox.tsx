@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { Icon, IconButton, Stack, Tooltip, useTheme2 } from '@grafana/ui';
-import { QueryValidator, QueryValidatorProps } from './QueryValidator';
+
 import { css } from '@emotion/css';
+import { Icon, IconButton, Stack, Tooltip, useTheme2 } from '@grafana/ui';
+
+import { QueryValidator, QueryValidatorProps } from './QueryValidator';
 
 interface QueryToolboxProps extends Omit<QueryValidatorProps, 'onValidate'> {
   showTools?: boolean;

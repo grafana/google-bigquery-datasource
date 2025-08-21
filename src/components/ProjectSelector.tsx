@@ -1,9 +1,10 @@
+import React, { useEffect } from 'react';
+import { useAsync } from 'react-use';
+
+import { css } from '@emotion/css';
 import { SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
 import { Combobox, useTheme2 } from '@grafana/ui';
-import React, { useEffect } from 'react';
-import { css } from '@emotion/css';
-import { useAsync } from 'react-use';
 import { ResourceSelectorProps } from 'types';
 
 interface ProjectSelectorProps extends Omit<ResourceSelectorProps, 'location'> {

@@ -1,6 +1,13 @@
 import { EditorMode } from '@grafana/plugin-ui';
 import { QueryFormat } from 'types';
-import { applyQueryDefaults, extractFromClause, findTimeField, formatBigqueryError, getShiftPeriod, handleError } from 'utils';
+import {
+  applyQueryDefaults,
+  extractFromClause,
+  findTimeField,
+  formatBigqueryError,
+  getShiftPeriod,
+  handleError,
+} from 'utils';
 
 describe('Utils', () => {
   test('formatBigqueryError', () => {
@@ -127,7 +134,6 @@ describe('Utils', () => {
     expect(res[0]).toBe('1m');
     expect(res[1]).toBe('10');
   });
-  
 
   test('getTimeShift and replaceTimeShift behave as expected', () => {
     const { getTimeShift, replaceTimeShift } = require('utils');

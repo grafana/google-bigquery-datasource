@@ -1,8 +1,9 @@
-import { SelectableValue } from '@grafana/data';
-import { InputGroup, Space, EditorField } from '@grafana/plugin-ui';
-import { Select, Input, RadioButtonGroup } from '@grafana/ui';
-import { uniqueId } from 'lodash';
 import React, { useCallback } from 'react';
+
+import { SelectableValue } from '@grafana/data';
+import { EditorField, InputGroup, Space } from '@grafana/plugin-ui';
+import { Input, RadioButtonGroup, Select } from '@grafana/ui';
+import { uniqueId } from 'lodash';
 import { SQLExpression } from 'types';
 import { toOption } from 'utils/data';
 import { setPropertyField } from 'utils/sql.utils';

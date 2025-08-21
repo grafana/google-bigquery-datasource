@@ -1,4 +1,5 @@
 import { TypedVariableModel } from '@grafana/data';
+
 import { interpolateVariable } from './interpolateVariable';
 
 describe('Interpolating variables', () => {

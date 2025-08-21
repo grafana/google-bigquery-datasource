@@ -1,7 +1,8 @@
+import React from 'react';
+
 import { dateTime } from '@grafana/data';
 import { Button, Combobox, DateTimePicker, Input, Select } from '@grafana/ui';
 import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from '@react-awesome-query-builder/ui';
-import React from 'react';
 import { toOption } from 'utils/data';
 
 const buttonLabels = {
@@ -82,7 +83,11 @@ export const settings: Settings = {
       <Combobox
         id={conjProps?.id}
         aria-label="Conjunction"
-        options={conjProps?.conjunctionOptions ? Object.keys(conjProps?.conjunctionOptions).map(toOption) : Object.keys(BasicConfig.conjunctions).map(toOption)}
+        options={
+          conjProps?.conjunctionOptions
+            ? Object.keys(conjProps?.conjunctionOptions).map(toOption)
+            : Object.keys(BasicConfig.conjunctions).map(toOption)
+        }
         value={conjProps?.selectedConjunction}
         onChange={(val) => conjProps?.setConjunction(val.value!)}
       />
@@ -90,7 +95,7 @@ export const settings: Settings = {
   },
   renderField: function Field(fieldProps) {
     return (
-      // TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now 
+      // TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now
       // eslint-disable-next-line deprecation/deprecation
       <Select
         id={fieldProps?.id}

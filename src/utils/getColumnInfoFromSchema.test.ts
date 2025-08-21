@@ -2,9 +2,7 @@ import { getColumnInfoFromSchema } from './getColumnInfoFromSchema';
 
 describe('getColumnInfoFromSchema', () => {
   test('returns type and description for top-level column', () => {
-    const schema = [
-      { name: 'col', type: 'STRING', description: 'top level', repeated: false } as any,
-    ];
+    const schema = [{ name: 'col', type: 'STRING', description: 'top level', repeated: false } as any];
 
     const res = getColumnInfoFromSchema('col', schema);
     expect(res).toEqual({ type: 'STRING', description: 'top level' });

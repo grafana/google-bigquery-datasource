@@ -1,17 +1,13 @@
-import {
-  DataQueryRequest,
-  DataSourceInstanceSettings,
-  ScopedVars,
-  VariableSupportType,
-} from '@grafana/data';
+import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSupportType } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
-import { DataSourceWithBackend, getTemplateSrv, HealthCheckError } from '@grafana/runtime';
+import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
+import { DataQuery } from '@grafana/schema';
 import { getApiClient } from 'api';
 import { uniqueId } from 'lodash';
+
 import { VariableEditor } from './components/VariableEditor';
-import { BigQueryOptions, BigQueryQueryNG, BigQueryAuth, QueryFormat, QueryModel } from './types';
+import { BigQueryAuth, BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
-import { DataQuery } from '@grafana/schema';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   jsonData: BigQueryOptions;
