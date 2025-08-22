@@ -1,17 +1,13 @@
 // # MIT License
-
 // ## Copyright (c) 2019 DoiT International
-
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -19,8 +15,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-
-import { DataQueryRequest, dateTime, DurationUnit } from '@grafana/data';
+import { DataQueryRequest, DurationUnit, dateTime } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
 import { BigQueryAPI } from 'api';
 import { BigQueryDatasource } from 'datasource';
@@ -50,7 +45,7 @@ export function formatBigqueryError(error: any) {
 
 export function getShiftPeriod(strInterval: string): [DurationUnit, string] {
   const shift = strInterval.match(/\d+/)![0];
-  strInterval = strInterval.substr(shift.length, strInterval.length);
+  strInterval = strInterval.substring(shift.length, strInterval.length);
 
   if (strInterval.trim() === 'min') {
     strInterval = 'm';
@@ -156,11 +151,11 @@ export function updatePartition(q: string, options: DataQueryRequest<BigQueryQue
   if (q.indexOf('AND _PARTITIONTIME <') < 1) {
     return q;
   }
-  const from = q.substr(q.indexOf('AND _PARTITIONTIME >= ') + 22, 21);
+  const from = q.substring(q.indexOf('AND _PARTITIONTIME >= ') + 22, 21);
 
   const newFrom = "'" + formatDateToString(options.range.from.toDate(), '-', true) + "'";
   q = q.replace(from, newFrom);
-  const to = q.substr(q.indexOf('AND _PARTITIONTIME < ') + 21, 21);
+  const to = q.substring(q.indexOf('AND _PARTITIONTIME < ') + 21, 21);
   const newTo = "'" + formatDateToString(options.range.to.toDate(), '-', true) + "'";
 
   q = q.replace(to, newTo) + '\n ';
@@ -172,11 +167,11 @@ export function updateTableSuffix(q: string, options: DataQueryRequest<BigQueryQ
   if (ind < 1) {
     return q;
   }
-  const from = q.substr(ind + 28, 8);
+  const from = q.substring(ind + 28, 8);
 
   const newFrom = formatDateToString(options.range.from.toDate());
   q = q.replace(from, newFrom);
-  const to = q.substr(ind + 43, 8);
+  const to = q.substring(ind + 43, 8);
   const newTo = formatDateToString(options.range.to.toDate());
   q = q.replace(to, newTo) + '\n ';
   return q;
@@ -215,7 +210,7 @@ export function formatDateToString(inputDate: Date, separator = '', addTime = fa
   // create the format you want
   let dateStr = YYYY + separator + MM + separator + DD;
   if (addTime === true) {
-    dateStr += ' ' + date.toTimeString().substr(0, 8);
+    dateStr += ' ' + date.toTimeString().substring(0, 8);
   }
   return dateStr;
 }
@@ -264,7 +259,7 @@ export function getTimeShift(q: string) {
   let result = null;
 
   if (res) {
-    result = res[0].substr(1 + res[0].lastIndexOf('('));
+    result = res[0].substring(1 + res[0].lastIndexOf('('));
   }
   return result;
 }

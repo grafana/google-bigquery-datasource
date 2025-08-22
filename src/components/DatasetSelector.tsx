@@ -1,7 +1,8 @@
-import { SelectableValue } from '@grafana/data';
-import { Select } from '@grafana/ui';
 import React, { useEffect } from 'react';
 import { useAsync } from 'react-use';
+
+import { SelectableValue } from '@grafana/data';
+import { Select } from '@grafana/ui';
 import { ResourceSelectorProps } from 'types';
 import { toOption } from 'utils/data';
 
@@ -51,6 +52,11 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
   }, [state.value, value, location, applyDefault, onChange]);
 
   return (
+    // There is a known issue with ComboBox where user needs to start typing into the input to see the options.
+    // See: https://github.com/grafana/grafana/issues/108400
+    // Likely not ideal to migrate to ComboBox at this point.
+    // TODO: Migrate to ComboBox when the issue is resolved.
+    // eslint-disable-next-line deprecation/deprecation
     <Select
       className={className}
       aria-label="Dataset selector"

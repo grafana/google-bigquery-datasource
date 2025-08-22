@@ -1,9 +1,12 @@
-import { SelectableValue } from '@grafana/data';
 // import { queries } from '@testing-library/dom';
-import { getApiClient } from 'api';
 import { useAsync } from 'react-use';
+
+import { SelectableValue } from '@grafana/data';
+import { getApiClient } from 'api';
+
 import { QueryWithDefaults } from '../types';
 import { getDatasourceId } from '../utils';
+
 import { getColumnInfoFromSchema } from './getColumnInfoFromSchema';
 
 type Options = {
