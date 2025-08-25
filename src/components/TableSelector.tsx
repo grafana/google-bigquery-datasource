@@ -27,7 +27,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
       return [];
     }
     const tables = await apiClient.getTables(query);
-    return tables.map(toOption);
+    return tables?.map(toOption);
   }, [query]);
 
   return (

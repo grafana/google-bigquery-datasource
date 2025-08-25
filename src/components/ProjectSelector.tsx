@@ -24,7 +24,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   const theme = useTheme2();
   const state = useAsync(async () => {
     const projects = await apiClient.getProjects();
-    return projects.map((project) => ({ label: project.displayName, value: project.projectId }));
+    return projects?.map((project) => ({ label: project.displayName, value: project.projectId }));
   }, []);
 
   useEffect(() => {

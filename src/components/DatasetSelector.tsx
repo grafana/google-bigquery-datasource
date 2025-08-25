@@ -29,7 +29,7 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
 }) => {
   const state = useAsync(async () => {
     const datasets = await apiClient.getDatasets(location, project);
-    return datasets.map(toOption);
+    return datasets?.map(toOption);
   }, [location, project]);
 
   useEffect(() => {
