@@ -216,6 +216,12 @@ To add a new Google BigQuery query variable, refer to [Add a query variable](htt
 
 After creating a variable, you can use it in your Google BigQuery queries by using [Variable syntax](https://grafana.com/docs/grafana/latest/variables/syntax/). For more information about variables, refer to [Templates and variables](https://grafana.com/docs/grafana/latest/variables/).
 
+### Storage API
+
+The plugin supports the [Storage API](https://cloud.google.com/bigquery/docs/reference/storage) for reading data from BigQuery. To enable the Storage API, you need to set the `Enable Storage API` option to `true` in the query editor.
+
+> **Note:** This doesn't work with Forward OAuth Identity.
+
 ## Learn more
 
 - Add [Annotations](https://grafana.com/docs/grafana/latest/dashboards/annotations/).

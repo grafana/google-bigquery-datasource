@@ -1,6 +1,6 @@
 module github.com/grafana/grafana-bigquery-datasource
 
-go 1.24.3
+go 1.24.6
 
 require (
 	cloud.google.com/go v0.120.0
@@ -10,6 +10,7 @@ require (
 	github.com/grafana/sqlds/v4 v4.2.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.233.0
 	google.golang.org/grpc v1.73.0
 )
@@ -114,7 +115,6 @@ require (
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
 	golang.org/x/mod v0.25.0 // indirect
 	golang.org/x/net v0.41.0 // indirect
-	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.15.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/term v0.32.0 // indirect
