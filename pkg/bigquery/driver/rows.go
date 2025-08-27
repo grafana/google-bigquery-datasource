@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"reflect"
-	"time"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
@@ -74,11 +73,9 @@ func (r *rows) bigqueryTypeOf(columnType *string) (reflect.Type, error) {
 		return reflect.TypeOf(""), nil
 	case "BOOLEAN":
 		return reflect.TypeOf(false), nil
-	case "TIMESTAMP":
-		return reflect.TypeOf(time.Time{}), nil
 	case "DATE", "TIME", "DATETIME":
 		return reflect.TypeOf(""), nil
-	case "RECORD", "GEOGRAPHY":
+	case "RECORD", "GEOGRAPHY", "JSON":
 		return reflect.TypeOf(""), nil
 	default:
 		return nil, fmt.Errorf("unknown column type `%s`", *columnType)
