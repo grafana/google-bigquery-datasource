@@ -106,6 +106,11 @@ export function QueryHeader({
     onChange(next);
   };
 
+  const onStorageApiChange = () => {
+    const next = { ...query, enableStorageAPI: !query.enableStorageAPI };
+    onChange(next);
+  };
+
   function renderRunButton(): React.ReactNode {
     if (!showRunButton) {
       return null;
@@ -156,6 +161,17 @@ export function QueryHeader({
           onChange={onFormatChange}
           options={QUERY_FORMAT_OPTIONS}
         />
+
+        {editorMode === EditorMode.Code && (
+          <InlineSwitch
+            id={`${htmlId}-storage-api`}
+            label="Storage API"
+            transparent={true}
+            showLabel={true}
+            value={query.enableStorageAPI}
+            onChange={onStorageApiChange}
+          />
+        )}
 
         {editorMode === EditorMode.Builder && (
           <>
