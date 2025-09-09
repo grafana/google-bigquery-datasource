@@ -272,7 +272,7 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 		return nil, backend.DownstreamError(err)
 	}
 
-	log.DefaultLogger.Debug("Executed query", "queryID", rowsIterator.QueryID(), "usingStorageAPI", rowsIterator.IsAccelerated())
+	log.DefaultLogger.Debug("Executed query", "usingStorageAPI", rowsIterator.IsAccelerated())
 
 	res := &rows{
 		rs: resultSet{},
