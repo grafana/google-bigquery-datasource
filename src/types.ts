@@ -1,4 +1,4 @@
-import { DataQuery, TimeRange } from '@grafana/data';
+import { TimeRange } from '@grafana/data';
 import {
   DataSourceOptions,
   DataSourceSecureJsonData,
@@ -6,6 +6,7 @@ import {
   GoogleAuthType,
 } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/plugin-ui';
+import { DataQuery } from '@grafana/schema';
 import { JsonTree } from '@react-awesome-query-builder/ui';
 import { BigQueryAPI } from 'api';
 import {

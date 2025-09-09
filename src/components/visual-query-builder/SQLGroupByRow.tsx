@@ -1,8 +1,9 @@
+import React, { useCallback } from 'react';
+
 import { SelectableValue } from '@grafana/data';
 import { AccessoryButton, EditorList, InputGroup } from '@grafana/plugin-ui';
 import { Select } from '@grafana/ui';
 import { QueryEditorExpressionType, QueryEditorGroupByExpression } from 'expressions';
-import React, { useCallback } from 'react';
 import { SQLExpression } from 'types';
 import { toOption } from 'utils/data';
 import { setGroupByField } from 'utils/sql.utils';
@@ -49,6 +50,8 @@ function makeRenderColumn({ options }: { options?: Array<SelectableValue<string>
   ) {
     return (
       <InputGroup>
+        {/* TODO: migrate this to ComboBox when we find a way to use ComboBox options with icons. Disabling lint warning for now */}
+        {/* eslint-disable-next-line deprecation/deprecation */}
         <Select
           value={isQueryEditorGroupByExpression(item) && item.property?.name ? toOption(item.property.name) : null}
           aria-label="Group by"

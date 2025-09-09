@@ -1,7 +1,8 @@
-import { dateTime } from '@grafana/data';
-import { Button, DateTimePicker, Input, Select } from '@grafana/ui';
-import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from '@react-awesome-query-builder/ui';
 import React from 'react';
+
+import { dateTime } from '@grafana/data';
+import { Button, Combobox, DateTimePicker, Input, Select } from '@grafana/ui';
+import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from '@react-awesome-query-builder/ui';
 import { toOption } from 'utils/data';
 
 const buttonLabels = {
@@ -79,11 +80,14 @@ export const settings: Settings = {
   deleteLabel: buttonLabels.remove,
   renderConjs: function Conjunctions(conjProps) {
     return (
-      <Select
+      <Combobox
         id={conjProps?.id}
         aria-label="Conjunction"
-        menuShouldPortal
-        options={conjProps?.conjunctionOptions ? Object.keys(conjProps?.conjunctionOptions).map(toOption) : undefined}
+        options={
+          conjProps?.conjunctionOptions
+            ? Object.keys(conjProps?.conjunctionOptions).map(toOption)
+            : Object.keys(BasicConfig.conjunctions).map(toOption)
+        }
         value={conjProps?.selectedConjunction}
         onChange={(val) => conjProps?.setConjunction(val.value!)}
       />
@@ -91,6 +95,8 @@ export const settings: Settings = {
   },
   renderField: function Field(fieldProps) {
     return (
+      // TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now
+      // eslint-disable-next-line deprecation/deprecation
       <Select
         id={fieldProps?.id}
         width={25}
@@ -122,10 +128,9 @@ export const settings: Settings = {
   },
   renderOperator: function Operator(operatorProps) {
     return (
-      <Select
+      <Combobox
         options={operatorProps?.items.map((op) => ({ label: op.label, value: op.key }))}
         aria-label="Operator"
-        menuShouldPortal
         value={operatorProps?.selectedKey}
         onChange={(val) => {
           operatorProps?.setField(val.value || '');

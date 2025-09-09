@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -49,7 +50,7 @@ func isFieldOrderable(f *bq.FieldSchema) bool {
 	return f.Type != bq.GeographyFieldType && f.Type != bq.RecordFieldType
 }
 
-func UnmarshalBody(body io.ReadCloser, reqBody interface{}) error {
+func UnmarshalBody(body io.ReadCloser, reqBody any) error {
 	b, err := io.ReadAll(body)
 	if err != nil {
 		return err
@@ -68,7 +69,7 @@ func WriteResponse(rw http.ResponseWriter, b []byte) {
 	}
 }
 
-func SendResponse(res interface{}, err error, rw http.ResponseWriter) {
+func SendResponse(res any, err error, rw http.ResponseWriter) {
 	if err != nil {
 		rw.WriteHeader(http.StatusBadRequest)
 		googleApiError, success := err.(*googleapi.Error)
@@ -105,16 +106,17 @@ type ErrorResponse struct {
 
 // HandleError processes an error, logs it appropriately, and returns a structured error response
 // It specifically handles Google API errors with enhanced logging and proper HTTP status codes
-func HandleError(err error, context string) (ErrorResponse, int) {
+func HandleError(ctx context.Context, err error, message string) (ErrorResponse, int) {
 	if err == nil {
 		return ErrorResponse{}, 0
 	}
+	logger := log.DefaultLogger.FromContext(ctx)
 
 	// Check if it's a Google API error
 	if googleApiError, ok := err.(*googleapi.Error); ok {
 		// Log Google API error with details
-		log.DefaultLogger.Warn("Google API error",
-			"context", context,
+		logger.Warn("Google API error",
+			"message", message,
 			"code", googleApiError.Code,
 			"message", googleApiError.Message,
 			"details", googleApiError.Details,
@@ -130,24 +132,21 @@ func HandleError(err error, context string) (ErrorResponse, int) {
 	}
 
 	// Handle generic errors
-	log.DefaultLogger.Error("Error occurred",
-		"context", context,
-		"error", err.Error(),
-	)
+	logger.Warn(message, "error", err.Error())
 
 	return ErrorResponse{
 		Error:   err.Error(),
-		Message: fmt.Sprintf("Error in %s: %s", context, err.Error()),
+		Message: fmt.Sprintf("Error in %s: %s", message, err.Error()),
 	}, http.StatusInternalServerError
 }
 
 // SendErrorResponse is a convenience function that handles an error and writes the response
-func SendErrorResponse(err error, context string, rw http.ResponseWriter) {
+func SendErrorResponse(ctx context.Context, err error, message string, rw http.ResponseWriter) {
 	if err == nil {
 		return
 	}
 
-	errorResp, statusCode := HandleError(err, context)
+	errorResp, statusCode := HandleError(ctx, err, message)
 
 	rw.WriteHeader(statusCode)
 	rw.Header().Set("Content-Type", "application/json")

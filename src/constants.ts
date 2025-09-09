@@ -1,4 +1,6 @@
 import { SelectableValue } from '@grafana/data';
+import { ComboboxOption } from '@grafana/ui';
+
 import { QueryFormat, QueryPriority } from './types';
 
 export const QUERY_FORMAT_OPTIONS = [
@@ -6,7 +8,7 @@ export const QUERY_FORMAT_OPTIONS = [
   { label: 'Table', value: QueryFormat.Table },
 ];
 
-export const PROCESSING_LOCATIONS: Array<SelectableValue<string>> = [
+export const PROCESSING_LOCATIONS: Array<ComboboxOption<string>> = [
   // Allow BigQuery to select the processing location.
   { label: 'Automatic location selection', value: '' },
 

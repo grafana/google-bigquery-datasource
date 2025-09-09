@@ -1,8 +1,10 @@
 import _ from 'lodash';
-import { VariableModel } from '@grafana/data';
+
+import { TypedVariableModel } from '@grafana/data';
+
 import { quoteLiteral } from '../utils';
 
-export function interpolateVariable(value: any, variable: VariableModel) {
+export function interpolateVariable(value: any, variable: TypedVariableModel) {
   if (typeof value === 'string') {
     // @ts-ignore
     if (variable.multi || variable.includeAll) {

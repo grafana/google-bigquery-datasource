@@ -1,16 +1,19 @@
+import React from 'react';
+
 import {
   DataSourcePluginOptionsEditorProps,
   DataSourceSettings,
   onUpdateDatasourceJsonDataOption,
-  onUpdateDatasourceJsonDataOptionSelect
+  onUpdateDatasourceJsonDataOptionSelect,
 } from '@grafana/data';
 import { AuthConfig, DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
-import { Field, Input, SecureSocksProxySettings, Select } from '@grafana/ui';
-import React from 'react';
+import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
+
 import { PROCESSING_LOCATIONS } from '../constants';
-import { BigQueryAuth, bigQueryAuthTypes, BigQueryOptions, BigQuerySecureJsonData } from '../types';
+import { BigQueryAuth, BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
+
 import { ConfigurationHelp } from './/ConfigurationHelp';
 import { Divider } from './Divider';
 
@@ -95,13 +98,12 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             </span>
           }
         >
-          <Select
-            className="width-30"
+          <Combobox
+            width={60}
             placeholder="Automatic location selection"
             value={jsonData.processingLocation || ''}
             options={PROCESSING_LOCATIONS}
             onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'processingLocation')}
-            menuShouldPortal={true}
           />
         </Field>
         <Field

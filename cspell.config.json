@@ -71,7 +71,8 @@
     "UNIXTIME",
     "uplot",
     "uuidv",
-    "vectorator"
+    "vectorator",
+    "Combobox"
   ],
   "language": "en-US"
 }

@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"testing"
@@ -16,7 +17,7 @@ func TestHandleError_GoogleAPIError(t *testing.T) {
 	}
 
 	// Test HandleError function
-	errorResp, statusCode := HandleError(googleErr, "test operation")
+	errorResp, statusCode := HandleError(t.Context(), googleErr, "test operation")
 
 	// Verify the response
 	if statusCode != 403 {
@@ -42,7 +43,7 @@ func TestHandleError_GenericError(t *testing.T) {
 	genericErr := errors.New("connection timeout")
 
 	// Test HandleError function
-	errorResp, statusCode := HandleError(genericErr, "database connection")
+	errorResp, statusCode := HandleError(t.Context(), genericErr, "database connection")
 
 	// Verify the response
 	if statusCode != http.StatusInternalServerError {
@@ -65,7 +66,7 @@ func TestHandleError_GenericError(t *testing.T) {
 
 func TestHandleError_NilError(t *testing.T) {
 	// Test with nil error
-	errorResp, statusCode := HandleError(nil, "test operation")
+	errorResp, statusCode := HandleError(t.Context(), nil, "test operation")
 
 	// Verify the response
 	if statusCode != 0 {
@@ -85,7 +86,7 @@ func ExampleHandleError() {
 		Message: "Invalid query",
 	}
 
-	errorResp, statusCode := HandleError(googleErr, "BigQuery query execution")
+	errorResp, statusCode := HandleError(context.Background(), googleErr, "BigQuery query execution")
 
 	// Use the structured response
 	_ = errorResp  // ErrorResponse{Error: "Invalid query", Message: "Google API error: Invalid query", Code: 400}
