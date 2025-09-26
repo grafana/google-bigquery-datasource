@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/civil"
@@ -266,6 +267,25 @@ func Test_ConvertColumnValue(t *testing.T) {
 			schema:        &bigquery.FieldSchema{Type: "GEOGRAPHY", Repeated: true},
 			expectedType:  "string",
 			expectedValue: "POINT(1.0 1.0),POINT(2.0 2.0)",
+		},
+		{
+			name:          "TIMESTAMP",
+			value:         bigquery.Value(time.Date(2019, 1, 1, 1, 1, 1, 1, time.UTC)),
+			columnType:    "TIMESTAMP",
+			schema:        &bigquery.FieldSchema{Type: "TIMESTAMP"},
+			expectedType:  "time.Time",
+			expectedValue: "2019-01-01 01:01:01.000000001 +0000 UTC",
+		},
+		{
+			name: "TIMESTAMP repeated",
+			value: bigquery.Value([]bigquery.Value{
+				time.Date(2019, 1, 1, 1, 1, 1, 1, time.UTC),
+				time.Date(2019, 2, 1, 1, 1, 1, 1, time.UTC),
+			}),
+			columnType:    "TIMESTAMP",
+			schema:        &bigquery.FieldSchema{Type: "TIMESTAMP", Repeated: true},
+			expectedType:  "string",
+			expectedValue: "2019-01-01 01:01:01.000000001 +0000 UTC,2019-02-01 01:01:01.000000001 +0000 UTC",
 		},
 		{
 			name: "RECORD",
