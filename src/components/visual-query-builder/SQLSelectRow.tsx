@@ -86,7 +86,7 @@ export function SQLSelectRow({ sql, columns, onSqlChange }: SQLSelectRowProps) {
           <Stack gap={2} alignItems="end">
             <EditorField label="Column" width={25}>
               {/* TODO: migrate this to ComboBox when we find a way to use ComboBox options with icons. Disabling lint warning for now */}
-              {/* eslint-disable-next-line deprecation/deprecation */}
+              {/* eslint-disable-next-line @typescript-eslint/no-deprecated */}
               <Select
                 value={getColumnValue(item)}
                 options={columnsWithAsterisk}

@@ -56,7 +56,7 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
     // See: https://github.com/grafana/grafana/issues/108400
     // Likely not ideal to migrate to ComboBox at this point.
     // TODO: Migrate to ComboBox when the issue is resolved.
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     <Select
       className={className}
       aria-label="Dataset selector"

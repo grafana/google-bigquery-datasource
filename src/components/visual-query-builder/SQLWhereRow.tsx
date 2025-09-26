@@ -17,14 +17,14 @@ export function SQLWhereRow({ sql, config, onSqlChange }: SQLBuilderWhereRowProp
   useEffect(() => {
     // Set the initial tree
     if (!tree) {
-      const initTree = Utils.checkTree(Utils.loadTree(sql.whereJsonTree ?? emptyInitValue), configWithDefaults);
-      setTree(initTree);
+      const initTree = Utils.Validation.sanitizeTree(Utils.loadTree(sql.whereJsonTree ?? emptyInitValue), configWithDefaults);
+      setTree(initTree.fixedTree);
     }
   }, [configWithDefaults, sql.whereJsonTree, tree]);
 
   useEffect(() => {
     if (!sql.whereJsonTree) {
-      setTree(Utils.checkTree(Utils.loadTree(emptyInitValue), configWithDefaults));
+      setTree(Utils.Validation.sanitizeTree(Utils.loadTree(emptyInitValue), configWithDefaults).fixedTree);
     }
   }, [configWithDefaults, sql.whereJsonTree]);
 
