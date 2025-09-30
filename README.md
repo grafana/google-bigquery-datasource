@@ -218,7 +218,7 @@ After creating a variable, you can use it in your Google BigQuery queries by usi
 
 ### Storage API
 
-The plugin supports the [Storage API](https://cloud.google.com/bigquery/docs/reference/storage) for reading data from BigQuery. To enable the Storage API, you need to set the `Enable Storage API` option to `true` in the query editor.
+The plugin supports the [Storage API](https://cloud.google.com/bigquery/docs/reference/storage) for reading data from BigQuery. To enable the Storage API, you need to set the `Use Storage API` option to `true` in the query editor.
 
 > **Note:** This doesn't work with Forward OAuth Identity.
 

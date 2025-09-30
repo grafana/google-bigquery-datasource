@@ -60,11 +60,11 @@ export const VisualEditor: React.FC<VisualEditorProps> = ({
         <EditorRow>
           <QueryOptionGroup
             title="Options"
-            collapsedInfo={[`Storage API: ${query.enableStorageAPI ? 'enabled' : 'disabled'}`]}
+            collapsedInfo={[`Use Storage API: ${query.enableStorageAPI ? 'enabled' : 'disabled'}`]}
           >
             <InlineSwitch
               id={`${htmlId}-storage-api`}
-              label="Storage API"
+              label="Use Storage API"
               transparent={true}
               showLabel={true}
               value={query.enableStorageAPI}

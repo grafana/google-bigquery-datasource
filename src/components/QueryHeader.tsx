@@ -170,7 +170,7 @@ export function QueryHeader({
         {editorMode === EditorMode.Code && (
           <InlineSwitch
             id={`${htmlId}-storage-api`}
-            label="Storage API"
+            label="Use Storage API"
             transparent={true}
             className={styles.storageApiSwitch}
             showLabel={true}
