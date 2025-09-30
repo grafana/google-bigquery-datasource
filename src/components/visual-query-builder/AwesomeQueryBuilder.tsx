@@ -2,7 +2,17 @@ import React from 'react';
 
 import { dateTime } from '@grafana/data';
 import { Button, Combobox, DateTimePicker, Input, Select } from '@grafana/ui';
-import { BasicConfig, Config, JsonItem, Settings, Utils, Widgets } from '@react-awesome-query-builder/ui';
+import {
+  BasicConfig,
+  Config,
+  DateTimeWidgetProps,
+  JsonItem,
+  NumberWidgetProps,
+  Settings,
+  TextWidgetProps,
+  Utils,
+  Widgets,
+} from '@react-awesome-query-builder/ui';
 import { toOption } from 'utils/data';
 
 const buttonLabels = {
@@ -30,7 +40,7 @@ export const widgets: Widgets = {
   ...BasicConfig.widgets,
   text: {
     ...BasicConfig.widgets.text,
-    factory: function TextInput(props) {
+    factory: function TextInput(props: TextWidgetProps) {
       return (
         <Input
           value={props?.value || ''}
@@ -42,10 +52,10 @@ export const widgets: Widgets = {
   },
   number: {
     ...BasicConfig.widgets.number,
-    factory: function NumberInput(props) {
+    factory: function NumberInput(props: NumberWidgetProps) {
       return (
         <Input
-          value={props?.value}
+          value={Array.isArray(props?.value) ? (props.value[0] ?? '') : (props?.value ?? '')}
           placeholder={props?.placeholder}
           type="number"
           onChange={(e) => props?.setValue(Number.parseInt(e.currentTarget.value, 10))}
@@ -55,13 +65,13 @@ export const widgets: Widgets = {
   },
   datetime: {
     ...BasicConfig.widgets.datetime,
-    factory: function DateTimeInput(props) {
+    factory: function DateTimeInput(props: DateTimeWidgetProps) {
       return (
         <DateTimePicker
           onChange={(e) => {
             props?.setValue(e?.format(BasicConfig.widgets.datetime.valueFormat));
           }}
-          date={dateTime(props?.value).utc()}
+          date={dateTime(Array.isArray(props?.value) ? props.value[0] : props?.value).utc()}
         />
       );
     },
@@ -96,7 +106,7 @@ export const settings: Settings = {
   renderField: function Field(fieldProps) {
     return (
       // TODO: migrate this to ComboBox when we find a way to use ComboBox with icons. Disabling lint warning for now
-      // eslint-disable-next-line deprecation/deprecation
+      // eslint-disable-next-line @typescript-eslint/no-deprecated
       <Select
         id={fieldProps?.id}
         width={25}

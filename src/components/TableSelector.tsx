@@ -35,7 +35,7 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
     // See: https://github.com/grafana/grafana/issues/108400
     // Likely not ideal to migrate to ComboBox at this point.
     // TODO: Migrate to ComboBox when the issue is resolved.z
-    // eslint-disable-next-line deprecation/deprecation
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     <Select
       className={className}
       disabled={state.loading}
