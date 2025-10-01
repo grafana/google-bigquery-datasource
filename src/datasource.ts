@@ -114,6 +114,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
         dataset: queryModel.dataset!,
         table: queryModel.table!,
         location: queryModel.location!,
+        enableStorageAPI: queryModel.enableStorageAPI || false,
       },
     };
     return result;

@@ -10,6 +10,7 @@ require (
 	github.com/grafana/sqlds/v4 v4.2.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/oauth2 v0.30.0
 	google.golang.org/api v0.233.0
 	google.golang.org/grpc v1.74.2
 )
@@ -114,7 +115,6 @@ require (
 	golang.org/x/exp v0.0.0-20250811191247-51f88131bc50 // indirect
 	golang.org/x/mod v0.27.0 // indirect
 	golang.org/x/net v0.43.0 // indirect
-	golang.org/x/oauth2 v0.30.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/term v0.34.0 // indirect
