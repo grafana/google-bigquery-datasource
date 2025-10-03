@@ -78,6 +78,8 @@ func (r *rows) bigqueryTypeOf(columnType *string) (reflect.Type, error) {
 		return reflect.TypeOf(false), nil
 	case "TIMESTAMP":
 		return reflect.TypeOf(time.Time{}), nil
+	case "JSON", "INTERVAL", "RANGE":
+		return reflect.TypeOf(""), nil
 	case "DATE", "TIME", "DATETIME":
 		return reflect.TypeOf(""), nil
 	case "RECORD", "GEOGRAPHY":

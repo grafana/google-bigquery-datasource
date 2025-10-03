@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/big"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/civil"
@@ -61,6 +62,31 @@ func ConvertColumnValue(v bigquery.Value, fieldSchema *bigquery.FieldSchema) (dr
 	case "NUMERIC", "BIGNUMERIC":
 		conv, _ := v.(*big.Rat).Float64()
 		return conv, nil
+	case "TIMESTAMP":
+		// TIMESTAMP values come as time.Time from BigQuery
+		return v.(time.Time), nil
+	case "JSON":
+		// JSON values are returned as strings from BigQuery
+		return v.(string), nil
+	case "INTERVAL":
+		// INTERVAL values are returned as *bigquery.IntervalValue from BigQuery
+		intervalValue := v.(*bigquery.IntervalValue)
+		return intervalValue.String(), nil
+	case "RANGE":
+		// RANGE values are returned as *bigquery.RangeValue from BigQuery
+		rangeValue := v.(*bigquery.RangeValue)
+		// Convert RangeValue to string representation like "[start,end)"
+		startStr := "unbounded"
+		endStr := "unbounded"
+		
+		if rangeValue.Start != nil {
+			startStr = fmt.Sprintf("%v", rangeValue.Start)
+		}
+		if rangeValue.End != nil {
+			endStr = fmt.Sprintf("%v", rangeValue.End)
+		}
+		
+		return fmt.Sprintf("[%s,%s)", startStr, endStr), nil
 	case "GEOGRAPHY":
 		return v.(string), nil
 	default:

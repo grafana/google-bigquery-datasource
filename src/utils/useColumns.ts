@@ -80,6 +80,9 @@ export function mapColumnTypeToIcon(type: string) {
     case 'DECIMAL':
       return 'calculator-alt';
     case 'STRING':
+    case 'JSON':
+    case 'INTERVAL':
+    case 'RANGE':
     case 'BYTES':
       return 'text';
     case 'GEOGRAPHY':
