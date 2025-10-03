@@ -1473,7 +1473,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grafana/e2e-selectors@npm:12.2.0":
+"@grafana/e2e-selectors@npm:12.2.0, @grafana/e2e-selectors@npm:^12.2.0-255920":
   version: 12.2.0
   resolution: "@grafana/e2e-selectors@npm:12.2.0"
   dependencies:
@@ -1493,17 +1493,6 @@ __metadata:
     tslib: "npm:2.8.1"
     typescript: "npm:5.7.3"
   checksum: 10c0/6c66b555d41ee2ebcf78ccfc16bb8e9c23fb25fd1c22794b68c8ab289016f0dfdb31ecb12d680767fe9827c87a8097d04aaa2d9cb5223e1f265931c76764154a
-  languageName: node
-  linkType: hard
-
-"@grafana/e2e-selectors@npm:^12.2.0-255920":
-  version: 12.2.0-17681690154
-  resolution: "@grafana/e2e-selectors@npm:12.2.0-17681690154"
-  dependencies:
-    semver: "npm:^7.7.0"
-    tslib: "npm:2.8.1"
-    typescript: "npm:5.9.2"
-  checksum: 10c0/63fd9c317ba55a9713b961d677104ad0d0c20d48c0437da4f1bf61550ff40cfc520933e06f16c014b36005ff82c00b00ec7976e2ddb63149052b772cb2ec7cb7
   languageName: node
   linkType: hard
 
@@ -4855,14 +4844,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"clsx@npm:^2.0.0":
-  version: 2.1.0
-  resolution: "clsx@npm:2.1.0"
-  checksum: 10c0/c09c00ad14f638366ca814097e6cab533dfa1972a358da5b557be487168acbb25b4c1395e89ffa842a8a61ba87a462d2b4885bc9d4f8410b598f3cb339599cdb
-  languageName: node
-  linkType: hard
-
-"clsx@npm:^2.1.1":
+"clsx@npm:^2.0.0, clsx@npm:^2.1.1":
   version: 2.1.1
   resolution: "clsx@npm:2.1.1"
   checksum: 10c0/c4c8eb865f8c82baab07e71bfa8897c73454881c4f99d6bc81585aecd7c441746c1399d08363dc096c550cceaf97bd4ce1e8854e1771e9998d9f94c4fe075839
