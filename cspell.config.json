@@ -13,6 +13,7 @@
     "cloudresourcemanager",
     "codebases",
     "codecov",
+    "Combobox",
     "conj",
     "Conjs",
     "conv",
@@ -61,6 +62,7 @@
     "sqlutil",
     "stretchr",
     "subresource",
+    "substr",
     "tempvar",
     "testid",
     "timegroup",
@@ -72,8 +74,7 @@
     "UNIXTIME",
     "uplot",
     "uuidv",
-    "vectorator",
-    "Combobox"
+    "vectorator"
   ],
   "language": "en-US"
 }
