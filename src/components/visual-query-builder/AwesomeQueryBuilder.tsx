@@ -128,6 +128,7 @@ export const settings: Settings = {
     return (
       <Button
         type="button"
+        aria-label={`${buttonProps?.label} filter`}
         title={`${buttonProps?.label} filter`}
         onClick={buttonProps?.onClick}
         variant="secondary"
