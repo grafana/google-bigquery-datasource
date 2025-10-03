@@ -18,11 +18,10 @@ type resultSet struct {
 }
 
 type rows struct {
-	columns      []string
-	fieldSchemas []*bigquery.FieldSchema
-	types        []string
-	rs           resultSet
-	conn         *Conn
+	columns       []string
+	fieldSchemas  []*bigquery.FieldSchema
+	types         []string
+	rs            resultSet
 }
 
 func (r *rows) Columns() []string {
@@ -30,7 +29,10 @@ func (r *rows) Columns() []string {
 }
 
 func (r *rows) Close() error {
-	return r.conn.Close()
+	// This is called after a query run from SQLDS but we don't want to close the connection here.
+	// Calling conn.Close() will close the connection and all subsequent queries will fail.
+	// In real sql drivers this usually closes the reader but we don't have a reader here.
+	return nil
 }
 
 func (r *rows) Next(dest []driver.Value) error {
@@ -76,6 +78,8 @@ func (r *rows) bigqueryTypeOf(columnType *string) (reflect.Type, error) {
 		return reflect.TypeOf(false), nil
 	case "TIMESTAMP":
 		return reflect.TypeOf(time.Time{}), nil
+	case "JSON", "INTERVAL", "RANGE":
+		return reflect.TypeOf(""), nil
 	case "DATE", "TIME", "DATETIME":
 		return reflect.TypeOf(""), nil
 	case "RECORD", "GEOGRAPHY":

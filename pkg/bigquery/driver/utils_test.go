@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/big"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/civil"
@@ -364,6 +365,70 @@ func Test_ConvertColumnValue(t *testing.T) {
 			},
 			expectedType:  "[]interface {}",
 			expectedValue: "[null,{\"col1\":2,\"col2\":2.99999,\"col3\":\"text value 2\",\"col4\":\"02:02:02\",\"col5\":\"2019-02-02 01:01:01\"}]",
+		},
+		{
+			name:          "TIMESTAMP",
+			value:         bigquery.Value(time.Date(2023, 12, 25, 10, 30, 45, 123456789, time.UTC)),
+			columnType:    "TIMESTAMP",
+			schema:        &bigquery.FieldSchema{Type: "TIMESTAMP"},
+			expectedType:  "time.Time",
+			expectedValue: "2023-12-25 10:30:45.123456789 +0000 UTC",
+		},
+		{
+			name:          "TIMESTAMP repeated",
+			value:         bigquery.Value([]bigquery.Value{time.Date(2023, 12, 25, 10, 30, 45, 0, time.UTC), time.Date(2023, 12, 26, 11, 31, 46, 0, time.UTC)}),
+			columnType:    "TIMESTAMP",
+			schema:        &bigquery.FieldSchema{Type: "TIMESTAMP", Repeated: true},
+			expectedType:  "string",
+			expectedValue: "2023-12-25 10:30:45 +0000 UTC,2023-12-26 11:31:46 +0000 UTC",
+		},
+		{
+			name:          "JSON",
+			value:         bigquery.Value(`{"name": "John", "age": 30}`),
+			columnType:    "JSON",
+			schema:        &bigquery.FieldSchema{Type: "JSON"},
+			expectedType:  "string",
+			expectedValue: `{"name": "John", "age": 30}`,
+		},
+		{
+			name:          "JSON repeated",
+			value:         bigquery.Value([]bigquery.Value{`{"name": "John", "age": 30}`, `{"name": "Jane", "age": 25}`}),
+			columnType:    "JSON",
+			schema:        &bigquery.FieldSchema{Type: "JSON", Repeated: true},
+			expectedType:  "string",
+			expectedValue: `{"name": "John", "age": 30},{"name": "Jane", "age": 25}`,
+		},
+		{
+			name:          "INTERVAL",
+			value:         bigquery.Value(&bigquery.IntervalValue{SubSecondNanos: 1000}),
+			columnType:    "INTERVAL",
+			schema:        &bigquery.FieldSchema{Type: "INTERVAL"},
+			expectedType:  "string",
+			expectedValue: "0-0 0 0:0:0.000001",
+		},
+		{
+			name:          "INTERVAL repeated",
+			value:         bigquery.Value([]bigquery.Value{&bigquery.IntervalValue{SubSecondNanos: 1000}, &bigquery.IntervalValue{Years: 1, SubSecondNanos: 2000}}),
+			columnType:    "INTERVAL",
+			schema:        &bigquery.FieldSchema{Type: "INTERVAL", Repeated: true},
+			expectedType:  "string",
+			expectedValue: "0-0 0 0:0:0.000001,1-0 0 0:0:0.000002",
+		},
+		{
+			name:          "RANGE",
+			value:         bigquery.Value(&bigquery.RangeValue{Start: bigquery.Value(1), End: bigquery.Value(5)}),
+			columnType:    "RANGE",
+			schema:        &bigquery.FieldSchema{Type: "RANGE"},
+			expectedType:  "string",
+			expectedValue: "[1,5)",
+		},
+		{
+			name:          "RANGE repeated",
+			value:         bigquery.Value([]bigquery.Value{&bigquery.RangeValue{Start: bigquery.Value(1), End: bigquery.Value(5)}, &bigquery.RangeValue{Start: bigquery.Value(10), End: bigquery.Value(20)}}),
+			columnType:    "RANGE",
+			schema:        &bigquery.FieldSchema{Type: "RANGE", Repeated: true},
+			expectedType:  "string",
+			expectedValue: "[1,5),[10,20)",
 		},
 	}
 

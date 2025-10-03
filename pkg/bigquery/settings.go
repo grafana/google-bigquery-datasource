@@ -59,5 +59,9 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		connectionSettings.Headers = queryArgs.Headers
 	}
 
+	if queryArgs.EnableStorageAPI {
+		connectionSettings.EnableStorageAPI = queryArgs.EnableStorageAPI
+	}
+
 	return connectionSettings
 }

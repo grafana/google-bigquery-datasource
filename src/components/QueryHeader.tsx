@@ -1,12 +1,16 @@
-import { SelectableValue } from '@grafana/data';
-import { EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space, EditorField } from '@grafana/plugin-ui';
-import { Button, InlineSwitch, RadioButtonGroup, Tooltip } from '@grafana/ui';
-import { BigQueryAPI } from 'api';
 import React, { useCallback, useId, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
+
+import { css } from '@emotion/css';
+import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/plugin-ui';
+import { Button, InlineSwitch, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
+import { BigQueryAPI } from 'api';
 import { toRawSql } from 'utils/sql.utils';
+
 import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
 import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
+
 import { ConfirmModal } from './ConfirmModal';
 import { DatasetSelector } from './DatasetSelector';
 import { ProjectSelector } from './ProjectSelector';
@@ -42,6 +46,7 @@ export function QueryHeader({
   const [_, copyToClipboard] = useCopyToClipboard();
   const [showConfirm, setShowConfirm] = useState(false);
   const htmlId = useId();
+  const styles = useStyles2(getStyles);
 
   const onEditorModeChange = useCallback(
     (newEditorMode: EditorMode) => {
@@ -106,6 +111,11 @@ export function QueryHeader({
     onChange(next);
   };
 
+  const onStorageApiChange = () => {
+    const next = { ...query, enableStorageAPI: !query.enableStorageAPI };
+    onChange(next);
+  };
+
   function renderRunButton(): React.ReactNode {
     if (!showRunButton) {
       return null;
@@ -156,6 +166,18 @@ export function QueryHeader({
           onChange={onFormatChange}
           options={QUERY_FORMAT_OPTIONS}
         />
+
+        {editorMode === EditorMode.Code && (
+          <InlineSwitch
+            id={`${htmlId}-storage-api`}
+            label="Use Storage API"
+            transparent={true}
+            className={styles.storageApiSwitch}
+            showLabel={true}
+            value={query.enableStorageAPI}
+            onChange={onStorageApiChange}
+          />
+        )}
 
         {editorMode === EditorMode.Builder && (
           <>
@@ -278,3 +300,13 @@ export function QueryHeader({
     </>
   );
 }
+
+const getStyles = (theme: GrafanaTheme2) => {
+  return {
+    storageApiSwitch: css({
+      color: theme.colors.text.secondary,
+      fontSize: theme.typography.bodySmall.fontSize,
+      padding: 0,
+    }),
+  };
+};
