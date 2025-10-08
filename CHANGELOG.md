@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.1
+
+🐛 Fix: Error source for query data and bump sqlds 5.0.1
+
 ## 3.0.0
 
 🎉 Sets the least supported version of Grafana to 11.6.x, and updates @grafana package dependencies accordingly

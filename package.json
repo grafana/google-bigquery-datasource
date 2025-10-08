@@ -1,6 +1,6 @@
 {
   "name": "grafana-bigquery-datasource",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Google BigQuery datasource for Grafana",
   "license": "Apache-2.0",
   "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
