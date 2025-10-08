@@ -15,9 +15,10 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/data/sqlutil"
-	"github.com/grafana/sqlds/v4"
+	"github.com/grafana/sqlds/v5"
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
@@ -357,6 +358,15 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 	}
 
 	return apiClient.ValidateQuery(ctx, query), nil
+}
+
+// MutateQueryError marks BigQuery errors as downstream errors
+func (s *BigQueryDatasource) MutateQueryError(err error) backend.ErrorWithSource {
+	var wrappedException *googleapi.Error
+	if errors.As(err, &wrappedException) {
+		return backend.NewErrorWithSource(err, backend.ErrorSourceDownstream)
+	}
+	return backend.NewErrorWithSource(err, backend.DefaultErrorSource)
 }
 
 type TableSchemaArgs struct {
