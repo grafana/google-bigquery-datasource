@@ -318,5 +318,6 @@ func (c *Conn) Close() (err error) {
 		return driver.ErrBadConn
 	}
 	c.closed = true
-	return c.client.Close()
+	// BigQuery advises not to close the client. Closing it will cause storage API reads to fail.
+	return nil
 }
