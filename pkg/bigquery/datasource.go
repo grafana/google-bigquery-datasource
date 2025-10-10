@@ -18,7 +18,6 @@ import (
 	"github.com/grafana/sqlds/v5"
 	"github.com/pkg/errors"
 	"google.golang.org/api/cloudresourcemanager/v3"
-	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 
 	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
@@ -362,8 +361,7 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 
 // MutateQueryError marks BigQuery errors as downstream errors
 func (s *BigQueryDatasource) MutateQueryError(err error) backend.ErrorWithSource {
-	var wrappedException *googleapi.Error
-	if errors.As(err, &wrappedException) {
+	if errors.Is(err, sqlds.ErrorQuery) {
 		return backend.NewErrorWithSource(err, backend.ErrorSourceDownstream)
 	}
 	return backend.NewErrorWithSource(err, backend.DefaultErrorSource)

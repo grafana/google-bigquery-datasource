@@ -318,5 +318,6 @@ func (c *Conn) Close() (err error) {
 		return driver.ErrBadConn
 	}
 	c.closed = true
-	return c.client.Close()
+	// BigQuery advises not to close the client. Closing it will cause storage API reads to fail. See [bq.Client.Close()](https://pkg.go.dev/cloud.google.com/go/bigquery#Client.Close)
+	return nil
 }
