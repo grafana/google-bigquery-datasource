@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.3
+
+🐛 bump sqlds
+
 ## 3.0.2
 
 🐛 Fix: Panic invalid memory address or nil pointer dereference
