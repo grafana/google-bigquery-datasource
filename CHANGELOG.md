@@ -2,7 +2,6 @@
 
 ## 3.0.3
 
-### Patch Changes
 
 🐛 bump sqlds
 
