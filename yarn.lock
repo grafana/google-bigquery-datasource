@@ -3384,7 +3384,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest@npm:*, @types/jest@npm:^29.5.0":
+"@types/jest@npm:^29.5.0":
   version: 29.5.5
   resolution: "@types/jest@npm:29.5.5"
   dependencies:
@@ -3614,15 +3614,6 @@ __metadata:
   version: 6.15.3
   resolution: "@types/systemjs@npm:6.15.3"
   checksum: 10c0/922a006446eff5263a3073af24691fc71519c72e334f7746a3a602d8d2bdf983f467042001b4bda1e6468a0a5bcf9905fcce570c3cb8ab84176815bc495e4e25
-  languageName: node
-  linkType: hard
-
-"@types/testing-library__jest-dom@npm:5.14.8":
-  version: 5.14.8
-  resolution: "@types/testing-library__jest-dom@npm:5.14.8"
-  dependencies:
-    "@types/jest": "npm:*"
-  checksum: 10c0/83b9e7470da50d1a594c0afd999f689955e61cb8d9a8a32582ca14f73cc8503428376f98414becc1dc9e712f3de8ee2e49f41ed0117ab6a382c79988682e857e
   languageName: node
   linkType: hard
 
@@ -7453,7 +7444,6 @@ __metadata:
     "@types/react": "npm:^18.3.0"
     "@types/react-dom": "npm:^18.3.0"
     "@types/react-router-dom": "npm:^5.2.0"
-    "@types/testing-library__jest-dom": "npm:5.14.8"
     "@typescript-eslint/eslint-plugin": "npm:^8.3.0"
     "@typescript-eslint/parser": "npm:^8.3.0"
     copy-webpack-plugin: "npm:^11.0.0"
