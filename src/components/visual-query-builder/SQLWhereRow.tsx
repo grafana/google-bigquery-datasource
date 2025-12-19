@@ -1,6 +1,6 @@
 import { injectGlobal } from '@emotion/css';
 import { Builder, Config, ImmutableTree, Query, Utils } from '@react-awesome-query-builder/ui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { SQLExpression } from '../../types';
 import { emptyInitValue, raqbConfig } from './AwesomeQueryBuilder';
 
@@ -11,22 +11,26 @@ interface SQLBuilderWhereRowProps {
 }
 
 export function SQLWhereRow({ sql, config, onSqlChange }: SQLBuilderWhereRowProps) {
-  const [tree, setTree] = useState<ImmutableTree>();
   const configWithDefaults = useMemo(() => ({ ...raqbConfig, ...config }), [config]);
 
-  useEffect(() => {
-    // Set the initial tree
-    if (!tree) {
-      const initTree = Utils.Validation.sanitizeTree(Utils.loadTree(sql.whereJsonTree ?? emptyInitValue), configWithDefaults);
-      setTree(initTree.fixedTree);
-    }
-  }, [configWithDefaults, sql.whereJsonTree, tree]);
+  // Lazy initialization - only runs once on mount
+  const [tree, setTree] = useState<ImmutableTree>(() =>
+    Utils.Validation.sanitizeTree(
+      Utils.loadTree(sql.whereJsonTree ?? emptyInitValue),
+      { ...raqbConfig, ...config }
+    ).fixedTree
+  );
 
-  useEffect(() => {
+  // Track previous value to detect prop changes
+  const [prevWhereJsonTree, setPrevWhereJsonTree] = useState(sql.whereJsonTree);
+
+  // Adjust the state during rendering when whereJsonTree becomes falsy
+  if (sql.whereJsonTree !== prevWhereJsonTree) {
+    setPrevWhereJsonTree(sql.whereJsonTree);
     if (!sql.whereJsonTree) {
       setTree(Utils.Validation.sanitizeTree(Utils.loadTree(emptyInitValue), configWithDefaults).fixedTree);
     }
-  }, [configWithDefaults, sql.whereJsonTree]);
+  }
 
   const onTreeChange = useCallback(
     (changedTree: ImmutableTree, config: Config) => {
@@ -41,10 +45,6 @@ export function SQLWhereRow({ sql, config, onSqlChange }: SQLBuilderWhereRowProp
     },
     [onSqlChange, sql]
   );
-
-  if (!tree) {
-    return null;
-  }
 
   return (
     <Query

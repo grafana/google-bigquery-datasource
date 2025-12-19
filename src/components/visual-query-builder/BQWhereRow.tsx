@@ -1,5 +1,5 @@
 import { BigQueryAPI, TableSchema } from 'api';
-import React from 'react';
+import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { mapColumnTypeToIcon } from 'utils/useColumns';
@@ -23,16 +23,15 @@ export function BQWhereRow({ query, apiClient, onQueryChange }: BQWhereRowProps)
   }, [apiClient, query.dataset, query.location, query.table]);
 
   const { onSqlChange } = useSqlChange({ query, onQueryChange });
+  const config = useMemo(() => ({ fields: state.value || {} }), [state.value]);
 
   return (
     <SQLWhereRow
-      // TODO: fix key that's used to force clean render or SQLWhereRow - otherwise it doesn't render operators correctly
-      key={JSON.stringify(state.value)}
-      config={{ fields: state.value || {} }}
+      // Reset component state when dataset/table changes to ensure operators render correctly
+      key={`${query.dataset}-${query.location}-${query.table}`}
+      config={config}
       sql={query.sql}
-      onSqlChange={(val) => {
-        onSqlChange(val);
-      }}
+      onSqlChange={onSqlChange}
     />
   );
 }
