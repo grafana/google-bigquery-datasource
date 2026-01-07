@@ -66,12 +66,27 @@ export const widgets: Widgets = {
   datetime: {
     ...BasicConfig.widgets.datetime,
     factory: function DateTimeInput(props: DateTimeWidgetProps) {
+      const currentValue = Array.isArray(props?.value) ? props.value[0] : props?.value;
+      let parsedDate = dateTime();
+      if (currentValue) {
+        try {
+          const parsed = dateTime(currentValue);
+          if (parsed.isValid()) {
+            parsedDate = parsed;
+          }
+        } catch (e) {
+          parsedDate = dateTime();
+        }
+      }
+
       return (
         <DateTimePicker
           onChange={(e) => {
-            props?.setValue(e?.format(BasicConfig.widgets.datetime.valueFormat));
+            if (e && e.isValid()) {
+              props?.setValue(e.format(BasicConfig.widgets.datetime.valueFormat));
+            }
           }}
-          date={dateTime(Array.isArray(props?.value) ? props.value[0] : props?.value).utc()}
+          date={parsedDate.utc()}
         />
       );
     },

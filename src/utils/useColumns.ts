@@ -1,9 +1,9 @@
-// import { queries } from '@testing-library/dom';
 import { useAsync } from 'react-use';
 
 import { SelectableValue } from '@grafana/data';
-import { getApiClient } from 'api';
+import { type IconName } from '@grafana/ui';
 
+import { getApiClient } from '../api';
 import { QueryWithDefaults } from '../types';
 import { getDatasourceId } from '../utils';
 
@@ -58,8 +58,10 @@ export function useColumns({ query, isOrderable = false }: Options) {
   return state;
 }
 
-export function mapColumnTypeToIcon(type: string) {
+export function mapColumnTypeToIcon(type: string): IconName | undefined {
   switch (type) {
+    case 'DATE':
+      return 'calendar-alt';
     case 'TIME':
     case 'DATETIME':
     case 'TIMESTAMP':
@@ -84,10 +86,10 @@ export function mapColumnTypeToIcon(type: string) {
     case 'INTERVAL':
     case 'RANGE':
     case 'BYTES':
-      return 'text';
+      return 'text-fields';
     case 'GEOGRAPHY':
-      return 'map';
+      return 'map-marker';
     default:
-      return undefined;
+      return 'question-circle';
   }
 }
