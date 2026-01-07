@@ -18,21 +18,17 @@ type Props = {
 
 export function QueryEditorRaw({
   children,
-  getColumns: apiGetColumns,
-  getTables: apiGetTables,
-  getTableSchema: apiGetTableSchema,
+  getColumns,
+  getTables,
+  getTableSchema,
   onChange,
   query,
   width,
   height,
 }: Props) {
-  const getColumns = useRef<Props['getColumns']>(apiGetColumns);
-  const getTables = useRef<Props['getTables']>(apiGetTables);
-  const getTableSchema = useRef<Props['getTableSchema']>(apiGetTableSchema);
-
   const completionProvider = useMemo(
     () => getBigQueryCompletionProvider({ getColumns, getTables, getTableSchema }),
-    []
+    [getColumns, getTables, getTableSchema]
   );
 
   // We need to pass query via ref to SQLEditor as onChange is executed via monacoEditor.onDidChangeModelContent callback, not onChange property
@@ -40,11 +36,6 @@ export function QueryEditorRaw({
   useEffect(() => {
     queryRef.current = query;
   }, [query]);
-
-  useEffect(() => {
-    getColumns.current = apiGetColumns;
-    getTables.current = apiGetTables;
-  }, [apiGetColumns, apiGetTables]);
 
   const onRawQueryChange = useCallback(
     (rawSql: string, processQuery: boolean) => {

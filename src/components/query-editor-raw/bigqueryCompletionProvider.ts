@@ -18,9 +18,9 @@ import { BQ_OPERATORS } from './bigQueryOperators';
 import { MACROS } from './macros';
 
 interface CompletionProviderGetterArgs {
-  getColumns: React.MutableRefObject<(t: string) => Promise<ColumnDefinition[]>>;
-  getTables: React.MutableRefObject<(d?: string) => Promise<TableDefinition[]>>;
-  getTableSchema: React.MutableRefObject<(p: string, d: string, t: string) => Promise<TableSchema | null>>;
+  getColumns: (t: string) => Promise<ColumnDefinition[]>;
+  getTables: (d?: string) => Promise<TableDefinition[]>;
+  getTableSchema: (p: string, d: string, t: string) => Promise<TableSchema | null>;
 }
 
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
@@ -29,7 +29,7 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
     triggerCharacters: ['.', ' ', '$', ',', '(', "'"],
     tables: {
       resolve: async () => {
-        return await getTables.current();
+        return await getTables();
       },
       parseName: (token: LinkedToken | null | undefined) => {
         let processedToken = token;
@@ -50,7 +50,7 @@ export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs)
 
     columns: {
       resolve: async (t?: TableIdentifier) => {
-        return t?.table ? await getColumns.current(t?.table) : [];
+        return t?.table ? await getColumns(t?.table) : [];
       },
     },
     supportedFunctions: () => BQ_AGGREGATE_FNS,
@@ -113,7 +113,7 @@ export const customSuggestionKinds: (
     applyTo: [CustomStatementPlacement.AfterDataset],
     suggestionsResolver: async (ctx) => {
       const tablePath = ctx.currentToken ? getTablePath(ctx.currentToken) : '';
-      const t = await getTables.current(tablePath);
+      const t = await getTables(tablePath);
 
       return t.map((table) => ({
         label: table.name,
@@ -139,7 +139,7 @@ export const customSuggestionKinds: (
       const suggestions = [];
 
       if (path.length === 3) {
-        const schema = await getTableSchema.current(path[0], path[1], path[2]);
+        const schema = await getTableSchema(path[0], path[1], path[2]);
 
         if (schema) {
           const timePartitioningSetup = schema.timePartitioning;

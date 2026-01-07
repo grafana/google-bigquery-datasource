@@ -38,10 +38,10 @@ describe('api', () => {
     setupBackendSrv(jest.fn());
 
     await getApiClient(datasourceId);
-    expect(defaultProjectSpy).toBeCalled();
+    expect(defaultProjectSpy).toHaveBeenCalled();
 
     await getApiClient(datasourceId);
-    expect(defaultProjectSpy).toBeCalledTimes(1);
+    expect(defaultProjectSpy).toHaveBeenCalledTimes(1);
   });
 
   it.each`
@@ -57,15 +57,15 @@ describe('api', () => {
 
     const res1 = await (apiClient as any)[method](...connArgs);
     expect(res1).toEqual(mockResponse);
-    expect(callsSpy).toBeCalledTimes(1);
+    expect(callsSpy).toHaveBeenCalledTimes(1);
 
     const res2 = await (apiClient as any)[method](...connArgs);
     expect(res2).toEqual(mockResponse);
-    expect(callsSpy).toBeCalledTimes(1);
+    expect(callsSpy).toHaveBeenCalledTimes(1);
 
     await apiClient.dispose();
     const res3 = await (apiClient as any)[method](...connArgs);
     expect(res3).toEqual(mockResponse);
-    expect(callsSpy).toBeCalledTimes(2);
+    expect(callsSpy).toHaveBeenCalledTimes(2);
   });
 });
