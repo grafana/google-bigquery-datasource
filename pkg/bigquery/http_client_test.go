@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

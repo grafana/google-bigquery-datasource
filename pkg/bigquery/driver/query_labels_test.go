@@ -1,10 +1,11 @@
 package driver
 
 import (
-	"cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
 	"reflect"
 	"testing"
+
+	"cloud.google.com/go/bigquery"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 )
 
 func TestHeadersAsLabels(t *testing.T) {

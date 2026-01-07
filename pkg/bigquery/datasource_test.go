@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/api"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"

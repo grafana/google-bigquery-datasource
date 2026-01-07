@@ -6,8 +6,8 @@ import (
 	"fmt"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/utils"
 	"github.com/pkg/errors"
 	"google.golang.org/api/iterator"
 )
