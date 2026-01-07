@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.4
+
+🐛 Fix the filters in visual query builder for timestamp/date filters ( Fixes #381 )
+🐛 Fix: Add filter needs to be clicked 2 times
+
 ## 3.0.3
 
 🐛 bump sqlds
