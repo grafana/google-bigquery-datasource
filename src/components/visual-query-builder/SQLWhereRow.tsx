@@ -1,7 +1,10 @@
-import { injectGlobal } from '@emotion/css';
-import { Builder, Config, ImmutableTree, Query, Utils } from '@react-awesome-query-builder/ui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { SQLExpression } from '../../types';
+
+import { injectGlobal } from '@emotion/css';
+import { Builder, type Config, type ImmutableTree, Query, Utils } from '@react-awesome-query-builder/ui';
+
+import type { SQLExpression } from '../../types';
+
 import { emptyInitValue, raqbConfig } from './AwesomeQueryBuilder';
 
 interface SQLBuilderWhereRowProps {
@@ -14,33 +17,34 @@ export function SQLWhereRow({ sql, config, onSqlChange }: SQLBuilderWhereRowProp
   const configWithDefaults = useMemo(() => ({ ...raqbConfig, ...config }), [config]);
 
   // Lazy initialization - only runs once on mount
-  const [tree, setTree] = useState<ImmutableTree>(() =>
-    Utils.Validation.sanitizeTree(
-      Utils.loadTree(sql.whereJsonTree ?? emptyInitValue),
-      { ...raqbConfig, ...config }
-    ).fixedTree
-  );
+  const [tree, setTree] = useState<ImmutableTree>(() => {
+    const updatedConfig = { ...raqbConfig, ...config };
+    const tree = Utils.loadTree(sql.whereJsonTree ?? emptyInitValue);
+    return Utils.Validation.sanitizeTree(tree, updatedConfig).fixedTree;
+  });
 
   // Track previous value to detect prop changes
   const [prevWhereJsonTree, setPrevWhereJsonTree] = useState(sql.whereJsonTree);
+  const [prevConfig, setPrevConfig] = useState(config);
 
-  // Adjust the state during rendering when whereJsonTree becomes falsy
-  if (sql.whereJsonTree !== prevWhereJsonTree) {
+  // Update the tree when whereJsonTree becomes falsy OR when config changes (fields loaded)
+  if (sql.whereJsonTree !== prevWhereJsonTree || config !== prevConfig) {
     setPrevWhereJsonTree(sql.whereJsonTree);
+    setPrevConfig(config);
     if (!sql.whereJsonTree) {
       setTree(Utils.Validation.sanitizeTree(Utils.loadTree(emptyInitValue), configWithDefaults).fixedTree);
+    } else if (config !== prevConfig && sql.whereJsonTree) {
+      const reloadedTree = Utils.loadTree(sql.whereJsonTree);
+      setTree(Utils.Validation.sanitizeTree(reloadedTree, configWithDefaults).fixedTree);
     }
   }
 
   const onTreeChange = useCallback(
     (changedTree: ImmutableTree, config: Config) => {
       setTree(changedTree);
-      const newSql = {
-        ...sql,
-        whereJsonTree: Utils.getTree(changedTree),
-        whereString: Utils.sqlFormat(changedTree, config),
-      };
-
+      const whereString = Utils.sqlFormat(changedTree, config);
+      const whereJsonTree = whereString ? Utils.getTree(changedTree) : undefined;
+      const newSql = { ...sql, whereJsonTree, whereString };
       onSqlChange(newSql);
     },
     [onSqlChange, sql]
