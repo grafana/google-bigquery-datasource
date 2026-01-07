@@ -6,7 +6,7 @@ import (
 	sdkUtils "github.com/grafana/grafana-google-sdk-go/pkg/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/utils"
 )
 
 type ResourceHandler struct {
@@ -45,7 +45,7 @@ func (r *ResourceHandler) datasets(rw http.ResponseWriter, req *http.Request) {
 		utils.SendErrorResponse(req.Context(), err, "parsing datasets request body", rw)
 		return
 	}
-	
+
 	res, err := r.ds.Datasets(req.Context(), result)
 	if err != nil {
 		utils.SendErrorResponse(req.Context(), err, "fetching BigQuery datasets", rw)

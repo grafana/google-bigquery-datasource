@@ -11,8 +11,8 @@ import (
 	"time"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/utils"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 	"google.golang.org/api/googleapi"

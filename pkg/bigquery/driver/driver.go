@@ -8,7 +8,7 @@ import (
 	"sync"
 
 	bq "cloud.google.com/go/bigquery"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 )
 
 var (

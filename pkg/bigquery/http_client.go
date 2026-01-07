@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-google-sdk-go/pkg/tokenprovider"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/httpclient"
 )

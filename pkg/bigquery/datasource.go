@@ -20,15 +20,15 @@ import (
 	"google.golang.org/api/cloudresourcemanager/v3"
 	"google.golang.org/api/option"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/api"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/driver"
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
-	ut "github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/utils"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/api"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/driver"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
+	ut "github.com/grafana/google-bigquery-datasource/pkg/bigquery/utils"
 )
 
 var (
 	PluginConfigFromContext = backend.PluginConfigFromContext
-	ErrFailedToConnect = backend.PluginError(errors.New("Failed to connect"))
+	ErrFailedToConnect      = backend.PluginError(errors.New("Failed to connect"))
 )
 
 type BigqueryDatasourceIface interface {
@@ -171,7 +171,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		if err != nil {
 			return nil, ErrFailedToConnect
 		}
-		
+
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 
 		apiInstance := api.New(bqClient)

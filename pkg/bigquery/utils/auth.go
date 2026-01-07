@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 	"golang.org/x/oauth2/jwt"
 )
 

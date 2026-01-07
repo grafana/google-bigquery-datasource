@@ -6,7 +6,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 
-	"github.com/grafana/grafana-bigquery-datasource/pkg/bigquery"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery"
 )
 
 func main() {
