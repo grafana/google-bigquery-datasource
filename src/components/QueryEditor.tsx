@@ -22,7 +22,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
     loading: apiLoading,
     error: apiError,
     value: apiClient,
-  } = useAsync(async () => await getApiClient(datasource.uid), [datasource]);
+  } = useAsync(async () => await getApiClient(datasource.uid), [datasource.uid]);
   const queryWithDefaults = applyQueryDefaults(query, datasource, apiClient);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
     filter: !!queryWithDefaults.sql.whereString,
@@ -36,7 +36,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
     return () => {
       getApiClient(datasource.uid).then((client) => client.dispose());
     };
-  }, [datasource.id]);
+  }, [datasource.uid]);
 
   const processQuery = useCallback(
     (q: BigQueryQueryNG) => {
