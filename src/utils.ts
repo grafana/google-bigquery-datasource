@@ -301,12 +301,12 @@ export const isQueryValid = (q: BigQueryQueryNG) => {
   return Boolean(q.rawSql);
 };
 
-let datasourceId: number;
+let datasourceId: string;
 
-export function setDatasourceId(instance: number) {
+export function setDatasourceId(instance: string) {
   datasourceId = instance;
 }
 
-export function getDatasourceId(): number {
+export function getDatasourceId(): string {
   return datasourceId;
 }

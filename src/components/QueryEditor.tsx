@@ -16,13 +16,13 @@ interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, Bi
 }
 
 export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton }: Props) {
-  setDatasourceId(datasource.id);
+  setDatasourceId(datasource.uid);
   const [isQueryRunnable, setIsQueryRunnable] = useState(true);
   const {
     loading: apiLoading,
     error: apiError,
     value: apiClient,
-  } = useAsync(async () => await getApiClient(datasource.id), [datasource]);
+  } = useAsync(async () => await getApiClient(datasource.uid), [datasource]);
   const queryWithDefaults = applyQueryDefaults(query, datasource, apiClient);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
     filter: !!queryWithDefaults.sql.whereString,
@@ -34,7 +34,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
 
   useEffect(() => {
     return () => {
-      getApiClient(datasource.id).then((client) => client.dispose());
+      getApiClient(datasource.uid).then((client) => client.dispose());
     };
   }, [datasource.id]);
 

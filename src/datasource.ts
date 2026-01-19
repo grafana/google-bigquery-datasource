@@ -1,9 +1,10 @@
+import { uniqueId } from 'lodash';
+
 import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSupportType } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
 import { DataQuery } from '@grafana/schema';
 import { getApiClient } from 'api';
-import { uniqueId } from 'lodash';
 
 import { VariableEditor } from './components/VariableEditor';
 import { BigQueryAuth, BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
@@ -83,7 +84,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
       });
     }
 
-    const client = await getApiClient(this.id);
+    const client = await getApiClient(this.uid);
     try {
       await client.getProjects();
     } catch (err: any) {
