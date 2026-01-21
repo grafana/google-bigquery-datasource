@@ -104,10 +104,10 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		connectionSettings.Project = defaultProject
 	}
 
-	connectionKey := fmt.Sprintf("%d/%s:%s:%t", config.ID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
+	connectionKey := fmt.Sprintf("%s/%s:%s:%t", config.UID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
 
-	if s.resourceManagerServices[fmt.Sprint(config.ID)] == nil {
-		err := s.createResourceManagerService(ctx, config, settings, fmt.Sprint(config.ID))
+	if s.resourceManagerServices[config.UID] == nil {
+		err := s.createResourceManagerService(ctx, config, settings, config.UID)
 		if err != nil {
 			return nil, err
 		}
@@ -300,7 +300,7 @@ func (s *BigQueryDatasource) Columns(ctx context.Context, options sqlds.Options)
 }
 
 type ProjectsArgs struct {
-	DatasourceID string `json:"datasourceId"`
+	DatasourceUid string `json:"datasourceUid"`
 }
 
 type Project struct {
@@ -320,7 +320,7 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
 	}
 
-	response, err := s.resourceManagerServices[options.DatasourceID].Projects.Search().Do()
+	response, err := s.resourceManagerServices[options.DatasourceUid].Projects.Search().Do()
 	if err != nil {
 		return nil, err
 	}
@@ -385,7 +385,7 @@ func (s *BigQueryDatasource) TableSchema(ctx context.Context, args TableSchemaAr
 
 func (s *BigQueryDatasource) getApi(ctx context.Context, project, location string) (*api.API, error) {
 	datasourceSettings := getDatasourceSettings(ctx)
-	connectionKey := fmt.Sprintf("%d/%s:%s", datasourceSettings.ID, location, project)
+	connectionKey := fmt.Sprintf("%s/%s:%s", datasourceSettings.UID, location, project)
 	cClient, exists := s.apiClients.Load(connectionKey)
 
 	if exists {

@@ -22,7 +22,8 @@ import (
 
 func RunConnection(ds *BigQueryDatasource, connectionArgs json.RawMessage) (*sql.DB, error) {
 	return ds.Connect(context.Background(), backend.DataSourceInstanceSettings{
-		ID: 1,
+		ID:  1,
+		UID: "uid-1",
 		DecryptedSecureJSONData: map[string]string{
 			"privateKey": "randomPrivateKey",
 		},
@@ -54,7 +55,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err := RunConnection(ds, []byte("{}"))
 		assert.Nil(t, err)
 
-		_, exists := ds.connections.Load("1/:raintank-dev:false")
+		_, exists := ds.connections.Load("uid-1/:raintank-dev:false")
 		assert.True(t, exists)
 	})
 
@@ -62,7 +63,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err1 := RunConnection(ds, []byte(`{"location": "us-west2"}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west2:raintank-dev:false")
+		_, exists := ds.connections.Load("uid-1/us-west2:raintank-dev:false")
 		assert.True(t, exists)
 	})
 
@@ -73,9 +74,9 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err2 := RunConnection(ds, []byte(`{"location": "us-west3"}`))
 		assert.Nil(t, err2)
 
-		_, conn1Exists := ds.connections.Load("1/us-west2:raintank-dev:false")
+		_, conn1Exists := ds.connections.Load("uid-1/us-west2:raintank-dev:false")
 		assert.True(t, conn1Exists)
-		_, conn2Exists := ds.connections.Load("1/us-west3:raintank-dev:false")
+		_, conn2Exists := ds.connections.Load("uid-1/us-west3:raintank-dev:false")
 		assert.True(t, conn2Exists)
 	})
 
@@ -93,14 +94,14 @@ func Test_datasourceConnection(t *testing.T) {
 			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
-		ds.apiClients.Store("1/us-west2:raintank-dev:false", api.New(&bq.Client{
+		ds.apiClients.Store("uid-1/us-west2:raintank-dev:false", api.New(&bq.Client{
 			Location: "us-west1",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{"location": "us-west2"}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/us-west2:raintank-dev:false")
+		_, exists := ds.connections.Load("uid-1/us-west2:raintank-dev:false")
 		assert.True(t, exists)
 		assert.Equal(t, 0, clientsFactoryCallsCount)
 	})
@@ -119,19 +120,18 @@ func Test_datasourceConnection(t *testing.T) {
 			logger:                  backend.NewLoggerWith("bigquery datasource"),
 		}
 
-		ds.apiClients.Store("1/us-west2:raintank-dev:false", api.New(&bq.Client{
+		ds.apiClients.Store("uid-1/us-west2:raintank-dev:false", api.New(&bq.Client{
 			Location: "",
 		}))
 
 		_, err1 := RunConnection(ds, []byte(`{}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.connections.Load("1/:raintank-dev:false")
+		_, exists := ds.connections.Load("uid-1/:raintank-dev:false")
 		assert.True(t, exists)
-
-		_, apiClient1Exists := ds.apiClients.Load("1/us-west2:raintank-dev:false")
+		_, apiClient1Exists := ds.apiClients.Load("uid-1/us-west2:raintank-dev:false")
 		assert.True(t, apiClient1Exists)
-		_, apiClient2Exists := ds.apiClients.Load("1/:raintank-dev:false")
+		_, apiClient2Exists := ds.apiClients.Load("uid-1/:raintank-dev:false")
 		assert.True(t, apiClient2Exists)
 
 		assert.Equal(t, 1, clientsFactoryCallsCount)
@@ -151,7 +151,7 @@ func Test_datasourceConnection(t *testing.T) {
 		_, err1 := RunConnection(ds, []byte(`{}`))
 		assert.Nil(t, err1)
 
-		_, exists := ds.resourceManagerServices["1"]
+		_, exists := ds.resourceManagerServices["uid-1"]
 		assert.True(t, exists)
 	})
 }
@@ -163,7 +163,8 @@ func Test_getApi(t *testing.T) {
 	PluginConfigFromContext = func(ctx context.Context) backend.PluginContext {
 		return backend.PluginContext{
 			DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{
-				ID: 1,
+				ID:  1,
+				UID: "uid-1",
 				DecryptedSecureJSONData: map[string]string{
 					"privateKey": "randomPrivateKey",
 				},
@@ -184,7 +185,7 @@ func Test_getApi(t *testing.T) {
 		_, err := ds.getApi(context.Background(), "raintank-dev", "us-west1")
 		assert.Nil(t, err)
 
-		_, apiConnExists := ds.apiClients.Load("1/us-west1:raintank-dev")
+		_, apiConnExists := ds.apiClients.Load("uid-1/us-west1:raintank-dev")
 		assert.True(t, apiConnExists)
 	})
 
@@ -202,12 +203,12 @@ func Test_getApi(t *testing.T) {
 		}
 		_, err1 := ds.getApi(context.Background(), "raintank-dev", "us-west1")
 		assert.Nil(t, err1)
-		_, apiConn1Exists := ds.apiClients.Load("1/us-west1:raintank-dev")
+		_, apiConn1Exists := ds.apiClients.Load("uid-1/us-west1:raintank-dev")
 		assert.True(t, apiConn1Exists)
 
 		_, err2 := ds.getApi(context.Background(), "raintank-prod", "us-west2")
 		assert.Nil(t, err2)
-		_, apiConn2Exists := ds.apiClients.Load("1/us-west2:raintank-prod")
+		_, apiConn2Exists := ds.apiClients.Load("uid-1/us-west2:raintank-prod")
 		assert.True(t, apiConn2Exists)
 
 		assert.Equal(t, clientsFactoryCallsCount, 2)
@@ -226,7 +227,7 @@ func Test_getApi(t *testing.T) {
 			logger: backend.NewLoggerWith("bigquery datasource"),
 		}
 
-		ds.apiClients.Store("1/us-west1:raintank-dev", api.New(&bq.Client{
+		ds.apiClients.Store("uid-1/us-west1:raintank-dev", api.New(&bq.Client{
 			Location: "us-west1",
 		}))
 
