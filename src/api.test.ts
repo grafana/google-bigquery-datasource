@@ -1,9 +1,10 @@
 import { setBackendSrv } from '@grafana/runtime';
 import { of } from 'rxjs';
+
 import { getApiClient } from './api';
 
 describe('api', () => {
-  const datasourceId = 1;
+  const datasourceUid = 'abc';
   const mockResponse = {
     message: 'Hello World',
   };
@@ -12,7 +13,7 @@ describe('api', () => {
   const setupBackendSrv = (spy: jest.Mock) => {
     setBackendSrv({
       post: (path: string) => {
-        const resPath = `/api/datasources/${datasourceId}/resources`;
+        const resPath = `/api/datasources/uid/${datasourceUid}/resources`;
         if (path === `${resPath}/defaultProjects`) {
           defaultProjectSpy();
           return 'defaultProject';
@@ -37,10 +38,10 @@ describe('api', () => {
   test('api caching', async () => {
     setupBackendSrv(jest.fn());
 
-    await getApiClient(datasourceId);
+    await getApiClient(datasourceUid);
     expect(defaultProjectSpy).toHaveBeenCalled();
 
-    await getApiClient(datasourceId);
+    await getApiClient(datasourceUid);
     expect(defaultProjectSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -53,7 +54,7 @@ describe('api', () => {
   `('$method returns cached values', async ({ method, connArgs }) => {
     const callsSpy = jest.fn();
     setupBackendSrv(callsSpy);
-    const apiClient = await getApiClient(datasourceId);
+    const apiClient = await getApiClient(datasourceUid);
 
     const res1 = await (apiClient as any)[method](...connArgs);
     expect(res1).toEqual(mockResponse);
