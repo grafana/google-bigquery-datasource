@@ -31,16 +31,44 @@ The following Google APIs need to be enabled first:
 
 After installing the plugin, you must configure it so that Grafana can connect to your BigQuery data.
 
-Refer to [Configure the BigQuery data source](./configure/) for configuration instructions.
+Refer to [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/) for configuration instructions.
 
 ## Query your data
 
 After you configure the data source, you can build queries in the **SQL query editor** or the **Visual query editor** to visualize your BigQuery data.
 
-Refer to [Query the BigQuery data source](./query-editor/) for query instructions.
+Refer to [Query the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/query-editor/) for query instructions.
 
 ## Use template variables
 
 Instead of hard-coding details such as dataset names and column names in queries, you can use variables in their place.
 
-Refer to [BigQuery data source template variables](./template-variables/) for variable instructions.
+Refer to [BigQuery data source template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) for variable instructions.
+
+## Annotate visualizations
+
+You can mark points in time on your graphs with events from BigQuery data, such as deployments or incidents.
+
+Refer to [BigQuery annotations](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/annotations/) for annotation instructions.
+
+## Set up alerting
+
+Create alerts based on BigQuery queries to get notified when your data meets specific conditions.
+
+Refer to [BigQuery alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) for alerting instructions.
+
+## Supported features
+
+| Feature | Supported |
+|---------|-----------|
+| Metrics | Yes |
+| Alerting | Yes |
+| Annotations | Yes |
+
+## Plugin updates
+
+Ensure your plugin version is up-to-date so you have access to all current features and improvements. Navigate to **Plugins and data** > **Plugins** to check for updates.
+
+{{< admonition type="note" >}}
+Plugins are automatically updated in Grafana Cloud.
+{{< /admonition >}}
