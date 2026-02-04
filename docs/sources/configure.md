@@ -8,6 +8,7 @@ keywords:
   - configuration
   - authentication
   - provisioning
+  - terraform
 labels:
   products:
     - cloud
@@ -105,6 +106,16 @@ To configure Forward OAuth Identity:
 Some Grafana features don't function as expected with Forward OAuth Identity, including alerting. Grafana backend features require credentials to always be in scope, which isn't the case with this authentication method.
 {{< /admonition >}}
 
+## Additional settings
+
+Expand the **Additional Settings** section to configure optional settings.
+
+| Setting | Description |
+|---------|-------------|
+| **Processing location** | Specifies the [geographic location](https://cloud.google.com/bigquery/docs/locations) where BigQuery processes queries. Options include multi-regional locations (US, EU) and specific regions. Leave empty for automatic location selection. |
+| **Service endpoint** | Custom network address for the BigQuery API. Use this when connecting through a private endpoint or VPC Service Controls. Example: `https://bigquery.googleapis.com/bigquery/v2/` |
+| **Max bytes billed** | Limits the bytes billed for a query. Queries that would exceed this limit fail instead of running. Use this to prevent unexpectedly expensive queries. Example: `5242880` (5 MB). |
+
 ## Verify the connection
 
 Click **Save & test** to verify the connection. A successful test confirms that Grafana can connect to BigQuery with the provided credentials.
@@ -193,6 +204,128 @@ datasources:
       oauthPassThru: true
 ```
 
+### With additional settings
+
+```yaml
+apiVersion: 1
+datasources:
+  - name: BigQuery
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: jwt
+      clientEmail: <SERVICE_ACCOUNT_EMAIL>
+      defaultProject: <DEFAULT_PROJECT_ID>
+      tokenUri: https://oauth2.googleapis.com/token
+      processingLocation: US
+      MaxBytesBilled: 5242880
+      serviceEndpoint: https://bigquery.googleapis.com/bigquery/v2/
+    secureJsonData:
+      privateKey: <PRIVATE_KEY>
+```
+
+### Provisioning configuration reference
+
+| Key | Type | Description |
+|-----|------|-------------|
+| `authenticationType` | string | Authentication method: `jwt`, `gce`, or `forwardOAuthIdentity` |
+| `clientEmail` | string | Service account email (required for `jwt`) |
+| `defaultProject` | string | Default GCP project for queries |
+| `tokenUri` | string | OAuth token endpoint (required for `jwt`): `https://oauth2.googleapis.com/token` |
+| `privateKeyPath` | string | Path to private key file (alternative to `secureJsonData.privateKey`) |
+| `usingImpersonation` | boolean | Enable service account impersonation |
+| `serviceAccountToImpersonate` | string | Email of service account to impersonate |
+| `oauthPassThru` | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`) |
+| `processingLocation` | string | Query processing location (for example, `US`, `EU`, `us-central1`) |
+| `MaxBytesBilled` | integer | Maximum bytes billed per query |
+| `serviceEndpoint` | string | Custom BigQuery API endpoint URL |
+| `flatRateProject` | string | Project ID for flat-rate billing reservations |
+| `queryPriority` | string | Default query priority: `INTERACTIVE` or `BATCH` |
+| `enableSecureSocksProxy` | boolean | Enable Secure Socks Proxy (requires Grafana configuration) |
+
+| Secure Key | Type | Description |
+|------------|------|-------------|
+| `privateKey` | string | Service account private key (PEM format) |
+
+## Provision with Terraform
+
+You can provision the data source using the [Grafana Terraform provider](https://registry.terraform.io/providers/grafana/grafana/latest/docs).
+
+### Service account key
+
+```hcl
+resource "grafana_data_source" "bigquery" {
+  type = "grafana-bigquery-datasource"
+  name = "BigQuery"
+
+  json_data_encoded = jsonencode({
+    authenticationType = "jwt"
+    clientEmail        = "<SERVICE_ACCOUNT_EMAIL>"
+    defaultProject     = "<DEFAULT_PROJECT_ID>"
+    tokenUri           = "https://oauth2.googleapis.com/token"
+  })
+
+  secure_json_data_encoded = jsonencode({
+    privateKey = file("path/to/service-account-key.pem")
+  })
+}
+```
+
+### Google Metadata Server
+
+```hcl
+resource "grafana_data_source" "bigquery" {
+  type = "grafana-bigquery-datasource"
+  name = "BigQuery"
+
+  json_data_encoded = jsonencode({
+    authenticationType = "gce"
+  })
+}
+```
+
+### With service account impersonation
+
+```hcl
+resource "grafana_data_source" "bigquery" {
+  type = "grafana-bigquery-datasource"
+  name = "BigQuery"
+
+  json_data_encoded = jsonencode({
+    authenticationType          = "gce"
+    usingImpersonation          = true
+    serviceAccountToImpersonate = "<SERVICE_ACCOUNT_EMAIL>"
+    defaultProject              = "<DEFAULT_PROJECT_ID>"
+  })
+}
+```
+
+### With additional settings
+
+```hcl
+resource "grafana_data_source" "bigquery" {
+  type = "grafana-bigquery-datasource"
+  name = "BigQuery"
+
+  json_data_encoded = jsonencode({
+    authenticationType = "jwt"
+    clientEmail        = "<SERVICE_ACCOUNT_EMAIL>"
+    defaultProject     = "<DEFAULT_PROJECT_ID>"
+    tokenUri           = "https://oauth2.googleapis.com/token"
+    processingLocation = "US"
+    MaxBytesBilled     = 5242880
+    serviceEndpoint    = "https://bigquery.googleapis.com/bigquery/v2/"
+  })
+
+  secure_json_data_encoded = jsonencode({
+    privateKey = var.bigquery_private_key
+  })
+}
+```
+
+For more information, refer to the [Grafana Terraform provider documentation](https://registry.terraform.io/providers/grafana/grafana/latest/docs/resources/data_source).
+
 ## Import queries from DoiT International BigQuery plugin
 
 If you previously used the DoiT International BigQuery community plugin, you can import your existing queries into the Grafana BigQuery data source.
@@ -206,3 +339,10 @@ To import queries:
 {{< admonition type="note" >}}
 Imported queries are converted to raw SQL queries. This feature requires Grafana 8.5 or later.
 {{< /admonition >}}
+
+## Related resources
+
+- [Google BigQuery documentation](https://cloud.google.com/bigquery/docs)
+- [Create a service account](https://cloud.google.com/iam/docs/creating-managing-service-accounts)
+- [BigQuery IAM roles](https://cloud.google.com/bigquery/docs/access-control)
+- [Grafana provisioning documentation](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/administration/provisioning/)
