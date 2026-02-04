@@ -61,6 +61,18 @@ Refer to [BigQuery alerting](https://grafana.com/docs/plugins/grafana-bigquery-d
 
 If you encounter issues with the BigQuery data source, refer to [Troubleshoot BigQuery data source issues](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/) for common problems and solutions.
 
+## Pre-built dashboards
+
+The BigQuery data source plugin includes pre-built dashboards to help you get started.
+
+To import a pre-built dashboard:
+
+1. Navigate to **Dashboards**.
+1. Click **New** > **Import**.
+1. Select the BigQuery data source.
+1. Choose from the available dashboards:
+   - **Array queries examples** - Demonstrates how to work with BigQuery arrays and nested data structures
+
 ## Supported features
 
 | Feature | Supported |

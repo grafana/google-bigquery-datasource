@@ -138,7 +138,10 @@ Macros simplify queries by providing dynamic values based on the dashboard conte
 | Macro | Description | Example output |
 |-------|-------------|----------------|
 | `$__timeFilter(column)` | Filters results to the dashboard time range | `column BETWEEN TIMESTAMP('2024-01-01 00:00:00') AND TIMESTAMP('2024-01-02 00:00:00')` |
-| `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY` | `TIMESTAMP_TRUNC(column, HOUR)` |
+| `$__timeFrom()` | Returns the start of the dashboard time range | `TIMESTAMP('2024-01-01 00:00:00')` |
+| `$__timeTo()` | Returns the end of the dashboard time range | `TIMESTAMP('2024-01-02 00:00:00')` |
+| `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY` | `TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(column), 300000) * 300000)` |
+| `$__timeShifting(interval)` | Compares data across time periods by shifting the time range | Used for time-over-time comparisons |
 
 ### Macro examples
 
@@ -167,6 +170,67 @@ WHERE $__timeFilter(timestamp_column)
 GROUP BY time
 ORDER BY time
 ```
+
+#### Use time boundaries
+
+Use `$__timeFrom()` and `$__timeTo()` when you need explicit time boundaries:
+
+```sql
+SELECT
+  COUNT(*) AS total_events,
+  $__timeFrom() AS period_start,
+  $__timeTo() AS period_end
+FROM `project.dataset.events`
+WHERE timestamp_column BETWEEN $__timeFrom() AND $__timeTo()
+```
+
+#### Compare data across time periods
+
+Use `$__timeShifting` to compare current data with historical data:
+
+```sql
+SELECT
+  timestamp_column AS time,
+  value_column,
+  $__timeShifting(7d)
+FROM `project.dataset.metrics`
+WHERE $__timeFilter(timestamp_column)
+```
+
+This creates a shifted query that compares the current time range with the same period 7 days ago.
+
+## Query partitioned tables
+
+BigQuery [partitioned tables](https://cloud.google.com/bigquery/docs/partitioned-tables) improve query performance and reduce costs. The query editor provides autocompletion for partition filters.
+
+### Ingestion-time partitioned tables
+
+For tables partitioned by ingestion time, filter on `_PARTITIONTIME`:
+
+```sql
+SELECT
+  timestamp_column AS time,
+  value_column
+FROM `project.dataset.partitioned_table`
+WHERE _PARTITIONTIME BETWEEN $__timeFrom() AND $__timeTo()
+  AND $__timeFilter(timestamp_column)
+```
+
+### Column-partitioned tables
+
+For tables partitioned by a specific column, filter on that column:
+
+```sql
+SELECT
+  event_date AS time,
+  value_column
+FROM `project.dataset.date_partitioned_table`
+WHERE $__timeFilter(event_date)
+```
+
+{{< admonition type="note" >}}
+Always include partition filters in your queries to minimize data scanned and reduce costs.
+{{< /admonition >}}
 
 ## Storage API
 
