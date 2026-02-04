@@ -57,6 +57,10 @@ Create alerts based on BigQuery queries to get notified when your data meets spe
 
 Refer to [BigQuery alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) for alerting instructions.
 
+## Troubleshoot
+
+If you encounter issues with the BigQuery data source, refer to [Troubleshoot BigQuery data source issues](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/) for common problems and solutions.
+
 ## Supported features
 
 | Feature | Supported |
