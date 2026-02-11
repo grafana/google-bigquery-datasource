@@ -27,15 +27,15 @@ This document explains how to use the Google BigQuery query editor to build and 
 
 Before using the query editor:
 
-- [Configure the Google BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/)
-- Verify your credentials have appropriate permissions to query the datasets you need
+- [Configure the Google BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/).
+- Verify your credentials have appropriate permissions to query the datasets you need.
 
 ## Query editor modes
 
 The BigQuery data source provides two query editor modes, which you can switch between using the **Builder** / **Code** toggle in the query editor header:
 
-- **Builder (Visual query editor):** Build queries without writing SQL using a point-and-click interface
-- **Code (SQL query editor):** Write raw SQL queries with autocompletion and validation
+- **Builder (Visual query editor):** Build queries without writing SQL using a point-and-click interface.
+- **Code (SQL query editor):** Write raw SQL queries with autocompletion and validation.
 
 ### Query editor header
 
@@ -57,10 +57,10 @@ The SQL query editor provides a rich editing experience for writing BigQuery Sta
 
 The SQL query editor includes autocompletion for:
 
-- **BigQuery Standard SQL syntax:** Keywords, functions, and operators
-- **Schema objects:** Datasets, tables, and columns from your BigQuery project
-- **Macros:** Grafana macros like `$__timeFilter` and `$__timeGroup`
-- **Template variables:** Dashboard variables you've defined
+- **BigQuery Standard SQL syntax:** Keywords, functions, and operators.
+- **Schema objects:** Datasets, tables, and columns from your BigQuery project.
+- **Macros:** Grafana macros like `$__timeFilter` and `$__timeGroup`.
+- **Template variables:** Dashboard variables you've defined.
 
 To trigger autocompletion, press `Ctrl+Space` (Windows/Linux) or `Cmd+Space` (macOS).
 
@@ -193,6 +193,8 @@ Macros simplify queries by providing dynamic values based on the dashboard conte
 | `$__timeShifting(interval)` | Creates a duplicate query with time range shifted. The macro is removed from SQL. | Runs query twice for comparison |
 
 ### Macro examples
+
+The following examples demonstrate common macro usage patterns.
 
 #### Filter by time range
 

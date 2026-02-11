@@ -58,6 +58,8 @@ Alert queries have specific requirements:
 
 ## Alert query examples
 
+The following examples demonstrate common alerting patterns.
+
 ### Threshold alert on a metric
 
 Alert when a value exceeds a threshold:
@@ -188,6 +190,8 @@ Follow these recommendations for effective BigQuery alerts:
 - **Consider time zones:** BigQuery uses UTC by default. Account for time zone differences in your queries.
 
 ## Troubleshoot alerts
+
+Use these tips to diagnose common alerting issues.
 
 ### Alert not firing
 

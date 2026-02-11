@@ -40,11 +40,11 @@ The following Google APIs must be enabled in your GCP project:
 
 The following documents help you get started with the Google BigQuery data source:
 
-- [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/) - Set up authentication and connect to BigQuery
-- [BigQuery query editor](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/query-editor/) - Create and edit SQL and visual queries
-- [Template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) - Create dynamic dashboards with BigQuery variables
-- [Alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) - Create alert rules using BigQuery data
-- [Troubleshooting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/) - Solve common configuration and query errors
+- [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/) - Set up authentication and connect to BigQuery.
+- [BigQuery query editor](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/query-editor/) - Create and edit SQL and visual queries.
+- [Template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) - Create dynamic dashboards with BigQuery variables.
+- [Alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) - Create alert rules using BigQuery data.
+- [Troubleshooting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/) - Solve common configuration and query errors.
 
 ## Additional features
 

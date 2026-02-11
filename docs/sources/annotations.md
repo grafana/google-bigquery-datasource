@@ -62,6 +62,8 @@ Annotation queries must return specific columns that Grafana uses to render the 
 
 ## Annotation query examples
 
+The following examples demonstrate common annotation patterns.
+
 ### Simple event annotations
 
 Mark deployment events on your graphs:

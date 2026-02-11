@@ -58,6 +58,8 @@ To create a query variable:
 
 ## Query variable examples
 
+The following examples show common queries for populating variable options.
+
 ### List datasets in a project
 
 ```sql

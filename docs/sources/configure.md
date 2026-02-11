@@ -28,11 +28,11 @@ This document explains how to configure the Google BigQuery data source in Grafa
 Before configuring the data source, ensure you have:
 
 - **Grafana version:** 11.6.0 or later (plugin version 3.x). For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
-- **Grafana permissions:** Organization administrator role to add data sources
+- **Grafana permissions:** `Organization administrator` role to add data sources.
 - **Google Cloud APIs enabled:** The following APIs must be enabled in your GCP project:
   - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
-- **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server
+- **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server.
 
 {{< admonition type="note" >}}
 Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
@@ -125,11 +125,11 @@ Expand the **Additional Settings** section to configure optional settings.
 
 ## Verify the connection
 
-Click **Save & test** to verify the connection. A successful test confirms that Grafana can connect to BigQuery with the provided credentials.
+Click **Save & test** to verify the connection. A successful test displays the message "Data source is working". If you encounter errors, refer to [Troubleshooting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/).
 
 ## Provision the data source
 
-You can define the data source in YAML files as part of Grafana's provisioning system.
+You can define the data source in YAML files as part of the Grafana provisioning system.
 For more information, refer to [Provisioning Grafana data sources](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/administration/provisioning/#data-sources).
 
 ### Service account key with private key in secure JSON
