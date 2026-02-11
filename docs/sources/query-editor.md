@@ -149,6 +149,21 @@ WHERE $__timeFilter(timestamp_column)
 ORDER BY timestamp_column
 ```
 
+### Multi-series time series
+
+To display multiple series (for example, metrics by region), include a label column. Each unique value creates a separate series:
+
+```sql
+SELECT
+  $__timeGroup(timestamp_column, $__interval) AS time,
+  region,
+  AVG(metric_value) AS value
+FROM `project.dataset.metrics`
+WHERE $__timeFilter(timestamp_column)
+GROUP BY time, region
+ORDER BY time
+```
+
 ## Query as table
 
 Table visualizations work with any valid BigQuery query. You don't need to include a timestamp column for table results.
@@ -175,7 +190,7 @@ Macros simplify queries by providing dynamic values based on the dashboard conte
 | `$__timeFrom()` | Returns the start of the dashboard time range | `TIMESTAMP('2024-01-01 00:00:00')` |
 | `$__timeTo()` | Returns the end of the dashboard time range | `TIMESTAMP('2024-01-02 00:00:00')` |
 | `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY` | `TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(column), 300000) * 300000)` |
-| `$__timeShifting(interval)` | Compares data across time periods by shifting the time range | Used for time-over-time comparisons |
+| `$__timeShifting(interval)` | Creates a duplicate query with time range shifted. The macro is removed from SQL. | Runs query twice for comparison |
 
 ### Macro examples
 
@@ -220,18 +235,22 @@ WHERE timestamp_column BETWEEN $__timeFrom() AND $__timeTo()
 
 #### Compare data across time periods
 
-Use `$__timeShifting` to compare current data with historical data:
+Use `$__timeShifting` to compare current data with historical data. When you include this macro in your query, Grafana creates a duplicate query with the time range shifted by the specified interval:
 
 ```sql
 SELECT
-  timestamp_column AS time,
-  value_column,
-  $__timeShifting(7d)
+  $__timeGroup(timestamp_column, $__interval) AS time,
+  AVG(value_column) AS avg_value
 FROM `project.dataset.metrics`
 WHERE $__timeFilter(timestamp_column)
+GROUP BY time
+ORDER BY time
+-- $__timeShifting(7d)
 ```
 
-This creates a shifted query that compares the current time range with the same period 7 days ago.
+The `$__timeShifting(7d)` macro is removed from the SQL and instead shifts the time range. This query runs twice: once for the current time range, and once for the same period 7 days ago. The results appear as separate series in your visualization, allowing you to compare week-over-week data.
+
+Supported intervals: `s` (seconds), `min` (minutes), `h` (hours), `d` (days), `w` (weeks), `m` (months), `M` (months), `y` (years).
 
 ## Query partitioned tables
 

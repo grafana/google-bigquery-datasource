@@ -80,7 +80,7 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 
 **Solutions:**
 
-1. Verify the OAuth scope `https://www.googleapis.com/auth/bigquery` is configured in Grafana's OAuth settings.
+1. Verify the OAuth scopes are configured in Grafana's OAuth settings: `https://www.googleapis.com/auth/bigquery` and `https://www.googleapis.com/auth/drive` (if querying data linked to Google Drive).
 1. Ensure users have authenticated with Google OAuth before accessing BigQuery dashboards.
 1. Check that the **Default project** is configured in the data source settings.
 
