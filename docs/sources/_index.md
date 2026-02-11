@@ -1,7 +1,7 @@
 ---
-title: Google BigQuery data source plugin
+title: Google BigQuery data source
 menuTitle: Google BigQuery
-description: The Google BigQuery data source plugin allows you to query and visualize Google BigQuery data in Grafana.
+description: The Google BigQuery data source allows you to query and visualize Google BigQuery data in Grafana.
 keywords:
   - bigquery
   - google
@@ -16,70 +16,58 @@ labels:
 weight: 300
 ---
 
-# Google BigQuery data source plugin
+# Google BigQuery data source
 
-The Google BigQuery data source plugin allows you to query and visualize Google BigQuery data from within Grafana.
+The Google BigQuery data source allows you to query and visualize data from [Google BigQuery](https://cloud.google.com/bigquery), Google's fully managed, serverless data warehouse.
+
+## Supported features
+
+| Feature | Supported | Description |
+|---------|-----------|-------------|
+| **Metrics** | Yes | Query numeric data and visualize as time series or tables. |
+| **Alerting** | Yes | Create alert rules based on BigQuery queries. |
+| **Annotations** | Yes | Overlay events from BigQuery on your graphs. |
+| **Template variables** | Yes | Create dynamic dashboards with query-based variables. |
 
 ## Requirements
 
-The following Google APIs need to be enabled first:
+The following Google APIs must be enabled in your GCP project:
 
 - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
 - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 
 ## Get started
 
-After installing the plugin, you must configure it so that Grafana can connect to your BigQuery data.
+The following documents help you get started with the Google BigQuery data source:
 
-Refer to [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/) for configuration instructions.
+- [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/) - Set up authentication and connect to BigQuery
+- [BigQuery query editor](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/query-editor/) - Create and edit SQL and visual queries
+- [Template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) - Create dynamic dashboards with BigQuery variables
+- [Alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) - Create alert rules using BigQuery data
+- [Troubleshooting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/) - Solve common configuration and query errors
 
-## Query your data
+## Additional features
 
-After you configure the data source, you can build queries in the **SQL query editor** or the **Visual query editor** to visualize your BigQuery data.
+After you configure the BigQuery data source, you can:
 
-Refer to [Query the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/query-editor/) for query instructions.
-
-## Use template variables
-
-Instead of hard-coding details such as dataset names and column names in queries, you can use variables in their place.
-
-Refer to [BigQuery data source template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) for variable instructions.
-
-## Annotate visualizations
-
-You can mark points in time on your graphs with events from BigQuery data, such as deployments or incidents.
-
-Refer to [BigQuery annotations](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/annotations/) for annotation instructions.
-
-## Set up alerting
-
-Create alerts based on BigQuery queries to get notified when your data meets specific conditions.
-
-Refer to [BigQuery alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) for alerting instructions.
-
-## Troubleshoot
-
-If you encounter issues with the BigQuery data source, refer to [Troubleshoot BigQuery data source issues](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/) for common problems and solutions.
+- Add [Annotations](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/annotations/) to overlay BigQuery events on your graphs.
+- Configure and use [Template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) for dynamic dashboards.
+- Add [Transformations](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/panels-visualizations/query-transform-data/transform-data/) to manipulate query results.
+- Set up [Alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) rules based on your BigQuery data.
+- Use [Explore](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/explore/) to investigate your BigQuery data without building a dashboard.
 
 ## Pre-built dashboards
 
-The BigQuery data source plugin includes pre-built dashboards to help you get started.
+The BigQuery data source plugin includes the following pre-built dashboards:
+
+- **Array queries examples** - Demonstrates how to work with BigQuery arrays and nested data structures.
 
 To import a pre-built dashboard:
 
-1. Navigate to **Dashboards**.
-1. Click **New** > **Import**.
-1. Select the BigQuery data source.
-1. Choose from the available dashboards:
-   - **Array queries examples** - Demonstrates how to work with BigQuery arrays and nested data structures
-
-## Supported features
-
-| Feature | Supported |
-|---------|-----------|
-| Metrics | Yes |
-| Alerting | Yes |
-| Annotations | Yes |
+1. Go to **Connections** > **Data sources**.
+1. Select your BigQuery data source.
+1. Click the **Dashboards** tab.
+1. Click **Import** next to the dashboard you want to use.
 
 ## Plugin updates
 
@@ -88,3 +76,9 @@ Ensure your plugin version is up-to-date so you have access to all current featu
 {{< admonition type="note" >}}
 Plugins are automatically updated in Grafana Cloud.
 {{< /admonition >}}
+
+## Related resources
+
+- [Google BigQuery documentation](https://cloud.google.com/bigquery/docs)
+- [BigQuery SQL reference](https://cloud.google.com/bigquery/docs/reference/standard-sql/query-syntax)
+- [Grafana community forum](https://community.grafana.com/)
