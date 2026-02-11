@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.1
+
+🐛 Fix: Bug introduced in 3.1.0 that prevented queries from running
+
 ## 3.1.0
 
 🚀 Update dependencies for react-19 upgrade
