@@ -2,14 +2,15 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Run standalone plugin",
+      "name": "Standalone debug mode",
       "type": "go",
       "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}/pkg/main.go",
-      "output": "${workspaceFolder}/pkg/__debug_bin",
+      "mode": "debug",
+      "program": "${workspaceFolder}/pkg",
       "env": {},
-      "args": ["--standalone=true"]
+      "args": [
+        "-standalone"
+      ]
     },
     {
       "name": "Attach to plugin backend in docker",
@@ -24,7 +25,7 @@
       "substitutePath": [
         {
           "from": "${workspaceFolder}",
-          "to": "/root/{{ pluginId }}"
+          "to": "/root/grafana-bigquery-datasource"
         }
       ]
     }
