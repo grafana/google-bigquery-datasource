@@ -32,16 +32,26 @@ Before using the query editor:
 
 ## Query editor modes
 
-The BigQuery data source provides two query editor modes:
+The BigQuery data source provides two query editor modes, which you can switch between using the **Builder** / **Code** toggle in the query editor header:
 
-- **SQL query editor:** Write raw SQL queries with autocompletion and validation
-- **Visual query editor:** Build queries without writing SQL using a point-and-click interface
+- **Builder (Visual query editor):** Build queries without writing SQL using a point-and-click interface
+- **Code (SQL query editor):** Write raw SQL queries with autocompletion and validation
+
+### Query editor header
+
+The query editor header includes the following options:
+
+| Option | Description |
+|--------|-------------|
+| **Processing location** | Override the data source processing location for this query. |
+| **Format** | Select the output format: **Time series** or **Table**. |
+| **Use Storage API** | Enable the BigQuery Storage API for this query (Code mode only). |
+| **Filter/Group/Order/Preview** | Toggle sections in the Visual query editor (Builder mode only). |
+| **Builder/Code** | Switch between Visual query builder and SQL code editor. |
 
 ## SQL query editor
 
 The SQL query editor provides a rich editing experience for writing BigQuery Standard SQL queries.
-
-{{< figure src="/media/docs/bigquery/BQCodeEditor.png" max-width="800px" alt="BigQuery SQL query editor" caption="The SQL query editor with autocompletion" >}}
 
 ### Autocompletion
 
@@ -60,34 +70,58 @@ The SQL query editor validates your query as you type. If the query contains err
 
 When the query is valid, the editor shows an estimated query size, helping you understand the data volume before running the query.
 
-{{< figure src="/media/docs/bigquery/BQCodeEditorValidation.gif" max-width="800px" alt="BigQuery query validation" caption="Query validation showing errors and estimated query size" >}}
-
 ### Extended code editor
 
-For complex queries, use the full-screen code editor. Click the expand button in the query editor toolbar to open the extended editor.
+For complex queries, use the full-screen code editor. Click the expand button (double arrow icon) in the query toolbar to open the extended editor.
 
-{{< figure src="/media/docs/bigquery/BQCodeEditorFS.gif" max-width="800px" alt="BigQuery full-screen editor" caption="The full-screen code editor for working with long queries" >}}
+### Format query
+
+Click the **Format query** button (brackets icon) in the query toolbar to automatically format your SQL code for better readability.
 
 ### Keyboard shortcuts
 
 | Shortcut | Action |
 |----------|--------|
 | `Cmd/Ctrl + Return` | Run the query |
+| `Ctrl + Space` | Trigger autocompletion |
 
 ## Visual query editor
 
 The Visual query editor lets you build BigQuery queries without writing SQL. It's useful for users who aren't familiar with SQL or for building simple queries quickly.
 
-{{< figure src="/media/docs/bigquery/BQVqb.gif" max-width="800px" alt="BigQuery Visual query editor" caption="Building a query with the Visual query editor" >}}
+### Resource selectors
 
-The Visual query editor supports:
+In Builder mode, the query editor header displays resource selectors:
 
-- **Selecting columns:** Choose which columns to include in results
-- **Aggregations:** Apply functions like `COUNT`, `SUM`, `AVG`, `MIN`, and `MAX`
-- **Filtering:** Add `WHERE` conditions to filter data
-- **Grouping:** Group results by one or more columns
-- **Ordering:** Sort results by column values
-- **Preview:** View the generated SQL query
+| Selector | Description |
+|----------|-------------|
+| **Project** | Select the GCP project containing your data. |
+| **Dataset** | Select the dataset within the project. |
+| **Table** | Select the table to query. |
+
+### Query building
+
+The Visual query editor supports the following sections (toggle visibility using the switches in the header):
+
+| Section | Description |
+|---------|-------------|
+| **Select** | Choose columns and apply aggregation functions. |
+| **Filter** | Add `WHERE` conditions to filter data by column values. |
+| **Group** | Group results by one or more columns (required when using aggregations). |
+| **Order** | Sort results by column values in ascending or descending order. |
+| **Preview** | View the generated SQL query. |
+
+### Aggregation functions
+
+The following aggregation functions are available:
+
+- `AVG` - Average value
+- `COUNT` - Count of rows
+- `MIN` - Minimum value
+- `MAX` - Maximum value
+- `SUM` - Sum of values
+- `STDDEV` - Standard deviation
+- `VARIANCE` - Variance
 
 The Visual query editor validates your query as you build it, similar to the SQL query editor.
 
@@ -238,9 +272,8 @@ The plugin supports the [BigQuery Storage API](https://cloud.google.com/bigquery
 
 To enable the Storage API:
 
-1. Open the query editor.
-1. Expand the **Query options** section.
-1. Enable **Use Storage API**.
+- **Code mode:** Toggle **Use Storage API** in the query header.
+- **Builder mode:** Expand the **Options** section at the bottom and toggle **Use Storage API**.
 
 {{< admonition type="note" >}}
 The Storage API doesn't work with Forward OAuth Identity authentication.
@@ -248,12 +281,19 @@ The Storage API doesn't work with Forward OAuth Identity authentication.
 
 ## Query options
 
-Expand the **Query options** section in the query editor to access additional settings:
+The query editor provides additional options depending on the mode:
+
+### Code mode options
+
+In Code mode, access the **Use Storage API** toggle directly in the query header.
+
+### Builder mode options
+
+In Builder mode, expand the **Options** section at the bottom of the query editor to access:
 
 | Option | Description |
 |--------|-------------|
 | **Use Storage API** | Enable the BigQuery Storage API for improved performance with large result sets. |
-| **Query priority** | Set the query priority (interactive or batch). |
 
 ## Next steps
 

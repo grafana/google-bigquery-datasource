@@ -27,11 +27,16 @@ This document explains how to configure the Google BigQuery data source in Grafa
 
 Before configuring the data source, ensure you have:
 
+- **Grafana version:** 11.6.0 or later (plugin version 3.x). For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
 - **Grafana permissions:** Organization administrator role to add data sources
 - **Google Cloud APIs enabled:** The following APIs must be enabled in your GCP project:
   - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 - **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server
+
+{{< admonition type="note" >}}
+Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
+{{< /admonition >}}
 
 ## Add the data source
 
@@ -98,7 +103,9 @@ Use Forward OAuth Identity when you want to use Grafana's Google OAuth authentic
 To configure Forward OAuth Identity:
 
 1. Configure [Google OAuth authentication](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/configure-authentication/google/) in Grafana.
-1. Add the `https://www.googleapis.com/auth/bigquery` scope to the OAuth application.
+1. Add the following scopes to the OAuth application:
+   - `https://www.googleapis.com/auth/bigquery` (required)
+   - `https://www.googleapis.com/auth/drive` (optional, for querying Google Sheets data)
 1. In the data source configuration, select **Forward OAuth Identity** as the authentication type.
 1. Enter the **Default project** where queries run.
 
@@ -337,7 +344,7 @@ To import queries:
 1. Save the dashboard.
 
 {{< admonition type="note" >}}
-Imported queries are converted to raw SQL queries. This feature requires Grafana 8.5 or later.
+Imported queries are converted to raw SQL queries.
 {{< /admonition >}}
 
 ## Related resources
