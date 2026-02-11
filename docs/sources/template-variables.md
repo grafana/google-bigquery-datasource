@@ -16,6 +16,7 @@ labels:
 menuTitle: Template variables
 title: Google BigQuery template variables
 weight: 300
+last_reviewed: 2026-02-11
 ---
 
 # Google BigQuery template variables

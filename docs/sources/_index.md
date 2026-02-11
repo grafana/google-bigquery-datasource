@@ -14,6 +14,7 @@ labels:
     - enterprise
     - oss
 weight: 300
+last_reviewed: 2026-02-11
 ---
 
 # Google BigQuery data source

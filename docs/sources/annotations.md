@@ -15,6 +15,7 @@ labels:
 menuTitle: Annotations
 title: Google BigQuery annotations
 weight: 400
+last_reviewed: 2026-02-11
 ---
 
 # Google BigQuery annotations

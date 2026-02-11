@@ -17,6 +17,7 @@ labels:
 menuTitle: Query editor
 title: Google BigQuery query editor
 weight: 200
+last_reviewed: 2026-02-11
 ---
 
 # Google BigQuery query editor

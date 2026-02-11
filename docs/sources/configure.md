@@ -17,6 +17,7 @@ labels:
 menuTitle: Configure
 title: Configure the Google BigQuery data source
 weight: 100
+last_reviewed: 2026-02-11
 ---
 
 # Configure the Google BigQuery data source
