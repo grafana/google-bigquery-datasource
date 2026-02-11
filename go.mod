@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go v0.121.0
 	cloud.google.com/go/bigquery v1.67.0
 	github.com/grafana/grafana-google-sdk-go v0.4.2
-	github.com/grafana/grafana-plugin-sdk-go v0.287.0
+	github.com/grafana/grafana-plugin-sdk-go v0.288.0
 	github.com/grafana/sqlds/v5 v5.0.4
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
