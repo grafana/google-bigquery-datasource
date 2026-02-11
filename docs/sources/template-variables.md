@@ -82,6 +82,15 @@ FROM `project_id.dataset_name.table_name`
 ORDER BY region
 ```
 
+### List columns from a table
+
+```sql
+SELECT column_name
+FROM `project_id.dataset_name.INFORMATION_SCHEMA.COLUMNS`
+WHERE table_name = 'table_name'
+ORDER BY ordinal_position
+```
+
 ### List values with a display name
 
 Return two columns to use different values for the display name and the actual value:
@@ -96,11 +105,24 @@ ORDER BY display_name
 
 The `__text` column appears in the drop-down, and `__value` is used in queries.
 
+### List values filtered by time range
+
+Use macros to filter variable options based on the dashboard time range:
+
+```sql
+SELECT DISTINCT category
+FROM `project_id.dataset_name.events`
+WHERE $__timeFilter(event_time)
+ORDER BY category
+```
+
 ## Use variables in queries
 
 After creating variables, reference them in your queries using the `$variable_name` or `${variable_name}` syntax.
 
 ### Basic variable usage
+
+Variables inside backticks (for table references) don't need quotes because they're part of BigQuery identifiers:
 
 ```sql
 SELECT
@@ -111,6 +133,8 @@ WHERE $__timeFilter(timestamp)
 ```
 
 ### Variable in WHERE clause
+
+For single-select variables, add quotes around the variable:
 
 ```sql
 SELECT
@@ -123,7 +147,7 @@ WHERE $__timeFilter(timestamp)
 
 ### Multi-value variables
 
-For variables that allow multiple selections, use the `IN` operator:
+For variables that allow multiple selections, use the `IN` operator without adding quotes:
 
 ```sql
 SELECT
@@ -135,8 +159,50 @@ WHERE $__timeFilter(timestamp)
 ```
 
 {{< admonition type="note" >}}
-When using multi-value variables, ensure the variable is configured with the appropriate **Custom all value** and **Include All option** settings.
+The BigQuery data source **automatically quotes** values for multi-select variables and variables with the **Include All option** enabled. Do not add quotes around these variables in your queries, or you'll get double-quoted values that cause errors.
 {{< /admonition >}}
+
+### Variable quoting behavior
+
+The data source handles variable quoting differently based on the variable configuration:
+
+| Variable type | Quoting behavior | Example query | Result with `us-east1` selected |
+|---------------|------------------|---------------|----------------------------------|
+| Single-select | No auto-quoting | `region = '$var'` | `region = 'us-east1'` |
+| Multi-select | Auto-quoted | `region IN ($var)` | `region IN ('us-east1')` |
+| Multi-select (multiple values) | Auto-quoted, comma-separated | `region IN ($var)` | `region IN ('us-east1','us-west1')` |
+
+{{< admonition type="warning" >}}
+Using `'$var'` with a multi-select variable causes double quoting: `''us-east1''` — which is invalid SQL.
+{{< /admonition >}}
+
+### Pattern matching with LIKE
+
+Use variables for search patterns:
+
+```sql
+SELECT
+  timestamp AS time,
+  metric_name,
+  metric_value
+FROM `project_id.dataset.metrics`
+WHERE $__timeFilter(timestamp)
+  AND metric_name LIKE '$search%'
+```
+
+### Numeric variables
+
+For variables containing numbers (such as a limit or threshold), don't use quotes:
+
+```sql
+SELECT
+  timestamp AS time,
+  metric_value
+FROM `project_id.dataset.metrics`
+WHERE $__timeFilter(timestamp)
+  AND metric_value > $threshold
+LIMIT $row_limit
+```
 
 ## Chain variables
 
@@ -161,6 +227,23 @@ You can create cascading variables where one variable's options depend on anothe
    ```
 
 When users select a dataset, the table drop-down automatically updates to show only tables in that dataset.
+
+### Example: Column selector
+
+Create a variable that lists columns from the currently selected table:
+
+1. Ensure you have `dataset` and `table` variables.
+
+1. Create a `column` variable:
+
+   ```sql
+   SELECT column_name
+   FROM `project_id.$dataset.INFORMATION_SCHEMA.COLUMNS`
+   WHERE table_name = '$table'
+   ORDER BY ordinal_position
+   ```
+
+Use this to let users select which column to aggregate or filter on.
 
 ## Variable syntax options
 
