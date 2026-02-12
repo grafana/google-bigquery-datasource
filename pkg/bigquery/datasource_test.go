@@ -156,6 +156,49 @@ func Test_datasourceConnection(t *testing.T) {
 	})
 }
 
+func Test_Projects_doesNotPanicWhenResourceManagerServiceMissing(t *testing.T) {
+	origPluginConfigFromContext := PluginConfigFromContext
+	defer func() { PluginConfigFromContext = origPluginConfigFromContext }()
+
+	// Intentionally incomplete settings: enough for loadSettings() to succeed, but not enough
+	// for newHTTPClient() to create an authenticated client. Prior to the regression fix,
+	// calling Projects() with no resource manager service would panic on a nil dereference.
+	PluginConfigFromContext = func(ctx context.Context) backend.PluginContext {
+		return backend.PluginContext{
+			DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{
+				ID:  1,
+				UID: "uid-1",
+				DecryptedSecureJSONData: map[string]string{
+					"privateKey": "randomPrivateKey",
+				},
+				JSONData: []byte(`{"authenticationType":"jwt"}`),
+			},
+		}
+	}
+
+	ds := newBigQueryDatasource()
+
+	t.Run("missing entry", func(t *testing.T) {
+		require.NotPanics(t, func() {
+			_, err := ds.Projects(t.Context(), ProjectsArgs{DatasourceUid: "uid-1"})
+			require.Error(t, err)
+			require.Contains(t, err.Error(), "datasource is missing authentication details")
+		})
+	})
+
+	t.Run("nil entry", func(t *testing.T) {
+		ds.resourceManagerServicesMu.Lock()
+		ds.resourceManagerServices["uid-1"] = nil
+		ds.resourceManagerServicesMu.Unlock()
+
+		require.NotPanics(t, func() {
+			_, err := ds.Projects(t.Context(), ProjectsArgs{DatasourceUid: "uid-1"})
+			require.Error(t, err)
+			require.Contains(t, err.Error(), "datasource is missing authentication details")
+		})
+	})
+}
+
 func Test_getApi(t *testing.T) {
 	origPluginConfigFromContext := PluginConfigFromContext
 	defer func() { PluginConfigFromContext = origPluginConfigFromContext }()
