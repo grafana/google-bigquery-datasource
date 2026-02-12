@@ -50,6 +50,7 @@ type BigQueryDatasource struct {
 	connections             sync.Map
 	apiClients              sync.Map
 	bqFactory               bqServiceFactory
+	resourceManagerServicesMu sync.RWMutex
 	resourceManagerServices map[string]*cloudresourcemanager.Service
 	logger                  log.Logger
 }
@@ -106,7 +107,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 	connectionKey := fmt.Sprintf("%s/%s:%s:%t", config.UID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
 
-	if s.resourceManagerServices[config.UID] == nil {
+	if s.getResourceManagerService(config.UID) == nil {
 		err := s.createResourceManagerService(ctx, config, settings, config.UID)
 		if err != nil {
 			return nil, err
@@ -183,7 +184,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 }
 
-func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, id string) error {
+func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, dsUID string) error {
 	loggerWithContext := s.logger.FromContext(ctx)
 	httpOptions, err := config.HTTPClientOptions(ctx)
 	if err != nil {
@@ -197,12 +198,15 @@ func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, c
 		return err
 	}
 
-	cloudresourcemanagerService, err := cloudresourcemanager.NewService(context.Background(), option.WithHTTPClient(httpClient))
-	s.resourceManagerServices[id] = cloudresourcemanagerService
+	cloudresourcemanagerService, err := cloudresourcemanager.NewService(ctx, option.WithHTTPClient(httpClient))
 	if err != nil {
 		loggerWithContext.Warn("Failed to create resource manager service", "error", err)
 		return err
 	}
+
+	s.resourceManagerServicesMu.Lock()
+	defer s.resourceManagerServicesMu.Unlock()
+	s.resourceManagerServices[dsUID] = cloudresourcemanagerService
 
 	return nil
 }
@@ -309,8 +313,12 @@ type Project struct {
 }
 
 func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs) ([]*Project, error) {
-	settings := getDatasourceSettings(ctx)
-	bqSettings, err := loadSettings(settings)
+	dsSettings := getDatasourceSettings(ctx)
+	if dsSettings == nil {
+		return nil, errors.New("missing datasource settings in context")
+	}
+
+	bqSettings, err := loadSettings(dsSettings)
 	if err != nil {
 		return nil, err
 	}
@@ -320,7 +328,25 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
 	}
 
-	response, err := s.resourceManagerServices[options.DatasourceUid].Projects.Search().Do()
+	// This resource call is already scoped to a datasource UID via the URL:
+	// `/api/datasources/uid/:uid/resources/projects`. The request body UID is redundant,
+	// so treat it as an optional sanity check rather than a lookup key.
+	if options.DatasourceUid != "" && options.DatasourceUid != dsSettings.UID {
+		return nil, errors.New("datasource UID mismatch")
+	}
+
+	if s.getResourceManagerService(dsSettings.UID) == nil {
+		if err := s.createResourceManagerService(ctx, *dsSettings, bqSettings, dsSettings.UID); err != nil {
+			return nil, err
+		}
+	}
+
+	rmSvc := s.getResourceManagerService(dsSettings.UID)
+	if rmSvc == nil {
+		return nil, errors.New("resource manager service not initialized")
+	}
+
+	response, err := rmSvc.Projects.Search().Do()
 	if err != nil {
 		return nil, err
 	}
@@ -331,6 +357,12 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 	}
 
 	return projects, nil
+}
+
+func (s *BigQueryDatasource) getResourceManagerService(uid string) *cloudresourcemanager.Service {
+	s.resourceManagerServicesMu.RLock()
+	defer s.resourceManagerServicesMu.RUnlock()
+	return s.resourceManagerServices[uid]
 }
 
 type ValidateQueryArgs struct {
