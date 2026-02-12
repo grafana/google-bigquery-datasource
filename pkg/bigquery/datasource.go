@@ -184,7 +184,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 }
 
-func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, id string) error {
+func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings, dsUID string) error {
 	loggerWithContext := s.logger.FromContext(ctx)
 	httpOptions, err := config.HTTPClientOptions(ctx)
 	if err != nil {
@@ -205,11 +205,8 @@ func (s *BigQueryDatasource) createResourceManagerService(ctx context.Context, c
 	}
 
 	s.resourceManagerServicesMu.Lock()
-	if s.resourceManagerServices == nil {
-		s.resourceManagerServices = make(map[string]*cloudresourcemanager.Service)
-	}
-	s.resourceManagerServices[id] = cloudresourcemanagerService
-	s.resourceManagerServicesMu.Unlock()
+	defer s.resourceManagerServicesMu.Unlock()
+	s.resourceManagerServices[dsUID] = cloudresourcemanagerService
 
 	return nil
 }
@@ -365,9 +362,6 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 func (s *BigQueryDatasource) getResourceManagerService(uid string) *cloudresourcemanager.Service {
 	s.resourceManagerServicesMu.RLock()
 	defer s.resourceManagerServicesMu.RUnlock()
-	if s.resourceManagerServices == nil {
-		return nil
-	}
 	return s.resourceManagerServices[uid]
 }
 
