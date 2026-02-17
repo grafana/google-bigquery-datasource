@@ -1,8 +1,11 @@
 package driver
 
 import (
+	"context"
 	"regexp"
 	"strings"
+
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
 const (
@@ -68,7 +71,7 @@ func headerInList(header string, headersList []string) bool {
 // as per the requirements specified in the BigQuery documentation.
 // The values in the map are the corresponding cleaned and formatted values from the configuration.
 // It returns the map of headers as labels.
-func (c *Conn) headersAsLabels() map[string]string {
+func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	labels := make(map[string]string)
 	wantedHeaders := []string{HeaderPluginID, HeaderDatasourceUID, HeaderDashboardUID, HeaderPanelID, HeaderPanelPluginId, HeaderQueryGroupID, HeaderFromExpression}
 
@@ -76,6 +79,10 @@ func (c *Conn) headersAsLabels() map[string]string {
 		if headerInList(k, wantedHeaders) && len(v) > 0 {
 			labels[cleanStringForLabelOrValue(k, true)] = cleanStringForLabelOrValue(v[0], false)
 		}
+	}
+	pluginContext := backend.PluginConfigFromContext(ctx)
+	if pluginContext.PluginID != "" {
+		labels[cleanStringForLabelOrValue(HeaderPluginID, true)] = pluginContext.PluginID
 	}
 	return labels
 }
