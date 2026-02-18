@@ -4,6 +4,7 @@
     "src/dashboards/arrays.json",
     "dist/**",
     "package.json",
+    "renovate.json",
     "yarn.lock",
     "provisioning/**"
   ],
