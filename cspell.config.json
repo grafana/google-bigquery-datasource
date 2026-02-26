@@ -64,6 +64,7 @@
     "sqlutil",
     "STDDEV",
     "stretchr",
+    "subqueries",
     "subresource",
     "substr",
     "tempvar",
