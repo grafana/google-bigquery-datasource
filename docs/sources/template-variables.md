@@ -32,14 +32,14 @@ Before using template variables:
 
 ## Supported variable types
 
-| Variable type | Supported | Description |
-|---------------|-----------|-------------|
-| **Query** | Yes | Populate options from a BigQuery query |
-| **Custom** | Yes | Define a static list of options |
-| **Text box** | Yes | Free-form text input |
-| **Constant** | Yes | Single constant value |
-| **Data source** | Yes | Select from available BigQuery data sources |
-| **Interval** | Yes | Time interval values for time grouping |
+| Variable type   | Supported | Description                                 |
+| --------------- | --------- | ------------------------------------------- |
+| **Query**       | Yes       | Populate options from a BigQuery query      |
+| **Custom**      | Yes       | Define a static list of options             |
+| **Text box**    | Yes       | Free-form text input                        |
+| **Constant**    | Yes       | Single constant value                       |
+| **Data source** | Yes       | Select from available BigQuery data sources |
+| **Interval**    | Yes       | Time interval values for time grouping      |
 
 ## Create a query variable
 
@@ -99,7 +99,7 @@ ORDER BY ordinal_position
 Return two columns to use different values for the display name and the actual value:
 
 ```sql
-SELECT 
+SELECT
   display_name AS __text,
   id AS __value
 FROM `project_id.dataset_name.lookup_table`
@@ -169,10 +169,10 @@ The BigQuery data source **automatically quotes** values for multi-select variab
 
 The data source handles variable quoting differently based on the variable configuration:
 
-| Variable type | Quoting behavior | Example query | Result with `us-east1` selected |
-|---------------|------------------|---------------|----------------------------------|
-| Single-select | No auto-quoting | `region = '$var'` | `region = 'us-east1'` |
-| Multi-select | Auto-quoted | `region IN ($var)` | `region IN ('us-east1')` |
+| Variable type                  | Quoting behavior             | Example query      | Result with `us-east1` selected     |
+| ------------------------------ | ---------------------------- | ------------------ | ----------------------------------- |
+| Single-select                  | No auto-quoting              | `region = '$var'`  | `region = 'us-east1'`               |
+| Multi-select                   | Auto-quoted                  | `region IN ($var)` | `region IN ('us-east1')`            |
 | Multi-select (multiple values) | Auto-quoted, comma-separated | `region IN ($var)` | `region IN ('us-east1','us-west1')` |
 
 {{< admonition type="warning" >}}
@@ -252,18 +252,18 @@ Use this to let users select which column to aggregate or filter on.
 
 Grafana supports multiple syntax formats for variables:
 
-| Syntax | Example | Use case |
-|--------|---------|----------|
-| `$variable` | `$region` | Simple reference |
-| `${variable}` | `${region}` | When variable is adjacent to other text |
-| `${variable:option}` | `${region:csv}` | Apply formatting options |
+| Syntax               | Example         | Use case                                |
+| -------------------- | --------------- | --------------------------------------- |
+| `$variable`          | `$region`       | Simple reference                        |
+| `${variable}`        | `${region}`     | When variable is adjacent to other text |
+| `${variable:option}` | `${region:csv}` | Apply formatting options                |
 
 ### Formatting options
 
-| Option | Description | Example input | Example output |
-|--------|-------------|---------------|----------------|
-| `csv` | Comma-separated values | `['us-east1', 'us-west1']` | `us-east1,us-west1` |
-| `pipe` | Pipe-separated values | `['us-east1', 'us-west1']` | `us-east1\|us-west1` |
+| Option        | Description                    | Example input              | Example output          |
+| ------------- | ------------------------------ | -------------------------- | ----------------------- |
+| `csv`         | Comma-separated values         | `['us-east1', 'us-west1']` | `us-east1,us-west1`     |
+| `pipe`        | Pipe-separated values          | `['us-east1', 'us-west1']` | `us-east1\|us-west1`    |
 | `singlequote` | Single-quoted, comma-separated | `['us-east1', 'us-west1']` | `'us-east1','us-west1'` |
 | `doublequote` | Double-quoted, comma-separated | `['us-east1', 'us-west1']` | `"us-east1","us-west1"` |
 

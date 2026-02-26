@@ -48,18 +48,18 @@ Annotation queries must return specific columns that Grafana uses to render the 
 
 ### Required columns
 
-| Column | Type | Description |
-|--------|------|-------------|
+| Column | Type        | Description           |
+| ------ | ----------- | --------------------- |
 | `time` | `TIMESTAMP` | The time of the event |
 
 ### Optional columns
 
-| Column | Type | Description |
-|--------|------|-------------|
+| Column    | Type        | Description                                                   |
+| --------- | ----------- | ------------------------------------------------------------- |
 | `timeEnd` | `TIMESTAMP` | End time for region annotations (displays as a shaded region) |
-| `title` | `STRING` | Title text shown on hover |
-| `text` | `STRING` | Description text shown on hover |
-| `tags` | `STRING` | Comma-separated tags for filtering annotations |
+| `title`   | `STRING`    | Title text shown on hover                                     |
+| `text`    | `STRING`    | Description text shown on hover                               |
+| `tags`    | `STRING`    | Comma-separated tags for filtering annotations                |
 
 ## Annotation query examples
 

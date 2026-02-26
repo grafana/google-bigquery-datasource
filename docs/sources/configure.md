@@ -51,10 +51,10 @@ To add the Google BigQuery data source:
 
 ## Configure settings
 
-| Setting | Description |
-|---------|-------------|
-| **Name** | The name used to refer to the data source in panels and queries. |
-| **Default** | Toggle to make this the default data source for new panels. |
+| Setting     | Description                                                      |
+| ----------- | ---------------------------------------------------------------- |
+| **Name**    | The name used to refer to the data source in panels and queries. |
+| **Default** | Toggle to make this the default data source for new panels.      |
 
 ## Authentication
 
@@ -118,11 +118,11 @@ Some Grafana features don't function as expected with Forward OAuth Identity, in
 
 Expand the **Additional Settings** section to configure optional settings.
 
-| Setting | Description |
-|---------|-------------|
+| Setting                 | Description                                                                                                                                                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Processing location** | Specifies the [geographic location](https://cloud.google.com/bigquery/docs/locations) where BigQuery processes queries. Options include multi-regional locations (US, EU) and specific regions. Leave empty for automatic location selection. |
-| **Service endpoint** | Custom network address for the BigQuery API. Use this when connecting through a private endpoint or VPC Service Controls. Example: `https://bigquery.googleapis.com/bigquery/v2/` |
-| **Max bytes billed** | Limits the bytes billed for a query. Queries that would exceed this limit fail instead of running. Use this to prevent unexpectedly expensive queries. Example: `5242880` (5 MB). |
+| **Service endpoint**    | Custom network address for the BigQuery API. Use this when connecting through a private endpoint or VPC Service Controls. Example: `https://bigquery.googleapis.com/bigquery/v2/`                                                             |
+| **Max bytes billed**    | Limits the bytes billed for a query. Queries that would exceed this limit fail instead of running. Use this to prevent unexpectedly expensive queries. Example: `5242880` (5 MB).                                                             |
 
 ## Verify the connection
 
@@ -235,25 +235,23 @@ datasources:
 
 ### Provisioning configuration reference
 
-| Key | Type | Description |
-|-----|------|-------------|
-| `authenticationType` | string | Authentication method: `jwt`, `gce`, or `forwardOAuthIdentity` |
-| `clientEmail` | string | Service account email (required for `jwt`) |
-| `defaultProject` | string | Default GCP project for queries |
-| `tokenUri` | string | OAuth token endpoint (required for `jwt`): `https://oauth2.googleapis.com/token` |
-| `privateKeyPath` | string | Path to private key file (alternative to `secureJsonData.privateKey`) |
-| `usingImpersonation` | boolean | Enable service account impersonation |
-| `serviceAccountToImpersonate` | string | Email of service account to impersonate |
-| `oauthPassThru` | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`) |
-| `processingLocation` | string | Query processing location (for example, `US`, `EU`, `us-central1`) |
-| `MaxBytesBilled` | integer | Maximum bytes billed per query |
-| `serviceEndpoint` | string | Custom BigQuery API endpoint URL |
-| `flatRateProject` | string | Project ID for flat-rate billing reservations |
-| `queryPriority` | string | Default query priority: `INTERACTIVE` or `BATCH` |
-| `enableSecureSocksProxy` | boolean | Enable Secure Socks Proxy (requires Grafana configuration) |
+| Key                           | Type    | Description                                                                      |
+| ----------------------------- | ------- | -------------------------------------------------------------------------------- |
+| `authenticationType`          | string  | Authentication method: `jwt`, `gce`, or `forwardOAuthIdentity`                   |
+| `clientEmail`                 | string  | Service account email (required for `jwt`)                                       |
+| `defaultProject`              | string  | Default GCP project for queries                                                  |
+| `tokenUri`                    | string  | OAuth token endpoint (required for `jwt`): `https://oauth2.googleapis.com/token` |
+| `privateKeyPath`              | string  | Path to private key file (alternative to `secureJsonData.privateKey`)            |
+| `usingImpersonation`          | boolean | Enable service account impersonation                                             |
+| `serviceAccountToImpersonate` | string  | Email of service account to impersonate                                          |
+| `oauthPassThru`               | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`)                  |
+| `processingLocation`          | string  | Query processing location (for example, `US`, `EU`, `us-central1`)               |
+| `MaxBytesBilled`              | integer | Maximum bytes billed per query                                                   |
+| `serviceEndpoint`             | string  | Custom BigQuery API endpoint URL                                                 |
+| `enableSecureSocksProxy`      | boolean | Enable Secure Socks Proxy (requires Grafana configuration)                       |
 
-| Secure Key | Type | Description |
-|------------|------|-------------|
+| Secure Key   | Type   | Description                              |
+| ------------ | ------ | ---------------------------------------- |
 | `privateKey` | string | Service account private key (PEM format) |
 
 ## Provision with Terraform

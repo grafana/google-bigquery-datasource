@@ -95,11 +95,11 @@ Alert when a metric changes significantly:
 SELECT
   CURRENT_TIMESTAMP() AS time,
   (
-    SELECT COUNT(*) 
+    SELECT COUNT(*)
     FROM `project.dataset.events`
     WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 5 MINUTE)
   ) - (
-    SELECT COUNT(*) 
+    SELECT COUNT(*)
     FROM `project.dataset.events`
     WHERE timestamp >= TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 10 MINUTE)
       AND timestamp < TIMESTAMP_SUB(CURRENT_TIMESTAMP(), INTERVAL 5 MINUTE)
@@ -127,22 +127,22 @@ This creates separate alert instances for each region.
 
 After writing your query, configure the alert condition:
 
-| Condition type | Use case |
-|----------------|----------|
-| **Is above** | Alert when value exceeds a threshold |
-| **Is below** | Alert when value drops below a threshold |
-| **Is within range** | Alert when value is between two thresholds |
-| **Is outside range** | Alert when value is outside a range |
-| **Has no value** | Alert when query returns no data |
+| Condition type       | Use case                                   |
+| -------------------- | ------------------------------------------ |
+| **Is above**         | Alert when value exceeds a threshold       |
+| **Is below**         | Alert when value drops below a threshold   |
+| **Is within range**  | Alert when value is between two thresholds |
+| **Is outside range** | Alert when value is outside a range        |
+| **Has no value**     | Alert when query returns no data           |
 
 ## Handle no data and errors
 
 Configure how alerts behave when queries return no data or encounter errors:
 
-| Setting | Options |
-|---------|---------|
+| Setting     | Options                                        |
+| ----------- | ---------------------------------------------- |
 | **No data** | `No Data`, `Alerting`, `OK`, `Keep Last State` |
-| **Error** | `Error`, `Alerting`, `OK`, `Keep Last State` |
+| **Error**   | `Error`, `Alerting`, `OK`, `Keep Last State`   |
 
 For BigQuery:
 

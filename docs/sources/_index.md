@@ -23,12 +23,12 @@ The Google BigQuery data source allows you to query and visualize data from [Goo
 
 ## Supported features
 
-| Feature | Supported | Description |
-|---------|-----------|-------------|
-| **Metrics** | Yes | Query numeric data and visualize as time series or tables. |
-| **Alerting** | Yes | Create alert rules based on BigQuery queries. |
-| **Annotations** | Yes | Overlay events from BigQuery on your graphs. |
-| **Template variables** | Yes | Create dynamic dashboards with query-based variables. |
+| Feature                | Supported | Description                                                |
+| ---------------------- | --------- | ---------------------------------------------------------- |
+| **Metrics**            | Yes       | Query numeric data and visualize as time series or tables. |
+| **Alerting**           | Yes       | Create alert rules based on BigQuery queries.              |
+| **Annotations**        | Yes       | Overlay events from BigQuery on your graphs.               |
+| **Template variables** | Yes       | Create dynamic dashboards with query-based variables.      |
 
 ## Requirements
 

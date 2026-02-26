@@ -38,12 +38,12 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 
 **Possible causes and solutions:**
 
-| Cause | Solution |
-|-------|----------|
-| Missing BigQuery roles | Assign the **BigQuery Data Viewer** and **BigQuery Job User** roles to the service account. |
-| Service account key expired or revoked | Create a new key in the Google Cloud Console and update the data source configuration. |
-| Wrong project selected | Verify the default project matches where your data is located. |
-| API not enabled | Enable the [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) in your project. |
+| Cause                                  | Solution                                                                                                          |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Missing BigQuery roles                 | Assign the **BigQuery Data Viewer** and **BigQuery Job User** roles to the service account.                       |
+| Service account key expired or revoked | Create a new key in the Google Cloud Console and update the data source configuration.                            |
+| Wrong project selected                 | Verify the default project matches where your data is located.                                                    |
+| API not enabled                        | Enable the [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) in your project. |
 
 ### "Invalid JWT signature" or "Invalid token"
 
@@ -135,12 +135,12 @@ These errors occur when executing queries against BigQuery.
 
 **Possible causes and solutions:**
 
-| Cause | Solution |
-|-------|----------|
-| Time range doesn't contain data | Expand the dashboard time range or verify data exists in BigQuery for the selected period. |
-| Wrong project, dataset, or table | Verify you've selected the correct resources in the query. |
-| Filter conditions too restrictive | Review `WHERE` clauses and ensure they match existing data. |
-| Macro not expanding correctly | Check the generated SQL in Query Inspector to verify macro expansion. |
+| Cause                             | Solution                                                                                   |
+| --------------------------------- | ------------------------------------------------------------------------------------------ |
+| Time range doesn't contain data   | Expand the dashboard time range or verify data exists in BigQuery for the selected period. |
+| Wrong project, dataset, or table  | Verify you've selected the correct resources in the query.                                 |
+| Filter conditions too restrictive | Review `WHERE` clauses and ensure they match existing data.                                |
+| Macro not expanding correctly     | Check the generated SQL in Query Inspector to verify macro expansion.                      |
 
 ### "Syntax error" or "Query parse error"
 
@@ -275,7 +275,6 @@ These issues relate to slow queries or high costs.
 1. Use `$__timeFilter` to limit data scanned to the dashboard time range.
 1. Avoid `SELECT *` and select only required columns.
 1. Set appropriate dashboard refresh intervals (don't refresh more often than needed).
-1. Use the **Query priority** option to set batch priority for non-urgent queries.
 1. Consider enabling query caching in Grafana Enterprise or Grafana Cloud.
 
 ### Storage API errors

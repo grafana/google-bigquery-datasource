@@ -42,13 +42,13 @@ The BigQuery data source provides two query editor modes, which you can switch b
 
 The query editor header includes the following options:
 
-| Option | Description |
-|--------|-------------|
-| **Processing location** | Override the data source processing location for this query. |
-| **Format** | Select the output format: **Time series** or **Table**. |
-| **Use Storage API** | Enable the BigQuery Storage API for this query (Code mode only). |
-| **Filter/Group/Order/Preview** | Toggle sections in the Visual query editor (Builder mode only). |
-| **Builder/Code** | Switch between Visual query builder and SQL code editor. |
+| Option                         | Description                                                      |
+| ------------------------------ | ---------------------------------------------------------------- |
+| **Processing location**        | Override the data source processing location for this query.     |
+| **Format**                     | Select the output format: **Time series** or **Table**.          |
+| **Use Storage API**            | Enable the BigQuery Storage API for this query (Code mode only). |
+| **Filter/Group/Order/Preview** | Toggle sections in the Visual query editor (Builder mode only).  |
+| **Builder/Code**               | Switch between Visual query builder and SQL code editor.         |
 
 ## SQL query editor
 
@@ -63,7 +63,7 @@ The SQL query editor includes autocompletion for:
 - **Macros:** Grafana macros like `$__timeFilter` and `$__timeGroup`.
 - **Template variables:** Dashboard variables you've defined.
 
-To trigger autocompletion, press `Ctrl+Space` (Windows/Linux) or `Cmd+Space` (macOS).
+To trigger autocompletion, press `Ctrl+Space` (Windows/Linux) or `Cmd+I` (macOS).
 
 ### Query validation
 
@@ -81,10 +81,10 @@ Click the **Format query** button (brackets icon) in the query toolbar to automa
 
 ### Keyboard shortcuts
 
-| Shortcut | Action |
-|----------|--------|
-| `Cmd/Ctrl + Return` | Run the query |
-| `Ctrl + Space` | Trigger autocompletion |
+| Shortcut            | Action                 |
+| ------------------- | ---------------------- |
+| `Cmd/Ctrl + Return` | Run the query          |
+| `Ctrl + Space`      | Trigger autocompletion |
 
 ## Visual query editor
 
@@ -94,23 +94,23 @@ The Visual query editor lets you build BigQuery queries without writing SQL. It'
 
 In Builder mode, the query editor header displays resource selectors:
 
-| Selector | Description |
-|----------|-------------|
+| Selector    | Description                                  |
+| ----------- | -------------------------------------------- |
 | **Project** | Select the GCP project containing your data. |
-| **Dataset** | Select the dataset within the project. |
-| **Table** | Select the table to query. |
+| **Dataset** | Select the dataset within the project.       |
+| **Table**   | Select the table to query.                   |
 
 ### Query building
 
 The Visual query editor supports the following sections (toggle visibility using the switches in the header):
 
-| Section | Description |
-|---------|-------------|
-| **Select** | Choose columns and apply aggregation functions. |
-| **Filter** | Add `WHERE` conditions to filter data by column values. |
-| **Group** | Group results by one or more columns (required when using aggregations). |
-| **Order** | Sort results by column values in ascending or descending order. |
-| **Preview** | View the generated SQL query. |
+| Section     | Description                                                              |
+| ----------- | ------------------------------------------------------------------------ |
+| **Select**  | Choose columns and apply aggregation functions.                          |
+| **Filter**  | Add `WHERE` conditions to filter data by column values.                  |
+| **Group**   | Group results by one or more columns (required when using aggregations). |
+| **Order**   | Sort results by column values in ascending or descending order.          |
+| **Preview** | View the generated SQL query.                                            |
 
 ### Aggregation functions
 
@@ -185,13 +185,12 @@ LIMIT 100
 
 Macros simplify queries by providing dynamic values based on the dashboard context. Use macros to filter data by the dashboard time range without hardcoding dates.
 
-| Macro | Description | Example output |
-|-------|-------------|----------------|
-| `$__timeFilter(column)` | Filters results to the dashboard time range | `column BETWEEN TIMESTAMP('2024-01-01 00:00:00') AND TIMESTAMP('2024-01-02 00:00:00')` |
-| `$__timeFrom()` | Returns the start of the dashboard time range | `TIMESTAMP('2024-01-01 00:00:00')` |
-| `$__timeTo()` | Returns the end of the dashboard time range | `TIMESTAMP('2024-01-02 00:00:00')` |
-| `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY` | `TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(column), 300000) * 300000)` |
-| `$__timeShifting(interval)` | Creates a duplicate query with time range shifted. The macro is removed from SQL. | Runs query twice for comparison |
+| Macro                            | Description                                           | Example output                                                                         |
+| -------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `$__timeFilter(column)`          | Filters results to the dashboard time range           | `column BETWEEN TIMESTAMP('2024-01-01 00:00:00') AND TIMESTAMP('2024-01-02 00:00:00')` |
+| `$__timeFrom()`                  | Returns the start of the dashboard time range         | `TIMESTAMP('2024-01-01 00:00:00')`                                                     |
+| `$__timeTo()`                    | Returns the end of the dashboard time range           | `TIMESTAMP('2024-01-02 00:00:00')`                                                     |
+| `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY` | `TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(column), 300000) * 300000)`                          |
 
 ### Macro examples
 
@@ -236,25 +235,6 @@ FROM `project.dataset.events`
 WHERE timestamp_column BETWEEN $__timeFrom() AND $__timeTo()
 ```
 
-#### Compare data across time periods
-
-Use `$__timeShifting` to compare current data with historical data. When you include this macro in your query, Grafana creates a duplicate query with the time range shifted by the specified interval:
-
-```sql
-SELECT
-  $__timeGroup(timestamp_column, $__interval) AS time,
-  AVG(value_column) AS avg_value
-FROM `project.dataset.metrics`
-WHERE $__timeFilter(timestamp_column)
-GROUP BY time
-ORDER BY time
--- $__timeShifting(7d)
-```
-
-The `$__timeShifting(7d)` macro is removed from the SQL and instead shifts the time range. This query runs twice: once for the current time range, and once for the same period 7 days ago. The results appear as separate series in your visualization, allowing you to compare week-over-week data.
-
-Supported intervals: `s` (seconds), `min` (minutes), `h` (hours), `d` (days), `w` (weeks), `m` (months), `M` (months), `y` (years).
-
 ## Query partitioned tables
 
 BigQuery [partitioned tables](https://cloud.google.com/bigquery/docs/partitioned-tables) improve query performance and reduce costs. The query editor provides autocompletion for partition filters.
@@ -270,18 +250,6 @@ SELECT
 FROM `project.dataset.partitioned_table`
 WHERE _PARTITIONTIME BETWEEN $__timeFrom() AND $__timeTo()
   AND $__timeFilter(timestamp_column)
-```
-
-### Column-partitioned tables
-
-For tables partitioned by a specific column, filter on that column:
-
-```sql
-SELECT
-  event_date AS time,
-  value_column
-FROM `project.dataset.date_partitioned_table`
-WHERE $__timeFilter(event_date)
 ```
 
 {{< admonition type="note" >}}
@@ -313,8 +281,8 @@ In Code mode, access the **Use Storage API** toggle directly in the query header
 
 In Builder mode, expand the **Options** section at the bottom of the query editor to access:
 
-| Option | Description |
-|--------|-------------|
+| Option              | Description                                                                      |
+| ------------------- | -------------------------------------------------------------------------------- |
 | **Use Storage API** | Enable the BigQuery Storage API for improved performance with large result sets. |
 
 ## Next steps
