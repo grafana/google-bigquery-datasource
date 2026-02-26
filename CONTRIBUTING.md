@@ -19,10 +19,11 @@ Make sure you have the following dependencies installed first:
    ```bash
    yarn install
    ```
+
 2. Install playwright
-   
+
    ```bash
-      yarn playwright install   
+      yarn playwright install
    ```
 
 3. Build plugin in development mode
@@ -44,6 +45,7 @@ Make sure you have the following dependencies installed first:
    ```bash
    mage -v
    ```
+
 2. Start Grafana in Docker
 
    ```bash
@@ -57,6 +59,7 @@ Make sure you have the following dependencies installed first:
    ```bash
    yarn test
    ```
+
 2. Running e2e tests
 
    ```bash
@@ -70,7 +73,6 @@ If you are creating a PR, ensure to run `yarn changeset` from your branch. Provi
 ## Releasing & Bumping version
 
 To create a new release, execute `yarn changeset version`. This will update the Changelog and bump the version in `package.json` file. Commit those changes. Run the `Plugins - CD` GitHub Action to publish the new release.
-
 
 # Plugin Technical Documentation
 
