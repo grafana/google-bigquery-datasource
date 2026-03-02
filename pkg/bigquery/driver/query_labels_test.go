@@ -98,7 +98,7 @@ func TestHeadersAsLabels(t *testing.T) {
 				},
 				client: &bigquery.Client{},
 			}
-			if got := conn.headersAsLabels(); !reflect.DeepEqual(got, tt.want) {
+			if got := conn.headersAsLabels(t.Context()); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
 			}
 		})

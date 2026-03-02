@@ -127,7 +127,7 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 
 	q := c.client.Query(query)
 
-	q.Labels = c.headersAsLabels()
+	q.Labels = c.headersAsLabels(ctx)
 
 	if c.cfg.MaxBytesBilled > 0 {
 		q.MaxBytesBilled = c.cfg.MaxBytesBilled
@@ -250,7 +250,7 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 	q := c.client.Query(query)
 	q.Location = c.client.Location
 
-	q.Labels = c.headersAsLabels()
+	q.Labels = c.headersAsLabels(ctx)
 
 	if c.cfg.MaxBytesBilled > 0 {
 		q.MaxBytesBilled = c.cfg.MaxBytesBilled
