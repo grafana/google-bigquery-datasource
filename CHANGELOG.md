@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.1.2
+
+🐛 Fix: Prevent panic on missing ResourceManagerService
+
+⚙️ Updated backend/go version to 1.26.0 from 1.25.6 which resolves CVE-2025-68121
+
+⚙️ Updated frontend & backend dependencies
+
 ## 3.1.1
 
 🐛 Fix: Bug introduced in 3.1.0 that prevented queries from running
