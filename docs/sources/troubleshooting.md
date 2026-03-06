@@ -17,7 +17,7 @@ labels:
 menuTitle: Troubleshooting
 title: Troubleshoot Google BigQuery data source issues
 weight: 600
-last_reviewed: 2026-02-11
+review_date: 2026-02-11
 ---
 
 # Troubleshoot Google BigQuery data source issues
