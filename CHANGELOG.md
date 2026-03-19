@@ -2,7 +2,6 @@
 
 ## 3.1.3
 
-### Patch Changes
 
 🐛 chore: pass X-Plugin-Id as label
 
