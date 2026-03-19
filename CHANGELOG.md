@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.3
+
+🐛 chore: pass X-Plugin-Id as label
+
 ## 3.1.2
 
 🐛 Fix: Prevent panic on missing ResourceManagerService
