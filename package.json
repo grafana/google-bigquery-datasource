@@ -103,7 +103,7 @@
     "@remix-run/router": "1.23.2",
     "lodash": "4.17.23",
     "minimatch": "10.2.4",
-    "serialize-javascript": "7.0.4"
+    "serialize-javascript": "7.0.5"
   },
   "packageManager": "yarn@4.13.0"
 }
