@@ -6,7 +6,6 @@ export const ConfigurationHelp = () => {
 
   return (
     <Collapse
-      collapsible
       label="How to configure Google BigQuery datasource?"
       isOpen={isOpen}
       onToggle={() => setIsOpen((x) => !x)}
