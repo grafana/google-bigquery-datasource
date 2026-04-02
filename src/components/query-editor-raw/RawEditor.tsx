@@ -3,12 +3,12 @@ import { useMeasure } from 'react-use';
 import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
+import { type GrafanaTheme2 } from '@grafana/data';
 import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
 
 import { QueryEditorRaw } from '@/components/query-editor-raw/QueryEditorRaw';
 import { QueryToolbox } from '@/components/query-editor-raw/QueryToolbox';
-import { BigQueryQueryNG, QueryEditorProps } from '@/types';
+import { type BigQueryQueryNG, type QueryEditorProps } from '@/types';
 import { getColumnInfoFromSchema } from '@/utils/getColumnInfoFromSchema';
 
 interface RawEditorProps extends Omit<QueryEditorProps, 'onChange'> {

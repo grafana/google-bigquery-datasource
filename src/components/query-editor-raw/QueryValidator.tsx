@@ -3,11 +3,11 @@ import { useAsyncFn } from 'react-use';
 import useDebounce from 'react-use/lib/useDebounce';
 
 import { css } from '@emotion/css';
-import { TimeRange, formattedValueToString, getValueFormat } from '@grafana/data';
+import { type TimeRange, formattedValueToString, getValueFormat } from '@grafana/data';
 import { Icon, Spinner, useTheme2 } from '@grafana/ui';
 
-import { BigQueryAPI, ValidationResults } from '@/api';
-import { BigQueryQueryNG } from '@/types';
+import { type BigQueryAPI, type ValidationResults } from '@/api';
+import { type BigQueryQueryNG } from '@/types';
 
 export interface QueryValidatorProps {
   apiClient: BigQueryAPI;

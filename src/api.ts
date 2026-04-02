@@ -1,4 +1,4 @@
-import { TimeRange } from '@grafana/data';
+import { type TimeRange } from '@grafana/data';
 import { getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import { lastValueFrom } from 'rxjs';
 import type { BigQueryQueryNG } from '@/types';

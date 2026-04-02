@@ -1,10 +1,10 @@
 import { useAsync } from 'react-use';
 
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { type IconName } from '@grafana/ui';
 
 import { getApiClient } from '@/api';
-import { QueryWithDefaults } from '@/types';
+import { type QueryWithDefaults } from '@/types';
 import { getDatasourceId } from '@/utils';
 
 import { getColumnInfoFromSchema } from '@/utils/getColumnInfoFromSchema';

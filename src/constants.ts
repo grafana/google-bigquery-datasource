@@ -1,5 +1,5 @@
-import { SelectableValue } from '@grafana/data';
-import { ComboboxOption } from '@grafana/ui';
+import { type SelectableValue } from '@grafana/data';
+import { type ComboboxOption } from '@grafana/ui';
 
 import { QueryFormat, QueryPriority } from '@/types';
 

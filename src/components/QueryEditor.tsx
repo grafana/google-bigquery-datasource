@@ -1,14 +1,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAsync } from 'react-use';
 
-import { QueryEditorProps } from '@grafana/data';
+import { type QueryEditorProps } from '@grafana/data';
 import { EditorMode, Space } from '@grafana/plugin-ui';
 
 import { getApiClient } from '@/api';
 import { QueryHeader } from '@/components/QueryHeader';
 import { RawEditor } from '@/components/query-editor-raw/RawEditor';
 import { VisualEditor } from '@/components/visual-query-builder/VisualEditor';
-import { BigQueryDatasource } from '@/datasource';
+import { type BigQueryDatasource } from '@/datasource';
 import type { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '@/types';
 import { applyQueryDefaults, isQueryValid, setDatasourceId } from '@/utils';
 import { haveColumns } from '@/utils/sql.utils';

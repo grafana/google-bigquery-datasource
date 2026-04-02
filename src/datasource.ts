@@ -1,9 +1,9 @@
 import { uniqueId } from 'lodash';
 
-import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSupportType } from '@grafana/data';
+import { type DataQueryRequest, type DataSourceInstanceSettings, type ScopedVars, VariableSupportType } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
-import { DataQuery } from '@grafana/schema';
+import { type DataQuery } from '@grafana/schema';
 import { getApiClient } from '@/api';
 
 import { VariableEditor } from '@/components/VariableEditor';

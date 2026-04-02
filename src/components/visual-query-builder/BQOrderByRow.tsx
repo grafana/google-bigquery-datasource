@@ -1,9 +1,9 @@
 import React from 'react';
 
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 
 import { SQLOrderByRow } from '@/components/visual-query-builder/SQLOrderByRow';
-import { BigQueryQueryNG, QueryWithDefaults } from '@/types';
+import { type BigQueryQueryNG, type QueryWithDefaults } from '@/types';
 import { useColumns } from '@/utils/useColumns';
 import { useSqlChange } from '@/utils/useSqlChange';
 

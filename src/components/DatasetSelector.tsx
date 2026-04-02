@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
 import { useAsync } from 'react-use';
 
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { Select } from '@grafana/ui';
 
-import { ResourceSelectorProps } from '@/types';
+import { type ResourceSelectorProps } from '@/types';
 import { toOption } from '@/utils/data';
 
 interface DatasetSelectorProps extends ResourceSelectorProps {

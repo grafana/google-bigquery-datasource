@@ -2,11 +2,11 @@ import React, { useCallback, useId, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 
 import { css } from '@emotion/css';
-import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/plugin-ui';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
 
-import { BigQueryAPI } from '@/api';
+import { type BigQueryAPI } from '@/api';
 import { DatasetSelector } from '@/components//DatasetSelector';
 import { ProjectSelector } from '@/components//ProjectSelector';
 import { TableSelector } from '@/components//TableSelector';

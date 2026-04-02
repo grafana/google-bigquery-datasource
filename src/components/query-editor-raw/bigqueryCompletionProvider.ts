@@ -1,18 +1,18 @@
 import {
-  ColumnDefinition,
+  type ColumnDefinition,
   CompletionItemInsertTextRule,
   CompletionItemKind,
   CompletionItemPriority,
-  LanguageCompletionProvider,
-  LinkedToken,
-  StatementPlacementProvider,
+  type LanguageCompletionProvider,
+  type LinkedToken,
+  type StatementPlacementProvider,
   StatementPosition,
-  SuggestionKindProvider,
-  TableDefinition,
-  TableIdentifier,
+  type SuggestionKindProvider,
+  type TableDefinition,
+  type TableIdentifier,
   TokenType,
 } from '@grafana/plugin-ui';
-import { PartitioningType, TableSchema } from '@/api';
+import { PartitioningType, type TableSchema } from '@/api';
 import { BQ_AGGREGATE_FNS } from '@/components/query-editor-raw/bigQueryFunctions';
 import { BQ_OPERATORS } from '@/components/query-editor-raw/bigQueryOperators';
 import { MACROS } from '@/components/query-editor-raw//macros';

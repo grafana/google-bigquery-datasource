@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
-import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/plugin-ui';
+import { type ColumnDefinition, SQLEditor, type TableDefinition } from '@grafana/plugin-ui';
 
-import { TableSchema } from '@/api';
+import { type TableSchema } from '@/api';
 import { getBigQueryCompletionProvider } from '@/components/query-editor-raw/bigqueryCompletionProvider';
-import { BigQueryQueryNG } from '@/types';
+import { type BigQueryQueryNG } from '@/types';
 import { formatSQL } from '@/utils/formatSQL';
 
 type Props = {

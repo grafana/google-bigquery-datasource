@@ -15,10 +15,10 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
-import { DataQueryRequest, DurationUnit, dateTime } from '@grafana/data';
+import { type DataQueryRequest, type DurationUnit, dateTime } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
-import { BigQueryAPI } from '@/api';
-import { BigQueryDatasource } from '@/datasource';
+import { type BigQueryAPI } from '@/api';
+import { type BigQueryDatasource } from '@/datasource';
 import SqlParser from '@/sql_parser';
 import { type BigQueryQueryNG, QueryFormat } from '@/types';
 import { createFunctionField, setGroupByField } from '@/utils/sql.utils';

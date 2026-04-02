@@ -9,7 +9,7 @@ import { BQOrderByRow } from '@/components/visual-query-builder/BQOrderByRow';
 import { BQSelectRow } from '@/components/visual-query-builder/BQSelectRow';
 import { BQWhereRow } from '@/components/visual-query-builder/BQWhereRow';
 import { Preview } from '@/components/visual-query-builder/Preview';
-import { QueryEditorProps, QueryRowFilter } from '@/types';
+import { type QueryEditorProps, type QueryRowFilter } from '@/types';
 
 interface VisualEditorProps extends QueryEditorProps {
   queryRowFilter: QueryRowFilter;

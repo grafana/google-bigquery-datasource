@@ -3,13 +3,13 @@ import { uniqueId } from 'lodash';
 import React, { useCallback } from 'react';
 
 import { css } from '@emotion/css';
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
-import { Button, Combobox, ComboboxOption, Select, Stack, useStyles2 } from '@grafana/ui';
+import { Button, Combobox, type ComboboxOption, Select, Stack, useStyles2 } from '@grafana/ui';
 
 import { BQ_AGGREGATE_FNS } from '@/components/query-editor-raw/bigQueryFunctions';
-import { QueryEditorExpressionType, QueryEditorFunctionExpression } from '@/expressions';
-import { SQLExpression } from '@/types';
+import { QueryEditorExpressionType, type QueryEditorFunctionExpression } from '@/expressions';
+import { type SQLExpression } from '@/types';
 import { toOption } from '@/utils/data';
 import { createFunctionField } from '@/utils/sql.utils';
 

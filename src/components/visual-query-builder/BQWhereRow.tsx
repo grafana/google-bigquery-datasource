@@ -3,10 +3,10 @@ import useAsync from 'react-use/lib/useAsync';
 
 import { dateTime } from '@grafana/data';
 
-import { BigQueryAPI, TableSchema } from '@/api';
-import { Config } from '@/components/visual-query-builder/AwesomeQueryBuilder';
+import { type BigQueryAPI, type TableSchema } from '@/api';
+import { type Config } from '@/components/visual-query-builder/AwesomeQueryBuilder';
 import { SQLWhereRow } from '@/components/visual-query-builder/SQLWhereRow';
-import { BigQueryQueryNG, QueryWithDefaults } from '@/types';
+import { type BigQueryQueryNG, type QueryWithDefaults } from '@/types';
 import { mapColumnTypeToIcon } from '@/utils/useColumns';
 import { useSqlChange } from '@/utils/useSqlChange';
 

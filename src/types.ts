@@ -1,20 +1,20 @@
-import { TimeRange } from '@grafana/data';
+import { type TimeRange } from '@grafana/data';
 import {
-  DataSourceOptions,
-  DataSourceSecureJsonData,
+  type DataSourceOptions,
+  type DataSourceSecureJsonData,
   GOOGLE_AUTH_TYPE_OPTIONS,
   GoogleAuthType,
 } from '@grafana/google-sdk';
-import { EditorMode } from '@grafana/plugin-ui';
-import { DataQuery } from '@grafana/schema';
-import { JsonTree } from '@react-awesome-query-builder/ui';
-import { BigQueryAPI } from '@/api';
+import { type EditorMode } from '@grafana/plugin-ui';
+import { type DataQuery } from '@grafana/schema';
+import { type JsonTree } from '@react-awesome-query-builder/ui';
+import { type BigQueryAPI } from '@/api';
 import {
-  QueryEditorFunctionExpression,
-  QueryEditorGroupByExpression,
-  QueryEditorPropertyExpression,
+  type QueryEditorFunctionExpression,
+  type QueryEditorGroupByExpression,
+  type QueryEditorPropertyExpression,
 } from '@/expressions';
-import { applyQueryDefaults } from '@/utils';
+import { type applyQueryDefaults } from '@/utils';
 
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',

@@ -1,8 +1,8 @@
 import {
   QueryEditorExpressionType,
-  QueryEditorFunctionExpression,
-  QueryEditorGroupByExpression,
-  QueryEditorPropertyExpression,
+  type QueryEditorFunctionExpression,
+  type QueryEditorGroupByExpression,
+  type QueryEditorPropertyExpression,
   QueryEditorPropertyType,
 } from '@/expressions';
 import { isEmpty } from 'lodash';

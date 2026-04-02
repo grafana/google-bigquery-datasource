@@ -1,4 +1,4 @@
-import { TableFieldSchema } from '@/api';
+import { type TableFieldSchema } from '@/api';
 
 export const getColumnInfoFromSchema = (
   column: string,

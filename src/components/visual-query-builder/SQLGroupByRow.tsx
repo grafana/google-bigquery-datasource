@@ -1,11 +1,11 @@
 import React, { useCallback } from 'react';
 
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { AccessoryButton, EditorList, InputGroup } from '@grafana/plugin-ui';
 import { Select } from '@grafana/ui';
 
-import { QueryEditorExpressionType, QueryEditorGroupByExpression } from '@/expressions';
-import { SQLExpression } from '@/types';
+import { QueryEditorExpressionType, type QueryEditorGroupByExpression } from '@/expressions';
+import { type SQLExpression } from '@/types';
 import { toOption } from '@/utils/data';
 import { setGroupByField } from '@/utils/sql.utils';
 

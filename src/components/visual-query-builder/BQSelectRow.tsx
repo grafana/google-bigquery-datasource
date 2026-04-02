@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { SQLSelectRow } from '@/components/visual-query-builder/SQLSelectRow';
-import { BigQueryQueryNG, QueryWithDefaults } from '@/types';
+import { type BigQueryQueryNG, type QueryWithDefaults } from '@/types';
 import { useColumns } from '@/utils/useColumns';
 import { useSqlChange } from '@/utils/useSqlChange';
 
