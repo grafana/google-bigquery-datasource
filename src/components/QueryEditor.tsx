@@ -15,7 +15,7 @@ interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, Bi
   showRunButton?: boolean;
 }
 
-export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton }: Props) {
+export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton, queries, app }: Props) {
   setDatasourceId(datasource.uid);
   const [isQueryRunnable, setIsQueryRunnable] = useState(true);
   const {
@@ -80,6 +80,9 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
         apiClient={apiClient}
         isQueryRunnable={isQueryRunnable}
         showRunButton={showRunButton}
+        datasource={datasource}
+        queries={(queries as BigQueryQueryNG[]) ?? [query]}
+        app={app}
       />
 
       <Space v={0.5} />

@@ -1682,6 +1682,21 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@grafana/assistant@npm:^0.1.24":
+  version: 0.1.24
+  resolution: "@grafana/assistant@npm:0.1.24"
+  peerDependencies:
+    "@grafana/data": ">=12.1.0"
+    "@grafana/runtime": ">=12.1.0"
+    "@grafana/scenes": ">=5.41.0"
+    "@grafana/schema": ">=12.1.0"
+    "@grafana/ui": ">=12.1.0"
+    react: ">=18.0.0"
+    rxjs: ">=7.0.0"
+  checksum: 10c0/264de6e397261bfc6f0661342a7b22433340588cd45dbf7f2dc19d60eab005f90442e0a114631db11013c104e391e8f018ae423cb826a8f49d79115cf14ee143
+  languageName: node
+  linkType: hard
+
 "@grafana/data@npm:12.4.1":
   version: 12.4.1
   resolution: "@grafana/data@npm:12.4.1"
@@ -1812,9 +1827,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grafana/plugin-e2e@npm:3.4.10":
-  version: 3.4.10
-  resolution: "@grafana/plugin-e2e@npm:3.4.10"
+"@grafana/plugin-e2e@npm:3.4.11":
+  version: 3.4.11
+  resolution: "@grafana/plugin-e2e@npm:3.4.11"
   dependencies:
     "@grafana/e2e-selectors": "npm:13.0.0-23624974663"
     semver: "npm:^7.5.4"
@@ -1826,7 +1841,7 @@ __metadata:
   peerDependenciesMeta:
     "@axe-core/playwright":
       optional: true
-  checksum: 10c0/dfe47c44b10c9d61856675aa9b85476928d0aee9bc21e72dff2618e25f95bb57d52ee90b1b176cfe6d9785b10fe4607f0ab83e24aba1956c76430c9fc01d420c
+  checksum: 10c0/58e3b4060cf2cf76a0c0fa683cf0e6af9fcdb20dfff69f6efc2cd3d789f02ab46b54ec68055fd91da07a1998304f89934a89575de96dde84411baf6b1da541af
   languageName: node
   linkType: hard
 
@@ -7809,12 +7824,13 @@ __metadata:
     "@babel/core": "npm:7.29.0"
     "@changesets/cli": "npm:2.30.0"
     "@emotion/css": "npm:11.13.5"
+    "@grafana/assistant": "npm:^0.1.24"
     "@grafana/data": "npm:12.4.1"
     "@grafana/e2e-selectors": "npm:12.4.1"
     "@grafana/eslint-config": "npm:9.0.0"
     "@grafana/google-sdk": "npm:0.4.1"
     "@grafana/i18n": "npm:12.4.1"
-    "@grafana/plugin-e2e": "npm:3.4.10"
+    "@grafana/plugin-e2e": "npm:3.4.11"
     "@grafana/plugin-ui": "npm:0.13.1"
     "@grafana/runtime": "npm:12.4.1"
     "@grafana/schema": "npm:12.4.1"
@@ -9574,9 +9590,9 @@ __metadata:
   linkType: hard
 
 "lodash-es@npm:^4.17.21":
-  version: 4.17.23
-  resolution: "lodash-es@npm:4.17.23"
-  checksum: 10c0/3150fb6660c14c7a6b5f23bd11597d884b140c0e862a17fdb415aaa5ef7741523182904a6b7929f04e5f60a11edb5a79499eb448734381c99ffb3c4734beeddd
+  version: 4.18.1
+  resolution: "lodash-es@npm:4.18.1"
+  checksum: 10c0/35d4dcf87ef07f8d090f409447575800108057e360b445f590d0d25d09e3d1e33a163d2fc100d4d072b0f901d5e2fc533cd7c4bfd8eeb38a06abec693823c8b8
   languageName: node
   linkType: hard
 
@@ -11849,10 +11865,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"serialize-javascript@npm:7.0.4":
-  version: 7.0.4
-  resolution: "serialize-javascript@npm:7.0.4"
-  checksum: 10c0/f3da6f994c41306fbfabb55eefe280a46da05592939a84b0d95c84e296c92ba9e6a3d86cf7bbd71e7a59e1cfcd8481745910af109bedbd3ed853b444d32f9ee9
+"serialize-javascript@npm:7.0.5":
+  version: 7.0.5
+  resolution: "serialize-javascript@npm:7.0.5"
+  checksum: 10c0/7b7818e5267f6d474ec7a56d36ba69dd712726a13eab37706ec94615fb7ca8945471f2b7fb0dc9dbe8c79c1930c1079d97f66f91315c8c8c2ca6c38898cec96f
   languageName: node
   linkType: hard
 
