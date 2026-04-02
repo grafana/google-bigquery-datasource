@@ -235,11 +235,15 @@ const apis: Map<string, BigQueryAPI> = new Map();
 
 export async function getApiClient(datasourceUid: string) {
   if (!apis.has(datasourceUid)) {
-    const defaultProject = await getBackendSrv().post(
-      `/api/datasources/uid/${datasourceUid}/resources/defaultProjects`,
-      {}
-    ).catch(ex => console.error(ex));
-    apis.set(datasourceUid, new BigQueryAPIClient(datasourceUid, defaultProject));
+    try {
+      const defaultProject = await getBackendSrv().post(
+        `/api/datasources/uid/${datasourceUid}/resources/defaultProjects`,
+        {}
+      );
+      apis.set(datasourceUid, new BigQueryAPIClient(datasourceUid, defaultProject));
+    } catch (ex) {
+      console.error(ex)
+    }
   }
   return apis.get(datasourceUid)!;
 }
