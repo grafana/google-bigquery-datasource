@@ -2,11 +2,13 @@ import React, { useCallback, useId, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 
 import { css } from '@emotion/css';
-import { GrafanaTheme2, SelectableValue } from '@grafana/data';
+import { CoreApp, GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/plugin-ui';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
+import { QueryWithAssistantButton } from '@grafana/assistant';
 import { BigQueryAPI } from 'api';
 import { toRawSql } from 'utils/sql.utils';
+import { BigQueryDatasource } from '../datasource';
 
 import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
 import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
@@ -25,6 +27,9 @@ interface QueryHeaderProps {
   apiClient: BigQueryAPI;
   isQueryRunnable: boolean;
   showRunButton?: boolean;
+  datasource: BigQueryDatasource;
+  queries: BigQueryQueryNG[];
+  app?: CoreApp;
 }
 
 const editorModes = [
@@ -41,6 +46,9 @@ export function QueryHeader({
   apiClient,
   isQueryRunnable,
   showRunButton = true,
+  datasource,
+  queries,
+  app,
 }: QueryHeaderProps) {
   const { location, editorMode } = query;
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -148,6 +156,15 @@ export function QueryHeader({
   return (
     <>
       <EditorHeader>
+        <QueryWithAssistantButton
+          currentQuery={query}
+          queries={queries}
+          dataSourceInstanceSettings={datasource.instanceSettings}
+          app={app}
+          datasourceApi={datasource}
+          size="sm"
+        />
+
         <InlineSelect
           label="Processing location"
           value={location}
