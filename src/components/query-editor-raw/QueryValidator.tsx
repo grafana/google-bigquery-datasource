@@ -1,11 +1,13 @@
-import { css } from '@emotion/css';
-import { formattedValueToString, getValueFormat, TimeRange } from '@grafana/data';
-import { Icon, Spinner, useTheme2 } from '@grafana/ui';
-import { BigQueryAPI, ValidationResults } from 'api';
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useAsyncFn } from 'react-use';
 import useDebounce from 'react-use/lib/useDebounce';
-import { BigQueryQueryNG } from 'types';
+
+import { css } from '@emotion/css';
+import { type TimeRange, formattedValueToString, getValueFormat } from '@grafana/data';
+import { Icon, Spinner, useTheme2 } from '@grafana/ui';
+
+import { type BigQueryAPI, type ValidationResults } from '@/api';
+import { type BigQueryQueryNG } from '@/types';
 
 export interface QueryValidatorProps {
   apiClient: BigQueryAPI;

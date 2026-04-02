@@ -1,9 +1,9 @@
-import { getApiClient } from 'api';
+import { getApiClient } from '@/api';
 import { useCallback } from 'react';
 import { useAsync } from 'react-use';
-import { BigQueryQueryNG, SQLExpression } from '../types';
-import { getDatasourceId } from '../utils';
-import { toRawSql } from './sql.utils';
+import type { BigQueryQueryNG, SQLExpression } from '@/types';
+import { getDatasourceId } from '@/utils';
+import { toRawSql } from '@/utils/sql.utils';
 
 interface UseSqlChange {
   query: BigQueryQueryNG;

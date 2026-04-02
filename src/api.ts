@@ -1,9 +1,9 @@
-import { TimeRange } from '@grafana/data';
+import { type TimeRange } from '@grafana/data';
 import { getBackendSrv, getTemplateSrv } from '@grafana/runtime';
 import { lastValueFrom } from 'rxjs';
-import { BigQueryQueryNG } from 'types';
+import type { BigQueryQueryNG } from '@/types';
 
-import { interpolateVariable } from './utils/interpolateVariable';
+import { interpolateVariable } from '@/utils/interpolateVariable';
 
 export interface TableFieldSchema {
   name: string;
@@ -210,21 +210,21 @@ class BigQueryAPIClient implements BigQueryAPI {
 
   private fromCache =
     <T>(scope: string, fn: (...args: any[]) => Promise<T>) =>
-    async (...args: any[]): Promise<T> => {
-      let id = `${scope}/${args.join('.')}`;
+      async (...args: any[]): Promise<T> => {
+        let id = `${scope}/${args.join('.')}`;
 
-      if (args[0]?.location) {
-        id = `${scope}/${args[0].project}.${args[0].location}.${args[0].dataset}.${args[0].table}`;
-      }
+        if (args[0]?.location) {
+          id = `${scope}/${args[0].project}.${args[0].location}.${args[0].dataset}.${args[0].table}`;
+        }
 
-      if (this.RESULTS_CACHE.has(id)) {
-        return Promise.resolve(this.RESULTS_CACHE.get(id)!);
-      } else {
-        const res = await fn(...args);
-        this.RESULTS_CACHE.set(id, res);
-        return res;
-      }
-    };
+        if (this.RESULTS_CACHE.has(id)) {
+          return Promise.resolve(this.RESULTS_CACHE.get(id)!);
+        } else {
+          const res = await fn(...args);
+          this.RESULTS_CACHE.set(id, res);
+          return res;
+        }
+      };
 
   dispose() {
     this.RESULTS_CACHE.clear();
@@ -235,11 +235,15 @@ const apis: Map<string, BigQueryAPI> = new Map();
 
 export async function getApiClient(datasourceUid: string) {
   if (!apis.has(datasourceUid)) {
-    const defaultProject = await getBackendSrv().post(
-      `/api/datasources/uid/${datasourceUid}/resources/defaultProjects`,
-      {}
-    );
-    apis.set(datasourceUid, new BigQueryAPIClient(datasourceUid, defaultProject));
+    try {
+      const defaultProject = await getBackendSrv().post(
+        `/api/datasources/uid/${datasourceUid}/resources/defaultProjects`,
+        {}
+      );
+      apis.set(datasourceUid, new BigQueryAPIClient(datasourceUid, defaultProject));
+    } catch (ex) {
+      console.error(ex)
+    }
   }
   return apis.get(datasourceUid)!;
 }

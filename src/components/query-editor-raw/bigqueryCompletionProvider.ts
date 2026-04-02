@@ -1,21 +1,21 @@
 import {
-  ColumnDefinition,
+  type ColumnDefinition,
   CompletionItemInsertTextRule,
   CompletionItemKind,
   CompletionItemPriority,
-  LanguageCompletionProvider,
-  LinkedToken,
-  StatementPlacementProvider,
+  type LanguageCompletionProvider,
+  type LinkedToken,
+  type StatementPlacementProvider,
   StatementPosition,
-  SuggestionKindProvider,
-  TableDefinition,
-  TableIdentifier,
+  type SuggestionKindProvider,
+  type TableDefinition,
+  type TableIdentifier,
   TokenType,
 } from '@grafana/plugin-ui';
-import { PartitioningType, TableSchema } from 'api';
-import { BQ_AGGREGATE_FNS } from './bigQueryFunctions';
-import { BQ_OPERATORS } from './bigQueryOperators';
-import { MACROS } from './macros';
+import { PartitioningType, type TableSchema } from '@/api';
+import { BQ_AGGREGATE_FNS } from '@/components/query-editor-raw/bigQueryFunctions';
+import { BQ_OPERATORS } from '@/components/query-editor-raw/bigQueryOperators';
+import { MACROS } from '@/components/query-editor-raw//macros';
 
 interface CompletionProviderGetterArgs {
   getColumns: (t: string) => Promise<ColumnDefinition[]>;
@@ -25,40 +25,40 @@ interface CompletionProviderGetterArgs {
 
 export const getBigQueryCompletionProvider: (args: CompletionProviderGetterArgs) => LanguageCompletionProvider =
   ({ getColumns, getTables, getTableSchema }) =>
-  () => ({
-    triggerCharacters: ['.', ' ', '$', ',', '(', "'"],
-    tables: {
-      resolve: async () => {
-        return await getTables();
+    () => ({
+      triggerCharacters: ['.', ' ', '$', ',', '(', "'"],
+      tables: {
+        resolve: async () => {
+          return await getTables();
+        },
+        parseName: (token: LinkedToken | null | undefined) => {
+          let processedToken = token;
+          let tablePath = processedToken?.value ?? '';
+
+          while (processedToken?.next && processedToken?.next?.value !== '`') {
+            tablePath += processedToken.next.value;
+            processedToken = processedToken.next;
+          }
+
+          if (tablePath.trim().startsWith('`')) {
+            return { table: tablePath.slice(1) };
+          }
+
+          return { table: tablePath };
+        },
       },
-      parseName: (token: LinkedToken | null | undefined) => {
-        let processedToken = token;
-        let tablePath = processedToken?.value ?? '';
 
-        while (processedToken?.next && processedToken?.next?.value !== '`') {
-          tablePath += processedToken.next.value;
-          processedToken = processedToken.next;
-        }
-
-        if (tablePath.trim().startsWith('`')) {
-          return { table: tablePath.slice(1) };
-        }
-
-        return { table: tablePath };
+      columns: {
+        resolve: async (t?: TableIdentifier) => {
+          return t?.table ? await getColumns(t?.table) : [];
+        },
       },
-    },
-
-    columns: {
-      resolve: async (t?: TableIdentifier) => {
-        return t?.table ? await getColumns(t?.table) : [];
-      },
-    },
-    supportedFunctions: () => BQ_AGGREGATE_FNS,
-    supportedOperators: () => BQ_OPERATORS,
-    customSuggestionKinds: customSuggestionKinds(getTables, getTableSchema),
-    customStatementPlacement,
-    supportedMacros: () => MACROS,
-  });
+      supportedFunctions: () => BQ_AGGREGATE_FNS,
+      supportedOperators: () => BQ_OPERATORS,
+      customSuggestionKinds: customSuggestionKinds(getTables, getTableSchema),
+      customStatementPlacement,
+      supportedMacros: () => MACROS,
+    });
 
 export enum CustomStatementPlacement {
   AfterDataset = 'afterDataset',
@@ -75,13 +75,13 @@ export const customStatementPlacement: StatementPlacementProvider = () => [
     resolve: (currentToken, previousKeyword) => {
       return Boolean(
         currentToken?.is(TokenType.Delimiter, '.') ||
-          (currentToken?.is(TokenType.Whitespace) && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
-          (currentToken?.value === '`' && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
-          (currentToken?.isIdentifier() &&
-            currentToken?.value.endsWith('.') &&
-            previousKeyword?.getNextNonWhiteSpaceToken()?.value === '`') || //identifiers with a dot at the end like "`projectname."
-          (currentToken?.isNumber() && currentToken.value.endsWith('.')) || // number with dot at the end like "projectname-21342."
-          (currentToken?.value === '`' && isTypingTableIn(currentToken))
+        (currentToken?.is(TokenType.Whitespace) && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
+        (currentToken?.value === '`' && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
+        (currentToken?.isIdentifier() &&
+          currentToken?.value.endsWith('.') &&
+          previousKeyword?.getNextNonWhiteSpaceToken()?.value === '`') || //identifiers with a dot at the end like "`projectname."
+        (currentToken?.isNumber() && currentToken.value.endsWith('.')) || // number with dot at the end like "projectname-21342."
+        (currentToken?.value === '`' && isTypingTableIn(currentToken))
       );
     },
   },

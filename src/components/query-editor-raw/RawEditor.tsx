@@ -1,13 +1,15 @@
-import { QueryEditorRaw } from './QueryEditorRaw';
 import React, { useCallback, useState } from 'react';
-import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
-import { BigQueryQueryNG, QueryEditorProps } from 'types';
-import { QueryToolbox } from './QueryToolbox';
-import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
-import { css } from '@emotion/css';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { useMeasure } from 'react-use';
-import { GrafanaTheme2 } from '@grafana/data';
+import AutoSizer from 'react-virtualized-auto-sizer';
+
+import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
+
+import { QueryEditorRaw } from '@/components/query-editor-raw/QueryEditorRaw';
+import { QueryToolbox } from '@/components/query-editor-raw/QueryToolbox';
+import { type BigQueryQueryNG, type QueryEditorProps } from '@/types';
+import { getColumnInfoFromSchema } from '@/utils/getColumnInfoFromSchema';
 
 interface RawEditorProps extends Omit<QueryEditorProps, 'onChange'> {
   onRunQuery: () => void;
@@ -61,7 +63,7 @@ export function RawEditor({
           table: tablePath[2],
           project: tablePath[0],
         });
-        return cols.map((c) => {
+        return cols.map((c: any) => {
           const cInfo = schema.schema ? getColumnInfoFromSchema(c, schema.schema) : null;
           return { name: c, ...cInfo };
         });
@@ -82,7 +84,7 @@ export function RawEditor({
 
       if (!p) {
         projects = await apiClient.getProjects();
-        return projects.map((p) => ({ name: p.displayName, completion: `\`${p.projectId}.` }));
+        return projects.map((p: any) => ({ name: p.displayName, completion: `\`${p.projectId}.` }));
       } else {
         const path = p.split('.').filter((s) => s);
         if (path.length > 2) {
@@ -90,10 +92,10 @@ export function RawEditor({
         }
         if (path[0] && path[1]) {
           const tables = await apiClient.getTables({ ...query, project: path[0], dataset: path[1] });
-          return tables.map((t) => ({ name: t, completion: `${t}\`` }));
+          return tables.map((t: any) => ({ name: t, completion: `${t}\`` }));
         } else if (path[0]) {
           const datasets = await apiClient.getDatasets(query.location, path[0]);
-          return datasets.map((d) => ({ name: d, completion: `${d}.` }));
+          return datasets.map((d: any) => ({ name: d, completion: `${d}.` }));
         } else {
           return [];
         }

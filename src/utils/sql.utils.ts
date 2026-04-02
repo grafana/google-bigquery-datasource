@@ -1,12 +1,12 @@
 import {
   QueryEditorExpressionType,
-  QueryEditorFunctionExpression,
-  QueryEditorGroupByExpression,
-  QueryEditorPropertyExpression,
+  type QueryEditorFunctionExpression,
+  type QueryEditorGroupByExpression,
+  type QueryEditorPropertyExpression,
   QueryEditorPropertyType,
-} from 'expressions';
+} from '@/expressions';
 import { isEmpty } from 'lodash';
-import { BigQueryQueryNG, SQLExpression } from 'types';
+import type { BigQueryQueryNG, SQLExpression } from '@/types';
 
 export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): string {
   let rawQuery = '';
@@ -50,9 +50,9 @@ function createSelectClause(sqlColumns: NonNullable<SQLExpression['columns']>): 
   const columns = sqlColumns.map((c) => {
     let rawColumn = '';
     if (c.name) {
-      rawColumn += `${c.name}(${c.parameters?.map((p) => `${p.name}`)})`;
+      rawColumn += `${c.name}(${c.parameters?.map((p: any) => `${p.name}`)})`;
     } else {
-      rawColumn += `${c.parameters?.map((p) => `${p.name}`)}`;
+      rawColumn += `${c.parameters?.map((p: any) => `${p.name}`)}`;
     }
     return rawColumn;
   });
@@ -64,7 +64,7 @@ export const haveColumns = (columns: SQLExpression['columns']): columns is NonNu
     return false;
   }
 
-  const haveColumn = columns.some((c) => c.parameters?.length || c.parameters?.some((p) => p.name));
+  const haveColumn = columns.some((c) => c.parameters?.length || c.parameters?.some((p: any) => p.name));
   const haveFunction = columns.some((c) => c.name);
   return haveColumn || haveFunction;
 };

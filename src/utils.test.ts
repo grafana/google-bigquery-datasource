@@ -1,5 +1,5 @@
 import { EditorMode } from '@grafana/plugin-ui';
-import { QueryFormat } from 'types';
+import { QueryFormat } from '@/types';
 import {
   applyQueryDefaults,
   extractFromClause,
@@ -7,7 +7,7 @@ import {
   formatBigqueryError,
   getShiftPeriod,
   handleError,
-} from 'utils';
+} from '@/utils';
 
 describe('Utils', () => {
   test('formatBigqueryError', () => {

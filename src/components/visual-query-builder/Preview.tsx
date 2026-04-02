@@ -1,9 +1,11 @@
-import { css } from '@emotion/css';
-import { GrafanaTheme2 } from '@grafana/data';
-import { CodeEditor, Field, IconButton, useStyles2 } from '@grafana/ui';
 import React from 'react';
 import { useCopyToClipboard } from 'react-use';
-import { formatSQL } from 'utils/formatSQL';
+
+import { css } from '@emotion/css';
+import { type GrafanaTheme2 } from '@grafana/data';
+import { CodeEditor, Field, IconButton, useStyles2 } from '@grafana/ui';
+
+import { formatSQL } from '@/utils/formatSQL';
 
 type PreviewProps = {
   rawSql: string;

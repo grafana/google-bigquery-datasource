@@ -1,9 +1,11 @@
-import { SelectableValue } from '@grafana/data';
 import React from 'react';
-import { BigQueryQueryNG, QueryWithDefaults } from 'types';
-import { useColumns } from 'utils/useColumns';
-import { useSqlChange } from 'utils/useSqlChange';
-import { SQLOrderByRow } from './SQLOrderByRow';
+
+import { type SelectableValue } from '@grafana/data';
+
+import { SQLOrderByRow } from '@/components/visual-query-builder/SQLOrderByRow';
+import { type BigQueryQueryNG, type QueryWithDefaults } from '@/types';
+import { useColumns } from '@/utils/useColumns';
+import { useSqlChange } from '@/utils/useSqlChange';
 
 type BQOrderByRowProps = {
   query: QueryWithDefaults;
@@ -20,11 +22,11 @@ export function BQOrderByRow({ query, onQueryChange }: BQOrderByRowProps) {
       {
         value: '',
         label: 'Selected columns',
-        options: query.sql.columns?.map((c, i) => ({
+        options: query.sql.columns?.map((c: any, i: any) => ({
           value: i + 1,
           label: c.name
-            ? `${i + 1} - ${c.name}(${c.parameters?.map((p) => `${p.name}`)})`
-            : c.parameters?.map((p) => `${i + 1} - ${p.name}`),
+            ? `${i + 1} - ${c.name}(${c.parameters?.map((p: any) => `${p.name}`)})`
+            : c.parameters?.map((p: any) => `${i + 1} - ${p.name}`),
         })),
         expanded: true,
       },

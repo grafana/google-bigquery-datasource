@@ -1,4 +1,4 @@
-import { TableFieldSchema } from '../api';
+import { type TableFieldSchema } from '@/api';
 
 const TIME_COLUMN_TYPES = ['DATE', 'TIMESTAMP', 'DATETIME'];
 const METRIC_COLUMN_TYPES = ['STRING', 'BYTES'];

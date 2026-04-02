@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Collapse } from '@grafana/ui';
 
 export const ConfigurationHelp = () => {
@@ -6,7 +7,6 @@ export const ConfigurationHelp = () => {
 
   return (
     <Collapse
-      collapsible
       label="How to configure Google BigQuery datasource?"
       isOpen={isOpen}
       onToggle={() => setIsOpen((x) => !x)}

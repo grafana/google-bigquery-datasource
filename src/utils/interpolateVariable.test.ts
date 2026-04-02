@@ -1,6 +1,6 @@
-import { TypedVariableModel } from '@grafana/data';
+import { type TypedVariableModel } from '@grafana/data';
 
-import { interpolateVariable } from './interpolateVariable';
+import { interpolateVariable } from '@/utils/interpolateVariable';
 
 describe('Interpolating variables', () => {
   describe('and value is a string', () => {

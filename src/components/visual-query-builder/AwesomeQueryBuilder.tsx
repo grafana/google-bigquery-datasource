@@ -4,16 +4,17 @@ import { dateTime } from '@grafana/data';
 import { Button, Combobox, DateTimePicker, Input, Select } from '@grafana/ui';
 import {
   BasicConfig,
-  Config,
-  DateTimeWidgetProps,
-  JsonItem,
-  NumberWidgetProps,
-  Settings,
-  TextWidgetProps,
+  type Config,
+  type DateTimeWidgetProps,
+  type JsonItem,
+  type NumberWidgetProps,
+  type Settings,
+  type TextWidgetProps,
   Utils,
-  Widgets,
+  type Widgets,
 } from '@react-awesome-query-builder/ui';
-import { toOption } from 'utils/data';
+
+import { toOption } from '@/utils/data';
 
 const buttonLabels = {
   add: 'Add',

@@ -1,7 +1,7 @@
 import { setBackendSrv } from '@grafana/runtime';
 import { of } from 'rxjs';
 
-import { getApiClient } from './api';
+import { getApiClient } from '@/api';
 
 describe('api', () => {
   const datasourceUid = 'abc';

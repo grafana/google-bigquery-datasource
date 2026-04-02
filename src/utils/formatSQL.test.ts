@@ -1,4 +1,4 @@
-import { formatSQL } from './formatSQL';
+import { formatSQL } from '@/utils/formatSQL';
 
 describe('formatSQL', () => {
   it.each`

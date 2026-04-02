@@ -2,10 +2,11 @@ import React, { useEffect } from 'react';
 import { useAsync } from 'react-use';
 
 import { css } from '@emotion/css';
-import { SelectableValue } from '@grafana/data';
+import { type SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
 import { Combobox, useTheme2 } from '@grafana/ui';
-import { ResourceSelectorProps } from 'types';
+
+import { type ResourceSelectorProps } from '@/types';
 
 interface ProjectSelectorProps extends Omit<ResourceSelectorProps, 'location'> {
   value?: string;
@@ -24,7 +25,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
   const theme = useTheme2();
   const state = useAsync(async () => {
     const projects = await apiClient.getProjects();
-    return projects?.map((project) => ({ label: project.displayName, value: project.projectId }));
+    return projects?.map((project: any) => ({ label: project.displayName, value: project.projectId }));
   }, []);
 
   useEffect(() => {
@@ -37,7 +38,7 @@ export const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         onChange(state.value[0]);
       }
     } else {
-      if (state.value && state.value.find((v) => v.value === value) === undefined) {
+      if (state.value && state.value.find((v: any) => v.value === value) === undefined) {
         // if value is set and newly fetched values does not contain selected value
         if (state.value.length > 0) {
           onChange(state.value[0]);

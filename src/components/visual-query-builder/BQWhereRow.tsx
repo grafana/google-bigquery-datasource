@@ -2,13 +2,13 @@ import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import { dateTime } from '@grafana/data';
-import { BigQueryAPI, TableSchema } from 'api';
-import { BigQueryQueryNG, QueryWithDefaults } from 'types';
-import { mapColumnTypeToIcon } from 'utils/useColumns';
-import { useSqlChange } from 'utils/useSqlChange';
 
-import { Config } from './AwesomeQueryBuilder';
-import { SQLWhereRow } from './SQLWhereRow';
+import { type BigQueryAPI, type TableSchema } from '@/api';
+import { type Config } from '@/components/visual-query-builder/AwesomeQueryBuilder';
+import { SQLWhereRow } from '@/components/visual-query-builder/SQLWhereRow';
+import { type BigQueryQueryNG, type QueryWithDefaults } from '@/types';
+import { mapColumnTypeToIcon } from '@/utils/useColumns';
+import { useSqlChange } from '@/utils/useSqlChange';
 
 interface BQWhereRowProps {
   query: QueryWithDefaults;
