@@ -17,11 +17,11 @@
 // SOFTWARE.
 import { DataQueryRequest, DurationUnit, dateTime } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
-import { BigQueryAPI } from 'api';
-import { BigQueryDatasource } from 'datasource';
-import SqlParser from 'sql_parser';
-import { BigQueryQueryNG, QueryFormat } from 'types';
-import { createFunctionField, setGroupByField } from 'utils/sql.utils';
+import { BigQueryAPI } from '@/api';
+import { BigQueryDatasource } from '@/datasource';
+import SqlParser from '@/sql_parser';
+import { type BigQueryQueryNG, QueryFormat } from '@/types';
+import { createFunctionField, setGroupByField } from '@/utils/sql.utils';
 
 export const SHIFTED = '_shifted';
 

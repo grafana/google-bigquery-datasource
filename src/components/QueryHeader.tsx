@@ -5,16 +5,15 @@ import { css } from '@emotion/css';
 import { GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/plugin-ui';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
-import { BigQueryAPI } from 'api';
-import { toRawSql } from 'utils/sql.utils';
 
-import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
-import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
-
-import { ConfirmModal } from './ConfirmModal';
-import { DatasetSelector } from './DatasetSelector';
-import { ProjectSelector } from './ProjectSelector';
-import { TableSelector } from './TableSelector';
+import { BigQueryAPI } from '@/api';
+import { DatasetSelector } from '@/components//DatasetSelector';
+import { ProjectSelector } from '@/components//ProjectSelector';
+import { TableSelector } from '@/components//TableSelector';
+import { ConfirmModal } from '@/components/ConfirmModal';
+import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '@/constants';
+import { type BigQueryQueryNG, QueryFormat, type QueryRowFilter, type QueryWithDefaults } from '@/types';
+import { toRawSql } from '@/utils/sql.utils';
 
 interface QueryHeaderProps {
   query: QueryWithDefaults;

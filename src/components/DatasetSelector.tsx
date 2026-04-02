@@ -3,8 +3,9 @@ import { useAsync } from 'react-use';
 
 import { SelectableValue } from '@grafana/data';
 import { Select } from '@grafana/ui';
-import { ResourceSelectorProps } from 'types';
-import { toOption } from 'utils/data';
+
+import { ResourceSelectorProps } from '@/types';
+import { toOption } from '@/utils/data';
 
 interface DatasetSelectorProps extends ResourceSelectorProps {
   value: string | null;
@@ -42,7 +43,7 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
         onChange(state.value[0]);
       }
     } else {
-      if (state.value && state.value.find((v) => v.value === value) === undefined) {
+      if (state.value && state.value.find((v: any) => v.value === value) === undefined) {
         // if value is set and newly fetched values does not contain selected value
         if (state.value.length > 0) {
           onChange(state.value[0]);

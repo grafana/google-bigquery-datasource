@@ -1,7 +1,7 @@
 import { SelectableValue } from '@grafana/data';
 import { ComboboxOption } from '@grafana/ui';
 
-import { QueryFormat, QueryPriority } from './types';
+import { QueryFormat, QueryPriority } from '@/types';
 
 export const QUERY_FORMAT_OPTIONS = [
   { label: 'Time series', value: QueryFormat.Timeseries },

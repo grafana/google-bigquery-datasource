@@ -1,16 +1,17 @@
+import { uniqueId } from 'lodash';
+
 import React, { useCallback } from 'react';
 
 import { css } from '@emotion/css';
 import { SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
 import { Button, Combobox, ComboboxOption, Select, Stack, useStyles2 } from '@grafana/ui';
-import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
-import { uniqueId } from 'lodash';
-import { toOption } from 'utils/data';
-import { createFunctionField } from 'utils/sql.utils';
 
-import { SQLExpression } from '../../types';
-import { BQ_AGGREGATE_FNS } from '../query-editor-raw/bigQueryFunctions';
+import { BQ_AGGREGATE_FNS } from '@/components/query-editor-raw/bigQueryFunctions';
+import { QueryEditorExpressionType, QueryEditorFunctionExpression } from '@/expressions';
+import { SQLExpression } from '@/types';
+import { toOption } from '@/utils/data';
+import { createFunctionField } from '@/utils/sql.utils';
 
 interface SQLSelectRowProps {
   sql: SQLExpression;

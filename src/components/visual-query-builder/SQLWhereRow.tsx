@@ -3,9 +3,8 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { injectGlobal } from '@emotion/css';
 import { Builder, type Config, type ImmutableTree, Query, Utils } from '@react-awesome-query-builder/ui';
 
-import type { SQLExpression } from '../../types';
-
-import { emptyInitValue, raqbConfig } from './AwesomeQueryBuilder';
+import { emptyInitValue, raqbConfig } from '@/components/visual-query-builder/AwesomeQueryBuilder';
+import type { SQLExpression } from '@/types';
 
 interface SQLBuilderWhereRowProps {
   sql: SQLExpression;

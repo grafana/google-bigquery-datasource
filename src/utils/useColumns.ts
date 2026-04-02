@@ -3,11 +3,11 @@ import { useAsync } from 'react-use';
 import { SelectableValue } from '@grafana/data';
 import { type IconName } from '@grafana/ui';
 
-import { getApiClient } from '../api';
-import { QueryWithDefaults } from '../types';
-import { getDatasourceId } from '../utils';
+import { getApiClient } from '@/api';
+import { QueryWithDefaults } from '@/types';
+import { getDatasourceId } from '@/utils';
 
-import { getColumnInfoFromSchema } from './getColumnInfoFromSchema';
+import { getColumnInfoFromSchema } from '@/utils/getColumnInfoFromSchema';
 
 type Options = {
   query: QueryWithDefaults;

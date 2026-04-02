@@ -1,4 +1,4 @@
-import { toOption } from './data';
+import { toOption } from '@/utils/data';
 
 describe('toOption', () => {
   test('returns ComboboxOption with label and value', () => {

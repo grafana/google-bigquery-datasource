@@ -13,7 +13,8 @@ import {
   Utils,
   Widgets,
 } from '@react-awesome-query-builder/ui';
-import { toOption } from 'utils/data';
+
+import { toOption } from '@/utils/data';
 
 const buttonLabels = {
   add: 'Add',

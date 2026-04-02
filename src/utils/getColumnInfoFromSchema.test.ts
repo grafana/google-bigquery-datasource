@@ -1,4 +1,4 @@
-import { getColumnInfoFromSchema } from './getColumnInfoFromSchema';
+import { getColumnInfoFromSchema } from '@/utils/getColumnInfoFromSchema';
 
 describe('getColumnInfoFromSchema', () => {
   test('returns type and description for top-level column', () => {

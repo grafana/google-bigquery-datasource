@@ -4,11 +4,11 @@ import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSuppo
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
 import { DataQuery } from '@grafana/schema';
-import { getApiClient } from 'api';
+import { getApiClient } from '@/api';
 
-import { VariableEditor } from './components/VariableEditor';
-import { BigQueryAuth, BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
-import { interpolateVariable } from './utils/interpolateVariable';
+import { VariableEditor } from '@/components/VariableEditor';
+import { BigQueryAuth, type BigQueryOptions, type BigQueryQueryNG, QueryFormat, type QueryModel } from '@/types';
+import { interpolateVariable } from '@/utils/interpolateVariable';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
   jsonData: BigQueryOptions;

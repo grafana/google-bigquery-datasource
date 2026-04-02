@@ -11,11 +11,11 @@ import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
 import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
 
-import { PROCESSING_LOCATIONS } from '../constants';
-import { BigQueryAuth, BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
+import { Divider } from '@/components/Divider';
+import { PROCESSING_LOCATIONS } from '@/constants';
+import { BigQueryAuth, BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '@/types';
 
 import { ConfigurationHelp } from './/ConfigurationHelp';
-import { Divider } from './Divider';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
 

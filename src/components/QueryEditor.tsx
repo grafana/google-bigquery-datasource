@@ -1,15 +1,17 @@
-import { QueryEditorProps } from '@grafana/data';
-import { EditorMode, Space } from '@grafana/plugin-ui';
-import { RawEditor } from 'components/query-editor-raw/RawEditor';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAsync } from 'react-use';
-import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
-import { haveColumns } from 'utils/sql.utils';
-import { getApiClient } from '../api';
-import { QueryHeader } from '../components/QueryHeader';
-import { BigQueryDatasource } from '../datasource';
-import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
-import { VisualEditor } from './visual-query-builder/VisualEditor';
+
+import { QueryEditorProps } from '@grafana/data';
+import { EditorMode, Space } from '@grafana/plugin-ui';
+
+import { getApiClient } from '@/api';
+import { QueryHeader } from '@/components/QueryHeader';
+import { RawEditor } from '@/components/query-editor-raw/RawEditor';
+import { VisualEditor } from '@/components/visual-query-builder/VisualEditor';
+import { BigQueryDatasource } from '@/datasource';
+import type { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '@/types';
+import { applyQueryDefaults, isQueryValid, setDatasourceId } from '@/utils';
+import { haveColumns } from '@/utils/sql.utils';
 
 interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions> {
   showRunButton?: boolean;
@@ -51,7 +53,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
     setQueryToValidate(q as any);
     onChange(q);
 
-    if (haveColumns(q.sql?.columns) && q.sql?.columns.some((c) => c.name) && !queryRowFilter.group) {
+    if (haveColumns(q.sql?.columns) && q.sql?.columns?.some((c) => c.name) && !queryRowFilter.group) {
       setQueryRowFilter({ ...queryRowFilter, group: true });
     }
 

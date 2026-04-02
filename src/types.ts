@@ -8,13 +8,13 @@ import {
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataQuery } from '@grafana/schema';
 import { JsonTree } from '@react-awesome-query-builder/ui';
-import { BigQueryAPI } from 'api';
+import { BigQueryAPI } from '@/api';
 import {
   QueryEditorFunctionExpression,
   QueryEditorGroupByExpression,
   QueryEditorPropertyExpression,
-} from 'expressions';
-import { applyQueryDefaults } from 'utils';
+} from '@/expressions';
+import { applyQueryDefaults } from '@/utils';
 
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',
@@ -48,7 +48,7 @@ export const bigQueryAuthTypes = [
   { label: 'Forward OAuth Identity', value: BigQueryAuth.ForwardOAuthIdentity },
 ];
 
-export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}
+export interface BigQuerySecureJsonData extends DataSourceSecureJsonData { }
 
 export enum GroupType {
   Time = 'time',

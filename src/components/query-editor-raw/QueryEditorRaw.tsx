@@ -1,9 +1,11 @@
-import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/plugin-ui';
-import { TableSchema } from 'api';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { BigQueryQueryNG } from '../../types';
-import { formatSQL } from '../../utils/formatSQL';
-import { getBigQueryCompletionProvider } from './bigqueryCompletionProvider';
+
+import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/plugin-ui';
+
+import { TableSchema } from '@/api';
+import { getBigQueryCompletionProvider } from '@/components/query-editor-raw/bigqueryCompletionProvider';
+import { BigQueryQueryNG } from '@/types';
+import { formatSQL } from '@/utils/formatSQL';
 
 type Props = {
   query: BigQueryQueryNG;

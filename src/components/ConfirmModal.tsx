@@ -1,5 +1,6 @@
+import React, { useEffect, useRef } from 'react';
+
 import { Button, Icon, Modal } from '@grafana/ui';
-import React, { useRef, useEffect } from 'react';
 
 type ConfirmModalProps = {
   isOpen: boolean;

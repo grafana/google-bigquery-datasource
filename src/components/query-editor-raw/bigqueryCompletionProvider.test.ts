@@ -1,6 +1,6 @@
 import { SQLEditorTestUtils } from '@grafana/plugin-ui';
-import { CustomStatementPlacement, customStatementPlacement, getTablePath } from './bigqueryCompletionProvider';
-import { simpleBigQueryQuery } from './testData/simpleBigQueryQuery';
+import { CustomStatementPlacement, customStatementPlacement, getTablePath } from '@/components/query-editor-raw/bigqueryCompletionProvider';
+import { simpleBigQueryQuery } from '@/components/query-editor-raw/testData/simpleBigQueryQuery';
 
 describe('Custom statement position resolvers', () => {
   SQLEditorTestUtils.testStatementPosition(

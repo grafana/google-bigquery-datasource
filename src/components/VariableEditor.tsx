@@ -1,8 +1,10 @@
-import { CustomVariableSupport } from '@grafana/data';
 import React, { ComponentProps } from 'react';
-import { BigQueryDatasource } from '../datasource';
-import { BigQueryQueryNG } from '../types';
-import { QueryEditor } from './QueryEditor';
+
+import { CustomVariableSupport } from '@grafana/data';
+
+import { QueryEditor } from '@/components/QueryEditor';
+import { BigQueryDatasource } from '@/datasource';
+import { BigQueryQueryNG } from '@/types';
 
 type Props = ComponentProps<CustomVariableSupport<BigQueryDatasource, BigQueryQueryNG>['editor']>;
 

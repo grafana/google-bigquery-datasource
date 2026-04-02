@@ -1,7 +1,7 @@
-import { QueryEditorExpressionType, QueryEditorPropertyType } from 'expressions';
-import { SQLExpression } from 'types';
-import { applyQueryDefaults } from '../utils';
-import { haveColumns, toRawSql } from './sql.utils';
+import { QueryEditorExpressionType, QueryEditorPropertyType } from '@/expressions';
+import type { SQLExpression } from '@/types';
+import { applyQueryDefaults } from '@/utils';
+import { haveColumns, toRawSql } from '@/utils/sql.utils';
 
 const queryWithDefaults = applyQueryDefaults(
   { dataset: 'test', table: 't', project: 'projectId' } as any,
