@@ -81,7 +81,7 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
         isQueryRunnable={isQueryRunnable}
         showRunButton={showRunButton}
         datasource={datasource}
-        queries={queries ?? [query]}
+        queries={(queries as BigQueryQueryNG[]) ?? [query]}
         app={app}
       />
 

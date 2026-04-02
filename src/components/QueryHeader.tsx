@@ -161,7 +161,7 @@ export function QueryHeader({
           queries={queries}
           dataSourceInstanceSettings={datasource.instanceSettings}
           app={app}
-          datasourceApi={datasource}
+          datasourceApi={datasource as any}
           size="sm"
         />
 
