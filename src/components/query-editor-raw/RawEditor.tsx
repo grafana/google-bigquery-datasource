@@ -1,13 +1,15 @@
-import { QueryEditorRaw } from './QueryEditorRaw';
 import React, { useCallback, useState } from 'react';
-import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
-import { BigQueryQueryNG, QueryEditorProps } from 'types';
-import { QueryToolbox } from './QueryToolbox';
-import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
-import { css } from '@emotion/css';
-import AutoSizer from 'react-virtualized-auto-sizer';
 import { useMeasure } from 'react-use';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
+
+import { css } from '@emotion/css';
 import { GrafanaTheme2 } from '@grafana/data';
+import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
+import { BigQueryQueryNG, QueryEditorProps } from 'types';
+import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
+
+import { QueryEditorRaw } from './QueryEditorRaw';
+import { QueryToolbox } from './QueryToolbox';
 
 interface RawEditorProps extends Omit<QueryEditorProps, 'onChange'> {
   onRunQuery: () => void;
@@ -146,11 +148,7 @@ export function RawEditor({
 
   const renderEditor = (standalone = false) => {
     return standalone ? (
-      <AutoSizer>
-        {({ width, height }) => {
-          return renderQueryEditor(width, height);
-        }}
-      </AutoSizer>
+      <AutoSizer ChildComponent={({ width, height }) => renderQueryEditor(width, height)} />
     ) : (
       <div ref={editorRef}>{renderQueryEditor()}</div>
     );
