@@ -16,7 +16,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
   authenticationType: string;
   annotations = {};
 
-  constructor(instanceSettings: DataSourceInstanceSettings<BigQueryOptions>) {
+  constructor(public instanceSettings: DataSourceInstanceSettings<BigQueryOptions>) {
     super(instanceSettings);
 
     this.jsonData = instanceSettings.jsonData;
@@ -40,6 +40,10 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
       return false;
     }
     return true;
+  }
+
+  getQueryDisplayText(query: BigQueryQueryNG): string {
+    return query.rawSql ?? '';
   }
 
   async importQueries(queries: DataQuery[]) {

@@ -2,7 +2,8 @@ import React, { useCallback, useId, useState } from 'react';
 import { useCopyToClipboard } from 'react-use';
 
 import { css } from '@emotion/css';
-import { type GrafanaTheme2, type SelectableValue } from '@grafana/data';
+import { QueryWithAssistantButton } from '@grafana/assistant';
+import { type CoreApp, type GrafanaTheme2, type SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/plugin-ui';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
 
@@ -12,6 +13,7 @@ import { ProjectSelector } from '@/components//ProjectSelector';
 import { TableSelector } from '@/components//TableSelector';
 import { ConfirmModal } from '@/components/ConfirmModal';
 import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '@/constants';
+import { type BigQueryDatasource } from '@/datasource';
 import { type BigQueryQueryNG, QueryFormat, type QueryRowFilter, type QueryWithDefaults } from '@/types';
 import { toRawSql } from '@/utils/sql.utils';
 
@@ -24,6 +26,9 @@ interface QueryHeaderProps {
   apiClient: BigQueryAPI;
   isQueryRunnable: boolean;
   showRunButton?: boolean;
+  datasource: BigQueryDatasource;
+  queries: BigQueryQueryNG[];
+  app?: CoreApp;
 }
 
 const editorModes = [
@@ -40,6 +45,9 @@ export function QueryHeader({
   apiClient,
   isQueryRunnable,
   showRunButton = true,
+  datasource,
+  queries,
+  app,
 }: QueryHeaderProps) {
   const { location, editorMode } = query;
   const [_, copyToClipboard] = useCopyToClipboard();
@@ -147,6 +155,15 @@ export function QueryHeader({
   return (
     <>
       <EditorHeader>
+        <QueryWithAssistantButton
+          currentQuery={query}
+          queries={queries}
+          dataSourceInstanceSettings={datasource.instanceSettings}
+          app={app}
+          datasourceApi={datasource as any}
+          size="sm"
+        />
+
         <InlineSelect
           label="Processing location"
           value={location}
