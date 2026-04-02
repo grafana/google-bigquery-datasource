@@ -440,7 +440,11 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 		return nil, err
 	}
 
-	client, err := s.bqFactory(ctx, project, option.WithHTTPClient(httpClient))
+	clientOptions := []option.ClientOption{option.WithHTTPClient(httpClient)}
+	if settings.ServiceEndpoint != "" {
+		clientOptions = append(clientOptions, option.WithEndpoint(settings.ServiceEndpoint))
+	}
+	client, err := s.bqFactory(ctx, project, clientOptions...)
 	if err != nil {
 		return nil, err
 	}
