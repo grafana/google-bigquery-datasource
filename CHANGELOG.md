@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.4
+
+🚀 Feature: Add Grafana Assistant support
+🐛 Fix: Fix metadata API calls (datasets, tables, schemas) ignoring the 
+  custom serviceEndpoint setting
+
 ## 3.1.3
 
 🐛 chore: pass X-Plugin-Id as label
