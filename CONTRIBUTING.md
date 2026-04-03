@@ -74,6 +74,18 @@ If you are creating a PR, ensure to run `yarn changeset` from your branch. Provi
 
 To create a new release, execute `yarn changeset version`. This will update the Changelog and bump the version in `package.json` file. Commit those changes. Run the `Plugins - CD` GitHub Action to publish the new release.
 
+## GitHub Actions list
+
+The following workflows live under [.github/workflows](.github/workflows/).
+
+- **Plugins - CI** ([`push.yaml`](.github/workflows/push.yaml)) — Runs on every pull request and on pushes to `main`. It calls Grafana’s shared plugin CI workflow to build and validate the plugin (including Playwright), with a version suffix on PR builds.
+
+- **Plugins - CD** ([`publish.yaml`](.github/workflows/publish.yaml)) — Manual release/deploy workflow: pick a branch and target environment (`dev`, `ops`, or `prod`). It uses Grafana’s shared plugin CD pipeline; you can optionally publish docs only without shipping the plugin artifact.
+
+- **Create Plugin Update** ([`update-create-plugin.yml`](.github/workflows/update-create-plugin.yml)) — Can be run manually or on a monthly schedule. It opens automated updates (via Grafana’s create-plugin tooling) so the repo stays aligned with the current plugin scaffold.
+
+- **Add issues to OSS Big Tent team project** ([`add-to-project.yml`](.github/workflows/add-to-project.yml)) — When a new issue or pull request is opened, it adds the item to the Grafana org project board used by the OSS Big Tent team.
+
 # Plugin Technical Documentation
 
 ## Authentication
