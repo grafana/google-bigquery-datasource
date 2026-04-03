@@ -33,6 +33,16 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     });
   };
 
+  const onJobTimeoutChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        JobTimeout: Number(event.target.value),
+      },
+    });
+  };
+
   const onAuthenticationTypeChange = (options: DataSourceSettings<DataSourceOptions, DataSourceSecureJsonData>) => {
     onOptionsChange({
       ...options,
@@ -152,6 +162,30 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             type={'number'}
             value={jsonData.MaxBytesBilled || ''}
             onChange={onMaxBytesBilledChange}
+          />
+        </Field>
+        <Field
+          label="Job timeout"
+          description={
+            <span>
+              Set the maximum number of seconds a query job is allowed to run. Read more about job timeout{' '}
+              <a
+                href="https://cloud.google.com/bigquery/docs/reference/rest/v2/Job"
+                rel="noreferrer"
+                className="external-link"
+                target="_blank"
+              >
+                here
+              </a>
+            </span>
+          }
+        >
+          <Input
+            className="width-30"
+            placeholder="Optional, example 300"
+            type={'number'}
+            value={jsonData.JobTimeout || ''}
+            onChange={onJobTimeoutChange}
           />
         </Field>
 
