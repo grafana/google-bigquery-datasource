@@ -4,15 +4,15 @@ go 1.26.1
 
 require (
 	cloud.google.com/go v0.123.0
-	cloud.google.com/go/bigquery v1.74.0
+	cloud.google.com/go/bigquery v1.75.0
 	github.com/grafana/grafana-google-sdk-go v0.4.2
 	github.com/grafana/grafana-plugin-sdk-go v0.291.1
-	github.com/grafana/sqlds/v5 v5.1.0
+	github.com/grafana/sqlds/v5 v5.1.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.11.1
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/api v0.273.0
-	google.golang.org/grpc v1.79.3
+	google.golang.org/api v0.274.0
+	google.golang.org/grpc v1.80.0
 )
 
 require (
