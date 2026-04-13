@@ -38,7 +38,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       ...options,
       jsonData: {
         ...jsonData,
-        JobTimeout: Number(event.target.value),
+        JobTimeout: Math.max(0, Number(event.target.value)),
       },
     });
   };
@@ -184,6 +184,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             className="width-30"
             placeholder="Optional, example 300"
             type={'number'}
+            min={0}
             value={jsonData.JobTimeout || ''}
             onChange={onJobTimeoutChange}
           />
