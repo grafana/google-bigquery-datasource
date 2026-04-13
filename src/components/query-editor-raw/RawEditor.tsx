@@ -148,7 +148,7 @@ export function RawEditor({
 
   const renderEditor = (standalone = false) => {
     return standalone ? (
-      <AutoSizer ChildComponent={({ width, height }) => renderQueryEditor(width, height)} />
+      <AutoSizer renderProp={({ width, height }) => renderQueryEditor(width, height)} />
     ) : (
       <div ref={editorRef}>{renderQueryEditor()}</div>
     );
@@ -200,8 +200,10 @@ function getStyles(theme: GrafanaTheme2) {
       height: 95vh;
     `,
     modalContent: css`
-      height: 100%;
-      padding-top: 0;
+      flex: 1;
+      min-height: 0;
+      padding: 0;
+      overflow: hidden;
     `,
   };
 }

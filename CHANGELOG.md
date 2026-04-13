@@ -1,8 +1,15 @@
 # Changelog
 
+## 3.1.5
+
+🐛 Fix: Bug introduced in 3.1.4 that broke the plugin when expanding code editor
+
+⚙️ Chore: Updated backend dependencies
+
 ## 3.1.4
 
 🚀 Feature: Add Grafana Assistant support
+
 🐛 Fix: Fix metadata API calls (datasets, tables, schemas) ignoring the 
   custom serviceEndpoint setting
 
