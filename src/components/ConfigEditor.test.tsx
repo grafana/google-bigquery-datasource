@@ -14,8 +14,25 @@ const mockOnOptionsChange = jest.fn();
 
 const defaultProps: BigQueryConfigEditorProps = {
   options: {
-    jsonData: {},
-    },
+    id: 1,
+    uid: 'test-uid',
+    orgId: 1,
+    name: 'Test BigQuery',
+    type: 'grafana-bigquery-datasource',
+    typeName: 'BigQuery',
+    typeLogoUrl: '',
+    access: '',
+    url: '',
+    user: '',
+    database: '',
+    basicAuth: false,
+    basicAuthUser: '',
+    isDefault: false,
+    readOnly: false,
+    withCredentials: false,
+    secureJsonFields: {},
+    jsonData: { authenticationType: 'jwt' },
+  },
   onOptionsChange: mockOnOptionsChange,
 };
 
