@@ -202,7 +202,7 @@ function getStyles(theme: GrafanaTheme2) {
     modalContent: css`
       flex: 1;
       min-height: 0;
-      padding: 0;
+      padding: 0 ${theme.spacing(3)};
       overflow: hidden;
     `,
   };
