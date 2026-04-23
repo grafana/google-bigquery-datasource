@@ -26,7 +26,7 @@
     "@grafana/assistant": "^0.1.24",
     "@grafana/data": "12.4.2",
     "@grafana/google-sdk": "0.4.1",
-    "@grafana/i18n": "12.4.3",
+    "@grafana/i18n": "13.0.1",
     "@grafana/plugin-ui": "0.13.1",
     "@grafana/runtime": "12.4.2",
     "@grafana/schema": "12.4.2",
