@@ -17,6 +17,8 @@ import {
 } from 'expressions';
 import { applyQueryDefaults } from 'utils';
 
+import { isCloud } from './utils';
+
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',
   Batch = 'BATCH',
@@ -46,7 +48,7 @@ export const BigQueryAuth = {
 
 export const bigQueryAuthTypes = [
   ...GOOGLE_AUTH_TYPE_OPTIONS,
-  WIF_AUTH_TYPE_OPTION,
+  ...(isCloud() ? [WIF_AUTH_TYPE_OPTION] : []),
   { label: 'Forward OAuth Identity', value: BigQueryAuth.ForwardOAuthIdentity },
 ];
 
