@@ -323,8 +323,11 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 		return nil, err
 	}
 
-	// If OAuth passthrough is enabled, return the default project
-	if bqSettings.AuthenticationType == "forwardOAuthIdentity" {
+	// For auth types where the plugin forwards an externally-issued token rather than
+	// managing its own credentials, we cannot enumerate GCP projects. Return the
+	// configured default project instead.
+	if bqSettings.AuthenticationType == "forwardOAuthIdentity" ||
+		bqSettings.AuthenticationType == "workloadIdentityFederation" {
 		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
 	}
 

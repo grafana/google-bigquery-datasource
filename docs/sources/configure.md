@@ -97,6 +97,31 @@ To configure service account impersonation:
 1. In the data source configuration, enable **Service Account Impersonation**.
 1. Enter the email address of the service account to impersonate.
 
+### Workload Identity Federation
+
+Use [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) (WIF) to let Grafana users authenticate to BigQuery with an external identity provider (such as Okta or another OIDC provider) instead of a service account key.
+
+{{< admonition type="note" >}}
+This authentication method is available on **Grafana Cloud** only. Grafana Cloud exchanges the signed-in user's external OIDC token for a short-lived Google Cloud access token before the request reaches the plugin.
+{{< /admonition >}}
+
+To configure Workload Identity Federation:
+
+1. In your Google Cloud project, create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC provider.
+1. Grant the pool (or an impersonated service account) the BigQuery roles it needs:
+   - **BigQuery Data Viewer**
+   - **BigQuery Job User**
+1. In your Grafana Cloud stack, configure generic OAuth (or your stack's SSO integration) against the same OIDC provider so Grafana forwards the ID token to data sources.
+1. In the data source configuration, select **Workload Identity Federation** as the authentication type.
+1. Enter the **Workload Identity Pool Provider** resource path, for example:
+   `projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>`
+1. Optionally enter a **Service account email** to have the federated identity impersonate that service account when calling BigQuery.
+1. Enter the **Default project** where queries run.
+
+{{< admonition type="note" >}}
+Some Grafana features don't function as expected with Workload Identity Federation, including alerting. Grafana backend features require credentials to always be in scope, which isn't the case when the credential is derived from the signed-in user's ID token.
+{{< /admonition >}}
+
 ### Forward OAuth Identity
 
 Use Forward OAuth Identity when you want to use Grafana's Google OAuth authentication with BigQuery.
@@ -197,6 +222,24 @@ datasources:
       defaultProject: <DEFAULT_PROJECT_ID>
 ```
 
+### Workload Identity Federation
+
+Available on Grafana Cloud only.
+
+```yaml
+apiVersion: 1
+datasources:
+  - name: BigQuery
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: workloadIdentityFederation
+      workloadIdentityPoolProvider: projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL>/providers/<PROVIDER>
+      wifServiceAccountEmail: <SERVICE_ACCOUNT_EMAIL> # optional
+      defaultProject: <DEFAULT_PROJECT_ID>
+```
+
 ### Forward OAuth Identity
 
 ```yaml
@@ -235,20 +278,22 @@ datasources:
 
 ### Provisioning configuration reference
 
-| Key                           | Type    | Description                                                                      |
-| ----------------------------- | ------- | -------------------------------------------------------------------------------- |
-| `authenticationType`          | string  | Authentication method: `jwt`, `gce`, or `forwardOAuthIdentity`                   |
-| `clientEmail`                 | string  | Service account email (required for `jwt`)                                       |
-| `defaultProject`              | string  | Default GCP project for queries                                                  |
-| `tokenUri`                    | string  | OAuth token endpoint (required for `jwt`): `https://oauth2.googleapis.com/token` |
-| `privateKeyPath`              | string  | Path to private key file (alternative to `secureJsonData.privateKey`)            |
-| `usingImpersonation`          | boolean | Enable service account impersonation                                             |
-| `serviceAccountToImpersonate` | string  | Email of service account to impersonate                                          |
-| `oauthPassThru`               | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`)                  |
-| `processingLocation`          | string  | Query processing location (for example, `US`, `EU`, `us-central1`)               |
-| `MaxBytesBilled`              | integer | Maximum bytes billed per query                                                   |
-| `serviceEndpoint`             | string  | Custom BigQuery API endpoint URL                                                 |
-| `enableSecureSocksProxy`      | boolean | Enable Secure Socks Proxy (requires Grafana configuration)                       |
+| Key                            | Type    | Description                                                                                       |
+| ------------------------------ | ------- | ------------------------------------------------------------------------------------------------- |
+| `authenticationType`           | string  | Authentication method: `jwt`, `gce`, `workloadIdentityFederation`, or `forwardOAuthIdentity`      |
+| `clientEmail`                  | string  | Service account email (required for `jwt`)                                                        |
+| `defaultProject`               | string  | Default GCP project for queries                                                                   |
+| `tokenUri`                     | string  | OAuth token endpoint (required for `jwt`): `https://oauth2.googleapis.com/token`                  |
+| `privateKeyPath`               | string  | Path to private key file (alternative to `secureJsonData.privateKey`)                             |
+| `usingImpersonation`           | boolean | Enable service account impersonation                                                              |
+| `serviceAccountToImpersonate`  | string  | Email of service account to impersonate                                                           |
+| `workloadIdentityPoolProvider` | string  | WIF provider resource path (required for `workloadIdentityFederation`, Grafana Cloud only)        |
+| `wifServiceAccountEmail`       | string  | Service account to impersonate via WIF (optional, Grafana Cloud only)                             |
+| `oauthPassThru`                | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`)                                   |
+| `processingLocation`           | string  | Query processing location (for example, `US`, `EU`, `us-central1`)                                |
+| `MaxBytesBilled`               | integer | Maximum bytes billed per query                                                                    |
+| `serviceEndpoint`              | string  | Custom BigQuery API endpoint URL                                                                  |
+| `enableSecureSocksProxy`       | boolean | Enable Secure Socks Proxy (requires Grafana configuration)                                        |
 
 | Secure Key   | Type   | Description                              |
 | ------------ | ------ | ---------------------------------------- |
@@ -303,6 +348,24 @@ resource "grafana_data_source" "bigquery" {
     usingImpersonation          = true
     serviceAccountToImpersonate = "<SERVICE_ACCOUNT_EMAIL>"
     defaultProject              = "<DEFAULT_PROJECT_ID>"
+  })
+}
+```
+
+### Workload Identity Federation
+
+Available on Grafana Cloud only.
+
+```hcl
+resource "grafana_data_source" "bigquery" {
+  type = "grafana-bigquery-datasource"
+  name = "BigQuery"
+
+  json_data_encoded = jsonencode({
+    authenticationType           = "workloadIdentityFederation"
+    workloadIdentityPoolProvider = "projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/<POOL>/providers/<PROVIDER>"
+    wifServiceAccountEmail       = "<SERVICE_ACCOUNT_EMAIL>" # optional
+    defaultProject               = "<DEFAULT_PROJECT_ID>"
   })
 }
 ```

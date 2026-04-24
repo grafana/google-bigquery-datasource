@@ -1804,15 +1804,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@grafana/google-sdk@npm:0.4.1":
-  version: 0.4.1
-  resolution: "@grafana/google-sdk@npm:0.4.1"
+"@grafana/google-sdk@npm:0.5.0":
+  version: 0.5.0
+  resolution: "@grafana/google-sdk@npm:0.5.0"
   peerDependencies:
     "@grafana/data": ">=11.6.0"
     "@grafana/ui": ">=11.6.0"
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: 10c0/47cbc186279e7fa61324869324636d1a28fd3159da40a05437977654f54013766b93d0f9f7d78e75d11e5f6949646d4e92ecce32ef63e29646248c47a8c5c0ff
+  checksum: 10c0/2fdd98eaa62b180840641dc58d6e3a2c0f48ecc78a060e6962d3baa85331d2d37778685429b2ea5b7aca2eaa9992d5c954e797ba052c7aafb22e4dd133f9b873
   languageName: node
   linkType: hard
 
@@ -7828,7 +7828,7 @@ __metadata:
     "@grafana/data": "npm:12.4.2"
     "@grafana/e2e-selectors": "npm:12.4.2"
     "@grafana/eslint-config": "npm:9.0.0"
-    "@grafana/google-sdk": "npm:0.4.1"
+    "@grafana/google-sdk": "npm:0.5.0"
     "@grafana/i18n": "npm:13.0.1"
     "@grafana/plugin-e2e": "npm:3.5.1"
     "@grafana/plugin-ui": "npm:0.13.1"
