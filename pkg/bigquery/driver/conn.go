@@ -225,9 +225,11 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 		}
 
 		_, statusCode := utils.HandleError(ctx, rootErr, fmt.Sprintf("Failed to connect with authentication type: %s", c.cfg.AuthenticationType))
-		if statusCode == 403 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
+		isTokenForwarding := c.cfg.AuthenticationType == "forwardOAuthIdentity" ||
+			c.cfg.AuthenticationType == "workloadIdentityFederation"
+		if statusCode == 403 && isTokenForwarding {
 			return backend.DownstreamError(errors.New("connected to BigQuery but missing permissions to run queries"))
-		} else if statusCode == 401 && c.cfg.AuthenticationType == "forwardOAuthIdentity" {
+		} else if statusCode == 401 && isTokenForwarding {
 			return backend.DownstreamError(errors.New("unauthorized to connect to BigQuery"))
 		}
 		return rootErr

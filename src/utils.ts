@@ -17,6 +17,7 @@
 // SOFTWARE.
 import { DataQueryRequest, DurationUnit, dateTime } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
+import { config } from '@grafana/runtime';
 import { BigQueryAPI } from 'api';
 import { BigQueryDatasource } from 'datasource';
 import SqlParser from 'sql_parser';
@@ -309,4 +310,18 @@ export function setDatasourceId(instance: string) {
 
 export function getDatasourceId(): string {
   return datasourceId;
+}
+
+/**
+ * Checks if the current Grafana instance is running on cloud
+ * Uses namespace to determine deployment type:
+ * - Cloud instances use namespace format: `stacks-{stackId}`
+ * - On-prem instances use org-based namespace format: `org-{orgId}` or similar
+ *
+ * @returns true if the instance is cloud, false if it's on-premise
+ */
+export function isCloud() {
+  const namespace = config.namespace;
+
+  return namespace.startsWith('stacks-');
 }
