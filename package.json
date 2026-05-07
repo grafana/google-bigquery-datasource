@@ -24,13 +24,13 @@
   "dependencies": {
     "@emotion/css": "11.13.5",
     "@grafana/assistant": "^0.1.24",
-    "@grafana/data": "12.4.2",
+    "@grafana/data": "13.0.1",
     "@grafana/google-sdk": "0.5.0",
     "@grafana/i18n": "13.0.1",
     "@grafana/plugin-ui": "0.13.1",
-    "@grafana/runtime": "12.4.2",
-    "@grafana/schema": "12.4.2",
-    "@grafana/ui": "12.4.2",
+    "@grafana/runtime": "13.0.1",
+    "@grafana/schema": "13.0.1",
+    "@grafana/ui": "13.0.1",
     "@react-awesome-query-builder/ui": "6.6.15",
     "lodash": "4.18.1",
     "react": "18.3.1",
@@ -43,7 +43,7 @@
   "devDependencies": {
     "@babel/core": "7.29.0",
     "@changesets/cli": "2.31.0",
-    "@grafana/e2e-selectors": "12.4.2",
+    "@grafana/e2e-selectors": "13.0.1",
     "@grafana/eslint-config": "9.0.0",
     "@grafana/plugin-e2e": "3.7.1",
     "@grafana/tsconfig": "2.1.0",
@@ -99,12 +99,6 @@
     "webpack-livereload-plugin": "3.0.2",
     "webpack-subresource-integrity": "5.1.0",
     "webpack-virtual-modules": "0.6.2"
-  },
-  "resolutions": {
-    "@remix-run/router": "1.23.2",
-    "lodash": "4.18.1",
-    "minimatch": "10.2.5",
-    "serialize-javascript": "7.0.5"
   },
   "packageManager": "yarn@4.14.1"
 }
