@@ -105,21 +105,36 @@ Use [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/doc
 This authentication method is available on **Grafana Cloud** only. Grafana Cloud exchanges the signed-in user's external OIDC token for a short-lived Google Cloud access token before the request reaches the plugin.
 {{< /admonition >}}
 
-To configure Workload Identity Federation:
+Configuring Workload Identity Federation involves three systems: Google Cloud, your Grafana Cloud stack, and the data source itself.
 
-1. In your Google Cloud project, create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC provider.
-1. Grant the pool (or an impersonated service account) the BigQuery roles it needs:
-   - **BigQuery Data Viewer**
-   - **BigQuery Job User**
-1. In your Grafana Cloud stack, configure generic OAuth (or your stack's SSO integration) against the same OIDC provider so Grafana forwards the ID token to data sources.
-1. In the data source configuration, select **Workload Identity Federation** as the authentication type.
-1. Enter the **Workload Identity Pool Provider** resource path, for example:
-   `projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>`
-1. Optionally enter a **Service account email** to have the federated identity impersonate that service account when calling BigQuery.
-1. Enter the **Default project** where queries run.
+#### In Google Cloud
+
+1. Create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC identity provider. When configuring the provider, set up attribute mappings so that `google.subject` maps to the relevant claim from your identity provider (for example, `assertion.sub` — the exact mapping depends on your provider's claim format).
+1. Grant the BigQuery permissions needed to run queries. How you grant them depends on whether you use service account impersonation:
+   - **Without impersonation** — grant the WIF pool principal directly:
+     - **BigQuery Data Viewer**
+     - **BigQuery Job User**
+   - **With impersonation** — create a service account, grant it those same roles, then grant the WIF pool principal the **Service Account Token Creator** role on that service account.
+
+#### In Grafana Cloud
+
+1. Configure your Grafana Cloud stack's SSO integration against the same OIDC provider, so the signed-in user's identity is available for Grafana Cloud to exchange for a Google Cloud access token before the request reaches the plugin. Refer to [Configure OAuth2 authentication](https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/generic-oauth/) for setup details.
+
+#### In the data source configuration
+
+1. Open the BigQuery data source settings and select **Workload Identity Federation** as the authentication type.
+1. In the **Workload Identity Pool Provider** field, enter the full resource path of your provider:
+   `projects/<project-number>/locations/global/workloadIdentityPools/<pool-id>/providers/<provider-id>`
+
+   {{< admonition type="note" >}}
+Use the **project number** (a numeric ID such as `123456789`), not the project ID (such as `my-project`). You can find the project number on the Google Cloud Console home page.
+   {{< /admonition >}}
+
+1. If you set up service account impersonation, enter the service account email in the **Service account email** field. If you granted permissions directly to the WIF pool, leave this blank.
+1. Enter the **Default project** where your BigQuery queries will run.
 
 {{< admonition type="note" >}}
-Some Grafana features don't function as expected with Workload Identity Federation, including alerting. Grafana backend features require credentials to always be in scope, which isn't the case when the credential is derived from the signed-in user's ID token.
+Credentials from Workload Identity Federation are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 ### Forward OAuth Identity
@@ -136,7 +151,7 @@ To configure Forward OAuth Identity:
 1. Enter the **Default project** where queries run.
 
 {{< admonition type="note" >}}
-Some Grafana features don't function as expected with Forward OAuth Identity, including alerting. Grafana backend features require credentials to always be in scope, which isn't the case with this authentication method.
+Credentials from Forward OAuth Identity are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 ## Additional settings
