@@ -1,4 +1,4 @@
-name: Add issues to OSS Big Tent team project
+name: Add issues to Data Source Plugins team project
 on:
   issues:
     types:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   add-to-project:
-    name: Add issue to project
+    name: Add issue to Data Source Plugins project
     runs-on: ubuntu-latest
     steps:
       - id: get-github-token
@@ -21,7 +21,7 @@ jobs:
         with:
           github_app: grafana-oss-big-tent
       - name: Add to project
-        uses: actions/add-to-project@5afcf98fcd03f1c2f92c3c83f58ae24323cc57fd # main
+        uses: actions/add-to-project@1f2db0f17f4dca7786abfab9ca41e2bdcca1e27a # main
         with:
-          project-url: https://github.com/orgs/grafana/projects/457
+          project-url: https://github.com/orgs/grafana/projects/1085
           github-token: ${{ steps.get-github-token.outputs.token }}

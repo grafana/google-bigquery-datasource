@@ -44,3 +44,5 @@ ci/
 .idea
 
 .eslintcache
+
+.DS_Store
