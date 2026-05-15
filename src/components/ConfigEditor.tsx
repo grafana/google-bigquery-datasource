@@ -39,7 +39,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       jsonData: {
         ...options.jsonData,
         authenticationType: options.jsonData.authenticationType,
-        oauthPassThru: options.jsonData.authenticationType === BigQueryAuth.ForwardOAuthIdentity,
+        oauthPassThru: options.jsonData.authenticationType === BigQueryAuth.ForwardOAuthIdentity || options.jsonData.authenticationType === BigQueryAuth.WIF,
       },
     });
   };
