@@ -30,10 +30,18 @@ Before configuring the data source, ensure you have:
 
 - **Grafana version:** 11.6.0 or later (plugin version 3.x). For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
 - **Grafana permissions:** `Organization administrator` role to add data sources.
-- **Google Cloud APIs enabled:** The following APIs must be enabled in your GCP project:
+- **Google Cloud APIs enabled:** The following APIs must be enabled on each GCP project you query:
   - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 - **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server.
+- **Required GCP IAM roles:** The service account (or impersonated service account) must have the following roles on each project it accesses:
+  - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`) — read access to BigQuery data
+  - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
+  - **`resourcemanager.projects.get`** permission — required for the project dropdown to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
+
+{{< admonition type="note" >}}
+If the service account has project-level access but not dataset or table-level access, **Save & test** may succeed while individual queries return 403 errors. Ensure the service account has read access to the specific datasets and tables you intend to query.
+{{< /admonition >}}
 
 {{< admonition type="note" >}}
 Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
@@ -127,6 +135,12 @@ To configure service account impersonation in the data source settings:
 1. Enable **Service Account Impersonation**.
 1. Enter the full email address of the **impersonated** service account.
 1. Click **Save & test** to verify the connection.
+
+### Workload Identity Federation
+
+[Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) (keyless authentication) is not currently supported for Grafana Cloud. If your security requirements prohibit storing service account keys, use [service account impersonation](#service-account-impersonation) as the closest alternative — it minimizes the permissions of the stored key to only token creation.
+
+For self-managed Grafana running on GCE, you can achieve keyless authentication using the [Google Metadata Server](#google-metadata-server) method.
 
 ### Forward OAuth Identity
 
