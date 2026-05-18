@@ -205,6 +205,56 @@ These errors occur when Grafana cannot reach Google BigQuery endpoints.
 
 For general PDC setup and configuration, refer to [Private data source connect](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/).
 
+## Configuration errors
+
+These errors occur during data source setup or provisioning.
+
+### "Failed to save datasource"
+
+**Symptoms:**
+
+- Unable to save data source configuration
+- Error when clicking **Save & test**
+
+**Solutions:**
+
+1. Verify all required fields are filled in.
+1. Check that the JSON key file is valid and complete.
+1. Ensure Grafana has write permissions to its data directory.
+
+### Provisioning errors
+
+**Symptoms:**
+
+- Provisioned data source doesn't appear
+- Errors in Grafana logs about provisioning
+
+**Solutions:**
+
+1. Verify YAML syntax is correct (use a YAML validator).
+1. Check that `type` is set to `grafana-bigquery-datasource`.
+1. Ensure `authenticationType` matches the credentials provided.
+1. For `privateKey` in `secureJsonData`, ensure newlines are preserved (use `|` for multiline strings in YAML).
+
+**Example with multiline private key:**
+
+```yaml
+apiVersion: 1
+datasources:
+  - name: BigQuery
+    type: grafana-bigquery-datasource
+    jsonData:
+      authenticationType: jwt
+      clientEmail: <SERVICE_ACCOUNT_EMAIL>
+      defaultProject: <PROJECT_ID>
+      tokenUri: https://oauth2.googleapis.com/token
+    secureJsonData:
+      privateKey: |
+        -----BEGIN PRIVATE KEY-----
+        <KEY_CONTENT>
+        -----END PRIVATE KEY-----
+```
+
 ## Query errors
 
 These errors occur when executing queries against BigQuery.
@@ -348,27 +398,6 @@ These errors occur when using template variables with the data source.
 1. To force a dynamic refresh at runtime, use the [Grafana Reporting API](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/developers/http_api/reporting/) to clear the report's saved variable configuration. Remove the `templateVars` field from the report definition so variables are evaluated fresh at each scheduled run.
 1. Alternatively, recreate the report after updating variable queries to pick up the latest values.
 
-## Grafana Cloud vs. self-hosted differences
-
-If you are migrating from self-hosted Grafana to Grafana Cloud, be aware of the following behavioral differences with the BigQuery plugin.
-
-### Dataset and table browsing
-
-On self-hosted Grafana, the BigQuery plugin connects directly to Google Cloud APIs. On Grafana Cloud, the connection may route through [Private data source connect (PDC)](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/) if your BigQuery resources are not publicly accessible. This can affect:
-
-- The speed at which datasets and tables load in the query editor dropdowns
-- Whether all projects are visible in the project selector (ensure the service account has `resourcemanager.projects.get` on each project)
-
-If dataset browsing works on self-hosted but not on Grafana Cloud, verify your PDC agent is running and that the service account permissions are identical between environments.
-
-### Query variable substitution
-
-Template variable substitution behavior is consistent between self-hosted and Grafana Cloud. If you observe differences after migration, check:
-
-1. The plugin version matches between environments. Older plugin versions may handle multi-value variables differently.
-1. The data source configuration is identical — particularly the **Default project** and **Processing location** settings.
-1. Variable queries that rely on `$__interval` or time-range macros may produce different results if the default dashboard time range differs between environments.
-
 ## Performance issues
 
 These issues relate to slow queries or high costs.
@@ -423,55 +452,44 @@ These issues relate to slow queries or high costs.
 The Storage API doesn't work with Forward OAuth Identity authentication.
 {{< /admonition >}}
 
-## Configuration errors
+## Grafana Cloud vs. self-hosted differences
 
-These errors occur during data source setup or provisioning.
+If you are migrating from self-hosted Grafana to Grafana Cloud, be aware of the following behavioral differences with the BigQuery plugin.
 
-### "Failed to save datasource"
+### Dataset and table browsing
 
-**Symptoms:**
+On self-hosted Grafana, the BigQuery plugin connects directly to Google Cloud APIs. On Grafana Cloud, the connection may route through [Private data source connect (PDC)](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/) if your BigQuery resources are not publicly accessible. This can affect:
 
-- Unable to save data source configuration
-- Error when clicking **Save & test**
+- The speed at which datasets and tables load in the query editor dropdowns
+- Whether all projects are visible in the project selector (ensure the service account has `resourcemanager.projects.get` on each project)
 
-**Solutions:**
+If dataset browsing works on self-hosted but not on Grafana Cloud, verify your PDC agent is running and that the service account permissions are identical between environments.
 
-1. Verify all required fields are filled in.
-1. Check that the JSON key file is valid and complete.
-1. Ensure Grafana has write permissions to its data directory.
+### Query variable substitution
 
-### Provisioning errors
+Template variable substitution behavior is consistent between self-hosted and Grafana Cloud. If you observe differences after migration, check:
 
-**Symptoms:**
+1. The plugin version matches between environments. Older plugin versions may handle multi-value variables differently.
+1. The data source configuration is identical — particularly the **Default project** and **Processing location** settings.
+1. Variable queries that rely on `$__interval` or time-range macros may produce different results if the default dashboard time range differs between environments.
 
-- Provisioned data source doesn't appear
-- Errors in Grafana logs about provisioning
+## Auditing and usage tracking
 
-**Solutions:**
+To track which Grafana users are running BigQuery queries:
 
-1. Verify YAML syntax is correct (use a YAML validator).
-1. Check that `type` is set to `grafana-bigquery-datasource`.
-1. Ensure `authenticationType` matches the credentials provided.
-1. For `privateKey` in `secureJsonData`, ensure newlines are preserved (use `|` for multiline strings in YAML).
+- **Grafana audit logging** (available in Grafana Enterprise and Grafana Cloud) can identify the user and data source associated with a query request, but does not log the specific SQL query text or which BigQuery tables were accessed. For details, refer to [Auditing](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/audit-grafana/).
+- **BigQuery audit logs** in GCP provide full query-level detail, including the SQL text, tables accessed, bytes scanned, and job metadata. Enable [Cloud Audit Logs for BigQuery](https://cloud.google.com/bigquery/docs/reference/auditlogs) to capture this information.
 
-**Example with multiline private key:**
+For complete query-level auditing, use BigQuery's audit logs. You can correlate them with Grafana audit logs by matching timestamps and the service account identity.
 
-```yaml
-apiVersion: 1
-datasources:
-  - name: BigQuery
-    type: grafana-bigquery-datasource
-    jsonData:
-      authenticationType: jwt
-      clientEmail: <SERVICE_ACCOUNT_EMAIL>
-      defaultProject: <PROJECT_ID>
-      tokenUri: https://oauth2.googleapis.com/token
-    secureJsonData:
-      privateKey: |
-        -----BEGIN PRIVATE KEY-----
-        <KEY_CONTENT>
-        -----END PRIVATE KEY-----
-```
+## BigQuery metrics in Google Cloud Monitoring
+
+If you use Google Cloud Monitoring to track BigQuery usage metrics (such as `bigquery.googleapis.com/query/count` or `bigquery.googleapis.com/query/execution_times`), be aware that GCP attributes these metrics to the project that *runs* the query job, not the project that *hosts* the data. This means:
+
+- If your Grafana service account runs jobs in Project A but queries data in Project B, the metrics appear under Project A.
+- This is standard [GCP metric attribution behavior](https://cloud.google.com/bigquery/docs/monitoring), not something controlled by the Grafana plugin.
+
+When building Cloud Monitoring dashboards for BigQuery usage, filter by the project configured as the **Default project** in the BigQuery data source settings (or the project specified in the `$__timeFilter` query), as that is where job metrics are attributed.
 
 ## Enable debug logging
 
@@ -498,24 +516,6 @@ The Query Inspector helps debug query issues:
 1. Review the **Query** tab to see the exact SQL sent to BigQuery.
 1. Check the **Stats** tab for query timing information.
 1. Look at the **JSON** tab for the raw response data.
-
-## Auditing and usage tracking
-
-To track which Grafana users are running BigQuery queries:
-
-- **Grafana audit logging** (available in Grafana Enterprise and Grafana Cloud) can identify the user and data source associated with a query request, but does not log the specific SQL query text or which BigQuery tables were accessed. For details, refer to [Auditing](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/audit-grafana/).
-- **BigQuery audit logs** in GCP provide full query-level detail, including the SQL text, tables accessed, bytes scanned, and job metadata. Enable [Cloud Audit Logs for BigQuery](https://cloud.google.com/bigquery/docs/reference/auditlogs) to capture this information.
-
-For complete query-level auditing, use BigQuery's audit logs. You can correlate them with Grafana audit logs by matching timestamps and the service account identity.
-
-## BigQuery metrics in Google Cloud Monitoring
-
-If you use Google Cloud Monitoring to track BigQuery usage metrics (such as `bigquery.googleapis.com/query/count` or `bigquery.googleapis.com/query/execution_times`), be aware that GCP attributes these metrics to the project that *runs* the query job, not the project that *hosts* the data. This means:
-
-- If your Grafana service account runs jobs in Project A but queries data in Project B, the metrics appear under Project A.
-- This is standard [GCP metric attribution behavior](https://cloud.google.com/bigquery/docs/monitoring), not something controlled by the Grafana plugin.
-
-When building Cloud Monitoring dashboards for BigQuery usage, filter by the project configured as the **Default project** in the BigQuery data source settings (or the project specified in the `$__timeFilter` query), as that is where job metrics are attributed.
 
 ## Get additional help
 
