@@ -44,6 +44,7 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
 		MaxBytesBilled:     settings.MaxBytesBilled,
+		JobTimeout:         settings.JobTimeout,
 	}
 
 	// We want to set the location to empty string only if query args are set

@@ -97,7 +97,6 @@ func prepareQuery(query string, args []driver.Value) (out string, err error) {
 				log.DefaultLogger.Warn(fmt.Sprintf("Unknown query arg type: %s", reflect.TypeOf(value).String()))
 				query = strings.Replace(query, "?", fmt.Sprintf("'%s'", value), 1)
 			}
-
 		}
 		out = query
 
@@ -131,6 +130,10 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 
 	if c.cfg.MaxBytesBilled > 0 {
 		q.MaxBytesBilled = c.cfg.MaxBytesBilled
+	}
+
+	if c.cfg.JobTimeout > 0 {
+		q.JobTimeout = time.Duration(c.cfg.JobTimeout) * time.Second
 	}
 
 	// q.DefaultProjectID = c.cfg.Project // allows omitting project in table reference
@@ -188,7 +191,6 @@ func NewConnector(settings types.ConnectionSettings, client *bq.Client) *BigQuer
 
 func (c *BigQueryConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	conn, err := NewConn(ctx, c.settings, c.bqClient)
-
 	if err != nil {
 		return nil, err
 	}
@@ -208,7 +210,6 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 
 	q.DryRun = true
 	job, err := q.Run(ctx)
-
 	if err != nil {
 		// Unwrap the error to get to the root cause
 		rootErr := err
@@ -254,6 +255,10 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 
 	if c.cfg.MaxBytesBilled > 0 {
 		q.MaxBytesBilled = c.cfg.MaxBytesBilled
+	}
+
+	if c.cfg.JobTimeout > 0 {
+		q.JobTimeout = time.Duration(c.cfg.JobTimeout) * time.Second
 	}
 
 	job, err := q.Run(ctx)
