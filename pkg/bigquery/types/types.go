@@ -23,6 +23,10 @@ type BigQuerySettings struct {
 	ServiceAccountToImpersonate string `json:"serviceAccountToImpersonate"`
 	OAuthPassthroughEnabled     bool   `json:"oauthPassThru"`
 
+	// Workload Identity Federation fields (read by Grafana Cloud's auth middleware)
+	WorkloadIdentityPoolProvider string `json:"workloadIdentityPoolProvider"`
+	WifServiceAccountEmail       string `json:"wifServiceAccountEmail"`
+
 	// Saved in secure JSON
 	PrivateKey string `json:"-"`
 }

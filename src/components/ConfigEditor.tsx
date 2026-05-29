@@ -1,18 +1,17 @@
 import React from 'react';
 
 import {
-  DataSourcePluginOptionsEditorProps,
-  DataSourceSettings,
-  onUpdateDatasourceJsonDataOption,
-  onUpdateDatasourceJsonDataOptionSelect,
+    DataSourcePluginOptionsEditorProps,
+    onUpdateDatasourceJsonDataOption,
+    onUpdateDatasourceJsonDataOptionSelect
 } from '@grafana/data';
-import { AuthConfig, DataSourceOptions, DataSourceSecureJsonData } from '@grafana/google-sdk';
+import { AuthConfig, GoogleAuthType } from '@grafana/google-sdk';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
 import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
 
 import { PROCESSING_LOCATIONS } from '../constants';
-import { BigQueryAuth, BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
+import { BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
 
 import { ConfigurationHelp } from './/ConfigurationHelp';
 import { Divider } from './Divider';
@@ -33,19 +32,8 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
     });
   };
 
-  const onAuthenticationTypeChange = (options: DataSourceSettings<DataSourceOptions, DataSourceSecureJsonData>) => {
-    onOptionsChange({
-      ...options,
-      jsonData: {
-        ...options.jsonData,
-        authenticationType: options.jsonData.authenticationType,
-        oauthPassThru: options.jsonData.authenticationType === BigQueryAuth.ForwardOAuthIdentity,
-      },
-    });
-  };
-
   const showServiceAccountImpersonation =
-    jsonData.authenticationType === BigQueryAuth.JWT || jsonData.authenticationType === BigQueryAuth.GCE;
+    jsonData.authenticationType === GoogleAuthType.JWT || jsonData.authenticationType === GoogleAuthType.GCE;
 
   return (
     <>
@@ -63,21 +51,10 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
 
       <AuthConfig
         options={options}
-        onOptionsChange={onAuthenticationTypeChange}
+        onOptionsChange={onOptionsChange}
         authOptions={bigQueryAuthTypes}
         showServiceAccountImpersonationConfig={showServiceAccountImpersonation}
       />
-
-      {jsonData.authenticationType === BigQueryAuth.ForwardOAuthIdentity && (
-        <Field label="Default project">
-          <Input
-            id="defaultProject"
-            width={60}
-            value={options.jsonData.defaultProject || ''}
-            onChange={onUpdateDatasourceJsonDataOption(props, 'defaultProject')}
-          />
-        </Field>
-      )}
 
       <Divider />
 

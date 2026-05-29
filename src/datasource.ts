@@ -4,10 +4,11 @@ import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSuppo
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
 import { DataQuery } from '@grafana/schema';
+import { GoogleAuthType } from '@grafana/google-sdk';
 import { getApiClient } from 'api';
 
 import { VariableEditor } from './components/VariableEditor';
-import { BigQueryAuth, BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
+import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
 import { interpolateVariable } from './utils/interpolateVariable';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
@@ -20,7 +21,7 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     super(instanceSettings);
 
     this.jsonData = instanceSettings.jsonData;
-    this.authenticationType = instanceSettings.jsonData.authenticationType || BigQueryAuth.JWT;
+    this.authenticationType = instanceSettings.jsonData.authenticationType || GoogleAuthType.JWT;
     this.variables = {
       getType: () => VariableSupportType.Custom,
       // Have to use any here as DatasourceApi will not be the same as BigQueryDatasource
