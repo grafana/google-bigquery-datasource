@@ -1,6 +1,7 @@
 module github.com/grafana/google-bigquery-datasource
 
 go 1.26.3
+
 require (
 	cloud.google.com/go v0.123.0
 	cloud.google.com/go/bigquery v1.76.0
