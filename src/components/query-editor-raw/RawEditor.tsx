@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react';
-import { useMeasure } from 'react-use';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { css } from '@emotion/css';
@@ -7,6 +6,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
 import { BigQueryQueryNG, QueryEditorProps } from 'types';
 import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
+import { useMeasure } from 'utils/hooks';
 
 import { QueryEditorRaw } from './QueryEditorRaw';
 import { QueryToolbox } from './QueryToolbox';

@@ -1,5 +1,3 @@
-import { uniqueId } from 'lodash';
-
 import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSupportType } from '@grafana/data';
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
@@ -8,6 +6,7 @@ import { getApiClient } from 'api';
 
 import { VariableEditor } from './components/VariableEditor';
 import { BigQueryAuth, BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
+import { uniqueId } from './utils';
 import { interpolateVariable } from './utils/interpolateVariable';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {
