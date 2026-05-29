@@ -7,12 +7,11 @@ on:
     types:
       - opened
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   add-to-project:
+    permissions:
+      contents: read
+      id-token: write
     name: Add issue to Data Source Plugins project
     runs-on: ubuntu-latest
     steps:
