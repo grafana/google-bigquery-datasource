@@ -41,9 +41,9 @@ jest.mock('@grafana/plugin-ui', () => ({
 }));
 
 // useMeasure relies on ResizeObserver. Return a stable [ref, size] tuple.
-jest.mock('react-use', () => ({
-  ...jest.requireActual('react-use'),
-  useMeasure: () => [{ current: null }, { width: 800, height: 30 }],
+jest.mock('utils/hooks', () => ({
+  ...jest.requireActual('utils/hooks'),
+  useMeasure: () => [() => {}, { width: 800, height: 30 }],
 }));
 
 // QueryValidator triggers async API calls; stub it out.
