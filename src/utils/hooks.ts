@@ -90,11 +90,7 @@ export function useAsync<T extends (...args: any[]) => Promise<any>>(
  * change (and once on mount). Returns an `isReady` getter and a `cancel`
  * function, mirroring react-use's signature.
  */
-export function useDebounce(
-  fn: () => void,
-  ms = 0,
-  deps: DependencyList = []
-): [() => boolean | null, () => void] {
+export function useDebounce(fn: () => void, ms = 0, deps: DependencyList = []): [() => boolean | null, () => void] {
   const isReadyRef = useRef<boolean | null>(false);
   const timeout = useRef<ReturnType<typeof setTimeout>>();
   const fnRef = useRef(fn);

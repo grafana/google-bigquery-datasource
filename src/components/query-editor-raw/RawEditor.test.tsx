@@ -1,6 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+
+import { fireEvent, render, screen } from '@testing-library/react';
+
 import { QueryFormat } from '../../types';
+
 import { RawEditor } from './RawEditor';
 
 // AutoSizer relies on DOM measurements which aren't available in jsdom.

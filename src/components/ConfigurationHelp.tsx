@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { Collapse } from '@grafana/ui';
 
 export const ConfigurationHelp = () => {

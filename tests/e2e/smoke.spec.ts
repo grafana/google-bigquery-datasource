@@ -1,4 +1,4 @@
-import { test, expect } from '@grafana/plugin-e2e';
+import { expect, test } from '@grafana/plugin-e2e';
 
 test('Smoke test: plugin loads', async ({ createDataSourceConfigPage, page }) => {
   await createDataSourceConfigPage({ type: 'grafana-bigquery-datasource' });

@@ -1,16 +1,16 @@
 import React, { useCallback, useId, useState } from 'react';
 
 import { css } from '@emotion/css';
+import { QueryWithAssistantButton } from '@grafana/assistant';
 import { CoreApp, GrafanaTheme2, SelectableValue } from '@grafana/data';
 import { EditorField, EditorHeader, EditorMode, EditorRow, FlexItem, InlineSelect, Space } from '@grafana/plugin-ui';
 import { Button, InlineSwitch, RadioButtonGroup, Tooltip, useStyles2 } from '@grafana/ui';
-import { QueryWithAssistantButton } from '@grafana/assistant';
 import { BigQueryAPI } from 'api';
 import { useCopyToClipboard } from 'utils/hooks';
 import { toRawSql } from 'utils/sql.utils';
-import { BigQueryDatasource } from '../datasource';
 
 import { PROCESSING_LOCATIONS, QUERY_FORMAT_OPTIONS } from '../constants';
+import { BigQueryDatasource } from '../datasource';
 import { BigQueryQueryNG, QueryFormat, QueryRowFilter, QueryWithDefaults } from '../types';
 
 import { ConfirmModal } from './ConfirmModal';
