@@ -227,10 +227,14 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 		_, statusCode := utils.HandleError(ctx, rootErr, fmt.Sprintf("Failed to connect with authentication type: %s", c.cfg.AuthenticationType))
 		isTokenForwarding := c.cfg.AuthenticationType == "forwardOAuthIdentity" ||
 			c.cfg.AuthenticationType == "workloadIdentityFederation"
+		gcpMsg := ""
+		if gErr, ok := rootErr.(*googleapi.Error); ok && gErr.Message != "" {
+			gcpMsg = ": " + gErr.Message
+		}
 		if statusCode == 403 && isTokenForwarding {
-			return backend.DownstreamError(errors.New("connected to BigQuery but missing permissions to run queries"))
+			return backend.DownstreamErrorf("connected to BigQuery but missing permissions to run queries%s. Verify the authenticated principal has bigquery.jobs.create on the project and bigquery.dataViewer on the dataset/table", gcpMsg)
 		} else if statusCode == 401 && isTokenForwarding {
-			return backend.DownstreamError(errors.New("unauthorized to connect to BigQuery"))
+			return backend.DownstreamErrorf("unauthorized to connect to BigQuery%s. Verify the identity token is valid and not expired", gcpMsg)
 		}
 		return rootErr
 	}
