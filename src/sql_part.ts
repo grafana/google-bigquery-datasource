@@ -20,8 +20,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-import _ from 'lodash';
-
 export class SqlPartDef {
   type: string;
   style: string;
@@ -80,7 +78,7 @@ export class SqlPart {
       this.label = def.label;
     }
 
-    part.params = part.params || _.clone(this.def.defaultParams);
+    part.params = part.params || [...this.def.defaultParams];
     this.params = part.params;
   }
 

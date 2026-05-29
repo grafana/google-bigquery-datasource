@@ -5,7 +5,6 @@ import {
   QueryEditorPropertyExpression,
   QueryEditorPropertyType,
 } from 'expressions';
-import { isEmpty } from 'lodash';
 import { BigQueryQueryNG, SQLExpression } from 'types';
 
 export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): string {
@@ -27,7 +26,7 @@ export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): str
   }
 
   if (sql.groupBy?.[0]?.property.name) {
-    const groupBy = sql.groupBy.map((g) => g.property.name).filter((g) => !isEmpty(g));
+    const groupBy = sql.groupBy.map((g) => g.property.name).filter((g): g is string => Boolean(g));
     rawQuery += `GROUP BY ${groupBy.join(', ')} `;
   }
 
