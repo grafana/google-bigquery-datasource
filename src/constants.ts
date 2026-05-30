@@ -1,4 +1,3 @@
-import { SelectableValue } from '@grafana/data';
 import { ComboboxOption } from '@grafana/ui';
 
 import { QueryFormat, QueryPriority } from './types';
@@ -64,7 +63,7 @@ export const PROCESSING_LOCATIONS: Array<ComboboxOption<string>> = [
   { label: 'Tel Aviv (me-west1)', value: 'me-west1' },
 ];
 
-export const QUERY_PRIORITIES: Array<SelectableValue<QueryPriority>> = [
+export const QUERY_PRIORITIES: Array<ComboboxOption<QueryPriority>> = [
   { label: 'Interactive', value: QueryPriority.Interactive },
   { label: 'Batch', value: QueryPriority.Batch },
 ];

@@ -11,7 +11,7 @@ import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
 import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
 
-import { PROCESSING_LOCATIONS } from '../constants';
+import { PROCESSING_LOCATIONS, QUERY_PRIORITIES } from '../constants';
 import { BigQueryAuth, BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
 
 import { ConfigurationHelp } from './/ConfigurationHelp';
@@ -104,6 +104,30 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             value={jsonData.processingLocation || ''}
             options={PROCESSING_LOCATIONS}
             onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'processingLocation')}
+          />
+        </Field>
+        <Field
+          label="Query priority"
+          description={
+            <span>
+              Priority used when running queries. Read more about query priority{' '}
+              <a
+                href="https://cloud.google.com/bigquery/docs/running-queries#batch"
+                rel="noreferrer"
+                className="external-link"
+                target="_blank"
+              >
+                here
+              </a>
+            </span>
+          }
+        >
+          <Combobox
+            width={60}
+            placeholder="Interactive"
+            value={jsonData.queryPriority ?? null}
+            options={QUERY_PRIORITIES}
+            onChange={onUpdateDatasourceJsonDataOptionSelect(props, 'queryPriority')}
           />
         </Field>
         <Field
