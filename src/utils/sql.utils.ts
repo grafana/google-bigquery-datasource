@@ -39,8 +39,10 @@ export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): str
     rawQuery += `${sql.orderByDirection} `;
   }
 
-  // Although LIMIT 0 doesn't make sense, it is still possible to have LIMIT 0
-  if (sql.limit !== undefined && sql.limit >= 0) {
+  // Although LIMIT 0 doesn't make sense, it is still possible to have LIMIT 0.
+  // Use isFinite so that NaN/null/"" — which can appear after JSON round-trip of
+  // a cleared input — don't slip through as "LIMIT null"/"LIMIT ".
+  if (typeof sql.limit === 'number' && Number.isFinite(sql.limit) && sql.limit >= 0) {
     rawQuery += `LIMIT ${sql.limit} `;
   }
   return rawQuery;
