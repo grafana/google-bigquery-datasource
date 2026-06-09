@@ -1,8 +1,11 @@
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+
 import { ColumnDefinition, SQLEditor, TableDefinition } from '@grafana/plugin-ui';
 import { TableSchema } from 'api';
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+
 import { BigQueryQueryNG } from '../../types';
 import { formatSQL } from '../../utils/formatSQL';
+
 import { getBigQueryCompletionProvider } from './bigqueryCompletionProvider';
 
 type Props = {

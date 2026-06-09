@@ -310,3 +310,12 @@ export function setDatasourceId(instance: string) {
 export function getDatasourceId(): string {
   return datasourceId;
 }
+
+let idCounter = 0;
+
+/**
+ * Generates a unique id, optionally prefixed. Mirrors lodash's `uniqueId`.
+ */
+export function uniqueId(prefix = ''): string {
+  return `${prefix}${++idCounter}`;
+}

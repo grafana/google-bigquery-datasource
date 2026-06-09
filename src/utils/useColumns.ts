@@ -1,5 +1,3 @@
-import { useAsync } from 'react-use';
-
 import { SelectableValue } from '@grafana/data';
 import { type IconName } from '@grafana/ui';
 
@@ -8,6 +6,7 @@ import { QueryWithDefaults } from '../types';
 import { getDatasourceId } from '../utils';
 
 import { getColumnInfoFromSchema } from './getColumnInfoFromSchema';
+import { useAsync } from './hooks';
 
 type Options = {
   query: QueryWithDefaults;

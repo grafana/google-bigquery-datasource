@@ -3,8 +3,8 @@ import React, { useCallback } from 'react';
 import { SelectableValue } from '@grafana/data';
 import { EditorField, InputGroup, Space } from '@grafana/plugin-ui';
 import { Input, RadioButtonGroup, Select } from '@grafana/ui';
-import { uniqueId } from 'lodash';
 import { SQLExpression } from 'types';
+import { uniqueId } from 'utils';
 import { toOption } from 'utils/data';
 import { setPropertyField } from 'utils/sql.utils';
 

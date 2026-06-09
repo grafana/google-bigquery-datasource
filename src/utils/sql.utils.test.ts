@@ -1,6 +1,8 @@
 import { QueryEditorExpressionType, QueryEditorPropertyType } from 'expressions';
 import { SQLExpression } from 'types';
+
 import { applyQueryDefaults } from '../utils';
+
 import { haveColumns, toRawSql } from './sql.utils';
 
 const queryWithDefaults = applyQueryDefaults(

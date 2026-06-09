@@ -1,11 +1,11 @@
+import React, { useEffect, useMemo, useState } from 'react';
+
 import { css } from '@emotion/css';
-import { formattedValueToString, getValueFormat, TimeRange } from '@grafana/data';
+import { TimeRange, formattedValueToString, getValueFormat } from '@grafana/data';
 import { Icon, Spinner, useTheme2 } from '@grafana/ui';
 import { BigQueryAPI, ValidationResults } from 'api';
-import React, { useState, useMemo, useEffect } from 'react';
-import { useAsyncFn } from 'react-use';
-import useDebounce from 'react-use/lib/useDebounce';
 import { BigQueryQueryNG } from 'types';
+import { useAsyncFn, useDebounce } from 'utils/hooks';
 
 export interface QueryValidatorProps {
   apiClient: BigQueryAPI;
