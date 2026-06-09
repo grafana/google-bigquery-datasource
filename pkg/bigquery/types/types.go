@@ -35,6 +35,7 @@ type ConnectionSettings struct {
 	Headers            map[string][]string
 	MaxBytesBilled     int64
 	EnableStorageAPI   bool
+	QueryPriority      string
 }
 type TableFieldSchema struct {
 	Name        string       `json:"name"`
