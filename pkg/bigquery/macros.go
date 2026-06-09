@@ -3,6 +3,7 @@ package bigquery
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend/gtime"
@@ -33,11 +34,30 @@ func macroTimeGroup(query *sqlutil.Query, args []string) (string, error) {
 
 	timeVar := args[0]
 	intervalVar := strings.Trim(args[1], "'\"")
-	last := intervalVar[len(intervalVar)-1:]
+	if intervalVar == "" {
+		return "", fmt.Errorf("the second parameter(interval) for $__timeGroup macro cannot be empty")
+	}
 
-	// when month interval
-	if last == "M" {
-		return fmt.Sprintf("TIMESTAMP((PARSE_DATE(\"%%Y-%%m-%%d\",CONCAT( CAST((EXTRACT(YEAR FROM %s)) AS STRING),'-',CAST((EXTRACT(MONTH FROM %s)) AS STRING),'-','01'))))", timeVar, timeVar), nil
+	// Month intervals need calendar-aware grouping because a month is not a fixed
+	// number of milliseconds. The trailing "M" denotes months, e.g. "1M", "3M".
+	if strings.HasSuffix(intervalVar, "M") {
+		months := 1
+		if prefix := strings.TrimSpace(strings.TrimSuffix(intervalVar, "M")); prefix != "" {
+			n, err := strconv.Atoi(prefix)
+			if err != nil || n < 1 {
+				return "", fmt.Errorf("error parsing interval %v", intervalVar)
+			}
+			months = n
+		}
+
+		if months == 1 {
+			// Bucket to the first day of each calendar month.
+			return fmt.Sprintf("TIMESTAMP((PARSE_DATE(\"%%Y-%%m-%%d\",CONCAT( CAST((EXTRACT(YEAR FROM %s)) AS STRING),'-',CAST((EXTRACT(MONTH FROM %s)) AS STRING),'-','01'))))", timeVar, timeVar), nil
+		}
+
+		// Bucket into N-month windows aligned to the start of the calendar year
+		// (e.g. 3M -> Jan/Apr/Jul/Oct).
+		return fmt.Sprintf("TIMESTAMP(DATE(EXTRACT(YEAR FROM %s), CAST(FLOOR((EXTRACT(MONTH FROM %s) - 1) / %d) * %d + 1 AS INT64), 1))", timeVar, timeVar, months, months), nil
 	}
 
 	interval, err := gtime.ParseInterval(intervalVar)
