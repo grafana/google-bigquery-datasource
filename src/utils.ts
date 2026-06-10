@@ -325,3 +325,12 @@ export function isCloud() {
 
   return namespace.startsWith('stacks-');
 }
+
+let idCounter = 0;
+
+/**
+ * Generates a unique id, optionally prefixed. Mirrors lodash's `uniqueId`.
+ */
+export function uniqueId(prefix = ''): string {
+  return `${prefix}${++idCounter}`;
+}

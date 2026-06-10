@@ -13,6 +13,7 @@ import {
   TokenType,
 } from '@grafana/plugin-ui';
 import { PartitioningType, TableSchema } from 'api';
+
 import { BQ_AGGREGATE_FNS } from './bigQueryFunctions';
 import { BQ_OPERATORS } from './bigQueryOperators';
 import { MACROS } from './macros';
@@ -75,13 +76,13 @@ export const customStatementPlacement: StatementPlacementProvider = () => [
     resolve: (currentToken, previousKeyword) => {
       return Boolean(
         currentToken?.is(TokenType.Delimiter, '.') ||
-          (currentToken?.is(TokenType.Whitespace) && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
-          (currentToken?.value === '`' && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
-          (currentToken?.isIdentifier() &&
-            currentToken?.value.endsWith('.') &&
-            previousKeyword?.getNextNonWhiteSpaceToken()?.value === '`') || //identifiers with a dot at the end like "`projectname."
-          (currentToken?.isNumber() && currentToken.value.endsWith('.')) || // number with dot at the end like "projectname-21342."
-          (currentToken?.value === '`' && isTypingTableIn(currentToken))
+        (currentToken?.is(TokenType.Whitespace) && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
+        (currentToken?.value === '`' && currentToken?.previous?.is(TokenType.Delimiter, '.')) ||
+        (currentToken?.isIdentifier() &&
+          currentToken?.value.endsWith('.') &&
+          previousKeyword?.getNextNonWhiteSpaceToken()?.value === '`') || //identifiers with a dot at the end like "`projectname."
+        (currentToken?.isNumber() && currentToken.value.endsWith('.')) || // number with dot at the end like "projectname-21342."
+        (currentToken?.value === '`' && isTypingTableIn(currentToken))
       );
     },
   },

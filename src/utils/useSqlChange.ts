@@ -1,8 +1,11 @@
-import { getApiClient } from 'api';
 import { useCallback } from 'react';
-import { useAsync } from 'react-use';
+
+import { getApiClient } from 'api';
+
 import { BigQueryQueryNG, SQLExpression } from '../types';
 import { getDatasourceId } from '../utils';
+
+import { useAsync } from './hooks';
 import { toRawSql } from './sql.utils';
 
 interface UseSqlChange {

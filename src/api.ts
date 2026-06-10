@@ -86,7 +86,7 @@ class BigQueryAPIClient implements BigQueryAPI {
 
   private _getProjects = async (): Promise<GCPProject[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/projects', {
-      datasourceUid: this.datasourceUid
+      datasourceUid: this.datasourceUid,
     });
   };
 

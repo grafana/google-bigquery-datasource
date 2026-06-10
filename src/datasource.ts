@@ -1,14 +1,13 @@
-import { uniqueId } from 'lodash';
-
 import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSupportType } from '@grafana/data';
+import { GoogleAuthType } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
 import { DataQuery } from '@grafana/schema';
-import { GoogleAuthType } from '@grafana/google-sdk';
 import { getApiClient } from 'api';
 
 import { VariableEditor } from './components/VariableEditor';
 import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
+import { uniqueId } from './utils';
 import { interpolateVariable } from './utils/interpolateVariable';
 
 export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, BigQueryOptions> {

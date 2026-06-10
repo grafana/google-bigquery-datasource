@@ -1,9 +1,9 @@
 import React from 'react';
-import { useAsync } from 'react-use';
 
 import { SelectableValue } from '@grafana/data';
 import { Select } from '@grafana/ui';
 import { toOption } from 'utils/data';
+import { useAsync } from 'utils/hooks';
 
 import { QueryWithDefaults, ResourceSelectorProps } from '../types';
 
