@@ -147,6 +147,7 @@ func TestNewHTTPClient(t *testing.T) {
 
 	t.Run("workloadIdentityFederation with pool provider returns a client", func(t *testing.T) {
 		settings := baseSettings
+		settings.OAuthPassthroughEnabled = true
 		settings.AuthenticationType = "workloadIdentityFederation"
 		settings.WorkloadIdentityPoolProvider = "projects/123/locations/global/workloadIdentityPools/pool/providers/provider"
 
@@ -158,6 +159,7 @@ func TestNewHTTPClient(t *testing.T) {
 
 	t.Run("workloadIdentityFederation without pool provider returns error", func(t *testing.T) {
 		settings := baseSettings
+		settings.OAuthPassthroughEnabled = true
 		settings.AuthenticationType = "workloadIdentityFederation"
 		settings.WorkloadIdentityPoolProvider = ""
 
