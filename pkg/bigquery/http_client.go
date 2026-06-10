@@ -96,14 +96,7 @@ func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options, rou
 		return nil, fmt.Errorf("workloadIdentityFederation requires workloadIdentityPoolProvider to be configured")
 	}
 
-	// forwardOAuthIdentity relies on oauthPassThru being explicitly enabled.
-	// workloadIdentityFederation always forwards headers: Grafana Cloud has already
-	// exchanged the OIDC token for a short-lived GCP token and placed it in the
-	// Authorization header before the plugin sees the request.
-	forwardHeaders := (settings.AuthenticationType == "forwardOAuthIdentity" && settings.OAuthPassthroughEnabled) ||
-		settings.AuthenticationType == "workloadIdentityFederation"
-
-	if forwardHeaders {
+	if settings.OAuthPassthroughEnabled {
 		opts.ForwardHTTPHeaders = true
 
 		// We need to set the Accept-Encoding header to identity to avoid the
