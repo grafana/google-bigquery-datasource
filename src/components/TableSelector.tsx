@@ -46,7 +46,8 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
       onChange={onChange}
       isLoading={state.loading}
       menuShouldPortal={true}
-      placeholder={state.loading ? 'Loading tables' : 'Select table'}
+      invalid={!!state.error}
+      placeholder={state.error ? 'Failed to load tables' : state.loading ? 'Loading tables' : 'Select table'}
     />
   );
 };

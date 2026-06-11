@@ -67,6 +67,8 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       disabled={disabled}
       isLoading={state.loading}
       menuShouldPortal={true}
+      invalid={!!state.error}
+      placeholder={state.error ? 'Failed to load datasets' : undefined}
     />
   );
 };
