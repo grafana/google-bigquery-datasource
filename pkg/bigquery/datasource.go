@@ -47,12 +47,12 @@ type conn struct {
 type bqServiceFactory func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error)
 
 type BigQueryDatasource struct {
-	connections             sync.Map
-	apiClients              sync.Map
-	bqFactory               bqServiceFactory
+	connections               sync.Map
+	apiClients                sync.Map
+	bqFactory                 bqServiceFactory
 	resourceManagerServicesMu sync.RWMutex
-	resourceManagerServices map[string]*cloudresourcemanager.Service
-	logger                  log.Logger
+	resourceManagerServices   map[string]*cloudresourcemanager.Service
+	logger                    log.Logger
 }
 
 type ConnectionArgs struct {
@@ -323,8 +323,10 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 		return nil, err
 	}
 
-	// If OAuth passthrough is enabled, return the default project
-	if bqSettings.AuthenticationType == "forwardOAuthIdentity" {
+	// For auth types where the plugin forwards an externally-issued token rather than
+	// managing its own credentials, we cannot enumerate GCP projects. Return the
+	// configured default project instead.
+	if bqSettings.OAuthPassthroughEnabled {
 		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
 	}
 

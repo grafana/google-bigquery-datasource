@@ -57,6 +57,11 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 			provider = tokenprovider.NewGceAccessTokenProvider(providerConfig)
 		}
 
+	case "forwardOAuthIdentity", "workloadIdentityFederation":
+		// Token forwarding is handled by newHTTPClient; getMiddleware should not be
+		// reached for these auth types.
+		return nil, fmt.Errorf("auth type %q does not use a token provider middleware", settings.AuthenticationType)
+
 	case "jwt":
 		fallthrough
 	default:
@@ -87,7 +92,11 @@ func getMiddleware(settings types.BigQuerySettings, routePath string) (httpclien
 }
 
 func newHTTPClient(settings types.BigQuerySettings, opts httpclient.Options, route string) (*http.Client, error) {
-	if settings.AuthenticationType == "forwardOAuthIdentity" && settings.OAuthPassthroughEnabled {
+	if settings.AuthenticationType == "workloadIdentityFederation" && settings.WorkloadIdentityPoolProvider == "" {
+		return nil, fmt.Errorf("workloadIdentityFederation requires workloadIdentityPoolProvider to be configured")
+	}
+
+	if settings.OAuthPassthroughEnabled {
 		opts.ForwardHTTPHeaders = true
 
 		// We need to set the Accept-Encoding header to identity to avoid the
