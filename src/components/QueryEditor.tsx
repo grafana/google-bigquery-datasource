@@ -1,0 +1,120 @@
+import React, { useCallback, useEffect, useState } from 'react';
+
+import { QueryEditorProps } from '@grafana/data';
+import { EditorMode, Space } from '@grafana/plugin-ui';
+import { RawEditor } from 'components/query-editor-raw/RawEditor';
+import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
+import { useAsync } from 'utils/hooks';
+import { haveColumns } from 'utils/sql.utils';
+
+import { getApiClient } from '../api';
+import { QueryHeader } from '../components/QueryHeader';
+import { BigQueryDatasource } from '../datasource';
+import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
+
+import { VisualEditor } from './visual-query-builder/VisualEditor';
+
+interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions> {
+  showRunButton?: boolean;
+}
+
+export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton, queries, app }: Props) {
+  setDatasourceId(datasource.uid);
+  const [isQueryRunnable, setIsQueryRunnable] = useState(true);
+  const { loading: apiLoading, value: apiClient } = useAsync(
+    async () => await getApiClient(datasource.uid),
+    [datasource.uid]
+  );
+  const queryWithDefaults = applyQueryDefaults(query, datasource, apiClient);
+  const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
+    filter: !!queryWithDefaults.sql.whereString,
+    group: !!queryWithDefaults.sql.groupBy?.[0]?.property.name,
+    order: !!queryWithDefaults.sql.orderBy?.property.name,
+    preview: true,
+  });
+  const [queryToValidate, setQueryToValidate] = useState(queryWithDefaults);
+
+  useEffect(() => {
+    return () => {
+      getApiClient(datasource.uid).then((client) => client.dispose());
+    };
+  }, [datasource.uid]);
+
+  const processQuery = useCallback(
+    (q: BigQueryQueryNG) => {
+      if (isQueryValid(q) && onRunQuery) {
+        onRunQuery();
+      }
+    },
+    [onRunQuery]
+  );
+
+  const onQueryChange = (q: BigQueryQueryNG, process = true) => {
+    setQueryToValidate(q as any);
+    onChange(q);
+
+    if (haveColumns(q.sql?.columns) && q.sql?.columns.some((c) => c.name) && !queryRowFilter.group) {
+      setQueryRowFilter({ ...queryRowFilter, group: true });
+    }
+
+    if (process) {
+      processQuery(q);
+    }
+  };
+
+  const onQueryHeaderChange = (q: BigQueryQueryNG) => {
+    setQueryToValidate(q as any);
+    onChange(q);
+  };
+
+  // Render the editor as soon as we have a client. getApiClient resolves even when the
+  // default project can't be fetched (e.g. a data source auth/WIF failure), so the
+  // editor stays usable and the project/dataset/table selectors surface their own
+  // errors rather than the whole editor going blank.
+  if (apiLoading || !apiClient) {
+    return null;
+  }
+
+  return (
+    <>
+      <QueryHeader
+        onChange={onQueryHeaderChange}
+        onRunQuery={onRunQuery}
+        onQueryRowChange={setQueryRowFilter}
+        queryRowFilter={queryRowFilter}
+        query={queryWithDefaults}
+        apiClient={apiClient}
+        isQueryRunnable={isQueryRunnable}
+        showRunButton={showRunButton}
+        datasource={datasource}
+        queries={(queries as BigQueryQueryNG[]) ?? [query]}
+        app={app}
+      />
+
+      <Space v={0.5} />
+
+      {queryWithDefaults.editorMode !== EditorMode.Code && (
+        <VisualEditor
+          apiClient={apiClient}
+          query={queryWithDefaults}
+          onChange={(q) => onQueryChange(q, false)}
+          queryRowFilter={queryRowFilter}
+          onValidate={setIsQueryRunnable}
+          range={range}
+        />
+      )}
+
+      {queryWithDefaults.editorMode === EditorMode.Code && (
+        <RawEditor
+          apiClient={apiClient}
+          query={queryWithDefaults}
+          queryToValidate={queryToValidate}
+          onChange={onQueryChange}
+          onRunQuery={onRunQuery}
+          onValidate={setIsQueryRunnable}
+          range={range}
+        />
+      )}
+    </>
+  );
+}

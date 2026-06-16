@@ -1,0 +1,72 @@
+import { setBackendSrv } from '@grafana/runtime';
+import { of } from 'rxjs';
+
+import { getApiClient } from './api';
+
+describe('api', () => {
+  const datasourceUid = 'abc';
+  const mockResponse = {
+    message: 'Hello World',
+  };
+
+  let defaultProjectSpy = jest.fn();
+  const setupBackendSrv = (spy: jest.Mock) => {
+    setBackendSrv({
+      post: (path: string) => {
+        const resPath = `/api/datasources/uid/${datasourceUid}/resources`;
+        if (path === `${resPath}/defaultProjects`) {
+          defaultProjectSpy();
+          return 'defaultProject';
+        } else {
+          spy();
+          return mockResponse;
+        }
+
+        return null;
+      },
+      fetch: () => {
+        spy();
+        return of({ data: mockResponse });
+      },
+    } as any);
+  };
+
+  beforeEach(() => {
+    defaultProjectSpy.mockClear();
+  });
+
+  test('api caching', async () => {
+    setupBackendSrv(jest.fn());
+
+    await getApiClient(datasourceUid);
+    expect(defaultProjectSpy).toHaveBeenCalled();
+
+    await getApiClient(datasourceUid);
+    expect(defaultProjectSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it.each`
+    method              | connArgs
+    ${'getDatasets'}    | ${['us']}
+    ${'getTables'}      | ${['us', 'my-dataset']}
+    ${'getColumns'}     | ${['us', 'my-dataset', 'my-table']}
+    ${'getTableSchema'} | ${['us', 'my-dataset', 'my-table']}
+  `('$method returns cached values', async ({ method, connArgs }) => {
+    const callsSpy = jest.fn();
+    setupBackendSrv(callsSpy);
+    const apiClient = await getApiClient(datasourceUid);
+
+    const res1 = await (apiClient as any)[method](...connArgs);
+    expect(res1).toEqual(mockResponse);
+    expect(callsSpy).toHaveBeenCalledTimes(1);
+
+    const res2 = await (apiClient as any)[method](...connArgs);
+    expect(res2).toEqual(mockResponse);
+    expect(callsSpy).toHaveBeenCalledTimes(1);
+
+    await apiClient.dispose();
+    const res3 = await (apiClient as any)[method](...connArgs);
+    expect(res3).toEqual(mockResponse);
+    expect(callsSpy).toHaveBeenCalledTimes(2);
+  });
+});
