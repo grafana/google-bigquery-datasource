@@ -1,8 +1,10 @@
-import { SelectableValue } from '@grafana/data';
 import React from 'react';
+
+import { SelectableValue } from '@grafana/data';
 import { BigQueryQueryNG, QueryWithDefaults } from 'types';
 import { useColumns } from 'utils/useColumns';
 import { useSqlChange } from 'utils/useSqlChange';
+
 import { SQLOrderByRow } from './SQLOrderByRow';
 
 type BQOrderByRowProps = {

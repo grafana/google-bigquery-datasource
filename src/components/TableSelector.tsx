@@ -1,9 +1,9 @@
 import React from 'react';
-import { useAsync } from 'react-use';
 
 import { SelectableValue } from '@grafana/data';
 import { Select } from '@grafana/ui';
 import { toOption } from 'utils/data';
+import { useAsync } from 'utils/hooks';
 
 import { QueryWithDefaults, ResourceSelectorProps } from '../types';
 
@@ -46,7 +46,8 @@ export const TableSelector: React.FC<TableSelectorProps> = ({
       onChange={onChange}
       isLoading={state.loading}
       menuShouldPortal={true}
-      placeholder={state.loading ? 'Loading tables' : 'Select table'}
+      invalid={!!state.error}
+      placeholder={state.error ? 'Failed to load tables' : state.loading ? 'Loading tables' : 'Select table'}
     />
   );
 };

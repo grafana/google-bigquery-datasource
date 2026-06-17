@@ -56,6 +56,30 @@ func Test_macros(t *testing.T) {
 			"TIMESTAMP((PARSE_DATE(\"%Y-%m-%d\",CONCAT( CAST((EXTRACT(YEAR FROM created_at)) AS STRING),'-',CAST((EXTRACT(MONTH FROM created_at)) AS STRING),'-','01'))))",
 			nil,
 		},
+		{
+			"time groups 3M (quarterly)",
+			"timeGroup",
+			&sqlutil.Query{},
+			[]string{"created_at", "3M"},
+			"TIMESTAMP(DATE(EXTRACT(YEAR FROM created_at), CAST(FLOOR((EXTRACT(MONTH FROM created_at) - 1) / 3) * 3 + 1 AS INT64), 1))",
+			nil,
+		},
+		{
+			"time groups 6M",
+			"timeGroup",
+			&sqlutil.Query{},
+			[]string{"created_at", "6M"},
+			"TIMESTAMP(DATE(EXTRACT(YEAR FROM created_at), CAST(FLOOR((EXTRACT(MONTH FROM created_at) - 1) / 6) * 6 + 1 AS INT64), 1))",
+			nil,
+		},
+		{
+			"time groups 12M (yearly)",
+			"timeGroup",
+			&sqlutil.Query{},
+			[]string{"created_at", "12M"},
+			"TIMESTAMP(DATE(EXTRACT(YEAR FROM created_at), CAST(FLOOR((EXTRACT(MONTH FROM created_at) - 1) / 12) * 12 + 1 AS INT64), 1))",
+			nil,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.description, func(t *testing.T) {
@@ -65,6 +89,19 @@ func Test_macros(t *testing.T) {
 			}
 			if res != tt.expected {
 				t.Errorf("unexpected result %v, expecting %v", res, tt.expected)
+			}
+		})
+	}
+}
+
+// An interval that is empty after stripping quotes (e.g. "''") must return an
+// error rather than panicking with a slice-bounds-out-of-range.
+func Test_macroTimeGroup_emptyIntervalReturnsError(t *testing.T) {
+	for _, interval := range []string{"", "''", "\"\""} {
+		t.Run("interval="+interval, func(t *testing.T) {
+			res, err := macros["timeGroup"](&sqlutil.Query{}, []string{"created_at", interval})
+			if err == nil {
+				t.Errorf("expected an error for empty interval %q, got result %q", interval, res)
 			}
 		})
 	}

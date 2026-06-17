@@ -3,8 +3,8 @@ import React, { useCallback } from 'react';
 import { SelectableValue } from '@grafana/data';
 import { EditorField, InputGroup, Space } from '@grafana/plugin-ui';
 import { Input, RadioButtonGroup, Select } from '@grafana/ui';
-import { uniqueId } from 'lodash';
 import { SQLExpression } from 'types';
+import { uniqueId } from 'utils';
 import { toOption } from 'utils/data';
 import { setPropertyField } from 'utils/sql.utils';
 
@@ -31,7 +31,11 @@ export function SQLOrderByRow({ sql, onSqlChange, columns, showOffset }: SQLOrde
 
   const onLimitChange = useCallback(
     (event: React.FormEvent<HTMLInputElement>) => {
-      const newSql: SQLExpression = { ...sql, limit: Number.parseInt(event.currentTarget.value, 10) };
+      const raw = event.currentTarget.value;
+      // Empty input -> undefined, not NaN: NaN survives in-memory but JSON.stringify
+      // normalizes it to null, which would then bypass the LIMIT guard on reload.
+      const limit = raw === '' ? undefined : Number.parseInt(raw, 10);
+      const newSql: SQLExpression = { ...sql, limit };
       onSqlChange(newSql);
     },
     [onSqlChange, sql]

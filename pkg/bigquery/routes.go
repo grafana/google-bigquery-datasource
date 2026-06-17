@@ -25,6 +25,11 @@ func (r *ResourceHandler) defaultProjects(rw http.ResponseWriter, req *http.Requ
 		utils.SendResponse(nil, err, rw)
 	}
 
+	if s.OAuthPassthroughEnabled {
+		utils.SendResponse(s.DefaultProject, nil, rw)
+		return
+	}
+
 	if s.AuthenticationType == "gce" {
 		if s.DefaultProject != "" {
 			utils.SendResponse(s.DefaultProject, nil, rw)

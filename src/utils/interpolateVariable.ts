@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 import { TypedVariableModel } from '@grafana/data';
 
 import { quoteLiteral } from '../utils';
@@ -18,7 +16,7 @@ export function interpolateVariable(value: any, variable: TypedVariableModel) {
     return value;
   }
 
-  const quotedValues = _.map(value, (v) => {
+  const quotedValues = (Array.isArray(value) ? value : []).map((v) => {
     return quoteLiteral(v);
   });
 

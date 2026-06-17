@@ -5,7 +5,6 @@ import {
   QueryEditorPropertyExpression,
   QueryEditorPropertyType,
 } from 'expressions';
-import { isEmpty } from 'lodash';
 import { BigQueryQueryNG, SQLExpression } from 'types';
 
 export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): string {
@@ -27,7 +26,7 @@ export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): str
   }
 
   if (sql.groupBy?.[0]?.property.name) {
-    const groupBy = sql.groupBy.map((g) => g.property.name).filter((g) => !isEmpty(g));
+    const groupBy = sql.groupBy.map((g) => g.property.name).filter((g): g is string => Boolean(g));
     rawQuery += `GROUP BY ${groupBy.join(', ')} `;
   }
 
@@ -39,8 +38,10 @@ export function toRawSql({ sql, dataset, table, project }: BigQueryQueryNG): str
     rawQuery += `${sql.orderByDirection} `;
   }
 
-  // Although LIMIT 0 doesn't make sense, it is still possible to have LIMIT 0
-  if (sql.limit !== undefined && sql.limit >= 0) {
+  // Although LIMIT 0 doesn't make sense, it is still possible to have LIMIT 0.
+  // Use isFinite so that NaN/null/"" — which can appear after JSON round-trip of
+  // a cleared input — don't slip through as "LIMIT null"/"LIMIT ".
+  if (typeof sql.limit === 'number' && Number.isFinite(sql.limit) && sql.limit >= 0) {
     rawQuery += `LIMIT ${sql.limit} `;
   }
   return rawQuery;

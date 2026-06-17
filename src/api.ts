@@ -86,7 +86,7 @@ class BigQueryAPIClient implements BigQueryAPI {
 
   private _getProjects = async (): Promise<GCPProject[]> => {
     return await getBackendSrv().post(this.resourcesUrl + '/projects', {
-      datasourceUid: this.datasourceUid
+      datasourceUid: this.datasourceUid,
     });
   };
 
@@ -235,10 +235,17 @@ const apis: Map<string, BigQueryAPI> = new Map();
 
 export async function getApiClient(datasourceUid: string) {
   if (!apis.has(datasourceUid)) {
-    const defaultProject = await getBackendSrv().post(
-      `/api/datasources/uid/${datasourceUid}/resources/defaultProjects`,
-      {}
-    );
+    let defaultProject = '';
+    try {
+      defaultProject = await getBackendSrv().post(`/api/datasources/uid/${datasourceUid}/resources/defaultProjects`, {});
+    } catch (e) {
+      // Couldn't resolve the default project (e.g. a data source auth/WIF failure).
+      // Return a client anyway so the query editor still renders — the project,
+      // dataset and table selectors will each surface their own error when their
+      // resource calls fail. We deliberately don't cache this degraded client, so a
+      // later open re-attempts resolving the default project.
+      return new BigQueryAPIClient(datasourceUid, defaultProject);
+    }
     apis.set(datasourceUid, new BigQueryAPIClient(datasourceUid, defaultProject));
   }
   return apis.get(datasourceUid)!;

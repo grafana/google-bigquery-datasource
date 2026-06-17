@@ -1,5 +1,4 @@
 import React, { useCallback, useState } from 'react';
-import { useMeasure } from 'react-use';
 import { AutoSizer } from 'react-virtualized-auto-sizer';
 
 import { css } from '@emotion/css';
@@ -7,6 +6,7 @@ import { GrafanaTheme2 } from '@grafana/data';
 import { Modal, useStyles2, useTheme2 } from '@grafana/ui';
 import { BigQueryQueryNG, QueryEditorProps } from 'types';
 import { getColumnInfoFromSchema } from 'utils/getColumnInfoFromSchema';
+import { useMeasure } from 'utils/hooks';
 
 import { QueryEditorRaw } from './QueryEditorRaw';
 import { QueryToolbox } from './QueryToolbox';
@@ -148,7 +148,7 @@ export function RawEditor({
 
   const renderEditor = (standalone = false) => {
     return standalone ? (
-      <AutoSizer ChildComponent={({ width, height }) => renderQueryEditor(width, height)} />
+      <AutoSizer renderProp={({ width, height }) => renderQueryEditor(width, height)} />
     ) : (
       <div ref={editorRef}>{renderQueryEditor()}</div>
     );
@@ -200,8 +200,10 @@ function getStyles(theme: GrafanaTheme2) {
       height: 95vh;
     `,
     modalContent: css`
-      height: 100%;
-      padding-top: 0;
+      flex: 1;
+      min-height: 0;
+      padding: 0 ${theme.spacing(3)};
+      overflow: hidden;
     `,
   };
 }
