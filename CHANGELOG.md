@@ -1,5 +1,13 @@
 # Changelog
 
+## 3.2.0
+
+🚀 Add support for [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) as a new authentication type. Available on Grafana Cloud only.
+
+🐛 Fix: clearing the `Limit` input in the visual query builder no longer produces invalid `LIMIT null` SQL after dashboard save/reload. `toRawSql` now only emits a `LIMIT` clause for finite non-negative numbers, and the input setter stores `undefined` (rather than `NaN`) for an empty value.
+
+🐛 Fix: `$__timeGroup` now honors the multiplier for month intervals — `3M`, `6M`, `12M` produce N-month buckets aligned to the calendar year instead of always grouping by a single month. It also no longer panics on an empty or quote-only interval (e.g. `''`), returning a clear error instead.
+
 ## 3.1.6
 
 ⚙️ Updated frontend & backend dependencies
