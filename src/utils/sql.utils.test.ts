@@ -148,6 +148,30 @@ describe('toRawSql function', () => {
     const result = toRawSql({ ...queryWithDefaults, sql });
     expect(result).toEqual(`SELECT name ${from} `);
   });
+
+  it(`should not set limit when it is NaN (e.g. user just cleared the input)`, () => {
+    const sql: SQLExpression = { columns: [columns[1]], limit: Number.NaN };
+    const result = toRawSql({ ...queryWithDefaults, sql });
+    expect(result).toEqual(`SELECT name ${from} `);
+  });
+
+  it(`should not set limit when it is null (e.g. NaN normalized to null by JSON round-trip)`, () => {
+    const sql: SQLExpression = { columns: [columns[1]], limit: null as any };
+    const result = toRawSql({ ...queryWithDefaults, sql });
+    expect(result).toEqual(`SELECT name ${from} `);
+  });
+
+  it(`should not set limit when it is an empty string`, () => {
+    const sql: SQLExpression = { columns: [columns[1]], limit: '' as any };
+    const result = toRawSql({ ...queryWithDefaults, sql });
+    expect(result).toEqual(`SELECT name ${from} `);
+  });
+
+  it(`should not set limit when it is Infinity`, () => {
+    const sql: SQLExpression = { columns: [columns[1]], limit: Number.POSITIVE_INFINITY };
+    const result = toRawSql({ ...queryWithDefaults, sql });
+    expect(result).toEqual(`SELECT name ${from} `);
+  });
 });
 
 describe('haveColumns', () => {
