@@ -1,13 +1,15 @@
 import React, { useId } from 'react';
+
+import { EditorField, EditorRow, EditorRows, QueryOptionGroup } from '@grafana/plugin-ui';
+import { InlineSwitch } from '@grafana/ui';
+import { QueryToolbox } from 'components/query-editor-raw/QueryToolbox';
 import { QueryEditorProps, QueryRowFilter } from 'types';
+
+import { BQGroupByRow } from './BQGroupByRow';
 import { BQOrderByRow } from './BQOrderByRow';
 import { BQSelectRow } from './BQSelectRow';
 import { BQWhereRow } from './BQWhereRow';
 import { Preview } from './Preview';
-import { BQGroupByRow } from './BQGroupByRow';
-import { QueryToolbox } from 'components/query-editor-raw/QueryToolbox';
-import { EditorRows, EditorRow, EditorField, QueryOptionGroup } from '@grafana/plugin-ui';
-import { InlineSwitch } from '@grafana/ui';
 
 interface VisualEditorProps extends QueryEditorProps {
   queryRowFilter: QueryRowFilter;

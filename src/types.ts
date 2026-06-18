@@ -3,7 +3,8 @@ import {
   DataSourceOptions,
   DataSourceSecureJsonData,
   GOOGLE_AUTH_TYPE_OPTIONS,
-  GoogleAuthType,
+  OAUTH_PASSTHROUGH_AUTH_TYPE_OPTION,
+  WIF_AUTH_TYPE_OPTION,
 } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/plugin-ui';
 import { DataQuery } from '@grafana/schema';
@@ -15,6 +16,8 @@ import {
   QueryEditorPropertyExpression,
 } from 'expressions';
 import { applyQueryDefaults } from 'utils';
+
+import { isCloud } from './utils';
 
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',
@@ -38,14 +41,10 @@ export interface BigQueryOptions extends DataSourceOptions {
   oauthPassThru?: boolean;
 }
 
-export const BigQueryAuth = {
-  ...GoogleAuthType,
-  ForwardOAuthIdentity: 'forwardOAuthIdentity',
-} as const;
-
 export const bigQueryAuthTypes = [
   ...GOOGLE_AUTH_TYPE_OPTIONS,
-  { label: 'Forward OAuth Identity', value: BigQueryAuth.ForwardOAuthIdentity },
+  OAUTH_PASSTHROUGH_AUTH_TYPE_OPTION,
+  ...(isCloud() ? [WIF_AUTH_TYPE_OPTION] : []),
 ];
 
 export interface BigQuerySecureJsonData extends DataSourceSecureJsonData {}

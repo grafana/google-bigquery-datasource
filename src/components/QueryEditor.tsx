@@ -1,14 +1,17 @@
+import React, { useCallback, useEffect, useState } from 'react';
+
 import { QueryEditorProps } from '@grafana/data';
 import { EditorMode, Space } from '@grafana/plugin-ui';
 import { RawEditor } from 'components/query-editor-raw/RawEditor';
-import React, { useCallback, useEffect, useState } from 'react';
-import { useAsync } from 'react-use';
 import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
+import { useAsync } from 'utils/hooks';
 import { haveColumns } from 'utils/sql.utils';
+
 import { getApiClient } from '../api';
 import { QueryHeader } from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
+
 import { VisualEditor } from './visual-query-builder/VisualEditor';
 
 interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, BigQueryOptions> {
@@ -18,11 +21,10 @@ interface Props extends QueryEditorProps<BigQueryDatasource, BigQueryQueryNG, Bi
 export function QueryEditor({ datasource, query, onChange, onRunQuery, range, showRunButton, queries, app }: Props) {
   setDatasourceId(datasource.uid);
   const [isQueryRunnable, setIsQueryRunnable] = useState(true);
-  const {
-    loading: apiLoading,
-    error: apiError,
-    value: apiClient,
-  } = useAsync(async () => await getApiClient(datasource.uid), [datasource.uid]);
+  const { loading: apiLoading, value: apiClient } = useAsync(
+    async () => await getApiClient(datasource.uid),
+    [datasource.uid]
+  );
   const queryWithDefaults = applyQueryDefaults(query, datasource, apiClient);
   const [queryRowFilter, setQueryRowFilter] = useState<QueryRowFilter>({
     filter: !!queryWithDefaults.sql.whereString,
@@ -65,7 +67,11 @@ export function QueryEditor({ datasource, query, onChange, onRunQuery, range, sh
     onChange(q);
   };
 
-  if (apiLoading || apiError || !apiClient) {
+  // Render the editor as soon as we have a client. getApiClient resolves even when the
+  // default project can't be fetched (e.g. a data source auth/WIF failure), so the
+  // editor stays usable and the project/dataset/table selectors surface their own
+  // errors rather than the whole editor going blank.
+  if (apiLoading || !apiClient) {
     return null;
   }
 

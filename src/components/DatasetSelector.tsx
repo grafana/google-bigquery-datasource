@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react';
-import { useAsync } from 'react-use';
 
 import { SelectableValue } from '@grafana/data';
 import { Select } from '@grafana/ui';
 import { ResourceSelectorProps } from 'types';
 import { toOption } from 'utils/data';
+import { useAsync } from 'utils/hooks';
 
 interface DatasetSelectorProps extends ResourceSelectorProps {
   value: string | null;
@@ -67,6 +67,8 @@ export const DatasetSelector: React.FC<DatasetSelectorProps> = ({
       disabled={disabled}
       isLoading={state.loading}
       menuShouldPortal={true}
+      invalid={!!state.error}
+      placeholder={state.error ? 'Failed to load datasets' : undefined}
     />
   );
 };
