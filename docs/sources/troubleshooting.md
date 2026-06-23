@@ -24,6 +24,37 @@ review_date: 2026-02-11
 
 This document provides solutions to common issues you may encounter when configuring or using the Google BigQuery data source. For configuration instructions, refer to [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/).
 
+## Plugin version errors
+
+These errors are the most common cause of issues with the BigQuery data source. Most generic error messages on **Save & test** are caused by running an outdated plugin version.
+
+### "An error occurred within the plugin" or generic plugin errors
+
+**Symptoms:**
+
+- **Save & test** fails with "An error occurred within the plugin"
+- Generic "plugin error" messages without specific details
+- Features that previously worked stop functioning after a Grafana upgrade
+
+**Solutions:**
+
+1. Update the BigQuery plugin to the latest version. In Grafana, go to **Administration** > **Plugins and data** > **Plugins**, search for BigQuery, and check for updates.
+1. Restart your Grafana instance after updating. Plugin updates may not take effect until the instance is restarted.
+1. Verify the plugin version is compatible with your Grafana version. Plugin version 3.x requires Grafana 11.6.0 or later. For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
+
+### "Plugin not registered"
+
+**Symptoms:**
+
+- Error message indicates the plugin is not registered
+- Occurs after pod restarts in Grafana Cloud
+- Data source was previously working but becomes unavailable
+
+**Solutions:**
+
+1. Reinstall the plugin. In Grafana Cloud, go to **Administration** > **Plugins and data** > **Plugins**, find the BigQuery plugin, uninstall it, and install it again.
+1. If the issue persists after reinstalling, contact [Grafana Support](https://grafana.com/support/).
+
 ## Authentication errors
 
 These errors occur when credentials are invalid, missing, or don't have the required permissions.
@@ -44,6 +75,34 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 | Service account key expired or revoked | Create a new key in the Google Cloud Console and update the data source configuration.                            |
 | Wrong project selected                 | Verify the default project matches where your data is located.                                                    |
 | API not enabled                        | Enable the [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) in your project. |
+| Dataset or table-level restrictions    | Grant the service account access to the specific datasets or tables, not just the project.                        |
+
+### 403 errors on queries when Save & test passes
+
+**Symptoms:**
+
+- **Save & test** succeeds but queries return 403 permission denied errors
+- Only some queries fail while others work
+
+**Solutions:**
+
+1. The service account has project-level access but is missing dataset or table-level permissions. In the BigQuery Console, verify the service account has read access to the specific datasets being queried.
+1. If querying across multiple projects, ensure the service account has the **BigQuery Data Viewer** and **BigQuery Job User** roles in each target project.
+1. Ensure the [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) is enabled in each target project, not just the default project.
+
+### Project dropdown not populating
+
+**Symptoms:**
+
+- The GCP project dropdown in the query editor is empty
+- No projects are listed when configuring the data source
+- Other query features work correctly
+
+**Solutions:**
+
+1. Grant the service account the `resourcemanager.projects.get` permission. This permission is included in the **Browser** role (`roles/browser`) or can be assigned through a custom role.
+1. Ensure the [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com) is enabled in the project.
+1. Verify the service account has access to the projects you expect to see listed. The dropdown only shows projects where the service account has at least one role.
 
 ### "Invalid JWT signature" or "Invalid token"
 
@@ -65,12 +124,16 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 
 - Queries fail when using service account impersonation
 - Error mentions impersonation or token creation
+- Only a "Service account email to impersonate" field is visible and it's unclear how to proceed
 
 **Solutions:**
 
-1. Verify the source service account has the **Service Account Token Creator** role (`roles/iam.serviceAccountTokenCreator`).
-1. Ensure the target service account (being impersonated) has the required BigQuery roles.
-1. Check that the target service account email is correctly configured.
+1. Verify you have configured authentication *before* enabling impersonation. Service account impersonation requires an underlying authentication method (either Google JWT File or GCE Default Service Account). Upload your authenticating service account's JSON key first, then enable the impersonation checkbox.
+1. Verify the authenticating service account has the **Service Account Token Creator** role (`roles/iam.serviceAccountTokenCreator`) on the impersonated service account.
+1. Ensure the impersonated service account has the required BigQuery roles (**BigQuery Data Viewer** and **BigQuery Job User**).
+1. Check that the impersonated service account email is the full email address (for example, `my-sa@my-project.iam.gserviceaccount.com`).
+
+For detailed setup instructions including `gcloud` commands, refer to [Service account impersonation](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/#service-account-impersonation).
 
 ### Forward OAuth Identity not working
 
@@ -78,12 +141,14 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 
 - Queries fail when using Forward OAuth Identity
 - User sees authentication errors after logging in
+- OAuth scopes appear correct in configuration files but authentication still fails
 
 **Solutions:**
 
 1. Verify the OAuth scopes are configured in Grafana's OAuth settings: `https://www.googleapis.com/auth/bigquery` and `https://www.googleapis.com/auth/drive` (if querying data linked to Google Drive).
 1. Ensure users have authenticated with Google OAuth before accessing BigQuery dashboards.
 1. Check that the **Default project** is configured in the data source settings.
+1. If you updated OAuth scopes in a configuration file but the data source still fails, the Grafana database may be storing stale settings that override the file-based configuration. To fix this, open the data source settings in the Grafana UI, re-enter the correct scopes, and click **Save & test**. This clears the database override.
 
 {{< admonition type="note" >}}
 Forward OAuth Identity doesn't support alerting or other background features that require credentials when users aren't logged in.
@@ -120,6 +185,75 @@ These errors occur when Grafana cannot reach Google BigQuery endpoints.
 1. Verify DNS settings on the Grafana server.
 1. Test DNS resolution: `nslookup bigquery.googleapis.com`.
 1. Check for network policy restrictions blocking external DNS.
+
+### Private data source connect (PDC) errors
+
+**Symptoms:**
+
+- "socks connect tcp ... network unreachable" error messages
+- SSH tunnel opens but closes immediately
+- Intermittent connection failures when using PDC
+- Data source works locally but fails in Grafana Cloud with PDC
+
+**Solutions:**
+
+1. Verify the PDC agent is running and connected. Check the agent logs and the PDC status in your Grafana Cloud instance under **Administration** > **Private data source connect**.
+1. Restart the PDC agent if you see "socks connect tcp ... network unreachable" errors. This error typically indicates the agent has lost its connection and needs to be restarted.
+1. Run multiple PDC agents for high availability. A single agent creates a single point of failure — if it goes down, all data sources using PDC become unavailable.
+1. If the SSH tunnel opens but immediately closes, this can indicate a plugin installation error rather than a network problem. Verify the BigQuery plugin is correctly installed and not in an error state (refer to [Plugin version errors](#plugin-version-errors)).
+1. Ensure the PDC agent's network allows outbound HTTPS (port 443) to `*.googleapis.com`.
+
+For general PDC setup and configuration, refer to [Private data source connect](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/).
+
+## Configuration errors
+
+These errors occur during data source setup or provisioning.
+
+### "Failed to save datasource"
+
+**Symptoms:**
+
+- Unable to save data source configuration
+- Error when clicking **Save & test**
+
+**Solutions:**
+
+1. Verify all required fields are filled in.
+1. Check that the JSON key file is valid and complete.
+1. Ensure Grafana has write permissions to its data directory.
+
+### Provisioning errors
+
+**Symptoms:**
+
+- Provisioned data source doesn't appear
+- Errors in Grafana logs about provisioning
+
+**Solutions:**
+
+1. Verify YAML syntax is correct (use a YAML validator).
+1. Check that `type` is set to `grafana-bigquery-datasource`.
+1. Ensure `authenticationType` matches the credentials provided.
+1. For `privateKey` in `secureJsonData`, ensure newlines are preserved (use `|` for multiline strings in YAML).
+
+**Example with multiline private key:**
+
+```yaml
+apiVersion: 1
+datasources:
+  - name: BigQuery
+    type: grafana-bigquery-datasource
+    jsonData:
+      authenticationType: jwt
+      clientEmail: <SERVICE_ACCOUNT_EMAIL>
+      defaultProject: <PROJECT_ID>
+      tokenUri: https://oauth2.googleapis.com/token
+    secureJsonData:
+      privateKey: |
+        -----BEGIN PRIVATE KEY-----
+        <KEY_CONTENT>
+        -----END PRIVATE KEY-----
+```
 
 ## Query errors
 
@@ -162,14 +296,20 @@ These errors occur when executing queries against BigQuery.
 
 - Query runs for a long time then fails
 - Error mentions timeout or exceeded limits
+- "context deadline exceeded" error
 
 **Solutions:**
 
+1. Increase the query timeout in the data source settings. The default timeout may not be sufficient for queries that process large volumes of data. In the data source configuration, increase the timeout value under **Additional Settings**.
 1. Narrow the time range to reduce data volume.
-1. Add filters to reduce the result set.
-1. Use partitioned tables and filter on the partition column.
-1. Add `LIMIT` clause for exploratory queries.
+1. Add partition filters. BigQuery partitioned tables perform significantly better when you filter on the partition column using `$__timeFilter`.
+1. Avoid `SELECT *` — select only the columns you need.
+1. Add a `LIMIT` clause during development and exploration.
 1. Consider pre-aggregating data for frequently-used queries.
+
+{{< admonition type="note" >}}
+Queries that process terabytes of data will likely exceed any reasonable timeout setting. In these cases, refactor the query to reduce the data scanned rather than increasing the timeout. Use partition filters, narrow the time range, or pre-aggregate data in BigQuery before querying from Grafana.
+{{< /admonition >}}
 
 ### "Query exceeded resource limits"
 
@@ -244,6 +384,20 @@ These errors occur when using template variables with the data source.
 1. Use `${variable}` syntax when the variable is adjacent to other text.
 1. Check the Query Inspector to see how variables are interpolated.
 
+### Stale variables in scheduled reports
+
+**Symptoms:**
+
+- Scheduled reports (Grafana Reporting) use outdated variable values
+- Reports always render with the same variable selection instead of refreshing dynamically
+- Variable values in the report don't match what's currently in BigQuery
+
+**Solutions:**
+
+1. Scheduled reports can cache variable values at the time the report is created. If the underlying BigQuery data changes, the report continues using the original values.
+1. To force a dynamic refresh at runtime, use the [Grafana Reporting API](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/developers/http_api/reporting/) to clear the report's saved variable configuration. Remove the `templateVars` field from the report definition so variables are evaluated fresh at each scheduled run.
+1. Alternatively, recreate the report after updating variable queries to pick up the latest values.
+
 ## Performance issues
 
 These issues relate to slow queries or high costs.
@@ -254,12 +408,16 @@ These issues relate to slow queries or high costs.
 
 - Dashboards take a long time to load
 - Queries timeout frequently
+- High bytes billed per query
 
 **Solutions:**
 
-1. Use partitioned tables and filter on partition columns with `$__timeFilter`.
-1. Select only the columns you need instead of `SELECT *`.
-1. Use appropriate aggregation intervals to reduce data points.
+1. **Use partition filters.** Always filter on the partition column using `$__timeFilter(partition_column)`. Without a partition filter, BigQuery scans the entire table regardless of the dashboard time range.
+1. **Narrow the time range.** Shorter time ranges scan less data. Use the dashboard time picker to limit the window.
+1. **Avoid `SELECT *`.** Select only the columns your visualization needs. BigQuery is columnar, so fewer columns means less data scanned.
+1. **Add `LIMIT` during development.** Use `LIMIT` when building and testing queries to reduce scan costs.
+1. **Use appropriate aggregation intervals.** Aggregate data to match the visualization granularity — there's no benefit in returning per-second data for a chart showing daily trends.
+1. **Set `Max bytes billed`.** Configure this in **Additional Settings** to prevent unexpectedly expensive queries from running.
 1. Consider using BigQuery BI Engine for frequently accessed data.
 
 ### High query costs
@@ -294,55 +452,44 @@ These issues relate to slow queries or high costs.
 The Storage API doesn't work with Forward OAuth Identity authentication.
 {{< /admonition >}}
 
-## Configuration errors
+## Grafana Cloud vs. self-hosted differences
 
-These errors occur during data source setup or provisioning.
+If you are migrating from self-hosted Grafana to Grafana Cloud, be aware of the following behavioral differences with the BigQuery plugin.
 
-### "Failed to save datasource"
+### Dataset and table browsing
 
-**Symptoms:**
+On self-hosted Grafana, the BigQuery plugin connects directly to Google Cloud APIs. On Grafana Cloud, the connection may route through [Private data source connect (PDC)](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/) if your BigQuery resources are not publicly accessible. This can affect:
 
-- Unable to save data source configuration
-- Error when clicking **Save & test**
+- The speed at which datasets and tables load in the query editor dropdowns
+- Whether all projects are visible in the project selector (ensure the service account has `resourcemanager.projects.get` on each project)
 
-**Solutions:**
+If dataset browsing works on self-hosted but not on Grafana Cloud, verify your PDC agent is running and that the service account permissions are identical between environments.
 
-1. Verify all required fields are filled in.
-1. Check that the JSON key file is valid and complete.
-1. Ensure Grafana has write permissions to its data directory.
+### Query variable substitution
 
-### Provisioning errors
+Template variable substitution behavior is consistent between self-hosted and Grafana Cloud. If you observe differences after migration, check:
 
-**Symptoms:**
+1. The plugin version matches between environments. Older plugin versions may handle multi-value variables differently.
+1. The data source configuration is identical — particularly the **Default project** and **Processing location** settings.
+1. Variable queries that rely on `$__interval` or time-range macros may produce different results if the default dashboard time range differs between environments.
 
-- Provisioned data source doesn't appear
-- Errors in Grafana logs about provisioning
+## Auditing and usage tracking
 
-**Solutions:**
+To track which Grafana users are running BigQuery queries:
 
-1. Verify YAML syntax is correct (use a YAML validator).
-1. Check that `type` is set to `grafana-bigquery-datasource`.
-1. Ensure `authenticationType` matches the credentials provided.
-1. For `privateKey` in `secureJsonData`, ensure newlines are preserved (use `|` for multiline strings in YAML).
+- **Grafana audit logging** (available in Grafana Enterprise and Grafana Cloud) can identify the user and data source associated with a query request, but does not log the specific SQL query text or which BigQuery tables were accessed. For details, refer to [Auditing](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/audit-grafana/).
+- **BigQuery audit logs** in GCP provide full query-level detail, including the SQL text, tables accessed, bytes scanned, and job metadata. Enable [Cloud Audit Logs for BigQuery](https://cloud.google.com/bigquery/docs/reference/auditlogs) to capture this information.
 
-**Example with multiline private key:**
+For complete query-level auditing, use BigQuery's audit logs. You can correlate them with Grafana audit logs by matching timestamps and the service account identity.
 
-```yaml
-apiVersion: 1
-datasources:
-  - name: BigQuery
-    type: grafana-bigquery-datasource
-    jsonData:
-      authenticationType: jwt
-      clientEmail: <SERVICE_ACCOUNT_EMAIL>
-      defaultProject: <PROJECT_ID>
-      tokenUri: https://oauth2.googleapis.com/token
-    secureJsonData:
-      privateKey: |
-        -----BEGIN PRIVATE KEY-----
-        <KEY_CONTENT>
-        -----END PRIVATE KEY-----
-```
+## BigQuery metrics in Google Cloud Monitoring
+
+If you use Google Cloud Monitoring to track BigQuery usage metrics (such as `bigquery.googleapis.com/query/count` or `bigquery.googleapis.com/query/execution_times`), be aware that GCP attributes these metrics to the project that *runs* the query job, not the project that *hosts* the data. This means:
+
+- If your Grafana service account runs jobs in Project A but queries data in Project B, the metrics appear under Project A.
+- This is standard [GCP metric attribution behavior](https://cloud.google.com/bigquery/docs/monitoring), not something controlled by the Grafana plugin.
+
+When building Cloud Monitoring dashboards for BigQuery usage, filter by the project configured as the **Default project** in the BigQuery data source settings (or the project specified in the `$__timeFilter` query), as that is where job metrics are attributed.
 
 ## Enable debug logging
 

@@ -30,10 +30,18 @@ Before configuring the data source, ensure you have:
 
 - **Grafana version:** 11.6.0 or later (plugin version 3.x). For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
 - **Grafana permissions:** `Organization administrator` role to add data sources.
-- **Google Cloud APIs enabled:** The following APIs must be enabled in your GCP project:
+- **Google Cloud APIs enabled:** The following APIs must be enabled on each GCP project you query:
   - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 - **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server.
+- **Required GCP IAM roles:** The service account (or impersonated service account) must have the following roles on each project it accesses:
+  - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`) — read access to BigQuery data
+  - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
+  - **`resourcemanager.projects.get`** permission — required for the project dropdown to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
+
+{{< admonition type="note" >}}
+If the service account has project-level access but not dataset or table-level access, **Save & test** may succeed while individual queries return 403 errors. Ensure the service account has read access to the specific datasets and tables you intend to query.
+{{< /admonition >}}
 
 {{< admonition type="note" >}}
 Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
@@ -71,7 +79,7 @@ To configure service account authentication:
    - **BigQuery Data Viewer** - Provides read access to BigQuery data
    - **BigQuery Job User** - Allows running BigQuery jobs
 1. Create and download a JSON key file for the service account.
-1. In the data source configuration, select **Google Service Account Key** as the authentication type.
+1. In the data source configuration, select **Google JWT File** as the authentication type.
 1. Upload the JSON key file or paste its contents.
 
 ### Google Metadata Server
@@ -86,16 +94,47 @@ When Grafana runs on a GCE virtual machine, it can automatically retrieve the de
 
 ### Service account impersonation
 
-Use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation) when you need to delegate access to BigQuery without distributing service account keys.
+Use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation) when you need to delegate access to BigQuery without distributing service account keys with broad permissions. With impersonation, the key stored in Grafana has minimal permissions — it can only generate short-lived tokens for a separate service account that has BigQuery access. This means the stored credentials cannot directly read data, reducing risk if they are compromised. This is the recommended secure authentication method for connecting Grafana Cloud to BigQuery.
 
-To configure service account impersonation:
+Service account impersonation involves two service accounts:
 
-1. Ensure the service account used by the plugin has the `iam.serviceAccounts.getAccessToken` permission. This permission is included in the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (`roles/iam.serviceAccountTokenCreator`).
-1. Ensure the service account being impersonated has the following roles:
-   - **BigQuery Data Viewer**
-   - **BigQuery Job User**
-1. In the data source configuration, enable **Service Account Impersonation**.
-1. Enter the email address of the service account to impersonate.
+- **Authenticating service account** — The service account whose JSON key is uploaded to Grafana. This account's only permission is to create access tokens for the impersonated account. It requires the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (`roles/iam.serviceAccountTokenCreator`).
+- **Impersonated service account** — The service account that has permissions to read data from BigQuery. Grafana assumes this account's identity to run queries. It requires the **BigQuery Data Viewer** and **BigQuery Job User** roles.
+
+#### Configure GCP permissions
+
+Before configuring the data source in Grafana, set up the required permissions in GCP. Replace `AUTH_SA`, `IMPERSONATED_SA`, and `PROJECT_ID` with your values.
+
+Grant the authenticating service account permission to create tokens for the impersonated service account:
+
+```bash
+gcloud iam service-accounts add-iam-policy-binding \
+  IMPERSONATED_SA@PROJECT_ID.iam.gserviceaccount.com \
+  --member="serviceAccount:AUTH_SA@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountTokenCreator"
+```
+
+Grant the impersonated service account BigQuery access:
+
+```bash
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:IMPERSONATED_SA@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/bigquery.dataViewer"
+
+gcloud projects add-iam-policy-binding PROJECT_ID \
+  --member="serviceAccount:IMPERSONATED_SA@PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/bigquery.jobUser"
+```
+
+#### Configure the data source in Grafana
+
+To configure service account impersonation in the data source settings:
+
+1. In the **Authentication** section, select **Google JWT File** as the authentication type.
+1. Upload the JSON key file for the **authenticating** service account.
+1. Enable **Service Account Impersonation**.
+1. Enter the full email address of the **impersonated** service account.
+1. Click **Save & test** to verify the connection.
 
 ### Workload Identity Federation
 
@@ -235,6 +274,26 @@ datasources:
       usingImpersonation: true
       serviceAccountToImpersonate: <SERVICE_ACCOUNT_EMAIL>
       defaultProject: <DEFAULT_PROJECT_ID>
+```
+
+### Service account key with service account impersonation
+
+```yaml
+apiVersion: 1
+datasources:
+  - name: BigQuery
+    type: grafana-bigquery-datasource
+    editable: true
+    enabled: true
+    jsonData:
+      authenticationType: jwt
+      clientEmail: <AUTH_SERVICE_ACCOUNT_EMAIL>
+      defaultProject: <DEFAULT_PROJECT_ID>
+      tokenUri: https://oauth2.googleapis.com/token
+      usingImpersonation: true
+      serviceAccountToImpersonate: <IMPERSONATED_SERVICE_ACCOUNT_EMAIL>
+    secureJsonData:
+      privateKey: <PRIVATE_KEY>
 ```
 
 ### Workload Identity Federation
