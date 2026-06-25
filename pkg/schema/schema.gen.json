@@ -1,0 +1,141 @@
+{
+  "targetApiVersion": "v0alpha1",
+  "settings": {
+    "spec": {
+      "type": "object",
+      "properties": {
+        "jsonData": {
+          "type": "object",
+          "required": [
+            "authenticationType"
+          ],
+          "properties": {
+            "MaxBytesBilled": {
+              "description": "Limits the bytes billed per query. Queries exceeding this limit will fail.",
+              "type": "number"
+            },
+            "authenticationType": {
+              "description": "Google Cloud authentication mechanism.",
+              "type": "string",
+              "default": "jwt",
+              "enum": [
+                "jwt",
+                "gce",
+                "forwardOAuthIdentity"
+              ]
+            },
+            "clientEmail": {
+              "description": "Service account email address for JWT authentication.",
+              "type": "string",
+              "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual'"
+            },
+            "defaultProject": {
+              "description": "Default GCP project for queries.",
+              "type": "string",
+              "x-dsconfig-depends-on": "jsonData.authenticationType != 'jwt'"
+            },
+            "enableSecureSocksProxy": {
+              "description": "Enable secure SOCKS proxy.",
+              "type": "boolean"
+            },
+            "flatRateProject": {
+              "description": "Project used for flat-rate billing reservation.",
+              "type": "string"
+            },
+            "oauthPassThru": {
+              "description": "Forward the user's OAuth token to BigQuery.",
+              "type": "boolean"
+            },
+            "privateKeyPath": {
+              "description": "Path to a local private key file on the Grafana server. Not supported in hosted environments.",
+              "type": "string",
+              "x-dsconfig-depends-on": "virtual.privateKeyMode == 'path'"
+            },
+            "processingLocation": {
+              "description": "BigQuery processing location.",
+              "type": "string",
+              "enum": [
+                "",
+                "US",
+                "EU",
+                "us-east5",
+                "us-south1",
+                "us-central1",
+                "us-west2",
+                "us-west4",
+                "northamerica-northeast1",
+                "us-east4",
+                "us-west1",
+                "us-west3",
+                "southamerica-east1",
+                "southamerica-west1",
+                "us-east1",
+                "northamerica-northeast2",
+                "europe-west1",
+                "europe-west10",
+                "europe-north1",
+                "europe-west3",
+                "europe-west2",
+                "europe-southwest1",
+                "europe-west8",
+                "europe-west4",
+                "europe-west9",
+                "europe-west12",
+                "europe-central2",
+                "europe-west6",
+                "asia-south2",
+                "asia-east2",
+                "asia-southeast2",
+                "australia-southeast2",
+                "asia-south1",
+                "asia-northeast2",
+                "asia-northeast3",
+                "asia-southeast1",
+                "australia-southeast1",
+                "asia-east1",
+                "asia-northeast1",
+                "me-central2",
+                "me-central1",
+                "me-west1"
+              ]
+            },
+            "queryPriority": {
+              "description": "BigQuery query priority.",
+              "type": "string",
+              "enum": [
+                "INTERACTIVE",
+                "BATCH"
+              ]
+            },
+            "serviceAccountToImpersonate": {
+              "description": "Email of the service account to impersonate.",
+              "type": "string",
+              "x-dsconfig-depends-on": "jsonData.authenticationType != 'forwardOAuthIdentity' \u0026\u0026 jsonData.usingImpersonation == true"
+            },
+            "serviceEndpoint": {
+              "description": "Custom BigQuery API endpoint URL.",
+              "type": "string"
+            },
+            "tokenUri": {
+              "description": "OAuth2 token endpoint URI.",
+              "type": "string",
+              "default": "https://oauth2.googleapis.com/token",
+              "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual'"
+            },
+            "usingImpersonation": {
+              "description": "Read more about service account impersonation.",
+              "type": "boolean",
+              "x-dsconfig-depends-on": "jsonData.authenticationType != 'forwardOAuthIdentity'"
+            }
+          }
+        }
+      }
+    },
+    "secureValues": [
+      {
+        "key": "privateKey",
+        "description": "Service account private key for JWT authentication."
+      }
+    ]
+  }
+}
