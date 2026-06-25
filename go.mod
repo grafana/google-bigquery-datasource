@@ -5,7 +5,7 @@ go 1.26.4
 require (
 	cloud.google.com/go v0.123.0
 	cloud.google.com/go/bigquery v1.77.0
-	github.com/grafana/dsconfig/schema v0.0.5
+	github.com/grafana/dsconfig/schema v0.0.6
 	github.com/grafana/grafana-google-sdk-go v0.4.2
 	github.com/grafana/grafana-plugin-sdk-go v0.292.1
 	github.com/grafana/sqlds/v5 v5.1.1
@@ -63,7 +63,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.16 // indirect
 	github.com/googleapis/gax-go/v2 v2.22.0 // indirect
 	github.com/grafana/dataplane/sdata v0.0.9 // indirect
-	github.com/grafana/dsconfig/dsconfig v0.0.5 // indirect
+	github.com/grafana/dsconfig/dsconfig v0.0.6 // indirect
 	github.com/grafana/otel-profiling-go v0.5.1 // indirect
 	github.com/grafana/pyroscope-go/godeltaprof v0.1.9 // indirect
 	github.com/grpc-ecosystem/go-grpc-middleware/providers/prometheus v1.1.0 // indirect
