@@ -17,7 +17,7 @@
       "validations": [
         {
           "type": "allowedValues",
-          "values": ["jwt", "gce", "forwardOAuthIdentity"]
+          "values": ["jwt", "gce", "workloadIdentityFederation", "forwardOAuthIdentity"]
         }
       ],
       "ui": {
@@ -30,6 +30,10 @@
           {
             "label": "GCE Default Service Account",
             "value": "gce"
+          },
+          {
+            "label": "Workload Identity Federation",
+            "value": "workloadIdentityFederation"
           },
           {
             "label": "Forward OAuth Identity",
@@ -49,6 +53,13 @@
           "when": "value == 'gce'",
           "set": {
             "virtual.jwtUpload": "manual",
+            "jsonData.oauthPassThru": false
+          }
+        },
+        {
+          "when": "value == 'workloadIdentityFederation'",
+          "set": {
+            "virtual.jwtUpload": "",
             "jsonData.oauthPassThru": false
           }
         },
@@ -164,6 +175,32 @@
       }
     },
     {
+      "id": "jsonData.workloadIdentityPoolProvider",
+      "key": "workloadIdentityPoolProvider",
+      "label": "Workload Identity Pool Provider",
+      "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider).",
+      "valueType": "string",
+      "target": "jsonData",
+      "dependsOn": "jsonData.authenticationType == 'workloadIdentityFederation'",
+      "ui": {
+        "component": "input",
+        "placeholder": "projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>"
+      }
+    },
+    {
+      "id": "jsonData.wifServiceAccountEmail",
+      "key": "wifServiceAccountEmail",
+      "label": "Service account email",
+      "description": "Optional. If set, the federated identity impersonates this service account when calling Google APIs.",
+      "valueType": "string",
+      "target": "jsonData",
+      "dependsOn": "jsonData.authenticationType == 'workloadIdentityFederation'",
+      "ui": {
+        "component": "input",
+        "placeholder": "name@project.iam.gserviceaccount.com"
+      }
+    },
+    {
       "id": "jsonData.defaultProjectNonJwt",
       "key": "defaultProject",
       "label": "Default Project",
@@ -188,7 +225,7 @@
       "description": "Read more about service account impersonation.",
       "valueType": "boolean",
       "target": "jsonData",
-      "dependsOn": "jsonData.authenticationType != 'forwardOAuthIdentity'",
+      "dependsOn": "jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce'",
       "ui": {
         "component": "switch"
       }
@@ -200,7 +237,7 @@
       "description": "Email of the service account to impersonate.",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "jsonData.authenticationType != 'forwardOAuthIdentity' && jsonData.usingImpersonation == true"
+      "dependsOn": "(jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce') && jsonData.usingImpersonation == true"
     },
     {
       "id": "jsonData.processingLocation",
@@ -435,17 +472,6 @@
       "description": "Project used for flat-rate billing reservation.",
       "valueType": "string",
       "target": "jsonData"
-    },
-    {
-      "id": "jsonData.enableSecureSocksProxy",
-      "key": "enableSecureSocksProxy",
-      "label": "Secure Socks Proxy",
-      "description": "Enable secure SOCKS proxy.",
-      "valueType": "boolean",
-      "target": "jsonData",
-      "ui": {
-        "component": "switch"
-      }
     }
   ],
   "groups": [
@@ -461,6 +487,8 @@
         "virtual.privateKeyMode",
         "secureJsonData.privateKey",
         "jsonData.privateKeyPath",
+        "jsonData.workloadIdentityPoolProvider",
+        "jsonData.wifServiceAccountEmail",
         "jsonData.defaultProjectNonJwt"
       ]
     },
