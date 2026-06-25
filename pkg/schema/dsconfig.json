@@ -104,7 +104,7 @@
       "description": "GCP project ID. In JWT mode, auto-filled from the service account JSON.",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "virtual.jwtUpload == 'manual'"
+      "dependsOn": "virtual.jwtUpload == 'manual' || jsonData.authenticationType != 'jwt'"
     },
     {
       "id": "jsonData.clientEmail",
@@ -199,15 +199,6 @@
         "component": "input",
         "placeholder": "name@project.iam.gserviceaccount.com"
       }
-    },
-    {
-      "id": "jsonData.defaultProjectNonJwt",
-      "key": "defaultProject",
-      "label": "Default Project",
-      "description": "Default GCP project for queries.",
-      "valueType": "string",
-      "target": "jsonData",
-      "dependsOn": "jsonData.authenticationType != 'jwt'"
     },
     {
       "id": "jsonData.datasourceId",
@@ -497,8 +488,7 @@
         "secureJsonData.privateKey",
         "jsonData.privateKeyPath",
         "jsonData.workloadIdentityPoolProvider",
-        "jsonData.wifServiceAccountEmail",
-        "jsonData.defaultProjectNonJwt"
+        "jsonData.wifServiceAccountEmail"
       ]
     },
     {

@@ -33,9 +33,9 @@
             "type": "number"
           },
           "defaultProject": {
-            "description": "Default GCP project for queries.",
+            "description": "GCP project ID. In JWT mode, auto-filled from the service account JSON.",
             "type": "string",
-            "x-dsconfig-depends-on": "jsonData.authenticationType != 'jwt'"
+            "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual' || jsonData.authenticationType != 'jwt'"
           },
           "flatRateProject": {
             "description": "Project used for flat-rate billing reservation.",
