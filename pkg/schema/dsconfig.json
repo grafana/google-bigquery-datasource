@@ -210,6 +210,15 @@
       "dependsOn": "jsonData.authenticationType != 'jwt'"
     },
     {
+      "id": "jsonData.datasourceId",
+      "key": "datasourceId",
+      "label": "Datasource ID",
+      "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
+      "valueType": "number",
+      "target": "jsonData",
+      "tags": ["internal"]
+    },
+    {
       "id": "jsonData.oauthPassThru",
       "key": "oauthPassThru",
       "label": "Forward OAuth Identity",

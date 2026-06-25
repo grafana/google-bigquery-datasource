@@ -30,6 +30,10 @@
               "type": "string",
               "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual'"
             },
+            "datasourceId": {
+              "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
+              "type": "number"
+            },
             "defaultProject": {
               "description": "Default GCP project for queries.",
               "type": "string",
