@@ -19,6 +19,7 @@
             "enum": [
               "jwt",
               "gce",
+              "workloadIdentityFederation",
               "forwardOAuthIdentity"
             ]
           },
@@ -31,10 +32,6 @@
             "description": "Default GCP project for queries.",
             "type": "string",
             "x-dsconfig-depends-on": "jsonData.authenticationType != 'jwt'"
-          },
-          "enableSecureSocksProxy": {
-            "description": "Enable secure SOCKS proxy.",
-            "type": "boolean"
           },
           "flatRateProject": {
             "description": "Project used for flat-rate billing reservation.",
@@ -108,7 +105,7 @@
           "serviceAccountToImpersonate": {
             "description": "Email of the service account to impersonate.",
             "type": "string",
-            "x-dsconfig-depends-on": "jsonData.authenticationType != 'forwardOAuthIdentity' \u0026\u0026 jsonData.usingImpersonation == true"
+            "x-dsconfig-depends-on": "(jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce') \u0026\u0026 jsonData.usingImpersonation == true"
           },
           "serviceEndpoint": {
             "description": "Custom BigQuery API endpoint URL.",
@@ -123,7 +120,17 @@
           "usingImpersonation": {
             "description": "Read more about service account impersonation.",
             "type": "boolean",
-            "x-dsconfig-depends-on": "jsonData.authenticationType != 'forwardOAuthIdentity'"
+            "x-dsconfig-depends-on": "jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce'"
+          },
+          "wifServiceAccountEmail": {
+            "description": "Optional. If set, the federated identity impersonates this service account when calling Google APIs.",
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData.authenticationType == 'workloadIdentityFederation'"
+          },
+          "workloadIdentityPoolProvider": {
+            "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider).",
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData.authenticationType == 'workloadIdentityFederation'"
           }
         }
       }

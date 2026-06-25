@@ -507,8 +507,7 @@
         "jsonData.serviceEndpoint",
         "jsonData.MaxBytesBilled",
         "jsonData.queryPriority",
-        "jsonData.flatRateProject",
-        "jsonData.enableSecureSocksProxy"
+        "jsonData.flatRateProject"
       ]
     }
   ]
