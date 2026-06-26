@@ -8,12 +8,12 @@ import {
 import { AuthConfig, GoogleAuthType } from '@grafana/google-sdk';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
-import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
+import { Checkbox, Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
 
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
 
-import { ConfigurationHelp } from './/ConfigurationHelp';
+import { ConfigurationHelp } from './ConfigurationHelp';
 import { Divider } from './Divider';
 
 export type BigQueryConfigEditorProps = DataSourcePluginOptionsEditorProps<BigQueryOptions, BigQuerySecureJsonData>;
@@ -28,6 +28,16 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       jsonData: {
         ...jsonData,
         MaxBytesBilled: Number(event.target.value),
+      },
+    });
+  };
+
+  const onUseGceForAlertingChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        useGceForAlerting: event.currentTarget.checked,
       },
     });
   };
@@ -129,6 +139,12 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             type={'number'}
             value={jsonData.MaxBytesBilled || ''}
             onChange={onMaxBytesBilledChange}
+          />
+        </Field>
+        <Field label="Use GCE for alerting" description="Use the GCE service account for alerting queries.">
+          <Checkbox
+            value={jsonData.useGceForAlerting || false}
+            onChange={onUseGceForAlertingChange}
           />
         </Field>
 

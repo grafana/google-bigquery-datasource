@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 	"sync"
 
 	bq "cloud.google.com/go/bigquery"
@@ -81,6 +82,42 @@ func newBigQueryDatasource() *BigQueryDatasource {
 	}
 }
 
+type fromAlertContextKey struct{}
+
+// MutateQueryData runs before sqlds handles the queries (sqlds.QueryDataMutator). It
+// inspects the request for Grafana's alerting marker and records the result in the
+// context, because by the time sqlds calls Connect only the forwarded HTTP headers are
+// available and the "FromAlert" marker is request metadata rather than an HTTP header.
+func (s *BigQueryDatasource) MutateQueryData(ctx context.Context, req *backend.QueryDataRequest) (context.Context, *backend.QueryDataRequest) {
+	if requestIsFromAlert(req) {
+		ctx = context.WithValue(ctx, fromAlertContextKey{}, true)
+	}
+	return ctx, req
+}
+
+// requestIsFromAlert reports whether a query request originated from Grafana alerting.
+// Grafana sets the "FromAlert" marker, which depending on the version arrives either as
+// request metadata (req.Headers) or as a forwarded HTTP header.
+func requestIsFromAlert(req *backend.QueryDataRequest) bool {
+	if req == nil {
+		return false
+	}
+	if strings.EqualFold(req.GetHTTPHeader("FromAlert"), "true") {
+		return true
+	}
+	for name, value := range req.Headers {
+		if strings.EqualFold(name, "FromAlert") && strings.EqualFold(value, "true") {
+			return true
+		}
+	}
+	return false
+}
+
+func fromAlertFromContext(ctx context.Context) bool {
+	fromAlert, _ := ctx.Value(fromAlertContextKey{}).(bool)
+	return fromAlert
+}
+
 func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSourceInstanceSettings, queryArgs json.RawMessage) (*sql.DB, error) {
 	loggerWithContext := s.logger.FromContext(ctx)
 	settings, err := loadSettings(&config)
@@ -95,9 +132,21 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 	isQueryArgsSet := args != nil
 
-	connectionSettings := getConnectionSettings(settings, args, isQueryArgsSet)
+	// When the data source forwards the user's OAuth identity, alert queries have no
+	// user token to forward. If "Use GCE for alerting" is enabled, authenticate those
+	// alert queries with the GCE service account instead of the forwarded identity.
+	useGceForAlerting := settings.OAuthPassthroughEnabled && settings.UseGceForAlerting &&
+		(fromAlertFromContext(ctx) || isFromAlert(args.Headers))
+	effectiveSettings := settings
+	if useGceForAlerting {
+		loggerWithContext.Debug("Alert query detected; using GCE authentication instead of forwarded OAuth identity")
+		effectiveSettings.AuthenticationType = "gce"
+		effectiveSettings.OAuthPassthroughEnabled = false
+	}
 
-	if settings.AuthenticationType == "gce" && connectionSettings.Project == "" {
+	connectionSettings := getConnectionSettings(effectiveSettings, args, isQueryArgsSet)
+
+	if effectiveSettings.AuthenticationType == "gce" && connectionSettings.Project == "" {
 		defaultProject, err := utils.GCEDefaultProject(context.Background(), BigQueryScope)
 		if err != nil {
 			return nil, errors.WithMessage(err, "Failed to retrieve default GCE project")
@@ -106,6 +155,11 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	}
 
 	connectionKey := fmt.Sprintf("%s/%s:%s:%t", config.UID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
+	// Cache GCE-authenticated alert connections separately so they are never reused for
+	// interactive queries that forward the OAuth identity (and vice versa).
+	if useGceForAlerting {
+		connectionKey += ":gce-alerting"
+	}
 
 	if s.getResourceManagerService(config.UID) == nil {
 		err := s.createResourceManagerService(ctx, config, settings, config.UID)
@@ -143,7 +197,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 		return db, nil
 	} else {
-		client, err := newHTTPClient(settings, opts, bigQueryRoute)
+		client, err := newHTTPClient(effectiveSettings, opts, bigQueryRoute)
 		if err != nil {
 			loggerWithContext.Warn("Failed to get http client options", "error", err)
 			return nil, err
@@ -463,6 +517,23 @@ func (s *BigQueryDatasource) getApi(ctx context.Context, project, location strin
 func getDatasourceSettings(ctx context.Context) *backend.DataSourceInstanceSettings {
 	plugin := PluginConfigFromContext(ctx)
 	return plugin.DataSourceInstanceSettings
+}
+
+// isFromAlert reports whether the query originated from Grafana alerting. Grafana
+// sets the "FromAlert" HTTP header on alert-rule evaluations, which is forwarded to
+// the plugin and surfaced here via the connection args (grafana-http-headers).
+func isFromAlert(headers map[string][]string) bool {
+	for name, values := range headers {
+		if !strings.EqualFold(name, "FromAlert") {
+			continue
+		}
+		for _, v := range values {
+			if strings.EqualFold(v, "true") {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func parseConnectionArgs(queryArgs json.RawMessage) (*ConnectionArgs, error) {
