@@ -4,6 +4,12 @@
   "pluginType": "grafana-bigquery-datasource",
   "pluginName": "Google BigQuery",
   "docURL": "https://grafana.com/grafana/plugins/grafana-bigquery-datasource/",
+  "instructions": [
+    {
+      "msg": "Supports Google JWT service account key file (jwt), GCE default service account from the metadata server (gce), Workload Identity Federation (workloadIdentityFederation, Grafana Cloud only), and Forward OAuth Identity (forwardOAuthIdentity) — ask which. But never ask for credentials themselves (service account JSON key, private key, client email). Those should be entered in the UI.",
+      "tags": ["llm"]
+    }
+  ],
   "fields": [
     {
       "id": "jsonData.authenticationType",
