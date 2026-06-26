@@ -76,7 +76,7 @@
       "id": "virtual.jwtUpload",
       "key": "jwtUpload",
       "label": "JWT token",
-      "description": "Upload or paste Google JWT token.",
+      "description": "Upload or paste a Google service account JSON key file. The file contents are parsed and the relevant fields are populated automatically.",
       "valueType": "string",
       "kind": "virtual",
       "defaultValue": "upload",
@@ -171,7 +171,7 @@
       "dependsOn": "virtual.privateKeyMode == 'path'",
       "ui": {
         "component": "input",
-        "placeholder": "File location of your private key (e.g. /etc/secrets/gce.pem)"
+        "placeholder": "File location of your private key (e.g. /etc/secrets/bigquery.pem)"
       }
     },
     {
@@ -207,12 +207,7 @@
       "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
       "valueType": "number",
       "target": "jsonData",
-      "overrides": [
-        {
-          "when": "true",
-          "readOnly": true
-        }
-      ],
+      "disabledWhen": "true",
       "tags": ["internal"]
     },
     {
@@ -222,18 +217,13 @@
       "description": "Forward the user's OAuth token to BigQuery.",
       "valueType": "boolean",
       "target": "jsonData",
-      "overrides": [
-        {
-          "when": "true",
-          "readOnly": true
-        }
-      ],
+      "disabledWhen": "true",
       "tags": ["managed-by:jsonData.authenticationType"]
     },
     {
       "id": "jsonData.usingImpersonation",
       "key": "usingImpersonation",
-      "label": "Enable",
+      "label": "Enable service account impersonation",
       "description": "Read more about service account impersonation.",
       "valueType": "boolean",
       "target": "jsonData",
@@ -511,7 +501,7 @@
     },
     {
       "id": "additional",
-      "title": "Additional Settings",
+      "title": "Additional settings",
       "optional": true,
       "fieldRefs": [
         "jsonData.processingLocation",
