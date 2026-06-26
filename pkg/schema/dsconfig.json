@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/grafana/dsconfig/refs/heads/main/dsconfig/schema.json",
+  "$schema": "https://raw.githubusercontent.com/grafana/dsconfig/dsconfig/v0.0.6/dsconfig/schema.json",
   "schemaVersion": "v1",
   "pluginType": "grafana-bigquery-datasource",
   "pluginName": "Google BigQuery",
@@ -75,8 +75,8 @@
     {
       "id": "virtual.jwtUpload",
       "key": "jwtUpload",
-      "label": "JWT Token",
-      "description": "Upload or paste a Google service account JSON key file. The file contents are parsed and the relevant fields are populated automatically.",
+      "label": "JWT token",
+      "description": "Upload or paste Google JWT token.",
       "valueType": "string",
       "kind": "virtual",
       "defaultValue": "upload",
@@ -109,7 +109,7 @@
     {
       "id": "jsonData.clientEmail",
       "key": "clientEmail",
-      "label": "Client Email",
+      "label": "Client email",
       "description": "Service account email address for JWT authentication.",
       "valueType": "string",
       "target": "jsonData",
@@ -154,7 +154,7 @@
     {
       "id": "secureJsonData.privateKey",
       "key": "privateKey",
-      "label": "Private Key",
+      "label": "Private key",
       "description": "Service account private key for JWT authentication.",
       "valueType": "string",
       "role": "auth.jwt.signingKey",
@@ -164,14 +164,14 @@
     {
       "id": "jsonData.privateKeyPath",
       "key": "privateKeyPath",
-      "label": "Private Key Path",
+      "label": "Private key path",
       "description": "Path to a local private key file on the Grafana server. Not supported in hosted environments.",
       "valueType": "string",
       "target": "jsonData",
       "dependsOn": "virtual.privateKeyMode == 'path'",
       "ui": {
         "component": "input",
-        "placeholder": "File location of your private key (e.g. /etc/secrets/bigquery.pem)"
+        "placeholder": "File location of your private key (e.g. /etc/secrets/gce.pem)"
       }
     },
     {
@@ -207,6 +207,12 @@
       "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
       "valueType": "number",
       "target": "jsonData",
+      "overrides": [
+        {
+          "when": "true",
+          "readOnly": true
+        }
+      ],
       "tags": ["internal"]
     },
     {
@@ -216,12 +222,18 @@
       "description": "Forward the user's OAuth token to BigQuery.",
       "valueType": "boolean",
       "target": "jsonData",
+      "overrides": [
+        {
+          "when": "true",
+          "readOnly": true
+        }
+      ],
       "tags": ["managed-by:jsonData.authenticationType"]
     },
     {
       "id": "jsonData.usingImpersonation",
       "key": "usingImpersonation",
-      "label": "Enable service account impersonation",
+      "label": "Enable",
       "description": "Read more about service account impersonation.",
       "valueType": "boolean",
       "target": "jsonData",
@@ -242,7 +254,7 @@
     {
       "id": "jsonData.processingLocation",
       "key": "processingLocation",
-      "label": "Processing Location",
+      "label": "Processing location",
       "description": "BigQuery processing location.",
       "valueType": "string",
       "target": "jsonData",
@@ -423,7 +435,7 @@
     {
       "id": "jsonData.serviceEndpoint",
       "key": "serviceEndpoint",
-      "label": "Service Endpoint",
+      "label": "Service endpoint",
       "description": "Custom BigQuery API endpoint URL.",
       "valueType": "string",
       "target": "jsonData",
@@ -435,7 +447,7 @@
     {
       "id": "jsonData.MaxBytesBilled",
       "key": "MaxBytesBilled",
-      "label": "Max Bytes Billed",
+      "label": "Max bytes billed",
       "description": "Limits the bytes billed per query. Queries exceeding this limit will fail.",
       "valueType": "number",
       "target": "jsonData",
@@ -499,7 +511,7 @@
     },
     {
       "id": "additional",
-      "title": "Additional settings",
+      "title": "Additional Settings",
       "optional": true,
       "fieldRefs": [
         "jsonData.processingLocation",
