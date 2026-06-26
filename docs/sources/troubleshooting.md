@@ -300,7 +300,7 @@ These errors occur when executing queries against BigQuery.
 
 **Solutions:**
 
-1. Increase the query timeout in the data source settings. The default timeout may not be sufficient for queries that process large volumes of data. In the data source configuration, increase the timeout value under **Additional Settings**.
+1. Reduce the amount of data your query scans. There is no configurable query timeout in the BigQuery data source settings — the timeout is determined by BigQuery's server-side limits and the Grafana instance's global query timeout.
 1. Narrow the time range to reduce data volume.
 1. Add partition filters. BigQuery partitioned tables perform significantly better when you filter on the partition column using `$__timeFilter`.
 1. Avoid `SELECT *` — select only the columns you need.
