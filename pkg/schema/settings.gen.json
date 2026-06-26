@@ -30,7 +30,8 @@
           },
           "datasourceId": {
             "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
-            "type": "number"
+            "type": "number",
+            "x-dsconfig-disabled-when": "true"
           },
           "defaultProject": {
             "description": "GCP project ID. In JWT mode, auto-filled from the service account JSON.",
@@ -43,7 +44,8 @@
           },
           "oauthPassThru": {
             "description": "Forward the user's OAuth token to BigQuery.",
-            "type": "boolean"
+            "type": "boolean",
+            "x-dsconfig-disabled-when": "true"
           },
           "privateKeyPath": {
             "description": "Path to a local private key file on the Grafana server. Not supported in hosted environments.",
