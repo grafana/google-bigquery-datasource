@@ -156,6 +156,100 @@ func Test_datasourceConnection(t *testing.T) {
 	})
 }
 
+func Test_isFromAlert(t *testing.T) {
+	assert.True(t, isFromAlert(map[string][]string{"FromAlert": {"true"}}))
+	// header keys arrive canonicalized via http.Header, match case-insensitively
+	assert.True(t, isFromAlert(map[string][]string{"Fromalert": {"True"}}))
+	assert.False(t, isFromAlert(map[string][]string{"FromAlert": {"false"}}))
+	assert.False(t, isFromAlert(map[string][]string{"Authorization": {"Bearer x"}}))
+	assert.False(t, isFromAlert(nil))
+}
+
+func Test_requestIsFromAlert(t *testing.T) {
+	assert.False(t, requestIsFromAlert(nil))
+	assert.False(t, requestIsFromAlert(&backend.QueryDataRequest{}))
+	// Grafana sets "FromAlert" as request metadata (not an http_-prefixed header).
+	assert.True(t, requestIsFromAlert(&backend.QueryDataRequest{Headers: map[string]string{"FromAlert": "true"}}))
+	assert.True(t, requestIsFromAlert(&backend.QueryDataRequest{Headers: map[string]string{"fromalert": "TRUE"}}))
+	assert.False(t, requestIsFromAlert(&backend.QueryDataRequest{Headers: map[string]string{"FromAlert": "false"}}))
+}
+
+func Test_MutateQueryData_propagatesAlertFlag(t *testing.T) {
+	ds := newBigQueryDatasource()
+
+	ctx, _ := ds.MutateQueryData(context.Background(), &backend.QueryDataRequest{Headers: map[string]string{"FromAlert": "true"}})
+	assert.True(t, fromAlertFromContext(ctx))
+
+	ctx, _ = ds.MutateQueryData(context.Background(), &backend.QueryDataRequest{})
+	assert.False(t, fromAlertFromContext(ctx))
+}
+
+func Test_useGceForAlerting(t *testing.T) {
+	newDS := func() *BigQueryDatasource {
+		return &BigQueryDatasource{
+			bqFactory: func(ctx context.Context, projectID string, opts ...option.ClientOption) (*bq.Client, error) {
+				return &bq.Client{Location: "test"}, nil
+			},
+			resourceManagerServices: make(map[string]*cloudresourcemanager.Service),
+			logger:                  backend.NewLoggerWith("bigquery datasource"),
+		}
+	}
+
+	// Data source forwards OAuth identity and has "Use GCE for alerting" enabled.
+	settings := backend.DataSourceInstanceSettings{
+		ID:       1,
+		UID:      "uid-1",
+		JSONData: []byte(`{"authenticationType":"forwardOAuthIdentity","oauthPassThru":true,"useGceForAlerting":true,"defaultProject":"raintank-dev"}`),
+	}
+
+	t.Run("alert query uses a dedicated GCE connection", func(t *testing.T) {
+		ds := newDS()
+		_, err := ds.Connect(context.Background(), settings, []byte(`{"grafana-http-headers":{"FromAlert":["true"]}}`))
+		assert.Nil(t, err)
+
+		_, gceConn := ds.connections.Load("uid-1/:raintank-dev:false:gce-alerting")
+		assert.True(t, gceConn, "alert query should create a :gce-alerting connection")
+		_, passthroughConn := ds.connections.Load("uid-1/:raintank-dev:false")
+		assert.False(t, passthroughConn, "alert query should not reuse the passthrough connection")
+	})
+
+	t.Run("alert flag from context routes to GCE even without forwarded headers", func(t *testing.T) {
+		ds := newDS()
+		// Simulate the sqlds flow: MutateQueryData stamps the alert flag onto the
+		// context, then Connect is called with no grafana-http-headers.
+		ctx, _ := ds.MutateQueryData(context.Background(), &backend.QueryDataRequest{Headers: map[string]string{"FromAlert": "true"}})
+		_, err := ds.Connect(ctx, settings, []byte(`{}`))
+		assert.Nil(t, err)
+
+		_, gceConn := ds.connections.Load("uid-1/:raintank-dev:false:gce-alerting")
+		assert.True(t, gceConn, "context alert flag should create a :gce-alerting connection")
+	})
+
+	t.Run("interactive query keeps the OAuth passthrough connection", func(t *testing.T) {
+		ds := newDS()
+		_, err := ds.Connect(context.Background(), settings, []byte(`{}`))
+		assert.Nil(t, err)
+
+		_, passthroughConn := ds.connections.Load("uid-1/:raintank-dev:false")
+		assert.True(t, passthroughConn, "interactive query should use the passthrough connection")
+		_, gceConn := ds.connections.Load("uid-1/:raintank-dev:false:gce-alerting")
+		assert.False(t, gceConn, "interactive query should not use the GCE alert connection")
+	})
+
+	t.Run("alert query is unaffected when the option is disabled", func(t *testing.T) {
+		ds := newDS()
+		disabled := settings
+		disabled.JSONData = []byte(`{"authenticationType":"forwardOAuthIdentity","oauthPassThru":true,"useGceForAlerting":false,"defaultProject":"raintank-dev"}`)
+		_, err := ds.Connect(context.Background(), disabled, []byte(`{"grafana-http-headers":{"FromAlert":["true"]}}`))
+		assert.Nil(t, err)
+
+		_, passthroughConn := ds.connections.Load("uid-1/:raintank-dev:false")
+		assert.True(t, passthroughConn, "with the option off, alert queries should use the passthrough connection")
+		_, gceConn := ds.connections.Load("uid-1/:raintank-dev:false:gce-alerting")
+		assert.False(t, gceConn)
+	})
+}
+
 func Test_Projects_doesNotPanicWhenResourceManagerServiceMissing(t *testing.T) {
 	origPluginConfigFromContext := PluginConfigFromContext
 	defer func() { PluginConfigFromContext = origPluginConfigFromContext }()

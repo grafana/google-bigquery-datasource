@@ -22,6 +22,7 @@ type BigQuerySettings struct {
 	UsingImpersonation          bool   `json:"usingImpersonation"`
 	ServiceAccountToImpersonate string `json:"serviceAccountToImpersonate"`
 	OAuthPassthroughEnabled     bool   `json:"oauthPassThru"`
+	UseGceForAlerting           bool   `json:"useGceForAlerting"`
 
 	// Workload Identity Federation fields (read by Grafana Cloud's auth middleware)
 	WorkloadIdentityPoolProvider string `json:"workloadIdentityPoolProvider"`
