@@ -133,6 +133,10 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 		q.MaxBytesBilled = c.cfg.MaxBytesBilled
 	}
 
+	if c.cfg.QueryPriority != "" {
+		q.Priority = bq.QueryPriority(c.cfg.QueryPriority)
+	}
+
 	// q.DefaultProjectID = c.cfg.Project // allows omitting project in table reference
 	// q.DefaultDatasetID = c.cfg.Dataset // allows omitting dataset in table reference
 
@@ -260,6 +264,10 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 
 	if c.cfg.MaxBytesBilled > 0 {
 		q.MaxBytesBilled = c.cfg.MaxBytesBilled
+	}
+
+	if c.cfg.QueryPriority != "" {
+		q.Priority = bq.QueryPriority(c.cfg.QueryPriority)
 	}
 
 	job, err := q.Run(ctx)
