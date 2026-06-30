@@ -50,6 +50,16 @@ The query editor header includes the following options:
 | **Filter/Group/Order/Preview** | Toggle sections in the Visual query editor (Builder mode only).  |
 | **Builder/Code**               | Switch between Visual query builder and SQL code editor.         |
 
+## Query with Grafana Assistant
+
+When [Grafana Assistant](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/) is available in your Grafana instance, the query editor header displays a **Query with Assistant** button. Use it to build and refine BigQuery queries with AI assistance instead of writing SQL by hand.
+
+The Assistant uses the current query and the data source connection as context. It discovers the projects, datasets, and tables available to your data source to suggest relevant queries against your data. You can then run the generated query or continue editing it in Builder or Code mode.
+
+{{< admonition type="note" >}}
+The **Query with Assistant** button only appears when Grafana Assistant is enabled for your Grafana instance. If you don't see it, Grafana Assistant isn't available in your environment.
+{{< /admonition >}}
+
 ## SQL query editor
 
 The SQL query editor provides a rich editing experience for writing BigQuery Standard SQL queries.
