@@ -9,6 +9,7 @@ keywords:
   - errors
   - authentication
   - query
+  - workload identity federation
 labels:
   products:
     - cloud
@@ -134,6 +135,31 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 1. Check that the impersonated service account email is the full email address (for example, `my-sa@my-project.iam.gserviceaccount.com`).
 
 For detailed setup instructions including `gcloud` commands, refer to [Service account impersonation](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/#service-account-impersonation).
+
+### Workload Identity Federation authentication failing
+
+**Symptoms:**
+
+- Queries fail when using Workload Identity Federation (WIF)
+- Errors mention token exchange, invalid audience, or the workload identity pool provider
+- The project, dataset, or table selectors in the query editor show load errors because the default project can't be resolved
+- Authentication works on interactive dashboards but fails for alerts, scheduled reports, or public dashboards
+
+**Solutions:**
+
+1. Confirm you're on Grafana Cloud. Workload Identity Federation is available on Grafana Cloud only, because Grafana Cloud exchanges the signed-in user's external OIDC token for a short-lived Google Cloud access token before the request reaches the plugin.
+1. Verify the **Workload Identity Pool Provider** resource path is correct and uses the format `projects/<project-number>/locations/global/workloadIdentityPools/<pool-id>/providers/<provider-id>`. Use the project **number** (a numeric ID such as `123456789`), not the project ID (such as `my-project`).
+1. Check the provider's attribute mappings in Google Cloud. The `google.subject` attribute must map to the correct claim from your identity provider (for example, `assertion.sub` — the exact mapping depends on your provider's claim format).
+1. Verify the BigQuery permissions are granted to the correct principal:
+   - **Without impersonation** — the WIF pool principal needs the **BigQuery Data Viewer** and **BigQuery Job User** roles, and the **Service account email** field must be left blank.
+   - **With impersonation** — the impersonated service account needs the **BigQuery Data Viewer** and **BigQuery Job User** roles, the WIF pool principal needs the **Service Account Token Creator** role on that service account, and the impersonated service account's full email must be entered in the **Service account email** field.
+1. Ensure your Grafana Cloud stack's SSO integration is configured against the same OIDC provider that the workload identity pool trusts. If the signed-in user's identity isn't available, Grafana Cloud can't exchange it for a Google Cloud access token.
+
+{{< admonition type="note" >}}
+Credentials from Workload Identity Federation are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
+{{< /admonition >}}
+
+For detailed setup instructions, refer to [Workload Identity Federation](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/#workload-identity-federation).
 
 ### Forward OAuth Identity not working
 
