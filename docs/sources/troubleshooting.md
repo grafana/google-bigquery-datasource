@@ -174,7 +174,7 @@ For detailed setup instructions, refer to [Workload Identity Federation](https:/
 1. Verify the OAuth scopes are configured in Grafana's OAuth settings: `https://www.googleapis.com/auth/bigquery` and `https://www.googleapis.com/auth/drive` (if querying data linked to Google Drive).
 1. Ensure users have authenticated with Google OAuth before accessing BigQuery dashboards.
 1. Check that the **Default project** is configured in the data source settings.
-1. If you updated OAuth scopes in a configuration file but the data source still fails, the Grafana database may be storing stale settings that override the file-based configuration. To fix this, open the data source settings in the Grafana UI, re-enter the correct scopes, and click **Save & test**. This clears the database override.
+1. If you updated OAuth scopes in a configuration file but the data source still fails, the Grafana database may be storing stale settings that override the file-based configuration. To fix this, open the data source settings in the Grafana UI, re-enter the correct scopes, and click **Save & test**.
 
 {{< admonition type="note" >}}
 Forward OAuth Identity doesn't support alerting or other background features that require credentials when users aren't logged in.
