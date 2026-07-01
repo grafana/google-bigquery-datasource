@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.2.1
+
+⚙️ Chore: add datasource configuration schema artifacts (`dsconfig.json`, generated settings/schema JSON) and include them in plugin build output under `dist/schema`.
+
+🐛 Fix: align dsconfig field labels/descriptions/placeholders with config editor components and mark internally managed fields (`datasourceId`, `oauthPassThru`) as read-only.
+
 ## 3.2.0
 
 🚀 Add support for [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) as a new authentication type. Available on Grafana Cloud only.
