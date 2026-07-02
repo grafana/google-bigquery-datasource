@@ -3,6 +3,7 @@ package bigquery
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-google-sdk-go/pkg/utils"
@@ -44,6 +45,7 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
 		MaxBytesBilled:     settings.MaxBytesBilled,
+		AllowedDatasets:    parseAllowedDatasets(settings.AllowedDatasets),
 	}
 
 	// We want to set the location to empty string only if query args are set
@@ -64,4 +66,17 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 	}
 
 	return connectionSettings
+}
+
+// parseAllowedDatasets splits the comma-separated allowlist from the data source
+// settings into trimmed, non-empty entries. Returns nil when the allowlist is
+// not configured.
+func parseAllowedDatasets(raw string) []string {
+	var allowed []string
+	for _, entry := range strings.Split(raw, ",") {
+		if entry = strings.TrimSpace(entry); entry != "" {
+			allowed = append(allowed, entry)
+		}
+	}
+	return allowed
 }

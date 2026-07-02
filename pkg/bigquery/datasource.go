@@ -390,7 +390,35 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 		}, nil
 	}
 
-	return apiClient.ValidateQuery(ctx, query), nil
+	response := apiClient.ValidateQuery(ctx, query)
+
+	// Surface dataset allowlist denials in the query editor. This is a
+	// convenience only; enforcement happens in the driver on every execution.
+	if dsSettings := getDatasourceSettings(ctx); response.IsValid && dsSettings != nil {
+		settings, err := loadSettings(dsSettings)
+		if err != nil {
+			return response, nil
+		}
+		if allowedDatasets := parseAllowedDatasets(settings.AllowedDatasets); len(allowedDatasets) > 0 {
+			// With GCE authentication the default project is resolved per
+			// query, so fall back to the project the editor is targeting.
+			defaultProject := settings.DefaultProject
+			if defaultProject == "" {
+				defaultProject = options.Project
+			}
+			var stats *bq.QueryStatistics
+			if response.Statistics != nil {
+				stats, _ = response.Statistics.Details.(*bq.QueryStatistics)
+			}
+			if err := driver.CheckAllowedDatasets(stats, allowedDatasets, defaultProject); err != nil {
+				response.IsValid = false
+				response.IsError = true
+				response.Error = err.Error()
+			}
+		}
+	}
+
+	return response, nil
 }
 
 // MutateQueryError marks BigQuery errors as downstream errors

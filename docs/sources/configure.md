@@ -202,6 +202,7 @@ Expand the **Additional Settings** section to configure optional settings.
 | **Processing location** | Specifies the [geographic location](https://cloud.google.com/bigquery/docs/locations) where BigQuery processes queries. Options include multi-regional locations (US, EU) and specific regions. Leave empty for automatic location selection. |
 | **Service endpoint**    | Custom network address for the BigQuery API. Use this when connecting through a private endpoint or VPC Service Controls. Example: `https://bigquery.googleapis.com/bigquery/v2/`                                                             |
 | **Max bytes billed**    | Limits the bytes billed for a query. Queries that would exceed this limit fail instead of running. Use this to prevent unexpectedly expensive queries. Example: `5242880` (5 MB).                                                             |
+| **Allowed datasets**    | Comma-separated list of datasets that queries may reference, entered as `dataset` (in the default project) or `project.dataset`. When set, every query is checked with a dry run and rejected if it references tables outside these datasets, including tables reached through views. Leave empty to allow all datasets.                                                             |
 
 ## Verify the connection
 
@@ -345,6 +346,7 @@ datasources:
       tokenUri: https://oauth2.googleapis.com/token
       processingLocation: US
       MaxBytesBilled: 5242880
+      allowedDatasets: my_dataset, other-project.analytics
       serviceEndpoint: https://bigquery.googleapis.com/bigquery/v2/
     secureJsonData:
       privateKey: <PRIVATE_KEY>
@@ -366,6 +368,7 @@ datasources:
 | `oauthPassThru`                | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`)                                   |
 | `processingLocation`           | string  | Query processing location (for example, `US`, `EU`, `us-central1`)                                |
 | `MaxBytesBilled`               | integer | Maximum bytes billed per query                                                                    |
+| `allowedDatasets`              | string  | Comma-separated list of datasets queries may reference (`dataset` or `project.dataset`)          |
 | `serviceEndpoint`              | string  | Custom BigQuery API endpoint URL                                                                  |
 | `enableSecureSocksProxy`       | boolean | Enable Secure Socks Proxy (requires Grafana configuration)                                        |
 
@@ -458,6 +461,7 @@ resource "grafana_data_source" "bigquery" {
     tokenUri           = "https://oauth2.googleapis.com/token"
     processingLocation = "US"
     MaxBytesBilled     = 5242880
+    allowedDatasets    = "my_dataset, other-project.analytics"
     serviceEndpoint    = "https://bigquery.googleapis.com/bigquery/v2/"
   })
 

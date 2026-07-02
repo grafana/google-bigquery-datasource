@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+
+🚀 Add an `Allowed datasets` data source setting. When configured, every query is checked with a dry run and rejected if it references tables outside the allowed datasets, including tables reached through views. Useful to block queries against public datasets, which IAM cannot restrict.
+
 ## 3.2.0
 
 🚀 Add support for [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) as a new authentication type. Available on Grafana Cloud only.

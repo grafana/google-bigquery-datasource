@@ -131,6 +131,24 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             onChange={onMaxBytesBilledChange}
           />
         </Field>
+        <Field
+          label="Allowed datasets"
+          description={
+            <span>
+              Restrict queries to a comma-separated list of datasets, entered as <code>dataset</code> (in the default
+              project) or <code>project.dataset</code>. When set, every query is checked with a dry run and rejected if
+              it references tables outside these datasets. Leave empty to allow all datasets.
+            </span>
+          }
+        >
+          <Input
+            className="width-30"
+            placeholder="Optional, example: my_dataset, other-project.analytics"
+            type={'string'}
+            value={jsonData.allowedDatasets || ''}
+            onChange={onUpdateDatasourceJsonDataOption(props, 'allowedDatasets')}
+          />
+        </Field>
 
         {config.secureSocksDSProxyEnabled && (
           <SecureSocksProxySettings options={options} onOptionsChange={onOptionsChange} />

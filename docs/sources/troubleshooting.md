@@ -444,6 +444,7 @@ These issues relate to slow queries or high costs.
 1. **Add `LIMIT` during development.** Use `LIMIT` when building and testing queries to reduce scan costs.
 1. **Use appropriate aggregation intervals.** Aggregate data to match the visualization granularity — there's no benefit in returning per-second data for a chart showing daily trends.
 1. **Set `Max bytes billed`.** Configure this in **Additional Settings** to prevent unexpectedly expensive queries from running.
+1. **Set `Allowed datasets`.** Configure this in **Additional Settings** to reject queries that reference tables outside a fixed list of datasets. This also blocks queries against public datasets such as `bigquery-public-data`, which IAM cannot restrict.
 1. Consider using BigQuery BI Engine for frequently accessed data.
 
 ### High query costs
