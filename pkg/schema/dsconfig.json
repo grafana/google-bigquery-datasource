@@ -1,33 +1,31 @@
 {
-  "$schema": "https://raw.githubusercontent.com/grafana/dsconfig/refs/heads/main/dsconfig/schema.json",
+  "$schema": "https://raw.githubusercontent.com/grafana/dsconfig/refs/tags/dsconfig/v0.0.10/dsconfig/schema.json",
   "schemaVersion": "v1",
   "pluginType": "grafana-bigquery-datasource",
   "pluginName": "Google BigQuery",
   "docURL": "https://grafana.com/grafana/plugins/grafana-bigquery-datasource/",
-  "instructions": [
-    {
-      "msg": "Supports Google JWT service account key file (jwt), GCE default service account from the metadata server (gce), Workload Identity Federation (workloadIdentityFederation, Grafana Cloud only), and Forward OAuth Identity (forwardOAuthIdentity) — ask which. But never ask for credentials themselves (service account JSON key, private key, client email). Those should be entered in the UI.",
-      "tags": ["llm"]
-    }
-  ],
   "fields": [
     {
-      "id": "jsonData.authenticationType",
+      "id": "jsonData_authenticationType",
       "key": "authenticationType",
       "label": "Authentication type",
-      "description": "Google Cloud authentication mechanism.",
       "valueType": "string",
       "target": "jsonData",
-      "required": true,
+      "role": "auth.discriminator",
       "defaultValue": "jwt",
       "validations": [
         {
           "type": "allowedValues",
-          "values": ["jwt", "gce", "workloadIdentityFederation", "forwardOAuthIdentity"]
+          "values": [
+            "jwt",
+            "gce",
+            "forwardOAuthIdentity",
+            "workloadIdentityFederation"
+          ]
         }
       ],
       "ui": {
-        "component": "select",
+        "component": "radio",
         "options": [
           {
             "label": "Google JWT File",
@@ -38,63 +36,33 @@
             "value": "gce"
           },
           {
-            "label": "Workload Identity Federation",
-            "value": "workloadIdentityFederation"
-          },
-          {
             "label": "Forward OAuth Identity",
             "value": "forwardOAuthIdentity"
+          },
+          {
+            "label": "Workload Identity Federation",
+            "value": "workloadIdentityFederation"
           }
         ]
       },
-      "effects": [
-        {
-          "when": "value == 'jwt'",
-          "set": {
-            "virtual.jwtUpload": "upload",
-            "jsonData.oauthPassThru": false
-          }
-        },
-        {
-          "when": "value == 'gce'",
-          "set": {
-            "virtual.jwtUpload": "manual",
-            "jsonData.oauthPassThru": false
-          }
-        },
-        {
-          "when": "value == 'workloadIdentityFederation'",
-          "set": {
-            "virtual.jwtUpload": "",
-            "jsonData.oauthPassThru": false
-          }
-        },
-        {
-          "when": "value == 'forwardOAuthIdentity'",
-          "set": {
-            "virtual.jwtUpload": "",
-            "jsonData.oauthPassThru": true
-          }
-        }
-      ]
+      "help": {
+        "title": "How to configure Google BigQuery datasource?",
+        "markdown": "##### Uploading Google Service Account key\n\nCreate a [Google Cloud Platform (GCP) Service Account](https://cloud.google.com/iam/docs/creating-managing-service-accounts) on the project you want to show data. The **BigQuery Data Viewer** role and the **Job User** role provide all the permissions that Grafana needs. The [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) has to be enabled on GCP for the data source to work.\n\n##### Using GCE Default Service Account\n\nWhen Grafana is running on a Google Compute Engine (GCE) virtual machine, it is possible for Grafana to automatically retrieve the default project id and authentication token from the metadata server. For this to work, you need to make sure that you have a service account that is setup as the default account for the virtual machine and that the service account has been given read access to the BigQuery API.\n\n**Note that, Grafana data source integrates with a single GCP project. If you need to visualize data from multiple GCP projects, create one data source per GCP project.**"
+      }
     },
     {
-      "id": "virtual.jwtUpload",
+      "id": "virtual_jwtUpload",
       "key": "jwtUpload",
-      "label": "JWT Token",
-      "description": "Upload or paste a Google service account JSON key file. The file contents are parsed and the relevant fields are populated automatically.",
+      "label": "JWT token",
+      "description": "Upload or paste a Google service-account JWT key file (.json). Its project_id, client_email, token_uri, and private_key are distributed into the JWT fields below.",
       "valueType": "string",
       "kind": "virtual",
-      "defaultValue": "upload",
-      "dependsOn": "jsonData.authenticationType == 'jwt'",
-      "storage": {
-        "type": "computed",
-        "read": "jsonData.clientEmail ? 'manual' : 'upload'"
-      },
+      "dependsOn": "jsonData_authenticationType == 'jwt'",
       "ui": {
         "component": "fileUpload",
-        "accept": [".json"],
-        "placeholder": "Paste Google JWT token here",
+        "accept": [
+          ".json"
+        ],
         "fileMapping": {
           "project_id": "jsonData.defaultProject",
           "client_email": "jsonData.clientEmail",
@@ -104,156 +72,142 @@
       }
     },
     {
-      "id": "jsonData.defaultProject",
+      "id": "jsonData_defaultProject",
       "key": "defaultProject",
-      "label": "Project ID",
-      "description": "GCP project ID. In JWT mode, auto-filled from the service account JSON.",
+      "label": "Default project",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "virtual.jwtUpload == 'manual' || jsonData.authenticationType != 'jwt'"
+      "dependsOn": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation'",
+      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
+      "ui": {
+        "component": "input"
+      }
     },
     {
-      "id": "jsonData.clientEmail",
+      "id": "jsonData_clientEmail",
       "key": "clientEmail",
-      "label": "Client Email",
-      "description": "Service account email address for JWT authentication.",
+      "label": "Client email",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "virtual.jwtUpload == 'manual'"
+      "dependsOn": "jsonData_authenticationType == 'jwt'",
+      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
+      "ui": {
+        "component": "input"
+      }
     },
     {
-      "id": "jsonData.tokenUri",
+      "id": "jsonData_tokenUri",
       "key": "tokenUri",
       "label": "Token URI",
-      "description": "OAuth2 token endpoint URI.",
       "valueType": "string",
       "target": "jsonData",
-      "defaultValue": "https://oauth2.googleapis.com/token",
-      "dependsOn": "virtual.jwtUpload == 'manual'"
-    },
-    {
-      "id": "virtual.privateKeyMode",
-      "key": "privateKeyMode",
-      "label": "Private key",
-      "valueType": "string",
-      "kind": "virtual",
-      "defaultValue": "paste",
-      "dependsOn": "virtual.jwtUpload == 'manual'",
-      "storage": {
-        "type": "computed",
-        "read": "jsonData.privateKeyPath ? 'path' : 'paste'"
-      },
+      "dependsOn": "jsonData_authenticationType == 'jwt'",
+      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
       "ui": {
-        "component": "radio",
-        "options": [
-          {
-            "label": "Paste private key",
-            "value": "paste"
-          },
-          {
-            "label": "Provide path to private key file",
-            "value": "path"
-          }
-        ]
+        "component": "input"
       }
     },
     {
-      "id": "secureJsonData.privateKey",
-      "key": "privateKey",
-      "label": "Private Key",
-      "description": "Service account private key for JWT authentication.",
-      "valueType": "string",
-      "role": "auth.jwt.signingKey",
-      "target": "secureJsonData",
-      "dependsOn": "virtual.privateKeyMode == 'paste'"
-    },
-    {
-      "id": "jsonData.privateKeyPath",
+      "id": "jsonData_privateKeyPath",
       "key": "privateKeyPath",
-      "label": "Private Key Path",
-      "description": "Path to a local private key file on the Grafana server. Not supported in hosted environments.",
+      "label": "Private key path",
+      "description": "Paste private key or provide path to private file",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "virtual.privateKeyMode == 'path'",
+      "dependsOn": "jsonData_authenticationType == 'jwt'",
       "ui": {
         "component": "input",
-        "placeholder": "File location of your private key (e.g. /etc/secrets/bigquery.pem)"
+        "placeholder": "File location of your private key (e.g. /etc/secrets/gce.pem)"
       }
     },
     {
-      "id": "jsonData.workloadIdentityPoolProvider",
-      "key": "workloadIdentityPoolProvider",
-      "label": "Workload Identity Pool Provider",
-      "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider).",
+      "id": "secureJsonData_privateKey",
+      "key": "privateKey",
+      "label": "Private key",
+      "description": "Paste private key or provide path to private file",
+      "valueType": "string",
+      "target": "secureJsonData",
+      "role": "auth.jwt.signingKey",
+      "dependsOn": "jsonData_authenticationType == 'jwt'",
+      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
+      "ui": {
+        "component": "input",
+        "placeholder": "Enter Private key"
+      }
+    },
+    {
+      "id": "jsonData_usingImpersonation",
+      "key": "usingImpersonation",
+      "label": "Enable",
+      "description": "Enable service account impersonation. Read more about service account impersonation here: https://cloud.google.com/iam/docs/service-account-impersonation",
+      "valueType": "boolean",
+      "target": "jsonData",
+      "dependsOn": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce'",
+      "defaultValue": false,
+      "ui": {
+        "component": "switch"
+      }
+    },
+    {
+      "id": "jsonData_serviceAccountToImpersonate",
+      "key": "serviceAccountToImpersonate",
+      "label": "Service account to impersonate",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "jsonData.authenticationType == 'workloadIdentityFederation'",
+      "dependsOn": "(jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce') && jsonData_usingImpersonation == true",
+      "ui": {
+        "component": "input"
+      }
+    },
+    {
+      "id": "jsonData_workloadIdentityPoolProvider",
+      "key": "workloadIdentityPoolProvider",
+      "label": "Workload Identity Pool Provider",
+      "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider)",
+      "valueType": "string",
+      "target": "jsonData",
+      "dependsOn": "jsonData_authenticationType == 'workloadIdentityFederation'",
+      "requiredWhen": "jsonData_authenticationType == 'workloadIdentityFederation'",
       "ui": {
         "component": "input",
         "placeholder": "projects/<number>/locations/global/workloadIdentityPools/<pool>/providers/<provider>"
       }
     },
     {
-      "id": "jsonData.wifServiceAccountEmail",
+      "id": "jsonData_wifServiceAccountEmail",
       "key": "wifServiceAccountEmail",
       "label": "Service account email",
       "description": "Optional. If set, the federated identity impersonates this service account when calling Google APIs.",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "jsonData.authenticationType == 'workloadIdentityFederation'",
+      "dependsOn": "jsonData_authenticationType == 'workloadIdentityFederation'",
       "ui": {
         "component": "input",
         "placeholder": "name@project.iam.gserviceaccount.com"
       }
     },
     {
-      "id": "jsonData.datasourceId",
-      "key": "datasourceId",
-      "label": "Datasource ID",
-      "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
-      "valueType": "number",
-      "target": "jsonData",
-      "tags": ["internal"]
-    },
-    {
-      "id": "jsonData.oauthPassThru",
+      "id": "jsonData_oauthPassThru",
       "key": "oauthPassThru",
-      "label": "Forward OAuth Identity",
-      "description": "Forward the user's OAuth token to BigQuery.",
+      "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written by AuthConfig.tsx:73-74 as a side-effect of the auth-type radio, not by a direct UI toggle.",
       "valueType": "boolean",
       "target": "jsonData",
-      "tags": ["managed-by:jsonData.authenticationType"]
+      "defaultValue": false,
+      "tags": [
+        "editor-managed"
+      ]
     },
     {
-      "id": "jsonData.usingImpersonation",
-      "key": "usingImpersonation",
-      "label": "Enable service account impersonation",
-      "description": "Read more about service account impersonation.",
-      "valueType": "boolean",
-      "target": "jsonData",
-      "dependsOn": "jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce'",
-      "ui": {
-        "component": "switch"
-      }
-    },
-    {
-      "id": "jsonData.serviceAccountToImpersonate",
-      "key": "serviceAccountToImpersonate",
-      "label": "Service account to impersonate",
-      "description": "Email of the service account to impersonate.",
-      "valueType": "string",
-      "target": "jsonData",
-      "dependsOn": "(jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce') && jsonData.usingImpersonation == true"
-    },
-    {
-      "id": "jsonData.processingLocation",
+      "id": "jsonData_processingLocation",
       "key": "processingLocation",
-      "label": "Processing Location",
-      "description": "BigQuery processing location.",
+      "label": "Processing location",
+      "description": "Read more about processing location here: https://cloud.google.com/bigquery/docs/locations",
       "valueType": "string",
       "target": "jsonData",
+      "defaultValue": "",
       "ui": {
         "component": "select",
+        "placeholder": "Automatic location selection",
         "options": [
           {
             "label": "Automatic location selection",
@@ -427,22 +381,23 @@
       }
     },
     {
-      "id": "jsonData.serviceEndpoint",
+      "id": "jsonData_serviceEndpoint",
       "key": "serviceEndpoint",
-      "label": "Service Endpoint",
-      "description": "Custom BigQuery API endpoint URL.",
+      "label": "Service endpoint",
+      "description": "Specifies the network address of an API service. Read more about service endpoint here: https://cloud.google.com/bigquery/docs/reference/rest#service-endpoint",
       "valueType": "string",
       "target": "jsonData",
+      "role": "endpoint.baseUrl",
       "ui": {
         "component": "input",
         "placeholder": "Optional, example https://bigquery.googleapis.com/bigquery/v2/"
       }
     },
     {
-      "id": "jsonData.MaxBytesBilled",
+      "id": "jsonData_MaxBytesBilled",
       "key": "MaxBytesBilled",
-      "label": "Max Bytes Billed",
-      "description": "Limits the bytes billed per query. Queries exceeding this limit will fail.",
+      "label": "Max bytes billed",
+      "description": "Prevent queries that would process more than this amount of bytes. Read more about max bytes billed here: https://cloud.google.com/bigquery/docs/best-practices-costs",
       "valueType": "number",
       "target": "jsonData",
       "ui": {
@@ -451,68 +406,147 @@
       }
     },
     {
-      "id": "jsonData.queryPriority",
-      "key": "queryPriority",
-      "label": "Query Priority",
-      "description": "BigQuery query priority.",
+      "id": "jsonData_flatRateProject",
+      "key": "flatRateProject",
+      "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:13) but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
       "valueType": "string",
       "target": "jsonData",
-      "ui": {
-        "component": "select",
-        "options": [
-          {
-            "label": "Interactive",
-            "value": "INTERACTIVE"
-          },
-          {
-            "label": "Batch",
-            "value": "BATCH"
-          }
-        ]
-      }
+      "tags": [
+        "backend-only",
+        "unused"
+      ]
     },
     {
-      "id": "jsonData.flatRateProject",
-      "key": "flatRateProject",
-      "label": "Flat Rate Project",
-      "description": "Project used for flat-rate billing reservation.",
+      "id": "jsonData_queryPriority",
+      "key": "queryPriority",
+      "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:15) as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries at src/types.ts:107 but that is a separate storage location).",
       "valueType": "string",
-      "target": "jsonData"
+      "target": "jsonData",
+      "validations": [
+        {
+          "type": "allowedValues",
+          "values": [
+            "INTERACTIVE",
+            "BATCH"
+          ]
+        }
+      ],
+      "tags": [
+        "backend-only",
+        "unused"
+      ]
     }
   ],
   "groups": [
     {
-      "id": "auth",
+      "id": "authentication",
       "title": "Authentication",
+      "order": 1,
       "fieldRefs": [
-        "jsonData.authenticationType",
-        "virtual.jwtUpload",
-        "jsonData.defaultProject",
-        "jsonData.clientEmail",
-        "jsonData.tokenUri",
-        "virtual.privateKeyMode",
-        "secureJsonData.privateKey",
-        "jsonData.privateKeyPath",
-        "jsonData.workloadIdentityPoolProvider",
-        "jsonData.wifServiceAccountEmail"
+        "jsonData_authenticationType",
+        "virtual_jwtUpload",
+        "jsonData_defaultProject",
+        "jsonData_clientEmail",
+        "jsonData_tokenUri",
+        "jsonData_privateKeyPath",
+        "secureJsonData_privateKey",
+        "jsonData_usingImpersonation",
+        "jsonData_serviceAccountToImpersonate",
+        "jsonData_workloadIdentityPoolProvider",
+        "jsonData_wifServiceAccountEmail"
       ]
     },
     {
-      "id": "impersonation",
-      "title": "Service account impersonation",
-      "optional": true,
-      "fieldRefs": ["jsonData.usingImpersonation", "jsonData.serviceAccountToImpersonate"]
-    },
-    {
-      "id": "additional",
-      "title": "Additional settings",
+      "id": "additional-settings",
+      "title": "Additional Settings",
+      "order": 2,
       "optional": true,
       "fieldRefs": [
-        "jsonData.processingLocation",
-        "jsonData.serviceEndpoint",
-        "jsonData.MaxBytesBilled",
-        "jsonData.queryPriority",
-        "jsonData.flatRateProject"
+        "jsonData_processingLocation",
+        "jsonData_serviceEndpoint",
+        "jsonData_MaxBytesBilled"
+      ]
+    }
+  ],
+  "relationships": [
+    {
+      "type": "group",
+      "fields": [
+        "jsonData_defaultProject",
+        "jsonData_clientEmail",
+        "jsonData_tokenUri",
+        "jsonData_privateKeyPath",
+        "secureJsonData_privateKey"
+      ],
+      "description": "Google JWT File credentials — required as a set for jwt auth"
+    },
+    {
+      "type": "group",
+      "fields": [
+        "jsonData_privateKeyPath",
+        "secureJsonData_privateKey"
+      ],
+      "description": "Alternative sources for the JWT private key: either supply the key inline as a secret (privateKey) or point at a file path on the Grafana server (privateKeyPath). Exactly one of the two must be configured for jwt auth."
+    },
+    {
+      "type": "group",
+      "fields": [
+        "jsonData_usingImpersonation",
+        "jsonData_serviceAccountToImpersonate"
+      ],
+      "description": "Service account impersonation: setting serviceAccountToImpersonate is only effective when usingImpersonation is true (pkg/bigquery/http_client.go:53-58,73-88)"
+    },
+    {
+      "type": "group",
+      "fields": [
+        "jsonData_workloadIdentityPoolProvider",
+        "jsonData_wifServiceAccountEmail"
+      ],
+      "description": "Workload Identity Federation credentials — workloadIdentityPoolProvider is required for WIF auth; wifServiceAccountEmail is optional impersonation"
+    }
+  ],
+  "instructions": [
+    {
+      "msg": "Four authentication methods are available, selected via jsonData.authenticationType: 'jwt' (Google JWT File, the default), 'gce' (GCE Default Service Account, only works when Grafana runs on a Google Compute Engine VM), 'forwardOAuthIdentity' (Forward the caller's OAuth token to BigQuery), and 'workloadIdentityFederation' (only visible in Grafana Cloud, but the backend accepts it anywhere). Configure exactly one method; the backend switches on this discriminator (pkg/bigquery/http_client.go:51-89) and only the credentials of the selected method are used.",
+      "tags": [
+        "llm",
+        "auth"
+      ]
+    },
+    {
+      "msg": "To configure Google JWT File authentication, set jsonData.authenticationType to 'jwt' and provide jsonData.defaultProject, jsonData.clientEmail, jsonData.tokenUri, and the service account's private key. The private key may be supplied inline as secureJsonData.privateKey OR by pointing jsonData.privateKeyPath at a file on the Grafana server. Minimal inline payload: {\"jsonData\":{\"authenticationType\":\"jwt\",\"defaultProject\":\"<project>\",\"clientEmail\":\"<sa email>\",\"tokenUri\":\"https://oauth2.googleapis.com/token\"},\"secureJsonData\":{\"privateKey\":\"-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----\\n\"}}. Grant the service account the 'BigQuery Data Viewer' and 'Job User' roles on the project, and enable the BigQuery API.",
+      "tags": [
+        "llm",
+        "auth"
+      ]
+    },
+    {
+      "msg": "To configure GCE Default Service Account authentication, set jsonData.authenticationType to 'gce'. Minimal payload: {\"jsonData\":{\"authenticationType\":\"gce\",\"defaultProject\":\"<project>\"}}. The backend obtains credentials from the GCE metadata server; this only works when Grafana runs on a Google Compute Engine VM whose default service account has been granted the required BigQuery permissions.",
+      "tags": [
+        "llm",
+        "auth"
+      ]
+    },
+    {
+      "msg": "To configure Workload Identity Federation authentication, set jsonData.authenticationType to 'workloadIdentityFederation' and provide jsonData.workloadIdentityPoolProvider (mandatory; missing it makes the backend fail at pkg/bigquery/http_client.go:95). Optionally set jsonData.wifServiceAccountEmail to have the federated identity impersonate a specific service account. To configure Forward OAuth Identity, set jsonData.authenticationType to 'forwardOAuthIdentity' — no additional fields are required; the backend forwards the caller's OAuth token (jsonData.oauthPassThru is set to true as a side-effect and enables http_client.ForwardHTTPHeaders).",
+      "tags": [
+        "llm",
+        "auth"
+      ]
+    },
+    {
+      "msg": "secureJsonData values (privateKey) are write-only: they can be set or reset but never read back. To check whether the private key is already configured on an existing datasource, read secureJsonFields.privateKey (true/false) instead of secureJsonData.privateKey.",
+      "tags": [
+        "llm",
+        "auth",
+        "secure"
+      ]
+    },
+    {
+      "msg": "Optional query behaviour: jsonData.processingLocation restricts BigQuery job processing to a specific region (empty string = automatic selection; see https://cloud.google.com/bigquery/docs/locations for the list). jsonData.serviceEndpoint overrides the default https://bigquery.googleapis.com/bigquery/v2/ URL (for private-service-connect / regional endpoints). jsonData.MaxBytesBilled caps the bytes any query may bill (integer bytes, e.g. 5242880 = 5 MB). Two fields are declared in the backend Settings struct but not read at runtime: jsonData.flatRateProject and jsonData.queryPriority — do not populate them for new datasources.",
+      "tags": [
+        "llm",
+        "settings"
       ]
     }
   ]

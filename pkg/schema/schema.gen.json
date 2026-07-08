@@ -6,57 +6,49 @@
       "properties": {
         "jsonData": {
           "type": "object",
-          "required": [
-            "authenticationType"
-          ],
           "properties": {
             "MaxBytesBilled": {
-              "description": "Limits the bytes billed per query. Queries exceeding this limit will fail.",
+              "description": "Prevent queries that would process more than this amount of bytes. Read more about max bytes billed here: https://cloud.google.com/bigquery/docs/best-practices-costs",
               "type": "number"
             },
             "authenticationType": {
-              "description": "Google Cloud authentication mechanism.",
               "type": "string",
               "default": "jwt",
               "enum": [
                 "jwt",
                 "gce",
-                "workloadIdentityFederation",
-                "forwardOAuthIdentity"
+                "forwardOAuthIdentity",
+                "workloadIdentityFederation"
               ]
             },
             "clientEmail": {
-              "description": "Service account email address for JWT authentication.",
               "type": "string",
-              "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual'"
-            },
-            "datasourceId": {
-              "description": "Internal Grafana datasource identifier. Managed by Grafana and not user-configurable.",
-              "type": "number",
-              "x-dsconfig-disabled-when": "true"
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
+              "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
             },
             "defaultProject": {
-              "description": "GCP project ID. In JWT mode, auto-filled from the service account JSON.",
               "type": "string",
-              "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual' || jsonData.authenticationType != 'jwt'"
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation'",
+              "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
             },
             "flatRateProject": {
-              "description": "Project used for flat-rate billing reservation.",
+              "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:13) but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
               "type": "string"
             },
             "oauthPassThru": {
-              "description": "Forward the user's OAuth token to BigQuery.",
+              "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written by AuthConfig.tsx:73-74 as a side-effect of the auth-type radio, not by a direct UI toggle.",
               "type": "boolean",
-              "x-dsconfig-disabled-when": "true"
+              "default": false
             },
             "privateKeyPath": {
-              "description": "Path to a local private key file on the Grafana server. Not supported in hosted environments.",
+              "description": "Paste private key or provide path to private file",
               "type": "string",
-              "x-dsconfig-depends-on": "virtual.privateKeyMode == 'path'"
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'"
             },
             "processingLocation": {
-              "description": "BigQuery processing location.",
+              "description": "Read more about processing location here: https://cloud.google.com/bigquery/docs/locations",
               "type": "string",
+              "default": "",
               "enum": [
                 "",
                 "US",
@@ -103,7 +95,7 @@
               ]
             },
             "queryPriority": {
-              "description": "BigQuery query priority.",
+              "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:15) as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries at src/types.ts:107 but that is a separate storage location).",
               "type": "string",
               "enum": [
                 "INTERACTIVE",
@@ -111,34 +103,34 @@
               ]
             },
             "serviceAccountToImpersonate": {
-              "description": "Email of the service account to impersonate.",
               "type": "string",
-              "x-dsconfig-depends-on": "(jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce') \u0026\u0026 jsonData.usingImpersonation == true"
+              "x-dsconfig-depends-on": "(jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce') \u0026\u0026 jsonData_usingImpersonation == true"
             },
             "serviceEndpoint": {
-              "description": "Custom BigQuery API endpoint URL.",
+              "description": "Specifies the network address of an API service. Read more about service endpoint here: https://cloud.google.com/bigquery/docs/reference/rest#service-endpoint",
               "type": "string"
             },
             "tokenUri": {
-              "description": "OAuth2 token endpoint URI.",
               "type": "string",
-              "default": "https://oauth2.googleapis.com/token",
-              "x-dsconfig-depends-on": "virtual.jwtUpload == 'manual'"
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
+              "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
             },
             "usingImpersonation": {
-              "description": "Read more about service account impersonation.",
+              "description": "Enable service account impersonation. Read more about service account impersonation here: https://cloud.google.com/iam/docs/service-account-impersonation",
               "type": "boolean",
-              "x-dsconfig-depends-on": "jsonData.authenticationType == 'jwt' || jsonData.authenticationType == 'gce'"
+              "default": false,
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce'"
             },
             "wifServiceAccountEmail": {
               "description": "Optional. If set, the federated identity impersonates this service account when calling Google APIs.",
               "type": "string",
-              "x-dsconfig-depends-on": "jsonData.authenticationType == 'workloadIdentityFederation'"
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'workloadIdentityFederation'"
             },
             "workloadIdentityPoolProvider": {
-              "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider).",
+              "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider)",
               "type": "string",
-              "x-dsconfig-depends-on": "jsonData.authenticationType == 'workloadIdentityFederation'"
+              "x-dsconfig-depends-on": "jsonData_authenticationType == 'workloadIdentityFederation'",
+              "x-dsconfig-required-when": "jsonData_authenticationType == 'workloadIdentityFederation'"
             }
           }
         }
@@ -147,7 +139,7 @@
     "secureValues": [
       {
         "key": "privateKey",
-        "description": "Service account private key for JWT authentication."
+        "description": "Paste private key or provide path to private file"
       }
     ]
   }

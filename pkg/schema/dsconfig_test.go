@@ -14,7 +14,7 @@ var configSchemaJSON []byte
 //go:generate go test -run TestPlugin -generateArtifacts
 func TestPlugin(t *testing.T) {
 	schema.RunPluginTests(t, schema.PluginUnderTest{
-		ID:                "grafana-bigquery-datasource",
+		ID:                types.PluginID,
 		ConfigSchemaJSON:  configSchemaJSON,
 		SettingsJSONModel: types.BigQuerySettings{},
 		SecureKeys:        []string{"privateKey"},

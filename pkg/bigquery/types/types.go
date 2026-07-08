@@ -6,8 +6,10 @@ import (
 	bq "cloud.google.com/go/bigquery"
 )
 
+const PluginID = "grafana-bigquery-datasource"
+
 type BigQuerySettings struct {
-	DatasourceId                int64  `json:"datasourceId"`
+	DatasourceId                int64
 	ClientEmail                 string `json:"clientEmail"`
 	DefaultProject              string `json:"defaultProject"`
 	FlatRateProject             string `json:"flatRateProject"`
