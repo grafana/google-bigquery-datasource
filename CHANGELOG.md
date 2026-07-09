@@ -2,7 +2,7 @@
 
 ## 3.3.0
 
-🚀 Add an `Allowed datasets` data source setting. When configured, every query is checked with a dry run and rejected if it references tables outside the allowed datasets, including tables reached through views. Useful to block queries against public datasets, which IAM cannot restrict.
+🚀 Add a `Restrict to accessible datasets` data source setting. When enabled, every query is checked with a dry run and rejected if it references tables outside the projects the data source has access to, including tables reached through views. An additional allowlist covers public or shared datasets you still want to permit. Useful to block queries against public datasets, which IAM cannot restrict.
 
 ## 3.2.0
 

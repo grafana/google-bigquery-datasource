@@ -8,7 +8,7 @@ import {
 import { AuthConfig, GoogleAuthType } from '@grafana/google-sdk';
 import { ConfigSection, DataSourceDescription } from '@grafana/plugin-ui';
 import { config } from '@grafana/runtime';
-import { Combobox, Field, Input, SecureSocksProxySettings } from '@grafana/ui';
+import { Combobox, Field, Input, SecureSocksProxySettings, Switch } from '@grafana/ui';
 
 import { PROCESSING_LOCATIONS } from '../constants';
 import { BigQueryOptions, BigQuerySecureJsonData, bigQueryAuthTypes } from '../types';
@@ -28,6 +28,16 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
       jsonData: {
         ...jsonData,
         MaxBytesBilled: Number(event.target.value),
+      },
+    });
+  };
+
+  const onRestrictToAccessibleDatasetsChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onOptionsChange({
+      ...options,
+      jsonData: {
+        ...jsonData,
+        restrictToAccessibleDatasets: event.target.checked,
       },
     });
   };
@@ -132,23 +142,34 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           />
         </Field>
         <Field
-          label="Allowed datasets"
-          description={
-            <span>
-              Restrict queries to a comma-separated list of datasets, entered as <code>dataset</code> (in the default
-              project) or <code>project.dataset</code>. When set, every query is checked with a dry run and rejected if
-              it references tables outside these datasets. Leave empty to allow all datasets.
-            </span>
-          }
+          label="Restrict to accessible datasets"
+          description="Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes."
         >
-          <Input
-            className="width-30"
-            placeholder="Optional, example: my_dataset, other-project.analytics"
-            type={'string'}
-            value={jsonData.allowedDatasets || ''}
-            onChange={onUpdateDatasourceJsonDataOption(props, 'allowedDatasets')}
+          <Switch
+            value={jsonData.restrictToAccessibleDatasets || false}
+            onChange={onRestrictToAccessibleDatasetsChange}
           />
         </Field>
+        {jsonData.restrictToAccessibleDatasets && (
+          <Field
+            label="Additional allowed datasets"
+            description={
+              <span>
+                Comma-separated list of datasets outside the accessible projects that queries may also reference,
+                entered as <code>project.dataset</code> or <code>dataset</code> (in the default project). Use this for
+                public or shared datasets you want to allow.
+              </span>
+            }
+          >
+            <Input
+              className="width-30"
+              placeholder="Optional, example: bigquery-public-data.samples"
+              type={'string'}
+              value={jsonData.additionalAllowedDatasets || ''}
+              onChange={onUpdateDatasourceJsonDataOption(props, 'additionalAllowedDatasets')}
+            />
+          </Field>
+        )}
 
         {config.secureSocksDSProxyEnabled && (
           <SecureSocksProxySettings options={options} onOptionsChange={onOptionsChange} />

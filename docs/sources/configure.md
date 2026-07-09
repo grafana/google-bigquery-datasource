@@ -202,7 +202,8 @@ Expand the **Additional Settings** section to configure optional settings.
 | **Processing location** | Specifies the [geographic location](https://cloud.google.com/bigquery/docs/locations) where BigQuery processes queries. Options include multi-regional locations (US, EU) and specific regions. Leave empty for automatic location selection. |
 | **Service endpoint**    | Custom network address for the BigQuery API. Use this when connecting through a private endpoint or VPC Service Controls. Example: `https://bigquery.googleapis.com/bigquery/v2/`                                                             |
 | **Max bytes billed**    | Limits the bytes billed for a query. Queries that would exceed this limit fail instead of running. Use this to prevent unexpectedly expensive queries. Example: `5242880` (5 MB).                                                             |
-| **Allowed datasets**    | Comma-separated list of datasets that queries may reference, entered as `dataset` (in the default project) or `project.dataset`. When set, every query is checked with a dry run and rejected if it references tables outside these datasets, including tables reached through views. Leave empty to allow all datasets.                                                             |
+| **Restrict to accessible datasets** | Rejects queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes, so tables reached through views are covered. Use IAM to control access within your own projects.                                                             |
+| **Additional allowed datasets**    | Only shown when the restriction is enabled. Comma-separated list of datasets outside the accessible projects that queries may also reference, entered as `project.dataset` or `dataset` (in the default project). Use this for public or shared datasets you want to allow. Example: `bigquery-public-data.samples`                                                             |
 
 ## Verify the connection
 
@@ -346,7 +347,8 @@ datasources:
       tokenUri: https://oauth2.googleapis.com/token
       processingLocation: US
       MaxBytesBilled: 5242880
-      allowedDatasets: my_dataset, other-project.analytics
+      restrictToAccessibleDatasets: true
+      additionalAllowedDatasets: bigquery-public-data.samples
       serviceEndpoint: https://bigquery.googleapis.com/bigquery/v2/
     secureJsonData:
       privateKey: <PRIVATE_KEY>
@@ -368,7 +370,8 @@ datasources:
 | `oauthPassThru`                | boolean | Enable OAuth pass-through (required for `forwardOAuthIdentity`)                                   |
 | `processingLocation`           | string  | Query processing location (for example, `US`, `EU`, `us-central1`)                                |
 | `MaxBytesBilled`               | integer | Maximum bytes billed per query                                                                    |
-| `allowedDatasets`              | string  | Comma-separated list of datasets queries may reference (`dataset` or `project.dataset`)          |
+| `restrictToAccessibleDatasets` | boolean | Reject queries referencing tables outside the projects the data source has access to             |
+| `additionalAllowedDatasets`    | string  | Comma-separated list of extra datasets to allow (`project.dataset` or `dataset`)                 |
 | `serviceEndpoint`              | string  | Custom BigQuery API endpoint URL                                                                  |
 | `enableSecureSocksProxy`       | boolean | Enable Secure Socks Proxy (requires Grafana configuration)                                        |
 
@@ -460,9 +463,10 @@ resource "grafana_data_source" "bigquery" {
     defaultProject     = "<DEFAULT_PROJECT_ID>"
     tokenUri           = "https://oauth2.googleapis.com/token"
     processingLocation = "US"
-    MaxBytesBilled     = 5242880
-    allowedDatasets    = "my_dataset, other-project.analytics"
-    serviceEndpoint    = "https://bigquery.googleapis.com/bigquery/v2/"
+    MaxBytesBilled               = 5242880
+    restrictToAccessibleDatasets = true
+    additionalAllowedDatasets    = "bigquery-public-data.samples"
+    serviceEndpoint              = "https://bigquery.googleapis.com/bigquery/v2/"
   })
 
   secure_json_data_encoded = jsonencode({

@@ -9,108 +9,144 @@ import (
 
 func TestCheckAllowedDatasets(t *testing.T) {
 	tests := []struct {
-		name            string
-		stats           *bq.QueryStatistics
-		allowedDatasets []string
-		defaultProject  string
-		wantErr         string
+		name               string
+		stats              *bq.QueryStatistics
+		accessibleProjects []string
+		additionalDatasets []string
+		defaultProject     string
+		wantErr            string
 	}{
 		{
-			name:            "no allowlist configured allows everything",
-			stats:           nil,
-			allowedDatasets: nil,
+			name:               "missing statistics fail closed",
+			stats:              nil,
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
+			wantErr:            "could not determine the tables referenced by the query",
 		},
 		{
-			name:            "missing statistics fail closed",
-			stats:           nil,
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         "could not determine the tables referenced by the query",
+			name:               "query without table references is allowed",
+			stats:              &bq.QueryStatistics{StatementType: "SELECT"},
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
 		},
 		{
-			name:            "query without table references is allowed",
-			stats:           &bq.QueryStatistics{StatementType: "SELECT"},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
+			name:               "scripts are rejected",
+			stats:              &bq.QueryStatistics{StatementType: "SCRIPT"},
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
+			wantErr:            "multi-statement scripts",
 		},
 		{
-			name:            "scripts are rejected",
-			stats:           &bq.QueryStatistics{StatementType: "SCRIPT"},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         "multi-statement scripts",
+			name:               "execute immediate is rejected",
+			stats:              &bq.QueryStatistics{StatementType: "EXECUTE_IMMEDIATE"},
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
+			wantErr:            "multi-statement scripts",
 		},
 		{
-			name:            "execute immediate is rejected",
-			stats:           &bq.QueryStatistics{StatementType: "EXECUTE_IMMEDIATE"},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         "multi-statement scripts",
+			name:               "procedure calls are rejected",
+			stats:              &bq.QueryStatistics{StatementType: "CALL"},
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
+			wantErr:            "multi-statement scripts",
 		},
 		{
-			name:            "procedure calls are rejected",
-			stats:           &bq.QueryStatistics{StatementType: "CALL"},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         "multi-statement scripts",
-		},
-		{
-			name: "table in fully qualified entry is allowed",
+			name: "table in an accessible project is allowed",
 			stats: &bq.QueryStatistics{
 				StatementType: "SELECT",
 				ReferencedTables: []*bq.Table{
-					{ProjectID: "otherproject", DatasetID: "analytics", TableID: "events"},
+					{ProjectID: "myproject", DatasetID: "sales", TableID: "orders"},
 				},
 			},
-			allowedDatasets: []string{"otherproject.analytics"},
-			defaultProject:  "myproject",
+			accessibleProjects: []string{"myproject", "otherproject"},
+			defaultProject:     "myproject",
 		},
 		{
-			name: "table outside the allowlist is rejected",
+			name: "table outside accessible projects is rejected",
 			stats: &bq.QueryStatistics{
 				StatementType: "SELECT",
 				ReferencedTables: []*bq.Table{
 					{ProjectID: "bigquery-public-data", DatasetID: "crypto_bitcoin", TableID: "transactions"},
 				},
 			},
-			allowedDatasets: []string{"myproject.mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         `"bigquery-public-data.crypto_bitcoin.transactions"`,
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
+			wantErr:            `"bigquery-public-data.crypto_bitcoin.transactions"`,
 		},
 		{
-			name: "bare entry is qualified with the default project",
+			name: "additional dataset entry allows a foreign table",
 			stats: &bq.QueryStatistics{
 				StatementType: "SELECT",
 				ReferencedTables: []*bq.Table{
-					{ProjectID: "myproject", DatasetID: "mydataset", TableID: "orders"},
+					{ProjectID: "bigquery-public-data", DatasetID: "samples", TableID: "shakespeare"},
 				},
 			},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
+			accessibleProjects: []string{"myproject"},
+			additionalDatasets: []string{"bigquery-public-data.samples"},
+			defaultProject:     "myproject",
 		},
 		{
-			name: "bare entry does not match the same dataset in another project",
+			name: "additional dataset entry only covers its own dataset",
 			stats: &bq.QueryStatistics{
 				StatementType: "SELECT",
 				ReferencedTables: []*bq.Table{
-					{ProjectID: "otherproject", DatasetID: "mydataset", TableID: "orders"},
+					{ProjectID: "bigquery-public-data", DatasetID: "crypto_bitcoin", TableID: "transactions"},
 				},
 			},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         `"otherproject.mydataset.orders"`,
+			accessibleProjects: []string{"myproject"},
+			additionalDatasets: []string{"bigquery-public-data.samples"},
+			defaultProject:     "myproject",
+			wantErr:            `"bigquery-public-data.crypto_bitcoin.transactions"`,
 		},
 		{
-			name: "multiple entries with mixed references",
+			name: "bare additional entry is qualified with the default project",
 			stats: &bq.QueryStatistics{
 				StatementType: "SELECT",
 				ReferencedTables: []*bq.Table{
 					{ProjectID: "myproject", DatasetID: "sales", TableID: "orders"},
-					{ProjectID: "otherproject", DatasetID: "analytics", TableID: "events"},
 				},
 			},
-			allowedDatasets: []string{"sales", "otherproject.analytics"},
-			defaultProject:  "myproject",
+			accessibleProjects: nil,
+			additionalDatasets: []string{"sales"},
+			defaultProject:     "myproject",
+		},
+		{
+			name: "bare additional entry does not match the same dataset in another project",
+			stats: &bq.QueryStatistics{
+				StatementType: "SELECT",
+				ReferencedTables: []*bq.Table{
+					{ProjectID: "otherproject", DatasetID: "sales", TableID: "orders"},
+				},
+			},
+			accessibleProjects: nil,
+			additionalDatasets: []string{"sales"},
+			defaultProject:     "myproject",
+			wantErr:            `"otherproject.sales.orders"`,
+		},
+		{
+			name: "no accessible projects and no additional datasets rejects everything",
+			stats: &bq.QueryStatistics{
+				StatementType: "SELECT",
+				ReferencedTables: []*bq.Table{
+					{ProjectID: "myproject", DatasetID: "sales", TableID: "orders"},
+				},
+			},
+			accessibleProjects: nil,
+			defaultProject:     "myproject",
+			wantErr:            `"myproject.sales.orders"`,
+		},
+		{
+			name: "mixed references across accessible project and additional dataset",
+			stats: &bq.QueryStatistics{
+				StatementType: "SELECT",
+				ReferencedTables: []*bq.Table{
+					{ProjectID: "myproject", DatasetID: "sales", TableID: "orders"},
+					{ProjectID: "bigquery-public-data", DatasetID: "samples", TableID: "shakespeare"},
+				},
+			},
+			accessibleProjects: []string{"myproject"},
+			additionalDatasets: []string{"bigquery-public-data.samples"},
+			defaultProject:     "myproject",
 		},
 		{
 			name: "matching is case-sensitive",
@@ -120,9 +156,10 @@ func TestCheckAllowedDatasets(t *testing.T) {
 					{ProjectID: "myproject", DatasetID: "mydataset", TableID: "orders"},
 				},
 			},
-			allowedDatasets: []string{"MyDataset"},
-			defaultProject:  "myproject",
-			wantErr:         `"myproject.mydataset.orders"`,
+			accessibleProjects: nil,
+			additionalDatasets: []string{"MyDataset"},
+			defaultProject:     "myproject",
+			wantErr:            `"myproject.mydataset.orders"`,
 		},
 		{
 			name: "too many referenced tables fail closed",
@@ -130,15 +167,15 @@ func TestCheckAllowedDatasets(t *testing.T) {
 				StatementType:    "SELECT",
 				ReferencedTables: makeReferencedTables(50),
 			},
-			allowedDatasets: []string{"mydataset"},
-			defaultProject:  "myproject",
-			wantErr:         "references too many tables",
+			accessibleProjects: []string{"myproject"},
+			defaultProject:     "myproject",
+			wantErr:            "references too many tables",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := CheckAllowedDatasets(tt.stats, tt.allowedDatasets, tt.defaultProject)
+			err := CheckAllowedDatasets(tt.stats, tt.accessibleProjects, tt.additionalDatasets, tt.defaultProject)
 			if tt.wantErr == "" {
 				assert.NoError(t, err)
 			} else {

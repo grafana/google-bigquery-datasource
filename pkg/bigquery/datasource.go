@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strconv"
 	"sync"
+	"time"
 
 	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-google-sdk-go/pkg/utils"
@@ -49,11 +50,19 @@ type bqServiceFactory func(ctx context.Context, projectID string, opts ...option
 type BigQueryDatasource struct {
 	connections               sync.Map
 	apiClients                sync.Map
+	accessibleProjectsCache   sync.Map
 	bqFactory                 bqServiceFactory
 	resourceManagerServicesMu sync.RWMutex
 	resourceManagerServices   map[string]*cloudresourcemanager.Service
 	logger                    log.Logger
 }
+
+type accessibleProjectsEntry struct {
+	projects  []string
+	fetchedAt time.Time
+}
+
+const accessibleProjectsCacheTTL = 5 * time.Minute
 
 type ConnectionArgs struct {
 	Dataset          string              `json:"dataset,omitempty"`
@@ -103,6 +112,12 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			return nil, errors.WithMessage(err, "Failed to retrieve default GCE project")
 		}
 		connectionSettings.Project = defaultProject
+	}
+
+	if connectionSettings.RestrictToAccessibleDatasets {
+		connectionSettings.AccessibleProjects = func(ctx context.Context) ([]string, error) {
+			return s.accessibleProjects(ctx, config, settings)
+		}
 	}
 
 	connectionKey := fmt.Sprintf("%s/%s:%s:%t", config.UID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
@@ -361,6 +376,47 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 	return projects, nil
 }
 
+// accessibleProjects returns the GCP projects the data source credentials can
+// enumerate via the resource manager API, cached per data source. With OAuth
+// passthrough the credentials cannot enumerate projects, so only the default
+// project is returned, mirroring Projects.
+func (s *BigQueryDatasource) accessibleProjects(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings) ([]string, error) {
+	if settings.OAuthPassthroughEnabled {
+		return []string{settings.DefaultProject}, nil
+	}
+
+	if entry, ok := s.accessibleProjectsCache.Load(config.UID); ok {
+		cached := entry.(accessibleProjectsEntry)
+		if time.Since(cached.fetchedAt) < accessibleProjectsCacheTTL {
+			return cached.projects, nil
+		}
+	}
+
+	if s.getResourceManagerService(config.UID) == nil {
+		if err := s.createResourceManagerService(ctx, config, settings, config.UID); err != nil {
+			return nil, err
+		}
+	}
+
+	rmSvc := s.getResourceManagerService(config.UID)
+	if rmSvc == nil {
+		return nil, errors.New("resource manager service not initialized")
+	}
+
+	response, err := rmSvc.Projects.Search().Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	projects := make([]string, 0, len(response.Projects))
+	for _, project := range response.Projects {
+		projects = append(projects, project.ProjectId)
+	}
+
+	s.accessibleProjectsCache.Store(config.UID, accessibleProjectsEntry{projects: projects, fetchedAt: time.Now()})
+	return projects, nil
+}
+
 func (s *BigQueryDatasource) getResourceManagerService(uid string) *cloudresourcemanager.Service {
 	s.resourceManagerServicesMu.RLock()
 	defer s.resourceManagerServicesMu.RUnlock()
@@ -392,14 +448,14 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 
 	response := apiClient.ValidateQuery(ctx, query)
 
-	// Surface dataset allowlist denials in the query editor. This is a
+	// Surface dataset restriction denials in the query editor. This is a
 	// convenience only; enforcement happens in the driver on every execution.
 	if dsSettings := getDatasourceSettings(ctx); response.IsValid && dsSettings != nil {
 		settings, err := loadSettings(dsSettings)
 		if err != nil {
 			return response, nil
 		}
-		if allowedDatasets := parseAllowedDatasets(settings.AllowedDatasets); len(allowedDatasets) > 0 {
+		if settings.RestrictToAccessibleDatasets {
 			// With GCE authentication the default project is resolved per
 			// query, so fall back to the project the editor is targeting.
 			defaultProject := settings.DefaultProject
@@ -410,10 +466,15 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 			if response.Statistics != nil {
 				stats, _ = response.Statistics.Details.(*bq.QueryStatistics)
 			}
-			if err := driver.CheckAllowedDatasets(stats, allowedDatasets, defaultProject); err != nil {
+			accessibleProjects, projectsErr := s.accessibleProjects(ctx, *dsSettings, settings)
+			checkErr := driver.CheckAllowedDatasets(stats, accessibleProjects, parseAllowedDatasets(settings.AdditionalAllowedDatasets), defaultProject)
+			if checkErr != nil && projectsErr != nil {
+				checkErr = fmt.Errorf("%s (could not list accessible projects: %s)", checkErr, projectsErr)
+			}
+			if checkErr != nil {
 				response.IsValid = false
 				response.IsError = true
-				response.Error = err.Error()
+				response.Error = checkErr.Error()
 			}
 		}
 	}

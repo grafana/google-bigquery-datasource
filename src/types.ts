@@ -37,7 +37,8 @@ export interface BigQueryOptions extends DataSourceOptions {
   queryPriority?: QueryPriority;
   enableSecureSocksProxy?: boolean;
   MaxBytesBilled?: number;
-  allowedDatasets?: string;
+  restrictToAccessibleDatasets?: boolean;
+  additionalAllowedDatasets?: string;
   serviceEndpoint?: string;
   oauthPassThru?: boolean;
 }

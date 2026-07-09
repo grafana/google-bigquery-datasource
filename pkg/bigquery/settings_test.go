@@ -30,13 +30,15 @@ func TestParseAllowedDatasets(t *testing.T) {
 	}
 }
 
-func TestGetConnectionSettingsAllowedDatasets(t *testing.T) {
+func TestGetConnectionSettingsDatasetRestriction(t *testing.T) {
 	settings := types.BigQuerySettings{
-		DefaultProject:  "myproject",
-		AllowedDatasets: "sales, other-project.analytics",
+		DefaultProject:               "myproject",
+		RestrictToAccessibleDatasets: true,
+		AdditionalAllowedDatasets:    "sales, other-project.analytics",
 	}
 
 	connectionSettings := getConnectionSettings(settings, &ConnectionArgs{}, false)
 
-	assert.Equal(t, []string{"sales", "other-project.analytics"}, connectionSettings.AllowedDatasets)
+	assert.True(t, connectionSettings.RestrictToAccessibleDatasets)
+	assert.Equal(t, []string{"sales", "other-project.analytics"}, connectionSettings.AdditionalAllowedDatasets)
 }
