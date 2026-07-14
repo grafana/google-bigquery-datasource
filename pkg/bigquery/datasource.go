@@ -5,7 +5,9 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -251,12 +253,54 @@ type DatasetsArgs struct {
 }
 
 func (s *BigQueryDatasource) Datasets(ctx context.Context, options DatasetsArgs) ([]string, error) {
+	if datasets, ok := s.allowlistedDatasets(ctx, options.Project); ok {
+		return datasets, nil
+	}
+
 	apiClient, err := s.getApi(ctx, options.Project, options.Location)
 	if err != nil {
 		return nil, err
 	}
 
 	return apiClient.ListDatasets(ctx)
+}
+
+// allowlistedDatasets returns the additionally allowed datasets for a project
+// that is only reachable through the allowlist, so the query builder offers
+// exactly the datasets that are queryable. Listing such a project directly
+// would return every dataset the credentials can see (hundreds for public data
+// projects), almost all of which would be denied at query time. Projects the
+// data source has access to keep the normal full listing.
+func (s *BigQueryDatasource) allowlistedDatasets(ctx context.Context, project string) ([]string, bool) {
+	dsSettings := getDatasourceSettings(ctx)
+	if dsSettings == nil {
+		return nil, false
+	}
+	settings, err := loadSettings(dsSettings)
+	if err != nil || !settings.RestrictToAccessibleDatasets {
+		return nil, false
+	}
+
+	var datasets []string
+	for _, entry := range parseAllowedDatasets(settings.AdditionalAllowedDatasets) {
+		if entryProject, dataset, ok := strings.Cut(entry, "."); ok && entryProject == project {
+			datasets = append(datasets, dataset)
+		}
+	}
+	if len(datasets) == 0 {
+		return nil, false
+	}
+
+	accessible, err := s.accessibleProjects(ctx, *dsSettings, settings)
+	if err != nil {
+		// Cannot tell whether the project is accessible; the scoped list is
+		// still the useful answer for a project with allowlist entries.
+		return datasets, true
+	}
+	if slices.Contains(accessible, project) {
+		return nil, false
+	}
+	return datasets, true
 }
 
 // sqlds.Completable interface
@@ -342,7 +386,8 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 	// managing its own credentials, we cannot enumerate GCP projects. Return the
 	// configured default project instead.
 	if bqSettings.OAuthPassthroughEnabled {
-		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
+		projects := []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}
+		return appendAllowlistProjects(projects, bqSettings), nil
 	}
 
 	// This resource call is already scoped to a datasource UID via the URL:
@@ -373,7 +418,31 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 		projects = append(projects, &Project{project.ProjectId, project.DisplayName})
 	}
 
-	return projects, nil
+	return appendAllowlistProjects(projects, bqSettings), nil
+}
+
+// appendAllowlistProjects adds the projects referenced by the additional
+// allowed datasets to the project list, so allowlisted datasets outside the
+// accessible projects can be reached from the query builder. Bare entries
+// belong to the default project, which is already listed.
+func appendAllowlistProjects(projects []*Project, settings types.BigQuerySettings) []*Project {
+	if !settings.RestrictToAccessibleDatasets {
+		return projects
+	}
+
+	seen := make(map[string]bool, len(projects))
+	for _, project := range projects {
+		seen[project.ProjectId] = true
+	}
+	for _, entry := range parseAllowedDatasets(settings.AdditionalAllowedDatasets) {
+		project, _, ok := strings.Cut(entry, ".")
+		if !ok || seen[project] {
+			continue
+		}
+		seen[project] = true
+		projects = append(projects, &Project{ProjectId: project, DisplayName: project})
+	}
+	return projects
 }
 
 // accessibleProjects returns the GCP projects the data source credentials can
@@ -392,15 +461,15 @@ func (s *BigQueryDatasource) accessibleProjects(ctx context.Context, config back
 		}
 	}
 
-	if s.getResourceManagerService(config.UID) == nil {
+	rmSvc := s.getResourceManagerService(config.UID)
+	if rmSvc == nil {
 		if err := s.createResourceManagerService(ctx, config, settings, config.UID); err != nil {
 			return nil, err
 		}
-	}
-
-	rmSvc := s.getResourceManagerService(config.UID)
-	if rmSvc == nil {
-		return nil, errors.New("resource manager service not initialized")
+		rmSvc = s.getResourceManagerService(config.UID)
+		if rmSvc == nil {
+			return nil, errors.New("resource manager service not initialized")
+		}
 	}
 
 	response, err := rmSvc.Projects.Search().Context(ctx).Do()

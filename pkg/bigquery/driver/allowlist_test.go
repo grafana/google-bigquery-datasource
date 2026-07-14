@@ -124,6 +124,31 @@ func TestCheckAllowedDatasets(t *testing.T) {
 			wantErr:            `"otherproject.sales.orders"`,
 		},
 		{
+			name: "bare additional entry without a default project never matches",
+			stats: &bq.QueryStatistics{
+				StatementType: "SELECT",
+				ReferencedTables: []*bq.Table{
+					{ProjectID: "myproject", DatasetID: "sales", TableID: "orders"},
+				},
+			},
+			accessibleProjects: nil,
+			additionalDatasets: []string{"sales"},
+			defaultProject:     "",
+			wantErr:            `entries "sales" were ignored because the data source has no default project`,
+		},
+		{
+			name: "qualified additional entry works without a default project",
+			stats: &bq.QueryStatistics{
+				StatementType: "SELECT",
+				ReferencedTables: []*bq.Table{
+					{ProjectID: "bigquery-public-data", DatasetID: "samples", TableID: "shakespeare"},
+				},
+			},
+			accessibleProjects: nil,
+			additionalDatasets: []string{"bigquery-public-data.samples"},
+			defaultProject:     "",
+		},
+		{
 			name: "no accessible projects and no additional datasets rejects everything",
 			stats: &bq.QueryStatistics{
 				StatementType: "SELECT",

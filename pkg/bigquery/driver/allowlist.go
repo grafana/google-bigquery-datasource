@@ -32,10 +32,10 @@ func CheckAllowedDatasets(stats *bq.QueryStatistics, accessibleProjects []string
 		return fmt.Errorf("could not determine the tables referenced by the query: this data source restricts which datasets can be queried")
 	}
 	if allowlistDeniedStatementTypes[stats.StatementType] {
-		return fmt.Errorf("multi-statement scripts, EXECUTE IMMEDIATE and procedure calls are not supported because this data source restricts which datasets can be queried")
+		return fmt.Errorf("multi-statement scripts, EXECUTE IMMEDIATE and procedure calls are not supported because this data source restricts which datasets can be queried; run each statement as a separate query")
 	}
 	if len(stats.ReferencedTables) >= maxReportedReferencedTables {
-		return fmt.Errorf("the query references too many tables (%d or more) to verify dataset access for this data source", maxReportedReferencedTables)
+		return fmt.Errorf("the query references too many tables (%d or more) to verify dataset access for this data source; split it into smaller queries that each reference fewer tables", maxReportedReferencedTables)
 	}
 
 	projects := make(map[string]bool, len(accessibleProjects))
@@ -44,8 +44,15 @@ func CheckAllowedDatasets(stats *bq.QueryStatistics, accessibleProjects []string
 	}
 
 	datasets := make(map[string]bool, len(additionalDatasets))
+	// Bare entries need a default project to be qualified with; without one
+	// they can never match, so they are skipped and called out on denial.
+	var skippedBareEntries []string
 	for _, entry := range additionalDatasets {
 		if !strings.Contains(entry, ".") {
+			if defaultProject == "" {
+				skippedBareEntries = append(skippedBareEntries, entry)
+				continue
+			}
 			entry = defaultProject + "." + entry
 		}
 		datasets[entry] = true
@@ -53,7 +60,11 @@ func CheckAllowedDatasets(stats *bq.QueryStatistics, accessibleProjects []string
 
 	for _, table := range stats.ReferencedTables {
 		if !projects[table.ProjectID] && !datasets[table.ProjectID+"."+table.DatasetID] {
-			return fmt.Errorf("the query references table %q, which is outside the projects accessible to this data source and not in its additional allowed datasets", table.ProjectID+"."+table.DatasetID+"."+table.TableID)
+			err := fmt.Errorf("the query references table %q, which is outside the projects accessible to this data source and not in its additional allowed datasets", table.ProjectID+"."+table.DatasetID+"."+table.TableID)
+			if len(skippedBareEntries) > 0 {
+				err = fmt.Errorf("%s (the allowed dataset entries %q were ignored because the data source has no default project to qualify them with; use the project.dataset form)", err, strings.Join(skippedBareEntries, ", "))
+			}
+			return err
 		}
 	}
 	return nil

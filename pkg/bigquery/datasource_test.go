@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"testing"
+	"time"
 
 	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/api"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
@@ -196,6 +198,97 @@ func Test_Projects_doesNotPanicWhenResourceManagerServiceMissing(t *testing.T) {
 			require.Error(t, err)
 			require.Contains(t, err.Error(), "datasource is missing authentication details")
 		})
+	})
+}
+
+func Test_appendAllowlistProjects(t *testing.T) {
+	accessible := []*Project{{ProjectId: "myproject", DisplayName: "My project"}}
+
+	t.Run("no-op when the restriction is disabled", func(t *testing.T) {
+		settings := types.BigQuerySettings{AdditionalAllowedDatasets: "bigquery-public-data.samples"}
+		assert.Equal(t, accessible, appendAllowlistProjects(accessible, settings))
+	})
+
+	t.Run("appends distinct allowlist projects", func(t *testing.T) {
+		settings := types.BigQuerySettings{
+			RestrictToAccessibleDatasets: true,
+			AdditionalAllowedDatasets:    "bigquery-public-data.samples, bigquery-public-data.crypto_bitcoin, other-project.analytics",
+		}
+		result := appendAllowlistProjects(accessible, settings)
+		assert.Equal(t, []*Project{
+			{ProjectId: "myproject", DisplayName: "My project"},
+			{ProjectId: "bigquery-public-data", DisplayName: "bigquery-public-data"},
+			{ProjectId: "other-project", DisplayName: "other-project"},
+		}, result)
+	})
+
+	t.Run("skips bare entries and already listed projects", func(t *testing.T) {
+		settings := types.BigQuerySettings{
+			RestrictToAccessibleDatasets: true,
+			AdditionalAllowedDatasets:    "sales, myproject.analytics",
+		}
+		assert.Equal(t, accessible, appendAllowlistProjects(accessible, settings))
+	})
+}
+
+func Test_allowlistedDatasets(t *testing.T) {
+	origPluginConfigFromContext := PluginConfigFromContext
+	defer func() { PluginConfigFromContext = origPluginConfigFromContext }()
+
+	setJSONData := func(jsonData string) {
+		PluginConfigFromContext = func(ctx context.Context) backend.PluginContext {
+			return backend.PluginContext{
+				DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{
+					ID:  1,
+					UID: "uid-1",
+					DecryptedSecureJSONData: map[string]string{
+						"privateKey": "randomPrivateKey",
+					},
+					JSONData: []byte(jsonData),
+				},
+			}
+		}
+	}
+
+	newDS := func(accessibleProjects []string) *BigQueryDatasource {
+		ds := newBigQueryDatasource()
+		ds.accessibleProjectsCache.Store("uid-1", accessibleProjectsEntry{projects: accessibleProjects, fetchedAt: time.Now()})
+		return ds
+	}
+
+	t.Run("restriction disabled falls through to normal listing", func(t *testing.T) {
+		setJSONData(`{"authenticationType":"jwt","additionalAllowedDatasets":"bigquery-public-data.samples"}`)
+		_, ok := newDS([]string{"myproject"}).allowlistedDatasets(t.Context(), "bigquery-public-data")
+		assert.False(t, ok)
+	})
+
+	t.Run("allowlist-only project gets the scoped dataset list", func(t *testing.T) {
+		setJSONData(`{"authenticationType":"jwt","restrictToAccessibleDatasets":true,"additionalAllowedDatasets":"bigquery-public-data.samples, bigquery-public-data.crypto_bitcoin, other-project.analytics"}`)
+		datasets, ok := newDS([]string{"myproject"}).allowlistedDatasets(t.Context(), "bigquery-public-data")
+		assert.True(t, ok)
+		assert.Equal(t, []string{"samples", "crypto_bitcoin"}, datasets)
+	})
+
+	t.Run("accessible project keeps the normal listing even with allowlist entries", func(t *testing.T) {
+		setJSONData(`{"authenticationType":"jwt","restrictToAccessibleDatasets":true,"additionalAllowedDatasets":"myproject.analytics"}`)
+		_, ok := newDS([]string{"myproject"}).allowlistedDatasets(t.Context(), "myproject")
+		assert.False(t, ok)
+	})
+
+	t.Run("project without allowlist entries falls through to normal listing", func(t *testing.T) {
+		setJSONData(`{"authenticationType":"jwt","restrictToAccessibleDatasets":true,"additionalAllowedDatasets":"bigquery-public-data.samples"}`)
+		_, ok := newDS([]string{"myproject"}).allowlistedDatasets(t.Context(), "other-project")
+		assert.False(t, ok)
+	})
+
+	t.Run("scoped list is returned when accessible projects cannot be fetched", func(t *testing.T) {
+		// Incomplete settings: loadSettings succeeds but the resource manager
+		// client cannot be created, so accessibleProjects errors out.
+		setJSONData(`{"authenticationType":"jwt","restrictToAccessibleDatasets":true,"additionalAllowedDatasets":"bigquery-public-data.samples"}`)
+		ds := newBigQueryDatasource()
+		datasets, ok := ds.allowlistedDatasets(t.Context(), "bigquery-public-data")
+		assert.True(t, ok)
+		assert.Equal(t, []string{"samples"}, datasets)
 	})
 }
 

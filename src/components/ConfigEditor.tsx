@@ -143,7 +143,11 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
         </Field>
         <Field
           label="Restrict to accessible datasets"
-          description="Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes."
+          description={
+            jsonData.authenticationType === GoogleAuthType.ForwardOAuthIdentity
+              ? 'Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes. With Forward OAuth Identity the plugin cannot list the projects the signed-in user has access to, so only the default project counts as accessible and any other dataset needs an entry in the additional allowed datasets list.'
+              : 'Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes.'
+          }
         >
           <Switch
             value={jsonData.restrictToAccessibleDatasets || false}
