@@ -39,6 +39,7 @@ export interface BigQueryOptions extends DataSourceOptions {
   MaxBytesBilled?: number;
   serviceEndpoint?: string;
   oauthPassThru?: boolean;
+  useGceForAlerting?: boolean;
 }
 
 export const bigQueryAuthTypes = [
