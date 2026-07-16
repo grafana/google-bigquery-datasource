@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0
+
+🚀 Add a `Restrict to accessible datasets` data source setting. When enabled, every query is checked with a dry run and rejected if it references tables outside the projects the data source has access to, including tables reached through views. An additional allowlist covers public or shared datasets you still want to permit. Useful to block queries against public datasets, which IAM cannot restrict.
+
 ## 3.2.0
 
 🚀 Add support for [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) as a new authentication type. Available on Grafana Cloud only.

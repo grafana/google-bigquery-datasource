@@ -5,8 +5,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strconv"
+	"strings"
 	"sync"
+	"time"
 
 	bq "cloud.google.com/go/bigquery"
 	"github.com/grafana/grafana-google-sdk-go/pkg/utils"
@@ -49,11 +52,19 @@ type bqServiceFactory func(ctx context.Context, projectID string, opts ...option
 type BigQueryDatasource struct {
 	connections               sync.Map
 	apiClients                sync.Map
+	accessibleProjectsCache   sync.Map
 	bqFactory                 bqServiceFactory
 	resourceManagerServicesMu sync.RWMutex
 	resourceManagerServices   map[string]*cloudresourcemanager.Service
 	logger                    log.Logger
 }
+
+type accessibleProjectsEntry struct {
+	projects  []string
+	fetchedAt time.Time
+}
+
+const accessibleProjectsCacheTTL = 5 * time.Minute
 
 type ConnectionArgs struct {
 	Dataset          string              `json:"dataset,omitempty"`
@@ -103,6 +114,12 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 			return nil, errors.WithMessage(err, "Failed to retrieve default GCE project")
 		}
 		connectionSettings.Project = defaultProject
+	}
+
+	if connectionSettings.RestrictToAccessibleDatasets {
+		connectionSettings.AccessibleProjects = func(ctx context.Context) ([]string, error) {
+			return s.accessibleProjects(ctx, config, settings)
+		}
 	}
 
 	connectionKey := fmt.Sprintf("%s/%s:%s:%t", config.UID, connectionSettings.Location, connectionSettings.Project, connectionSettings.EnableStorageAPI)
@@ -236,12 +253,54 @@ type DatasetsArgs struct {
 }
 
 func (s *BigQueryDatasource) Datasets(ctx context.Context, options DatasetsArgs) ([]string, error) {
+	if datasets, ok := s.allowlistedDatasets(ctx, options.Project); ok {
+		return datasets, nil
+	}
+
 	apiClient, err := s.getApi(ctx, options.Project, options.Location)
 	if err != nil {
 		return nil, err
 	}
 
 	return apiClient.ListDatasets(ctx)
+}
+
+// allowlistedDatasets returns the additionally allowed datasets for a project
+// that is only reachable through the allowlist, so the query builder offers
+// exactly the datasets that are queryable. Listing such a project directly
+// would return every dataset the credentials can see (hundreds for public data
+// projects), almost all of which would be denied at query time. Projects the
+// data source has access to keep the normal full listing.
+func (s *BigQueryDatasource) allowlistedDatasets(ctx context.Context, project string) ([]string, bool) {
+	dsSettings := getDatasourceSettings(ctx)
+	if dsSettings == nil {
+		return nil, false
+	}
+	settings, err := loadSettings(dsSettings)
+	if err != nil || !settings.RestrictToAccessibleDatasets {
+		return nil, false
+	}
+
+	var datasets []string
+	for _, entry := range parseAllowedDatasets(settings.AdditionalAllowedDatasets) {
+		if entryProject, dataset, ok := strings.Cut(entry, "."); ok && entryProject == project {
+			datasets = append(datasets, dataset)
+		}
+	}
+	if len(datasets) == 0 {
+		return nil, false
+	}
+
+	accessible, err := s.accessibleProjects(ctx, *dsSettings, settings)
+	if err != nil {
+		// Cannot tell whether the project is accessible; the scoped list is
+		// still the useful answer for a project with allowlist entries.
+		return datasets, true
+	}
+	if slices.Contains(accessible, project) {
+		return nil, false
+	}
+	return datasets, true
 }
 
 // sqlds.Completable interface
@@ -327,7 +386,8 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 	// managing its own credentials, we cannot enumerate GCP projects. Return the
 	// configured default project instead.
 	if bqSettings.OAuthPassthroughEnabled {
-		return []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}, nil
+		projects := []*Project{{ProjectId: bqSettings.DefaultProject, DisplayName: bqSettings.DefaultProject}}
+		return appendAllowlistProjects(projects, bqSettings), nil
 	}
 
 	// This resource call is already scoped to a datasource UID via the URL:
@@ -358,6 +418,71 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 		projects = append(projects, &Project{project.ProjectId, project.DisplayName})
 	}
 
+	return appendAllowlistProjects(projects, bqSettings), nil
+}
+
+// appendAllowlistProjects adds the projects referenced by the additional
+// allowed datasets to the project list, so allowlisted datasets outside the
+// accessible projects can be reached from the query builder. Bare entries
+// belong to the default project, which is already listed.
+func appendAllowlistProjects(projects []*Project, settings types.BigQuerySettings) []*Project {
+	if !settings.RestrictToAccessibleDatasets {
+		return projects
+	}
+
+	seen := make(map[string]bool, len(projects))
+	for _, project := range projects {
+		seen[project.ProjectId] = true
+	}
+	for _, entry := range parseAllowedDatasets(settings.AdditionalAllowedDatasets) {
+		project, _, ok := strings.Cut(entry, ".")
+		if !ok || seen[project] {
+			continue
+		}
+		seen[project] = true
+		projects = append(projects, &Project{ProjectId: project, DisplayName: project})
+	}
+	return projects
+}
+
+// accessibleProjects returns the GCP projects the data source credentials can
+// enumerate via the resource manager API, cached per data source. With OAuth
+// passthrough the credentials cannot enumerate projects, so only the default
+// project is returned, mirroring Projects.
+func (s *BigQueryDatasource) accessibleProjects(ctx context.Context, config backend.DataSourceInstanceSettings, settings types.BigQuerySettings) ([]string, error) {
+	if settings.OAuthPassthroughEnabled {
+		return []string{settings.DefaultProject}, nil
+	}
+
+	if entry, ok := s.accessibleProjectsCache.Load(config.UID); ok {
+		cached := entry.(accessibleProjectsEntry)
+		if time.Since(cached.fetchedAt) < accessibleProjectsCacheTTL {
+			return cached.projects, nil
+		}
+	}
+
+	rmSvc := s.getResourceManagerService(config.UID)
+	if rmSvc == nil {
+		if err := s.createResourceManagerService(ctx, config, settings, config.UID); err != nil {
+			return nil, err
+		}
+		rmSvc = s.getResourceManagerService(config.UID)
+		if rmSvc == nil {
+			return nil, errors.New("resource manager service not initialized")
+		}
+	}
+
+	response, err := rmSvc.Projects.Search().Context(ctx).Do()
+	if err != nil {
+		return nil, err
+	}
+
+	projects := make([]string, 0, len(response.Projects))
+	for _, project := range response.Projects {
+		projects = append(projects, project.ProjectId)
+	}
+
+	s.accessibleProjectsCache.Store(config.UID, accessibleProjectsEntry{projects: projects, fetchedAt: time.Now()})
 	return projects, nil
 }
 
@@ -390,7 +515,40 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 		}, nil
 	}
 
-	return apiClient.ValidateQuery(ctx, query), nil
+	response := apiClient.ValidateQuery(ctx, query)
+
+	// Surface dataset restriction denials in the query editor. This is a
+	// convenience only; enforcement happens in the driver on every execution.
+	if dsSettings := getDatasourceSettings(ctx); response.IsValid && dsSettings != nil {
+		settings, err := loadSettings(dsSettings)
+		if err != nil {
+			return response, nil
+		}
+		if settings.RestrictToAccessibleDatasets {
+			// With GCE authentication the default project is resolved per
+			// query, so fall back to the project the editor is targeting.
+			defaultProject := settings.DefaultProject
+			if defaultProject == "" {
+				defaultProject = options.Project
+			}
+			var stats *bq.QueryStatistics
+			if response.Statistics != nil {
+				stats, _ = response.Statistics.Details.(*bq.QueryStatistics)
+			}
+			accessibleProjects, projectsErr := s.accessibleProjects(ctx, *dsSettings, settings)
+			checkErr := driver.CheckAllowedDatasets(stats, accessibleProjects, parseAllowedDatasets(settings.AdditionalAllowedDatasets), defaultProject)
+			if checkErr != nil && projectsErr != nil {
+				checkErr = fmt.Errorf("%s (could not list accessible projects: %s)", checkErr, projectsErr)
+			}
+			if checkErr != nil {
+				response.IsValid = false
+				response.IsError = true
+				response.Error = checkErr.Error()
+			}
+		}
+	}
+
+	return response, nil
 }
 
 // MutateQueryError marks BigQuery errors as downstream errors

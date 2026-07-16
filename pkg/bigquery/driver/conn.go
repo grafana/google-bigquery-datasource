@@ -125,6 +125,10 @@ func (c *Conn) execContext(ctx context.Context, query string, args []driver.Valu
 		return nil, err
 	}
 
+	if err = c.enforceAllowedDatasets(ctx, query); err != nil {
+		return nil, err
+	}
+
 	q := c.client.Query(query)
 
 	q.Labels = c.headersAsLabels(ctx)
@@ -253,6 +257,10 @@ func (c *Conn) QueryContext(ctx context.Context, query string, args []driver.Nam
 }
 
 func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, error) {
+	if err := c.enforceAllowedDatasets(ctx, query); err != nil {
+		return nil, err
+	}
+
 	q := c.client.Query(query)
 	q.Location = c.client.Location
 

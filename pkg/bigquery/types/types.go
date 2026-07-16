@@ -1,27 +1,30 @@
 package types
 
 import (
+	"context"
 	"time"
 
 	bq "cloud.google.com/go/bigquery"
 )
 
 type BigQuerySettings struct {
-	DatasourceId                int64  `json:"datasourceId"`
-	ClientEmail                 string `json:"clientEmail"`
-	DefaultProject              string `json:"defaultProject"`
-	FlatRateProject             string `json:"flatRateProject"`
-	TokenUri                    string `json:"tokenUri"`
-	QueryPriority               string `json:"queryPriority"`
-	ProcessingLocation          string `json:"processingLocation"`
-	MaxBytesBilled              int64  `json:"MaxBytesBilled,omitempty"`
-	Updated                     time.Time
-	AuthenticationType          string `json:"authenticationType"`
-	PrivateKeyPath              string `json:"privateKeyPath"`
-	ServiceEndpoint             string `json:"serviceEndpoint"`
-	UsingImpersonation          bool   `json:"usingImpersonation"`
-	ServiceAccountToImpersonate string `json:"serviceAccountToImpersonate"`
-	OAuthPassthroughEnabled     bool   `json:"oauthPassThru"`
+	DatasourceId                 int64  `json:"datasourceId"`
+	ClientEmail                  string `json:"clientEmail"`
+	DefaultProject               string `json:"defaultProject"`
+	FlatRateProject              string `json:"flatRateProject"`
+	TokenUri                     string `json:"tokenUri"`
+	QueryPriority                string `json:"queryPriority"`
+	ProcessingLocation           string `json:"processingLocation"`
+	MaxBytesBilled               int64  `json:"MaxBytesBilled,omitempty"`
+	RestrictToAccessibleDatasets bool   `json:"restrictToAccessibleDatasets,omitempty"`
+	AdditionalAllowedDatasets    string `json:"additionalAllowedDatasets,omitempty"`
+	Updated                      time.Time
+	AuthenticationType           string `json:"authenticationType"`
+	PrivateKeyPath               string `json:"privateKeyPath"`
+	ServiceEndpoint              string `json:"serviceEndpoint"`
+	UsingImpersonation           bool   `json:"usingImpersonation"`
+	ServiceAccountToImpersonate  string `json:"serviceAccountToImpersonate"`
+	OAuthPassthroughEnabled      bool   `json:"oauthPassThru"`
 
 	// Workload Identity Federation fields (read by Grafana Cloud's auth middleware)
 	WorkloadIdentityPoolProvider string `json:"workloadIdentityPoolProvider"`
@@ -39,6 +42,13 @@ type ConnectionSettings struct {
 	Headers            map[string][]string
 	MaxBytesBilled     int64
 	EnableStorageAPI   bool
+
+	RestrictToAccessibleDatasets bool
+	AdditionalAllowedDatasets    []string
+	// AccessibleProjects returns the GCP projects the data source credentials
+	// can enumerate. Set by the datasource when RestrictToAccessibleDatasets
+	// is enabled.
+	AccessibleProjects func(ctx context.Context) ([]string, error)
 }
 type TableFieldSchema struct {
 	Name        string       `json:"name"`
