@@ -435,6 +435,42 @@
         "backend-only",
         "unused"
       ]
+    },
+    {
+      "id": "jsonData_restrictToAccessibleDatasets",
+      "key": "restrictToAccessibleDatasets",
+      "label": "Restrict to accessible datasets",
+      "description": "Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes.",
+      "valueType": "boolean",
+      "target": "jsonData",
+      "defaultValue": false,
+      "ui": {
+        "component": "switch"
+      }
+    },
+    {
+      "id": "jsonData_additionalAllowedDatasets",
+      "key": "additionalAllowedDatasets",
+      "label": "Additional allowed datasets",
+      "description": "Comma-separated list of datasets outside the accessible projects that queries may also reference, entered as 'project.dataset' or 'dataset' (in the default project). Use this for public or shared datasets you want to allow.",
+      "valueType": "string",
+      "target": "jsonData",
+      "dependsOn": "jsonData_restrictToAccessibleDatasets == true",
+      "ui": {
+        "component": "input",
+        "placeholder": "Optional, example: bigquery-public-data.samples"
+      }
+    },
+    {
+      "id": "jsonData_datasourceId",
+      "key": "datasourceId",
+      "description": "The numeric data source instance ID. Populated in the backend from the plugin context (pkg/bigquery/settings.go:36) rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
+      "valueType": "number",
+      "target": "jsonData",
+      "tags": [
+        "backend-only",
+        "editor-managed"
+      ]
     }
   ],
   "groups": [

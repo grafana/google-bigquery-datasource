@@ -11,6 +11,11 @@
               "description": "Prevent queries that would process more than this amount of bytes. Read more about max bytes billed here: https://cloud.google.com/bigquery/docs/best-practices-costs",
               "type": "number"
             },
+            "additionalAllowedDatasets": {
+              "description": "Comma-separated list of datasets outside the accessible projects that queries may also reference, entered as 'project.dataset' or 'dataset' (in the default project). Use this for public or shared datasets you want to allow.",
+              "type": "string",
+              "x-dsconfig-depends-on": "jsonData_restrictToAccessibleDatasets == true"
+            },
             "authenticationType": {
               "type": "string",
               "default": "jwt",
@@ -25,6 +30,10 @@
               "type": "string",
               "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
               "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+            },
+            "datasourceId": {
+              "description": "The numeric data source instance ID. Populated in the backend from the plugin context (pkg/bigquery/settings.go:36) rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
+              "type": "number"
             },
             "defaultProject": {
               "type": "string",
@@ -101,6 +110,11 @@
                 "INTERACTIVE",
                 "BATCH"
               ]
+            },
+            "restrictToAccessibleDatasets": {
+              "description": "Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes.",
+              "type": "boolean",
+              "default": false
             },
             "serviceAccountToImpersonate": {
               "type": "string",
