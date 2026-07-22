@@ -4,13 +4,21 @@
   "description": "Google BigQuery datasource for Grafana",
   "license": "Apache-2.0",
   "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
+  "overrides": {
+    "@grafana/data": "13.1.0-25893932881",
+    "@grafana/runtime": "13.1.0-25893932881",
+    "@grafana/schema": "13.1.0-25893932881",
+    "@grafana/ui": "13.1.0-25893932881",
+    "@grafana/e2e-selectors": "13.1.0-25893932881",
+    "unrs-resolver": "1.11.1"
+  },
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
-    "build:sign": "yarn run build && yarn run sign",
+    "build:sign": "npm run build && npm run sign",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
     "e2e": "playwright test",
     "lint": "eslint --cache .",
-    "lint:fix": "yarn run lint --fix && prettier --write --list-different .",
+    "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
     "lint:ts": "eslint --cache .",
     "server": "docker compose up --build",
     "sign": "sign-plugin",
@@ -91,8 +99,9 @@
     "webpack-subresource-integrity": "5.1.0",
     "webpack-virtual-modules": "0.6.2"
   },
-  "packageManager": "yarn@4.15.0",
+  "packageManager": "npm@11.18.0",
   "engines": {
-    "node": ">=24"
+    "node": ">=24",
+    "npm": ">=11.12.1"
   }
 }
