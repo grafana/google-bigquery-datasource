@@ -1,0 +1,157 @@
+{
+  "spec": {
+    "type": "object",
+    "properties": {
+      "jsonData": {
+        "type": "object",
+        "properties": {
+          "MaxBytesBilled": {
+            "description": "Prevent queries that would process more than this amount of bytes. Read more about max bytes billed here: https://cloud.google.com/bigquery/docs/best-practices-costs",
+            "type": "number"
+          },
+          "additionalAllowedDatasets": {
+            "description": "Comma-separated list of datasets outside the accessible projects that queries may also reference, entered as 'project.dataset' or 'dataset' (in the default project). Use this for public or shared datasets you want to allow.",
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_restrictToAccessibleDatasets == true"
+          },
+          "authenticationType": {
+            "type": "string",
+            "default": "jwt",
+            "enum": [
+              "jwt",
+              "gce",
+              "forwardOAuthIdentity",
+              "workloadIdentityFederation"
+            ]
+          },
+          "clientEmail": {
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+          },
+          "datasourceId": {
+            "description": "The numeric data source instance ID. Populated in the backend from the plugin context (pkg/bigquery/settings.go:36) rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
+            "type": "number"
+          },
+          "defaultProject": {
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation'",
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+          },
+          "flatRateProject": {
+            "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:13) but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
+            "type": "string"
+          },
+          "oauthPassThru": {
+            "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written by AuthConfig.tsx:73-74 as a side-effect of the auth-type radio, not by a direct UI toggle.",
+            "type": "boolean",
+            "default": false
+          },
+          "privateKeyPath": {
+            "description": "Paste private key or provide path to private file",
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'"
+          },
+          "processingLocation": {
+            "description": "Read more about processing location here: https://cloud.google.com/bigquery/docs/locations",
+            "type": "string",
+            "default": "",
+            "enum": [
+              "",
+              "US",
+              "EU",
+              "us-east5",
+              "us-south1",
+              "us-central1",
+              "us-west2",
+              "us-west4",
+              "northamerica-northeast1",
+              "us-east4",
+              "us-west1",
+              "us-west3",
+              "southamerica-east1",
+              "southamerica-west1",
+              "us-east1",
+              "northamerica-northeast2",
+              "europe-west1",
+              "europe-west10",
+              "europe-north1",
+              "europe-west3",
+              "europe-west2",
+              "europe-southwest1",
+              "europe-west8",
+              "europe-west4",
+              "europe-west9",
+              "europe-west12",
+              "europe-central2",
+              "europe-west6",
+              "asia-south2",
+              "asia-east2",
+              "asia-southeast2",
+              "australia-southeast2",
+              "asia-south1",
+              "asia-northeast2",
+              "asia-northeast3",
+              "asia-southeast1",
+              "australia-southeast1",
+              "asia-east1",
+              "asia-northeast1",
+              "me-central2",
+              "me-central1",
+              "me-west1"
+            ]
+          },
+          "queryPriority": {
+            "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:15) as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries at src/types.ts:107 but that is a separate storage location).",
+            "type": "string",
+            "enum": [
+              "INTERACTIVE",
+              "BATCH"
+            ]
+          },
+          "restrictToAccessibleDatasets": {
+            "description": "Reject queries that reference tables outside the projects this data source has access to, for example public datasets. Every query is checked with a dry run before it executes.",
+            "type": "boolean",
+            "default": false
+          },
+          "serviceAccountToImpersonate": {
+            "type": "string",
+            "x-dsconfig-depends-on": "(jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce') \u0026\u0026 jsonData_usingImpersonation == true"
+          },
+          "serviceEndpoint": {
+            "description": "Specifies the network address of an API service. Read more about service endpoint here: https://cloud.google.com/bigquery/docs/reference/rest#service-endpoint",
+            "type": "string"
+          },
+          "tokenUri": {
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+          },
+          "usingImpersonation": {
+            "description": "Enable service account impersonation. Read more about service account impersonation here: https://cloud.google.com/iam/docs/service-account-impersonation",
+            "type": "boolean",
+            "default": false,
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce'"
+          },
+          "wifServiceAccountEmail": {
+            "description": "Optional. If set, the federated identity impersonates this service account when calling Google APIs.",
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'workloadIdentityFederation'"
+          },
+          "workloadIdentityPoolProvider": {
+            "description": "Full resource name of the workload identity pool provider (e.g. projects/123/locations/global/workloadIdentityPools/my-pool/providers/my-provider)",
+            "type": "string",
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'workloadIdentityFederation'",
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'workloadIdentityFederation'"
+          }
+        }
+      }
+    }
+  },
+  "secureValues": [
+    {
+      "key": "privateKey",
+      "description": "Paste private key or provide path to private file"
+    }
+  ]
+}

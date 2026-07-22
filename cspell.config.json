@@ -25,6 +25,8 @@
     "datasourcetest",
     "DATETIME",
     "doitintl",
+    "dsconfig",
+    "behaviour",
     "dompurify",
     "etag",
     "fillmode",
