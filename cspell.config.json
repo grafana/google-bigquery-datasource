@@ -5,7 +5,8 @@
     "dist/**",
     "package.json",
     "yarn.lock",
-    "provisioning/**"
+    "provisioning/**",
+    "jest.config.js"
   ],
   "words": [
     "BIGNUMERIC",
