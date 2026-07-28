@@ -2,7 +2,9 @@
 
 ## 3.3.0
 
-⚙️ Macro interpolation is now powered by [macropro](https://github.com/grafana/macropro), replacing the legacy `sqlutil` pipeline. Macro output is unchanged, with two safety improvements: macros inside SQL comments (`--`, `#`, `/* */`) are no longer expanded (comments are stripped from the query sent to BigQuery), and a time macro called without a column (e.g. `$__timeFrom()`) now returns a clear error instead of generating invalid SQL.
+⚙️ Macro interpolation is now powered by [macropro](https://github.com/grafana/macropro), replacing the legacy `sqlutil` pipeline. Macro output is unchanged, with one safety improvement: macros inside SQL comments (`--`, `#`, `/* */`) are no longer expanded, and comments are stripped from the query sent to BigQuery.
+
+🐛 Fix: `$__timeFrom()` and `$__timeTo()` called without a column now return the dashboard time boundary as a timestamp value (e.g. `TIMESTAMP('2024-01-01T00:00:00Z')`), matching the documented behaviour, instead of generating invalid SQL such as `>= '2024-01-01T00:00:00Z'`. The filter forms `$__timeFrom(column)` and `$__timeTo(column)` are unchanged.
 
 🚀 Add a `Restrict to accessible datasets` data source setting. When enabled, every query is checked with a dry run and rejected if it references tables outside the projects the data source has access to, including tables reached through views. An additional allowlist covers public or shared datasets you still want to permit. Useful to block queries against public datasets, which IAM cannot restrict.
 

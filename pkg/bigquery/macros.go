@@ -45,28 +45,38 @@ func macroInterval(ctx macropro.QueryContext[struct{}], _ []string) (string, err
 	return gtime.FormatInterval(ctx.Interval), nil
 }
 
-// macroTimeFrom overrides macropro's default, which ignores the column
-// argument and renders a bare unquoted timestamp. BigQuery queries in the
-// wild rely on the sqlutil.DefaultMacros form:
+// macroTimeFrom renders the start of the dashboard time range. With no
+// arguments it returns the documented BigQuery value form (a TIMESTAMP
+// constructor); with a column argument it returns the lower-bound filter the
+// legacy sqlutil pipeline produced, so existing dashboards keep working.
 //
+//	$__timeFrom()     → TIMESTAMP('2006-01-02T15:04:05Z')
 //	$__timeFrom(time) → time >= '2006-01-02T15:04:05Z'
 func macroTimeFrom(ctx macropro.QueryContext[struct{}], args []string) (string, error) {
-	if len(args) != 1 {
-		return "", fmt.Errorf("%w: expected 1 argument, received %d", sqlutil.ErrorBadArgumentCount, len(args))
-	}
-
-	return fmt.Sprintf("%s >= '%s'", args[0], ctx.TimeRange.From.UTC().Format(time.RFC3339)), nil
+	return timeBoundary("$__timeFrom", ">=", ctx.TimeRange.From, args)
 }
 
-// macroTimeTo is the counterpart to macroTimeFrom.
+// macroTimeTo is the upper-bound counterpart to macroTimeFrom.
 //
+//	$__timeTo()     → TIMESTAMP('2006-01-02T15:04:05Z')
 //	$__timeTo(time) → time <= '2006-01-02T15:04:05Z'
 func macroTimeTo(ctx macropro.QueryContext[struct{}], args []string) (string, error) {
-	if len(args) != 1 {
-		return "", fmt.Errorf("%w: expected 1 argument, received %d", sqlutil.ErrorBadArgumentCount, len(args))
-	}
+	return timeBoundary("$__timeTo", "<=", ctx.TimeRange.To, args)
+}
 
-	return fmt.Sprintf("%s <= '%s'", args[0], ctx.TimeRange.To.UTC().Format(time.RFC3339)), nil
+// timeBoundary implements the dual-mode behaviour shared by macroTimeFrom and
+// macroTimeTo. A single empty argument is treated like no argument at all, so
+// $__timeFrom() and bare $__timeFrom both yield the value form.
+func timeBoundary(name, op string, t time.Time, args []string) (string, error) {
+	ts := t.UTC().Format(time.RFC3339)
+	switch {
+	case len(args) == 0 || (len(args) == 1 && args[0] == ""):
+		return fmt.Sprintf("TIMESTAMP('%s')", ts), nil
+	case len(args) == 1:
+		return fmt.Sprintf("%s %s '%s'", args[0], op, ts), nil
+	default:
+		return "", fmt.Errorf("%w: %s accepts at most 1 argument (column name), received %d", sqlutil.ErrorBadArgumentCount, name, len(args))
+	}
 }
 
 func macroTimeGroup(_ macropro.QueryContext[struct{}], args []string) (string, error) {
@@ -124,9 +134,10 @@ func macroTimeGroup(_ macropro.QueryContext[struct{}], args []string) (string, e
 // BigQuery-specific handlers on top of macropro's dialect-neutral defaults.
 // The defaults kept as-is (interval_ms, timeFilter) already match the output
 // of the sqlutil.DefaultMacros pipeline this replaced; the overrides either
-// diverge from macropro's defaults for compatibility (interval, timeFrom,
-// timeTo), implement BigQuery SQL (timeGroup), or reject macros the plugin
-// has never supported (table, column).
+// diverge from macropro's defaults for compatibility (interval), render
+// BigQuery dialect forms (timeFrom, timeTo), implement BigQuery SQL
+// (timeGroup), or reject macros the plugin has never supported (table,
+// column).
 var macros = macropro.MergeMacros(macropro.DefaultMacros[struct{}](), macropro.MacroMap[struct{}]{
 	"column":    macroColumn,
 	"table":     macroTable,

@@ -72,14 +72,34 @@ func Test_interpolate(t *testing.T) {
 			"SELECT * FROM t WHERE created_at >= '2023-01-01T00:00:00Z' AND created_at <= '2023-01-02T00:00:00Z'",
 		},
 		{
-			"time from",
+			"time from filter form",
 			"SELECT * FROM t WHERE $__timeFrom(created_at)",
 			"SELECT * FROM t WHERE created_at >= '2023-01-01T00:00:00Z'",
 		},
 		{
-			"time to",
+			"time to filter form",
 			"SELECT * FROM t WHERE $__timeTo(created_at)",
 			"SELECT * FROM t WHERE created_at <= '2023-01-02T00:00:00Z'",
+		},
+		{
+			"time from value form",
+			"SELECT $__timeFrom() AS period_start FROM t",
+			"SELECT TIMESTAMP('2023-01-01T00:00:00Z') AS period_start FROM t",
+		},
+		{
+			"time from value form as a bare token",
+			"SELECT $__timeFrom AS period_start FROM t",
+			"SELECT TIMESTAMP('2023-01-01T00:00:00Z') AS period_start FROM t",
+		},
+		{
+			"time to value form",
+			"SELECT $__timeTo() AS period_end FROM t",
+			"SELECT TIMESTAMP('2023-01-02T00:00:00Z') AS period_end FROM t",
+		},
+		{
+			"time boundaries in a BETWEEN range",
+			"SELECT * FROM t WHERE ts BETWEEN $__timeFrom() AND $__timeTo()",
+			"SELECT * FROM t WHERE ts BETWEEN TIMESTAMP('2023-01-01T00:00:00Z') AND TIMESTAMP('2023-01-02T00:00:00Z')",
 		},
 		{
 			"interval",
@@ -162,9 +182,9 @@ func Test_interpolate_errors(t *testing.T) {
 			"error parsing interval banana",
 		},
 		{
-			"time from without a column",
-			"SELECT * FROM t WHERE $__timeFrom",
-			"expected 1 argument, received 0",
+			"time from with too many arguments",
+			"SELECT * FROM t WHERE $__timeFrom(a, b)",
+			"$__timeFrom accepts at most 1 argument",
 		},
 	}
 	for _, tt := range tests {
