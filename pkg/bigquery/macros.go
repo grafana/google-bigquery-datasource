@@ -64,7 +64,7 @@ func macroTimeTo(ctx macropro.QueryContext[struct{}], args []string) (string, er
 	return timeBoundary("$__timeTo", "<=", ctx.TimeRange.To, args)
 }
 
-// timeBoundary implements the dual-mode behaviour shared by macroTimeFrom and
+// timeBoundary implements the dual-mode behavior shared by macroTimeFrom and
 // macroTimeTo. A single empty argument is treated like no argument at all, so
 // $__timeFrom() and bare $__timeFrom both yield the value form.
 func timeBoundary(name, op string, t time.Time, args []string) (string, error) {
@@ -148,8 +148,8 @@ var macros = macropro.MergeMacros(macropro.DefaultMacros[struct{}](), macropro.M
 })
 
 // bigQueryComments is the comment/quote style macropro uses when stripping
-// comments before macro expansion. GoogleSQL recognises #, -- and /* */
-// comments, backslash escapes inside string literals (e.g. 'O\'Brien') and
+// comments before macro expansion. GoogleSQL recognizes #, -- and /* */
+// comments, backslash escapes inside string literals (e.g. 'it\'s') and
 // backtick-quoted identifiers (e.g. `project.dataset.table`), so those
 // regions must not be mis-lexed as comments or macro tokens.
 const bigQueryComments = macropro.LineComment | macropro.BlockComment | macropro.HashComment | macropro.BackslashEscape | macropro.BacktickQuote

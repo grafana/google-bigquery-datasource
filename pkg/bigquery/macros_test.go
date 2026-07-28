@@ -138,8 +138,8 @@ func Test_interpolate(t *testing.T) {
 		},
 		{
 			"comment marker inside a backslash-escaped string is not a comment",
-			"SELECT 'O\\'Brien -- so', $__timeFrom(created_at) FROM t",
-			"SELECT 'O\\'Brien -- so', created_at >= '2023-01-01T00:00:00Z' FROM t",
+			"SELECT 'it\\'s -- fine', $__timeFrom(created_at) FROM t",
+			"SELECT 'it\\'s -- fine', created_at >= '2023-01-01T00:00:00Z' FROM t",
 		},
 	}
 	for _, tt := range tests {
