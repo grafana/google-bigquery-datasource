@@ -79,6 +79,7 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 	ds := sqlds.NewDatasource(s)
 	ds.Completable = s
 	ds.EnableMultipleConnections = true
+	ds.Interpolator = interpolateMacros
 	ds.CustomRoutes = newResourceHandler(s).Routes()
 
 	return ds.NewDatasource(ctx, settings)
@@ -505,7 +506,7 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 		return nil, err
 	}
 
-	query, err := sqlds.Interpolate(s, &options.Query)
+	query, err := interpolate(&options.Query)
 
 	if err != nil {
 		return &api.ValidateQueryResponse{

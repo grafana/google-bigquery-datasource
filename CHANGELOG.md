@@ -2,6 +2,8 @@
 
 ## 3.3.0
 
+⚙️ Macro interpolation is now powered by [macropro](https://github.com/grafana/macropro), replacing the legacy `sqlutil` pipeline. Macro output is unchanged, with two safety improvements: macros inside SQL comments (`--`, `#`, `/* */`) are no longer expanded (comments are stripped from the query sent to BigQuery), and a time macro called without a column (e.g. `$__timeFrom()`) now returns a clear error instead of generating invalid SQL.
+
 🚀 Add a `Restrict to accessible datasets` data source setting. When enabled, every query is checked with a dry run and rejected if it references tables outside the projects the data source has access to, including tables reached through views. An additional allowlist covers public or shared datasets you still want to permit. Useful to block queries against public datasets, which IAM cannot restrict.
 
 ## 3.2.0
