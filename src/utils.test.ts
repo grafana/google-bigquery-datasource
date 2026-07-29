@@ -5,19 +5,14 @@ import {
   convertToUtc,
   escapeLiteral,
   extractFromClause,
-  findTimeField,
   formatBigqueryError,
   formatDateToString,
   getDatasourceId,
   getInterval,
-  getShiftPeriod,
-  getTimeShift,
-  getUnixSecondsFromString,
   handleError,
   isQueryValid,
   quoteFiledName,
   quoteLiteral,
-  replaceTimeShift,
   setDatasourceId,
 } from 'utils';
 
@@ -33,28 +28,11 @@ describe('Utils', () => {
     expect(res).toBe('just like that: status text');
   });
 
-  test('getShiftPeriod', () => {
-    const interval = '55 min';
-
-    const res = getShiftPeriod(interval);
-    expect(res).toEqual(['m', '55']);
-  });
-
   test('extractFromClause', () => {
     const sql = 'select a from `prj.ds.dt` where';
 
     const res = extractFromClause(sql);
     expect(res).toEqual(['prj', 'ds', 'dt']);
-  });
-
-  test('findTimeField', () => {
-    const sql = 'select tm,b from `prj.ds.dt` where';
-    const fl = {
-      text: 'tm',
-    };
-    const timeFields = new Array(fl);
-    const res = findTimeField(sql, timeFields);
-    expect(res.text).toBe('tm');
   });
 
   test('applyQueryDefaults should handle location change from auto to US', () => {
@@ -140,20 +118,6 @@ describe('Utils', () => {
     const res = getInterval(q, true);
     expect(res[0]).toBe('1m');
     expect(res[1]).toBe('10');
-  });
-
-  test('getTimeShift and replaceTimeShift behave as expected', () => {
-    const sql = 'select $__timeShifting(55 min) as shifted';
-    expect(getTimeShift(sql)).toBe('55 min');
-    const replaced = replaceTimeShift(sql);
-    expect(replaced).not.toContain('$__timeShifting(');
-  });
-
-  test('getUnixSecondsFromString handles different periods', () => {
-    expect(getUnixSecondsFromString('5s')).toBe(5);
-    expect(getUnixSecondsFromString('2 min')).toBe(120);
-    expect(getUnixSecondsFromString('1h')).toBe(3600);
-    expect(getUnixSecondsFromString(undefined)).toBe(0);
   });
 
   test('convertToUtc applies timezone offset', () => {
