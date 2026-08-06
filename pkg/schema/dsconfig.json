@@ -462,6 +462,15 @@
       }
     },
     {
+      "id": "jsonData_enableSecureSocksProxy",
+      "key": "enableSecureSocksProxy",
+      "label": "Secure Socks Proxy enabled",
+      "description": "Connect to this data source through Grafana's secure SOCKS proxy. Read and applied by Grafana core when it builds the data source HTTP client, not by the plugin. The switch is only rendered in the configuration editor when the Grafana instance has secure_socks_datasource_proxy configured (src/components/ConfigEditor.tsx:178), but the value can always be set through provisioning.",
+      "valueType": "boolean",
+      "target": "jsonData",
+      "defaultValue": false
+    },
+    {
       "id": "jsonData_datasourceId",
       "key": "datasourceId",
       "description": "The numeric data source instance ID. Populated in the backend from the plugin context (pkg/bigquery/settings.go:36) rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
@@ -500,7 +509,9 @@
       "fieldRefs": [
         "jsonData_processingLocation",
         "jsonData_serviceEndpoint",
-        "jsonData_MaxBytesBilled"
+        "jsonData_MaxBytesBilled",
+        "jsonData_restrictToAccessibleDatasets",
+        "jsonData_additionalAllowedDatasets"
       ]
     }
   ],
@@ -580,6 +591,20 @@
     },
     {
       "msg": "Optional query behaviour: jsonData.processingLocation restricts BigQuery job processing to a specific region (empty string = automatic selection; see https://cloud.google.com/bigquery/docs/locations for the list). jsonData.serviceEndpoint overrides the default https://bigquery.googleapis.com/bigquery/v2/ URL (for private-service-connect / regional endpoints). jsonData.MaxBytesBilled caps the bytes any query may bill (integer bytes, e.g. 5242880 = 5 MB). Two fields are declared in the backend Settings struct but not read at runtime: jsonData.flatRateProject and jsonData.queryPriority — do not populate them for new datasources.",
+      "tags": [
+        "llm",
+        "settings"
+      ]
+    },
+    {
+      "msg": "Dataset access restriction: set jsonData.restrictToAccessibleDatasets to true to reject queries that reference tables outside the GCP projects the data source credentials can enumerate. Each query is dry-run first and the referenced tables BigQuery reports are checked before it executes (pkg/bigquery/driver/allowlist.go:77). The check fails closed — anything whose referenced tables cannot be determined reliably is rejected, so multi-statement scripts, EXECUTE IMMEDIATE and procedure calls are refused outright, as are queries referencing 50 or more tables (BigQuery stops reporting them past that point). jsonData.additionalAllowedDatasets is a comma-separated allowlist of datasets outside those projects that queries may still reference; it only has an effect when restrictToAccessibleDatasets is true. Example: {\"jsonData\":{\"restrictToAccessibleDatasets\":true,\"additionalAllowedDatasets\":\"bigquery-public-data.samples,shared_views\"}}",
+      "tags": [
+        "llm",
+        "settings"
+      ]
+    },
+    {
+      "msg": "Entries in jsonData.additionalAllowedDatasets are written either as 'project.dataset' or as a bare 'dataset', which is qualified with jsonData.defaultProject. Prefer the 'project.dataset' form: bare entries are silently ignored when the data source has no default project to qualify them with (pkg/bigquery/driver/allowlist.go:50-59). Projects named only in the allowlist are also added to the query builder's project list, and for those projects the dataset picker offers just the allowlisted datasets rather than every dataset the credentials can see. Note that with authenticationType 'forwardOAuthIdentity' or 'workloadIdentityFederation' — both of which set jsonData.oauthPassThru to true — the credentials cannot enumerate projects, so only jsonData.defaultProject counts as accessible (pkg/bigquery/datasource.go:453) and every other dataset needs an explicit allowlist entry.",
       "tags": [
         "llm",
         "settings"

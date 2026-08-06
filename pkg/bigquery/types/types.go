@@ -20,13 +20,17 @@ type BigQuerySettings struct {
 	MaxBytesBilled               int64  `json:"MaxBytesBilled,omitempty"`
 	RestrictToAccessibleDatasets bool   `json:"restrictToAccessibleDatasets,omitempty"`
 	AdditionalAllowedDatasets    string `json:"additionalAllowedDatasets,omitempty"`
-	Updated                      time.Time
-	AuthenticationType           string `json:"authenticationType"`
-	PrivateKeyPath               string `json:"privateKeyPath"`
-	ServiceEndpoint              string `json:"serviceEndpoint"`
-	UsingImpersonation           bool   `json:"usingImpersonation"`
-	ServiceAccountToImpersonate  string `json:"serviceAccountToImpersonate"`
-	OAuthPassthroughEnabled      bool   `json:"oauthPassThru"`
+	// EnableSecureSocksProxy is written by Grafana's SecureSocksProxySettings
+	// editor and consumed by core when it builds the datasource HTTP client, not
+	// by this plugin. Declared so the settings model covers every jsonData key.
+	EnableSecureSocksProxy      bool `json:"enableSecureSocksProxy,omitempty"`
+	Updated                     time.Time
+	AuthenticationType          string `json:"authenticationType"`
+	PrivateKeyPath              string `json:"privateKeyPath"`
+	ServiceEndpoint             string `json:"serviceEndpoint"`
+	UsingImpersonation          bool   `json:"usingImpersonation"`
+	ServiceAccountToImpersonate string `json:"serviceAccountToImpersonate"`
+	OAuthPassthroughEnabled     bool   `json:"oauthPassThru"`
 
 	// Workload Identity Federation fields (read by Grafana Cloud's auth middleware)
 	WorkloadIdentityPoolProvider string `json:"workloadIdentityPoolProvider"`

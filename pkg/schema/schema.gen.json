@@ -40,6 +40,11 @@
               "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation'",
               "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
             },
+            "enableSecureSocksProxy": {
+              "description": "Connect to this data source through Grafana's secure SOCKS proxy. Read and applied by Grafana core when it builds the data source HTTP client, not by the plugin. The switch is only rendered in the configuration editor when the Grafana instance has secure_socks_datasource_proxy configured (src/components/ConfigEditor.tsx:178), but the value can always be set through provisioning.",
+              "type": "boolean",
+              "default": false
+            },
             "flatRateProject": {
               "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:13) but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
               "type": "string"
