@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.1
+
+⚙️ Updated dependencies
+
 ## 3.3.0
 
 ⚙️ Macro interpolation is now powered by [macropro](https://github.com/grafana/macropro), replacing the legacy `sqlutil` pipeline. Macro output is unchanged, with one safety improvement: macros inside SQL comments (`--`, `#`, `/* */`) are no longer expanded, and comments are stripped from the query sent to BigQuery.
