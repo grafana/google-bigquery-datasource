@@ -86,7 +86,9 @@
     "UNIXTIME",
     "uplot",
     "uuidv",
-    "vectorator"
+    "vectorator",
+    "struct",
+    "Struct"
   ],
   "language": "en-US"
 }
