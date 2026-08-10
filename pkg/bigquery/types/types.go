@@ -22,8 +22,10 @@ type BigQuerySettings struct {
 	AdditionalAllowedDatasets    string `json:"additionalAllowedDatasets,omitempty"`
 	// EnableSecureSocksProxy is written by Grafana's SecureSocksProxySettings
 	// editor and consumed by core when it builds the datasource HTTP client, not
-	// by this plugin. Declared so the settings model covers every jsonData key.
-	EnableSecureSocksProxy      bool `json:"enableSecureSocksProxy,omitempty"`
+	// by this plugin. Declared so the settings model covers every jsonData key,
+	// and lenient so a loosely typed provisioned value cannot fail the unmarshal
+	// and take the datasource down. See lenient.go.
+	EnableSecureSocksProxy      LenientBool `json:"enableSecureSocksProxy,omitempty"`
 	Updated                     time.Time
 	AuthenticationType          string `json:"authenticationType"`
 	PrivateKeyPath              string `json:"privateKeyPath"`
