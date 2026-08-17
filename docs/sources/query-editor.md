@@ -63,7 +63,7 @@ The query editor header includes the following options:
 
 ## Query with Grafana Assistant
 
-When [Grafana Assistant](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/) is available in your Grafana instance, the query editor header displays a **Query with Assistant** button. Use it to build and refine BigQuery queries with AI assistance instead of writing SQL by hand.
+When [Grafana Assistant](https://grafana.com/docs/grafana-cloud/platform/grafana-assistant/) is available in your Grafana instance, the query editor header displays a **Query with Assistant** button. Use it to build and refine BigQuery queries with AI assistance instead of writing SQL by hand.
 
 The Assistant uses the current query and the data source connection as context. It discovers the projects, datasets, and tables available to your data source to suggest relevant queries against your data. You can then run the generated query or continue editing it in Builder or Code mode.
 

@@ -27,7 +27,7 @@ This document provides solutions to common issues you may encounter when configu
 
 ## Version and upgrade guidance
 
-An outdated or unsynced plugin version is the most common cause of BigQuery data source failures. Before deeper troubleshooting, confirm you're on the latest version. Upgrading and then restarting Grafana resolves a wide range of problems.
+An outdated or out-of-sync plugin version is the most common cause of BigQuery data source failures. Before deeper troubleshooting, confirm you're on the latest version. Upgrading and then restarting Grafana resolves a wide range of problems.
 
 {{< admonition type="note" >}}
 On Grafana Cloud, the Google BigQuery plugin is managed by Grafana and updates automatically. On self-managed Grafana, you must update the plugin manually. In other managed environments, such as Azure Managed Grafana, the plugin version is controlled by the platform provider and can lag behind the latest release.
@@ -40,7 +40,7 @@ These symptoms often appear after a Grafana or platform upgrade:
 - **Save & test** fails with "An error occurred within the plugin" or another generic plugin error.
 - The data source won't save, or dashboards that previously loaded stop loading.
 - The configuration tab looks blank or incomplete.
-- Intermittent `Plugin unavailable` or HTTP 500 errors, especially after a pod or instance restart.
+- Intermittent `Plugin unavailable` or HTTP 500 errors, especially after a Pod or instance restart.
 
 ### Check and update the plugin version
 
@@ -79,13 +79,13 @@ Plugin version 3.x requires Grafana 11.6.11 or later. On Grafana 12.x, the plugi
 - Error message indicates the plugin is not registered, not found, or failed to load
 - Dashboards show **Datasource Error** after a Grafana or platform change
 - The plugin page shows the plugin as uninstalled or in an error state
-- Occurs after pod or instance restarts, including in Grafana Cloud
+- Occurs after Pod or instance restarts, including in Grafana Cloud
 - Data source was previously working but becomes unavailable
 
 **Solutions:**
 
 1. Open **Administration** > **Plugins and data** > **Plugins**, search for **Google BigQuery**, and check its status. If it isn't installed or shows an error, install or reinstall it (uninstall, then install again).
-1. Restart Grafana after reinstalling. After a platform update or pod restart, the plugin sometimes doesn't re-register until you reinstall and restart.
+1. Restart Grafana after reinstalling. After a platform update or Pod restart, the plugin sometimes doesn't re-register until you reinstall and restart.
 1. On self-managed Grafana, review the Grafana server logs for `grafana-bigquery-datasource` or `gpx_bigquery` errors. Refer to [Enable debug logging](#enable-debug-logging).
 1. On Grafana Cloud, you can't access backend plugin logs directly. If a reinstall doesn't restore the data source, contact [Grafana Support](https://grafana.com/support/) and ask them to review the plugin logs.
 1. If the issue persists after reinstalling, contact [Grafana Support](https://grafana.com/support/).
@@ -218,10 +218,10 @@ For detailed setup instructions including `gcloud` commands, refer to [Service a
 
 1. Confirm you're on Grafana Cloud. Workload Identity Federation is available on Grafana Cloud only, because Grafana Cloud exchanges the signed-in user's external OIDC token for a short-lived Google Cloud access token before the request reaches the plugin.
 1. Verify the **Workload Identity Pool Provider** resource path is correct and uses the format `projects/<project-number>/locations/global/workloadIdentityPools/<pool-id>/providers/<provider-id>`. Use the project **number** (a numeric ID such as `123456789`), not the project ID (such as `my-project`).
-1. Check the provider's attribute mappings in Google Cloud. The `google.subject` attribute must map to the correct claim from your identity provider (for example, `assertion.sub` — the exact mapping depends on your provider's claim format).
+1. Check the provider's attribute mappings in Google Cloud. The `google.subject` attribute must map to the correct claim from your identity provider (for example, `assertion.sub`; the exact mapping depends on your provider's claim format).
 1. Verify the BigQuery permissions are granted to the correct principal:
-   - **Without impersonation** — the WIF pool principal needs the **BigQuery Data Viewer** and **BigQuery Job User** roles, and the **Service account email** field must be left blank.
-   - **With impersonation** — the impersonated service account needs the **BigQuery Data Viewer** and **BigQuery Job User** roles, the WIF pool principal needs the **Service Account Token Creator** role on that service account, and the impersonated service account's full email must be entered in the **Service account email** field.
+   - **Without impersonation:** the WIF pool principal needs the **BigQuery Data Viewer** and **BigQuery Job User** roles, and the **Service account email** field must be left blank.
+   - **With impersonation:** the impersonated service account needs the **BigQuery Data Viewer** and **BigQuery Job User** roles, the WIF pool principal needs the **Service Account Token Creator** role on that service account, and the impersonated service account's full email must be entered in the **Service account email** field.
 1. Ensure your Grafana Cloud stack's SSO integration is configured against the same OIDC provider that the workload identity pool trusts. If the signed-in user's identity isn't available, Grafana Cloud can't exchange it for a Google Cloud access token.
 
 {{< admonition type="note" >}}
@@ -240,7 +240,7 @@ For detailed setup instructions, refer to [Workload Identity Federation](https:/
 
 **Solutions:**
 
-1. Verify the OAuth scopes are configured in Grafana's OAuth settings: `https://www.googleapis.com/auth/bigquery` and `https://www.googleapis.com/auth/drive` (if querying data linked to Google Drive).
+1. Verify the OAuth scopes are configured in the Grafana OAuth settings: `https://www.googleapis.com/auth/bigquery` and `https://www.googleapis.com/auth/drive` (if querying data linked to Google Drive).
 1. Ensure users have authenticated with Google OAuth before accessing BigQuery dashboards.
 1. Check that the **Default project** is configured in the data source settings.
 1. If you updated OAuth scopes in a configuration file but the data source still fails, the Grafana database may be storing stale settings that override the file-based configuration. To fix this, open the data source settings in the Grafana UI, re-enter the correct scopes, and click **Save & test**.
@@ -265,7 +265,7 @@ These errors occur when Grafana cannot reach Google BigQuery endpoints.
 
 1. Verify network connectivity from the Grafana server to Google Cloud endpoints.
 1. Check firewall rules allow outbound HTTPS (port 443) to `*.googleapis.com`.
-1. If using a proxy, ensure it's configured correctly in Grafana's settings.
+1. If using a proxy, ensure it's configured correctly in the Grafana settings.
 1. For Grafana Cloud accessing private resources, configure [Private data source connect](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/).
 
 ### "Could not resolve host"
@@ -305,12 +305,12 @@ For general PDC setup, refer to [Private data source connect](https://grafana.co
 
 These errors occur during data source setup or provisioning.
 
-### "Failed to save datasource"
+### Failed to save data source
 
 **Symptoms:**
 
 - Unable to save data source configuration
-- Error when clicking **Save & test**
+- Error when clicking **Save & test**, including `Failed to save datasource`
 
 **Solutions:**
 
@@ -327,12 +327,12 @@ These errors occur during data source setup or provisioning.
 
 **Solutions:**
 
-1. Verify YAML syntax is correct (use a YAML validator).
+1. Verify YAML syntax is correct (use a YAML syntax checker).
 1. Check that `type` is set to `grafana-bigquery-datasource`.
 1. Ensure `authenticationType` matches the credentials provided.
-1. For `privateKey` in `secureJsonData`, ensure newlines are preserved (use `|` for multiline strings in YAML).
+1. For `privateKey` in `secureJsonData`, ensure newlines are preserved (use `|` for multi-line strings in YAML).
 
-**Example with multiline private key:**
+**Example with a multi-line private key:**
 
 ```yaml
 apiVersion: 1
@@ -381,12 +381,12 @@ These errors occur when executing queries against BigQuery.
 
 **Solutions:**
 
-1. Use the query validator in the SQL editor to identify syntax issues.
+1. Use query validation in the SQL editor to identify syntax issues.
 1. Verify table and column names are correctly quoted with backticks.
 1. Check that macros are used correctly (for example, `$__timeFilter(column)` not `$__timeFilter`).
 1. Ensure BigQuery Standard SQL syntax is used, not Legacy SQL.
 
-### "the query references table ... which is outside the projects accessible"
+### Table outside accessible projects
 
 These errors appear when **Restrict to accessible datasets** is enabled in the data source settings.
 
@@ -417,7 +417,7 @@ These errors appear when **Restrict to accessible datasets** is enabled in the d
 | Cause | Solution |
 |-------|----------|
 | The query scans too much data | In the [BigQuery Console query history](https://cloud.google.com/bigquery/docs/managing-jobs#view-jobs), check bytes processed. Add partition or cluster filters, narrow the dashboard time range, and avoid `SELECT *`. |
-| Grafana's query timeout | The BigQuery data source has no timeout setting. Dashboard queries use Grafana's data proxy timeout (default 30 seconds). Alert rules use the alerting evaluation timeout (default 30 seconds). |
+| Grafana query timeout | The BigQuery data source has no timeout setting. Dashboard queries use the Grafana data proxy timeout (default 30 seconds). Alert rules use the alerting evaluation timeout (default 30 seconds). |
 | Many panels or alert rules at once | Dashboards with many BigQuery panels, and alert rules in the same evaluation group, run queries concurrently and can all hit the timeout together. |
 
 **Solutions:**
@@ -425,7 +425,7 @@ These errors appear when **Restrict to accessible datasets** is enabled in the d
 1. Optimize the query first. Increasing a timeout doesn't help a scan of terabytes. Filter on the partition column with `$__timeFilter`, use clustered tables, and select only the columns you need.
 1. On self-managed Grafana, you can raise the Grafana timeouts if the query is already efficient:
    - Dashboards: `[dataproxy] timeout` in `grafana.ini` (default `30`). Refer to [timeout](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-grafana/#timeout).
-   - Alerting: `[unified_alerting] evaluation_timeout` (default `30s`). Refer to [evaluation_timeout](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-grafana/#evaluation_timeout).
+   - Alerting: `[unified_alerting] evaluation_timeout` (default `30s`). Refer to the [`evaluation_timeout`](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-grafana/#evaluation_timeout) setting.
 1. Restart Grafana after changing `grafana.ini`.
 1. On Grafana Cloud, you typically can't raise these timeouts. Reduce bytes scanned, or pre-aggregate data in BigQuery.
 1. For alerting, split heavy rules into separate evaluation groups so they don't all query BigQuery at the same time. Refer to [Performance considerations](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/#performance-considerations).
@@ -540,7 +540,7 @@ These issues relate to slow queries or high costs.
 1. **Narrow the time range.** Shorter time ranges scan less data. Use the dashboard time picker to limit the window.
 1. **Avoid `SELECT *`.** Select only the columns your visualization needs. BigQuery is columnar, so fewer columns means less data scanned.
 1. **Add `LIMIT` during development.** Use `LIMIT` when building and testing queries to reduce scan costs.
-1. **Use appropriate aggregation intervals.** Aggregate data to match the visualization granularity — there's no benefit in returning per-second data for a chart showing daily trends.
+1. **Use appropriate aggregation intervals.** Aggregate data to match the visualization granularity. There's no benefit in returning per-second data for a chart showing daily trends.
 1. **Set `Max bytes billed`.** Configure this in **Additional Settings** to prevent unexpectedly expensive queries from running.
 1. **Enable `Restrict to accessible datasets`.** Configure this in **Additional Settings** to reject queries that reference tables outside the projects the data source has access to. This blocks queries against public datasets such as `bigquery-public-data`, which IAM cannot restrict.
 1. Consider using BigQuery BI Engine for frequently accessed data.
@@ -594,7 +594,7 @@ If dataset browsing works on self-managed Grafana but not on Grafana Cloud, veri
 Template variable substitution behavior is consistent between self-managed Grafana and Grafana Cloud. If you observe differences after migration, check:
 
 1. The plugin version matches between environments. Older plugin versions may handle multi-value variables differently.
-1. The data source configuration is identical — particularly the **Default project** and **Processing location** settings.
+1. The data source configuration is identical, particularly the **Default project** and **Processing location** settings.
 1. Variable queries that rely on `$__interval` or time-range macros may produce different results if the default dashboard time range differs between environments.
 
 ## Auditing and usage tracking

@@ -35,9 +35,9 @@ Before configuring the data source, ensure you have:
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
 - **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or Grafana running on Google Compute Engine with a default service account.
 - **Required GCP IAM roles:** The service account (or impersonated service account) must have the following roles on each project it accesses:
-  - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`) — read access to BigQuery data
-  - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
-  - **`resourcemanager.projects.get`** permission — required for the project drop-down to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
+  - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`): read access to BigQuery data
+  - **BigQuery Job User** (`roles/bigquery.jobUser`): permission to run BigQuery jobs
+  - **`resourcemanager.projects.get`** permission: required for the project drop-down to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
 
 Grant **BigQuery Data Viewer** and **BigQuery Job User** at the **project** level when you can. Those project-level roles cover querying and listing datasets in that project. They aren't sufficient by themselves if you only grant access on individual datasets or tables:
 
@@ -119,12 +119,12 @@ When Grafana runs on a GCE virtual machine, it can automatically retrieve the de
 
 ### Service account impersonation
 
-Use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation) when you need to delegate access to BigQuery without distributing service account keys with broad permissions. With impersonation, the key stored in Grafana has minimal permissions — it can only generate short-lived tokens for a separate service account that has BigQuery access. This means the stored credentials cannot directly read data, reducing risk if they are compromised. This is the recommended secure authentication method for connecting Grafana Cloud to BigQuery.
+Use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation) when you need to delegate access to BigQuery without distributing service account keys with broad permissions. With impersonation, the key stored in Grafana has minimal permissions. It can only generate short-lived tokens for a separate service account that has BigQuery access. This means the stored credentials cannot directly read data, reducing risk if they are compromised. This is the recommended secure authentication method for connecting Grafana Cloud to BigQuery.
 
 Service account impersonation involves two service accounts:
 
-- **Authenticating service account** — The service account whose JSON key is uploaded to Grafana. This account's only permission is to create access tokens for the impersonated account. It requires the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (`roles/iam.serviceAccountTokenCreator`).
-- **Impersonated service account** — The service account that has permissions to read data from BigQuery. Grafana assumes this account's identity to run queries. It requires the **BigQuery Data Viewer** and **BigQuery Job User** roles.
+- **Authenticating service account:** The service account whose JSON key is uploaded to Grafana. This account's only permission is to create access tokens for the impersonated account. It requires the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (`roles/iam.serviceAccountTokenCreator`).
+- **Impersonated service account:** The service account that has permissions to read data from BigQuery. Grafana assumes this account's identity to run queries. It requires the **BigQuery Data Viewer** and **BigQuery Job User** roles.
 
 #### Configure GCP permissions
 
@@ -173,16 +173,16 @@ Configuring Workload Identity Federation involves three systems: Google Cloud, y
 
 #### In Google Cloud
 
-1. Create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC identity provider. When configuring the provider, set up attribute mappings so that `google.subject` maps to the relevant claim from your identity provider (for example, `assertion.sub` — the exact mapping depends on your provider's claim format).
+1. Create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC identity provider. When configuring the provider, set up attribute mappings so that `google.subject` maps to the relevant claim from your identity provider (for example, `assertion.sub`; the exact mapping depends on your provider's claim format).
 1. Grant the BigQuery permissions needed to run queries. How you grant them depends on whether you use service account impersonation:
-   - **Without impersonation** — grant the WIF pool principal directly:
+   - **Without impersonation:** grant the WIF pool principal directly:
      - **BigQuery Data Viewer**
      - **BigQuery Job User**
-   - **With impersonation** — create a service account, grant it those same roles, then grant the WIF pool principal the **Service Account Token Creator** role on that service account.
+   - **With impersonation:** create a service account, grant it those same roles, then grant the WIF pool principal the **Service Account Token Creator** role on that service account.
 
 #### In Grafana Cloud
 
-1. Configure your Grafana Cloud stack's SSO integration against the same OIDC provider, so the signed-in user's identity is available for Grafana Cloud to exchange for a Google Cloud access token before the request reaches the plugin. Refer to [Configure OAuth2 authentication](https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/generic-oauth/) for setup details.
+1. Configure your Grafana Cloud stack's SSO integration against the same OIDC provider, so the signed-in user's identity is available for Grafana Cloud to exchange for a Google Cloud access token before the request reaches the plugin. Refer to [Configure OAuth2 authentication](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/configure-authentication/generic-oauth/) for setup details.
 
 #### In the data source configuration
 
@@ -203,7 +203,7 @@ Credentials from Workload Identity Federation are tied to the signed-in user's a
 
 ### Forward OAuth Identity
 
-Use Forward OAuth Identity when you want to use Grafana's Google OAuth authentication with BigQuery.
+Use Forward OAuth Identity when you want to use Google OAuth authentication in Grafana with BigQuery.
 
 To configure Forward OAuth Identity:
 
