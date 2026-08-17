@@ -39,6 +39,11 @@ Before configuring the data source, ensure you have:
   - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
   - **`resourcemanager.projects.get`** permission — required for the project drop-down to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
 
+Grant **BigQuery Data Viewer** and **BigQuery Job User** at the **project** level when you can. Those project-level roles cover querying and listing datasets in that project. They aren't sufficient by themselves if you only grant access on individual datasets or tables:
+
+- The query editor dataset drop-down uses the BigQuery `datasets.list` API, which returns only datasets the caller can get. If the service account isn't a dataset [READER](https://cloud.google.com/bigquery/docs/control-access-to-resources-iam#grant_access_to_a_dataset) (or doesn't have `bigquery.datasets.get` on that dataset), the dataset doesn't appear in the drop-down. Refer to [datasets.list](https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets/list).
+- **Save & test** can still succeed. For IAM details beyond these roles, refer to [BigQuery access control](https://cloud.google.com/bigquery/docs/access-control).
+
 {{< admonition type="note" >}}
 If the service account has project-level access but not dataset or table-level access, **Save & test** may succeed while individual queries return 403 errors. Ensure the service account has read access to the specific datasets and tables you intend to query.
 {{< /admonition >}}

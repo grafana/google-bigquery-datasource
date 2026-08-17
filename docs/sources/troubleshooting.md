@@ -112,6 +112,7 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 | API not enabled                        | Enable the [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com) in your project. |
 | Dataset or table-level restrictions    | Grant the service account access to the specific datasets or tables, not just the project.                        |
 | Empty project drop-down                | That's a Cloud Resource Manager permission issue, not a query 403. Refer to [Project drop-down not populating](#project-drop-down-not-populating). |
+| Empty dataset drop-down                | Project-level Data Viewer and Job User aren't enough if access is only on specific datasets. Grant dataset READER (or `bigquery.datasets.get`) on those datasets. Refer to [Dataset drop-down not populating](#dataset-drop-down-not-populating). |
 
 To isolate whether the failure is in Grafana or GCP, run the same query as the service account outside Grafana. In the [Google Cloud Console](https://console.cloud.google.com/bigquery) query editor, or with the [`bq` CLI](https://cloud.google.com/bigquery/docs/bq-command-line-tool) after activating the key:
 
@@ -149,6 +150,21 @@ If that query fails, fix IAM or APIs in GCP before changing the data source. If 
 1. Grant the service account the `resourcemanager.projects.get` permission. This permission is included in the **Browser** role (`roles/browser`) or can be assigned through a custom role.
 1. Ensure the [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com) is enabled in the project.
 1. Verify the service account has access to the projects you expect to see listed. The drop-down only shows projects where the service account has at least one role.
+
+### Dataset drop-down not populating
+
+**Symptoms:**
+
+- The project drop-down has values, but the dataset drop-down is empty or missing datasets
+- You can run SQL that names the dataset, but you can't select it in Builder mode
+
+The query editor lists datasets with BigQuery [`datasets.list`](https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets/list), which returns only datasets the caller can get (`bigquery.datasets.get`). **BigQuery Data Viewer** and **BigQuery Job User** at project level include that. Dataset-scoped grants don't, unless the identity is also a dataset [READER](https://cloud.google.com/bigquery/docs/control-access-to-resources-iam#grant_access_to_a_dataset).
+
+**Solutions:**
+
+1. Prefer project-level **BigQuery Data Viewer** on the project that owns the datasets.
+1. If you must use dataset-level IAM, add the service account as a dataset READER (or grant `bigquery.datasets.get`) on each dataset that should appear in the drop-down.
+1. Confirm the same identity can list datasets in the [Google Cloud Console](https://console.cloud.google.com/bigquery) or with `bq ls --project_id=<PROJECT_ID>`.
 
 ### "Invalid JWT signature" or "Invalid token"
 
