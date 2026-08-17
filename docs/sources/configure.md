@@ -17,7 +17,7 @@ labels:
 menuTitle: Configure
 title: Configure the Google BigQuery data source
 weight: 100
-review_date: 2026-02-11
+review_date: 2026-08-17
 ---
 
 # Configure the Google BigQuery data source
@@ -28,12 +28,12 @@ This document explains how to configure the Google BigQuery data source in Grafa
 
 Before configuring the data source, ensure you have:
 
-- **Grafana version:** 11.6.0 or later (plugin version 3.x). For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
+- **Grafana version:** Plugin version 3.x requires Grafana 11.6.11 or later. On Grafana 12.x, the plugin also requires these minimum patch versions: 12.0.10, 12.1.7, or 12.2.5, depending on your minor release. For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8 or later) or 1.x.
 - **Grafana permissions:** `Organization administrator` role to add data sources.
 - **Google Cloud APIs enabled:** The following APIs must be enabled on each GCP project you query:
   - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
-- **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server.
+- **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or Grafana running on Google Compute Engine with a default service account.
 - **Required GCP IAM roles:** The service account (or impersonated service account) must have the following roles on each project it accesses:
   - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`) — read access to BigQuery data
   - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
@@ -46,6 +46,18 @@ If the service account has project-level access but not dataset or table-level a
 {{< admonition type="note" >}}
 Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
 {{< /admonition >}}
+
+## Key concepts
+
+If you're new to Google Cloud or BigQuery, these terms appear throughout the configuration:
+
+| Term | Description |
+|------|-------------|
+| **Service account** | A Google Cloud identity used by applications. Grafana authenticates to BigQuery as this account (or impersonates another account). |
+| **Service account impersonation** | Grafana uses a low-privilege key only to mint short-lived tokens for a second service account that has BigQuery access. |
+| **Workload Identity Federation (WIF)** | Grafana Cloud exchanges the signed-in user's external identity for a short-lived Google Cloud token. Available on Grafana Cloud only. |
+| **Processing location** | The geographic location where BigQuery runs the query. Leave empty for automatic selection. |
+| **Max bytes billed** | A per-query cost cap. Queries that would scan more than this limit fail instead of running. |
 
 ## Add the data source
 
@@ -66,7 +78,15 @@ To add the Google BigQuery data source:
 
 ## Authentication
 
-Google BigQuery data source supports multiple authentication methods. Choose the method that best fits your deployment environment.
+The Google BigQuery data source supports multiple authentication methods. Choose the method that best fits your deployment environment.
+
+| Method | Best for | Grafana Cloud | Supports alerting |
+|--------|----------|---------------|-------------------|
+| **Google JWT File** | Any deployment that can store a service account key | Yes | Yes |
+| **GCE Default Service Account** | Grafana running on a Google Compute Engine VM | No | Yes |
+| **Service account impersonation** | Delegating BigQuery access without storing a high-privilege key. An option on JWT or GCE, not a standalone type | Yes | Yes |
+| **Workload Identity Federation** | Grafana Cloud users authenticating through an external OIDC provider | Yes (Cloud only) | No |
+| **Forward OAuth Identity** | Using Google OAuth login in Grafana for interactive queries | Yes | No |
 
 ### Google Service Account key
 
@@ -82,7 +102,7 @@ To configure service account authentication:
 1. In the data source configuration, select **Google JWT File** as the authentication type.
 1. Upload the JSON key file or paste its contents.
 
-### Google Metadata Server
+### GCE default service account
 
 Use this method when running Grafana on a Google Compute Engine (GCE) virtual machine.
 
@@ -90,7 +110,7 @@ When Grafana runs on a GCE virtual machine, it can automatically retrieve the de
 
 1. Ensure your virtual machine has a service account configured as the default account.
 1. Assign the service account the **BigQuery Data Viewer** and **BigQuery Job User** roles.
-1. In the data source configuration, select **Google Metadata Server** as the authentication type.
+1. In the data source configuration, select **GCE Default Service Account** as the authentication type.
 
 ### Service account impersonation
 
@@ -132,8 +152,8 @@ To configure service account impersonation in the data source settings:
 
 1. In the **Authentication** section, select **Google JWT File** as the authentication type.
 1. Upload the JSON key file for the **authenticating** service account.
-1. Enable **Service Account Impersonation**.
-1. Enter the full email address of the **impersonated** service account.
+1. Under **Service account impersonation**, turn on **Enable**.
+1. Enter the full email address of the impersonated service account in **Service account to impersonate**.
 1. Click **Save & test** to verify the connection.
 
 ### Workload Identity Federation
@@ -170,10 +190,10 @@ Use the **project number** (a numeric ID such as `123456789`), not the project I
    {{< /admonition >}}
 
 1. If you set up service account impersonation, enter the service account email in the **Service account email** field. If you granted permissions directly to the WIF pool, leave this blank.
-1. Enter the **Default project** where your BigQuery queries will run.
+1. Enter the **Default project** where your BigQuery queries run.
 
 {{< admonition type="note" >}}
-Credentials from Workload Identity Federation are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
+Credentials from Workload Identity Federation are tied to the signed-in user's active session. There is no long-lived credential available to the Grafana backend, so features that run without a user present don't work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 ### Forward OAuth Identity
@@ -190,7 +210,7 @@ To configure Forward OAuth Identity:
 1. Enter the **Default project** where queries run.
 
 {{< admonition type="note" >}}
-Credentials from Forward OAuth Identity are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
+Credentials from Forward OAuth Identity are tied to the signed-in user's active session. There is no long-lived credential available to the Grafana backend, so features that run without a user present don't work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 ## Additional settings
@@ -255,7 +275,7 @@ datasources:
       privateKeyPath: '/etc/secrets/bigquery.pem'
 ```
 
-### Google Metadata Server
+### GCE default service account
 
 ```yaml
 apiVersion: 1
@@ -268,7 +288,7 @@ datasources:
       authenticationType: gce
 ```
 
-### Google Metadata Server with service account impersonation
+### GCE default service account with service account impersonation
 
 ```yaml
 apiVersion: 1
@@ -409,7 +429,7 @@ resource "grafana_data_source" "bigquery" {
 }
 ```
 
-### Google Metadata Server
+### GCE default service account
 
 ```hcl
 resource "grafana_data_source" "bigquery" {

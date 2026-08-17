@@ -18,16 +18,30 @@ labels:
 menuTitle: Troubleshooting
 title: Troubleshoot Google BigQuery data source issues
 weight: 600
-review_date: 2026-02-11
+review_date: 2026-08-17
 ---
 
 # Troubleshoot Google BigQuery data source issues
 
 This document provides solutions to common issues you may encounter when configuring or using the Google BigQuery data source. For configuration instructions, refer to [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/).
 
-## Plugin version errors
+## Version and upgrade guidance
 
-These errors are the most common cause of issues with the BigQuery data source. Most generic error messages on **Save & test** are caused by running an outdated plugin version.
+Many BigQuery issues are caused by running an outdated plugin version. Before deeper troubleshooting, confirm you're on the latest version, because upgrading resolves a wide range of problems.
+
+{{< admonition type="note" >}}
+On Grafana Cloud, the Google BigQuery plugin is managed by Grafana and updates automatically. On self-managed Grafana, you must update the plugin manually. In other managed environments, such as Azure Managed Grafana, the plugin version is controlled by the platform provider and can lag behind the latest release.
+{{< /admonition >}}
+
+### Check and update the plugin version
+
+1. Navigate to **Administration** > **Plugins and data** > **Plugins**.
+1. Search for the plugin and open its page.
+1. Review the installed version and the latest available version.
+1. If an update is available and you're on self-managed Grafana, click **Update**.
+1. Restart Grafana after updating. Plugin updates might not take effect until the instance is restarted.
+
+Plugin version 3.x requires Grafana 11.6.11 or later. On Grafana 12.x, the plugin also requires these minimum patch versions: 12.0.10, 12.1.7, or 12.2.5, depending on your minor release. For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8 or later) or 1.x.
 
 ### "An error occurred within the plugin" or generic plugin errors
 
@@ -39,9 +53,9 @@ These errors are the most common cause of issues with the BigQuery data source. 
 
 **Solutions:**
 
-1. Update the BigQuery plugin to the latest version. In Grafana, go to **Administration** > **Plugins and data** > **Plugins**, search for BigQuery, and check for updates.
-1. Restart your Grafana instance after updating. Plugin updates may not take effect until the instance is restarted.
-1. Verify the plugin version is compatible with your Grafana version. Plugin version 3.x requires Grafana 11.6.0 or later. For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
+1. Update the BigQuery plugin to the latest version using the steps in [Check and update the plugin version](#check-and-update-the-plugin-version).
+1. Restart your Grafana instance after updating.
+1. Verify the plugin version is compatible with your Grafana version.
 
 ### "Plugin not registered"
 
@@ -129,7 +143,7 @@ These errors occur when credentials are invalid, missing, or don't have the requ
 
 **Solutions:**
 
-1. Verify you have configured authentication *before* enabling impersonation. Service account impersonation requires an underlying authentication method (either Google JWT File or GCE Default Service Account). Upload your authenticating service account's JSON key first, then enable the impersonation checkbox.
+1. Verify you have configured authentication *before* enabling impersonation. Service account impersonation requires an underlying authentication method (either Google JWT File or GCE Default Service Account). Upload your authenticating service account's JSON key first, then under **Service account impersonation**, turn on **Enable**.
 1. Verify the authenticating service account has the **Service Account Token Creator** role (`roles/iam.serviceAccountTokenCreator`) on the impersonated service account.
 1. Ensure the impersonated service account has the required BigQuery roles (**BigQuery Data Viewer** and **BigQuery Job User**).
 1. Check that the impersonated service account email is the full email address (for example, `my-sa@my-project.iam.gserviceaccount.com`).
@@ -156,7 +170,7 @@ For detailed setup instructions including `gcloud` commands, refer to [Service a
 1. Ensure your Grafana Cloud stack's SSO integration is configured against the same OIDC provider that the workload identity pool trusts. If the signed-in user's identity isn't available, Grafana Cloud can't exchange it for a Google Cloud access token.
 
 {{< admonition type="note" >}}
-Credentials from Workload Identity Federation are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
+Credentials from Workload Identity Federation are tied to the signed-in user's active session. There is no long-lived credential available to the Grafana backend, so features that run without a user present don't work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 For detailed setup instructions, refer to [Workload Identity Federation](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/#workload-identity-federation).
@@ -226,7 +240,7 @@ These errors occur when Grafana cannot reach Google BigQuery endpoints.
 1. Verify the PDC agent is running and connected. Check the agent logs and the PDC status in your Grafana Cloud instance under **Administration** > **Private data source connect**.
 1. Restart the PDC agent if you see "socks connect tcp ... network unreachable" errors. This error typically indicates the agent has lost its connection and needs to be restarted.
 1. Run multiple PDC agents for high availability. A single agent creates a single point of failure — if it goes down, all data sources using PDC become unavailable.
-1. If the SSH tunnel opens but immediately closes, this can indicate a plugin installation error rather than a network problem. Verify the BigQuery plugin is correctly installed and not in an error state (refer to [Plugin version errors](#plugin-version-errors)).
+1. If the SSH tunnel opens but immediately closes, this can indicate a plugin installation error rather than a network problem. Verify the BigQuery plugin is correctly installed and not in an error state (refer to [Version and upgrade guidance](#version-and-upgrade-guidance)).
 1. Ensure the PDC agent's network allows outbound HTTPS (port 443) to `*.googleapis.com`.
 
 For general PDC setup and configuration, refer to [Private data source connect](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/).
@@ -300,7 +314,7 @@ These errors occur when executing queries against BigQuery.
 | Time range doesn't contain data   | Expand the dashboard time range or verify data exists in BigQuery for the selected period. |
 | Wrong project, dataset, or table  | Verify you've selected the correct resources in the query.                                 |
 | Filter conditions too restrictive | Review `WHERE` clauses and ensure they match existing data.                                |
-| Macro not expanding correctly     | Check the generated SQL in Query Inspector to verify macro expansion.                      |
+| Macro not expanding correctly     | Check the generated SQL in Query Inspector to verify macro expansion. Macros inside SQL comments (`--`, `#`, `/* */`) aren't expanded, and those comments are stripped from the query sent to BigQuery. |
 
 ### "Syntax error" or "Query parse error"
 
@@ -315,6 +329,24 @@ These errors occur when executing queries against BigQuery.
 1. Verify table and column names are correctly quoted with backticks.
 1. Check that macros are used correctly (for example, `$__timeFilter(column)` not `$__timeFilter`).
 1. Ensure BigQuery Standard SQL syntax is used, not Legacy SQL.
+
+### "the query references table ... which is outside the projects accessible"
+
+These errors appear when **Restrict to accessible datasets** is enabled in the data source settings.
+
+**Symptoms:**
+
+- The query fails before it runs, with a message about datasets, referenced tables, or `EXECUTE IMMEDIATE`
+- The same SQL works when the restriction is turned off
+
+**Possible causes and solutions:**
+
+| Cause | Solution |
+|-------|----------|
+| The query references a table outside the projects this data source can access, including tables reached through views | Add the dataset to **Additional allowed datasets** as `project.dataset`, or query a table in an accessible project. |
+| Multi-statement scripts, `EXECUTE IMMEDIATE`, or procedure calls | The plugin can't verify referenced tables for these statement types. Run each statement as a separate query. |
+| The query references 50 or more tables | Split the query so each statement references fewer tables. BigQuery reports at most 50 referenced tables in dry-run statistics. |
+| Bare dataset names in **Additional allowed datasets** with no default project | Use the `project.dataset` form, or set a **Default project** so bare names can be qualified. |
 
 ### Query timeout
 
@@ -334,7 +366,7 @@ These errors occur when executing queries against BigQuery.
 1. Consider pre-aggregating data for frequently-used queries.
 
 {{< admonition type="note" >}}
-Queries that process terabytes of data will likely exceed any reasonable timeout setting. In these cases, refactor the query to reduce the data scanned rather than increasing the timeout. Use partition filters, narrow the time range, or pre-aggregate data in BigQuery before querying from Grafana.
+Queries that process terabytes of data likely exceed any reasonable timeout setting. In these cases, refactor the query to reduce the data scanned rather than increasing the timeout. Use partition filters, narrow the time range, or pre-aggregate data in BigQuery before querying from Grafana.
 {{< /admonition >}}
 
 ### "Query exceeded resource limits"
@@ -479,21 +511,21 @@ These issues relate to slow queries or high costs.
 The Storage API doesn't work with Forward OAuth Identity authentication.
 {{< /admonition >}}
 
-## Grafana Cloud vs. self-hosted differences
+## Grafana Cloud vs. self-managed differences
 
-If you are migrating from self-hosted Grafana to Grafana Cloud, be aware of the following behavioral differences with the BigQuery plugin.
+If you are migrating from self-managed Grafana to Grafana Cloud, be aware of the following behavioral differences with the BigQuery plugin.
 
 ### Dataset and table browsing
 
-On self-hosted Grafana, the BigQuery plugin connects directly to Google Cloud APIs. On Grafana Cloud, the connection may route through [Private data source connect (PDC)](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/) if your BigQuery resources are not publicly accessible. This routing can affect the speed at which datasets and tables load in the query editor dropdowns.
+On self-managed Grafana, the BigQuery plugin connects directly to Google Cloud APIs. On Grafana Cloud, the connection may route through [Private data source connect (PDC)](https://grafana.com/docs/grafana-cloud/connect-externally-hosted/private-data-source-connect/) if your BigQuery resources are not publicly accessible. This routing can affect the speed at which datasets and tables load in the query editor drop-downs.
 
 Whether all projects are visible in the project selector depends on service account permissions rather than PDC. Ensure the service account has `resourcemanager.projects.get` on each project you expect to see listed.
 
-If dataset browsing works on self-hosted but not on Grafana Cloud, verify your PDC agent is running and that the service account permissions are identical between environments.
+If dataset browsing works on self-managed Grafana but not on Grafana Cloud, verify your PDC agent is running and that the service account permissions are identical between environments.
 
 ### Query variable substitution
 
-Template variable substitution behavior is consistent between self-hosted and Grafana Cloud. If you observe differences after migration, check:
+Template variable substitution behavior is consistent between self-managed Grafana and Grafana Cloud. If you observe differences after migration, check:
 
 1. The plugin version matches between environments. Older plugin versions may handle multi-value variables differently.
 1. The data source configuration is identical — particularly the **Default project** and **Processing location** settings.
