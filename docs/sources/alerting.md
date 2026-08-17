@@ -153,9 +153,10 @@ For BigQuery:
 
 BigQuery alerts run on a schedule, and each evaluation executes a query against BigQuery. Consider these factors:
 
-- **Query cost:** Each alert evaluation runs a query. Optimize queries to scan less data using filters and partitioned tables.
+- **Query cost:** Each alert evaluation runs a query. Optimize queries to scan less data using filters and partitioned tables. In the BigQuery Console, check bytes processed for the job.
 - **Evaluation interval:** Don't set intervals shorter than necessary. A 1-minute interval runs 1,440 queries per day per alert rule.
-- **Query timeout:** Complex queries may timeout. Simplify queries or pre-aggregate data for alerting.
+- **Concurrent evaluations:** Rules in the same evaluation group run at the same time. A large group of BigQuery rules can hit Grafana's evaluation timeout (default 30 seconds) together. Split heavy rules into separate groups, or use a longer interval.
+- **Query timeout:** The BigQuery data source has no timeout setting. Alert evaluations use Grafana's `evaluation_timeout` (default 30 seconds). Simplify queries or pre-aggregate data; raising the timeout only helps after the query already scans a reasonable amount of data.
 - **Partition pruning:** Use `$__timeFilter` on partitioned columns to limit scanned data.
 
 ### Cost optimization example

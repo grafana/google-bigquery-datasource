@@ -37,14 +37,14 @@ Before configuring the data source, ensure you have:
 - **Required GCP IAM roles:** The service account (or impersonated service account) must have the following roles on each project it accesses:
   - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`) — read access to BigQuery data
   - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
-  - **`resourcemanager.projects.get`** permission — required for the project dropdown to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
+  - **`resourcemanager.projects.get`** permission — required for the project drop-down to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
 
 {{< admonition type="note" >}}
 If the service account has project-level access but not dataset or table-level access, **Save & test** may succeed while individual queries return 403 errors. Ensure the service account has read access to the specific datasets and tables you intend to query.
 {{< /admonition >}}
 
 {{< admonition type="note" >}}
-Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
+The data source has a **Default project** where query jobs run. You can query datasets in other GCP projects from the same data source if the service account has the required roles on those projects. Grant `resourcemanager.projects.get` so those projects appear in the query editor drop-down.
 {{< /admonition >}}
 
 ## Key concepts
@@ -98,7 +98,7 @@ To configure service account authentication:
 1. Assign the following roles to the service account:
    - **BigQuery Data Viewer** - Provides read access to BigQuery data
    - **BigQuery Job User** - Allows running BigQuery jobs
-1. Create and download a JSON key file for the service account.
+1. Create and download a JSON key file for the service account. Google Cloud Console provides a `.json` key. P12 keys aren't supported.
 1. In the data source configuration, select **Google JWT File** as the authentication type.
 1. Upload the JSON key file or paste its contents.
 
