@@ -6,11 +6,11 @@
   "author": "Grafana Labs <team@grafana.com> (https://grafana.com)",
   "scripts": {
     "build": "webpack -c ./.config/webpack/webpack.config.ts --env production",
-    "build:sign": "yarn run build && yarn run sign",
+    "build:sign": "npm run build && npm run sign",
     "dev": "webpack -w -c ./.config/webpack/webpack.config.ts --env development",
     "e2e": "playwright test",
     "lint": "eslint --cache .",
-    "lint:fix": "yarn run lint --fix && prettier --write --list-different .",
+    "lint:fix": "npm run lint -- --fix && prettier --write --list-different .",
     "lint:ts": "eslint --cache .",
     "server": "docker compose up --build",
     "sign": "sign-plugin",
@@ -91,8 +91,9 @@
     "webpack-subresource-integrity": "5.1.0",
     "webpack-virtual-modules": "0.6.2"
   },
-  "packageManager": "yarn@4.15.0",
+  "packageManager": "npm@11.18.0",
   "engines": {
-    "node": ">=24"
+    "node": ">=24",
+    "npm": ">=11.16.0"
   }
 }
