@@ -1,0 +1,88 @@
+name: Scheduled Cloud End-to-end Tests
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Daily at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # playwright-cloud.yml's `pdc-network-name` input must be a literal value, resolved before the
+  # reusable workflow is called — it can't reference this job's own env, since `with:` on a
+  # `uses:` call is evaluated before that job runs. Read it from Vault in its own job first, using
+  # the data-sources-specific reader role (see docs/security/vault-secrets-for-plugins.md), and
+  # pass it through as a job output.
+  get-pdc-network:
+    name: Read PDC network name from Vault
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      pdc-network-name: ${{ steps.export.outputs.value }}
+    steps:
+      - name: Read e2ePdcNetworkName from Vault
+        id: vault
+        uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
+        with:
+          url: https://vault-github-actions.grafana-ops.net
+          method: jwt
+          path: github-actions-oidc
+          role: data-sources-reader-google-bigquery-datasource
+          jwtGithubAudience: https://vault-github-actions.grafana-ops.net
+          secrets: |
+            ci/data/data-sources/google-bigquery-datasource/bigQueryJwt e2ePdcNetworkName | PDC_NETWORK_NAME
+      - name: Export as job output
+        id: export
+        run: echo "value=${PDC_NETWORK_NAME}" >> "$GITHUB_OUTPUT"
+
+  playwright-cloud:
+    name: Playwright (Cloud)
+    needs: get-pdc-network
+    uses: grafana/data-sources-ci-workflows/.github/workflows/playwright-cloud.yml@main
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      run-stage: nightly
+      pdc-network-name: ${{ needs.get-pdc-network.outputs.pdc-network-name }}
+      # Vault paths follow ci/data/data-sources/<repo>/<instance>:<field>, per
+      # docs/security/vault-secrets-for-plugins.md. `bigQueryJwt` is the standard
+      # service-account instance defined in infra/data-sources/oss-big-tent/bigquery.ts.
+      repo-secrets: |
+        DS_INSTANCE_CLIENT_EMAIL=google-bigquery-datasource/bigQueryJwt:json_clientEmail
+        DS_INSTANCE_PROJECT_ID=google-bigquery-datasource/bigQueryJwt:json_defaultProject
+        DS_INSTANCE_TOKEN_URI=google-bigquery-datasource/bigQueryJwt:json_tokenUri
+        DS_INSTANCE_PRIVATE_KEY=google-bigquery-datasource/bigQueryJwt:secure_privateKey
+
+  notify-slack:
+    name: Notify Slack on failure
+    needs: playwright-cloud
+    if: failure()
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Notify #grafana-ds-plugins-dev
+        uses: grafana/shared-workflows/actions/send-slack-message@551bc8d50017d3e95d5da3f8a4826e733a208dc0 # send-slack-message/v3.0.2
+        with:
+          method: chat.postMessage
+          payload: |
+            {
+              "channel": "C0APH909GFK",
+              "text": "Cloud E2E tests failed for ${{ github.repository }} (nightly)",
+              "blocks": [
+                { "type": "section", "text": { "type": "mrkdwn", "text": ":x: *Cloud E2E tests failed*" } },
+                { "type": "section", "fields": [
+                  { "type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}" },
+                  { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
+                  { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" },
+                  { "type": "mrkdwn", "text": "*Commit:*\n${{ github.sha }}" }
+                ] },
+                { "type": "section", "text": { "type": "mrkdwn", "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View the failed run>" } }
+              ]
+            }
