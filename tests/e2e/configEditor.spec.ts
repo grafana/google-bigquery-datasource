@@ -44,7 +44,10 @@ test.describe('Config editor', () => {
 
       // mockHealthCheckResponse(body, status) — body first, status second. A fulfill-options-style
       // single argument would silently mock a *successful* (HTTP 200) response instead.
-      await configPage.mockHealthCheckResponse({ message: 'unable to authenticate' }, 400);
+      // `status` (not just `message`) must be present in the body — Grafana's settings page
+      // crashes rendering the result otherwise, which trips its own error boundary instead of
+      // showing our alert at all.
+      await configPage.mockHealthCheckResponse({ status: 'ERROR', message: 'unable to authenticate' }, 400);
 
       await expect(configPage.saveAndTest()).not.toBeOK();
       await expect(configPage).toHaveAlert('error', { hasText: 'unable to authenticate' });
@@ -53,7 +56,13 @@ test.describe('Config editor', () => {
     test('shows a success alert when the health check succeeds', async ({ createDataSourceConfigPage }) => {
       const configPage = await createDataSourceConfigPage({ type: PLUGIN_ID });
 
-      await configPage.mockHealthCheckResponse({ message: 'Data source is working' }, 200);
+      await configPage.mockHealthCheckResponse({ status: 'OK', message: 'Data source is working' }, 200);
+      // A successful health check makes Grafana eagerly resolve the default project, which hits
+      // our backend's real (unmocked) BigQuery resource handlers. With no real credentials behind
+      // this mocked success, those calls 500 and trip an error boundary that swallows the alert
+      // we're asserting on below — mock them too so only the health check result is under test.
+      await configPage.mockResourceResponse('defaultProjects', '');
+      await configPage.mockResourceResponse('projects', []);
 
       await expect(configPage.saveAndTest()).toBeOK();
       await expect(configPage).toHaveAlert('success', { hasText: 'Data source is working' });
@@ -74,7 +83,9 @@ test.describe('Config editor', () => {
       await page.getByLabel('Client email').fill(creds.clientEmail);
       await page.getByLabel('Token URI').fill(creds.tokenUri);
       await page.getByLabel('Project ID').fill(creds.defaultProject);
-      await page.getByLabel('Private key').fill(creds.privateKey);
+      // The "Private key" Field's label isn't associated with its input (an upstream
+      // @grafana/google-sdk issue, not ours) — its only accessible name is the placeholder.
+      await page.getByPlaceholder('Enter Private key').fill(creds.privateKey);
 
       await expect(configPage.saveAndTest()).toBeOK();
       // "Data source is working" is sqlds' default CheckHealth success message (health.go);
