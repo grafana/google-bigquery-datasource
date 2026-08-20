@@ -114,6 +114,28 @@ func TestCategorizeConnectionError(t *testing.T) {
 			err:      &oauth2.RetrieveError{ErrorCode: "unauthorized_client"},
 			expected: ConnectionErrorCategoryAuth,
 		},
+		{
+			// Nothing in the datasource config UI controls the OAuth grant type
+			// or request shape, so there's no "config" field for a user to fix.
+			name:     "oauth2 invalid_request is an OAuth exchange failure, not a config problem",
+			err:      &oauth2.RetrieveError{ErrorCode: "invalid_request", ErrorDescription: "Missing parameter: grant_type"},
+			expected: ConnectionErrorCategoryAuth,
+		},
+		{
+			name:     "oauth2 unsupported_grant_type is an OAuth exchange failure, not a config problem",
+			err:      &oauth2.RetrieveError{ErrorCode: "unsupported_grant_type"},
+			expected: ConnectionErrorCategoryAuth,
+		},
+		{
+			name:     "oauth2 response status code falls back to auth, not config, when the status is config-shaped",
+			err:      &oauth2.RetrieveError{Response: &http.Response{StatusCode: 404}},
+			expected: ConnectionErrorCategoryAuth,
+		},
+		{
+			name:     "oauth2 response status code still surfaces a transient server failure",
+			err:      &oauth2.RetrieveError{Response: &http.Response{StatusCode: 503}},
+			expected: ConnectionErrorCategoryServer,
+		},
 
 		// --- Config ---
 		{
@@ -124,21 +146,6 @@ func TestCategorizeConnectionError(t *testing.T) {
 		{
 			name:     "googleapi 404",
 			err:      &googleapi.Error{Code: 404, Message: "Not Found"},
-			expected: ConnectionErrorCategoryConfig,
-		},
-		{
-			name:     "oauth2 invalid_request",
-			err:      &oauth2.RetrieveError{ErrorCode: "invalid_request", ErrorDescription: "Missing parameter: grant_type"},
-			expected: ConnectionErrorCategoryConfig,
-		},
-		{
-			name:     "oauth2 unsupported_grant_type",
-			err:      &oauth2.RetrieveError{ErrorCode: "unsupported_grant_type"},
-			expected: ConnectionErrorCategoryConfig,
-		},
-		{
-			name:     "oauth2 response status code used when error code is empty",
-			err:      &oauth2.RetrieveError{Response: &http.Response{StatusCode: 404}},
 			expected: ConnectionErrorCategoryConfig,
 		},
 		{
@@ -164,11 +171,6 @@ func TestCategorizeConnectionError(t *testing.T) {
 		{
 			name:     "failed to retrieve default gce project",
 			err:      fmt.Errorf("Failed to retrieve default GCE project: %w", errors.New("metadata: GCE metadata \"project/project-id\" not defined")),
-			expected: ConnectionErrorCategoryConfig,
-		},
-		{
-			name:     "error reading query params",
-			err:      fmt.Errorf("error reading query params: %s", "unexpected end of JSON input"),
 			expected: ConnectionErrorCategoryConfig,
 		},
 		{
@@ -284,6 +286,11 @@ func TestCategorizeConnectionError(t *testing.T) {
 		{
 			name:     "completely unknown error",
 			err:      errors.New("something went very wrong"),
+			expected: ConnectionErrorCategoryUnknown,
+		},
+		{
+			name:     "error reading query params is not a datasource config problem",
+			err:      fmt.Errorf("error reading query params: %s", "unexpected end of JSON input"),
 			expected: ConnectionErrorCategoryUnknown,
 		},
 	}

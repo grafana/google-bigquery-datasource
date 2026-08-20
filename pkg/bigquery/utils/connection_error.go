@@ -31,17 +31,16 @@ const (
 	ConnectionErrorCategoryUnknown ConnectionErrorCategory = "unknown"
 )
 
-// configErrorSubstrings match this plugin's own static config-validation
-// messages (settings parsing, auth-type/http-client wiring) that are raised
-// before any request reaches Google, and so have no typed representation to
-// switch on.
+// configErrorSubstrings match this plugin's own static validation messages
+// for problems fixable on the datasource config level —
+// raised before any request reaches Google, so they have no typed
+// representation to switch on.
 var configErrorSubstrings = []string{
 	"does not use a token provider",
 	"requires workloadidentitypoolprovider",
 	"missing authentication details",
 	"could not unmarshal",
 	"failed to retrieve default gce project",
-	"error reading query params",
 	"private key",
 }
 
