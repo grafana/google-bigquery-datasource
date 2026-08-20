@@ -5,11 +5,11 @@ import { SelectableValue } from '@grafana/data';
 import { EditorField } from '@grafana/plugin-ui';
 import { Button, Combobox, ComboboxOption, Select, Stack, useStyles2 } from '@grafana/ui';
 import { QueryEditorExpressionType, QueryEditorFunctionExpression } from 'expressions';
-import { uniqueId } from 'utils';
 import { toOption } from 'utils/data';
 import { createFunctionField } from 'utils/sql.utils';
 
 import { SQLExpression } from '../../types';
+import { uniqueId } from '../../utils';
 import { BQ_AGGREGATE_FNS } from '../query-editor-raw/bigQueryFunctions';
 
 interface SQLSelectRowProps {
