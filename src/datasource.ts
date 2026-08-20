@@ -1,9 +1,8 @@
 import { DataQueryRequest, DataSourceInstanceSettings, ScopedVars, VariableSupportType } from '@grafana/data';
 import { GoogleAuthType } from '@grafana/google-sdk';
 import { EditorMode } from '@grafana/plugin-ui';
-import { DataSourceWithBackend, HealthCheckError, getTemplateSrv } from '@grafana/runtime';
+import { DataSourceWithBackend, getTemplateSrv } from '@grafana/runtime';
 import { DataQuery } from '@grafana/schema';
-import { getApiClient } from 'api';
 
 import { VariableEditor } from './components/VariableEditor';
 import { BigQueryOptions, BigQueryQueryNG, QueryFormat, QueryModel } from './types';
@@ -76,32 +75,6 @@ export class BigQueryDatasource extends DataSourceWithBackend<BigQueryQueryNG, B
     }
 
     return Promise.resolve(importedQueries) as any;
-  }
-
-  async testDatasource() {
-    const health = await this.callHealthCheck();
-    if (health.status?.toLowerCase() === 'error') {
-      return Promise.reject({
-        status: 'error',
-        message: health.message,
-        error: new HealthCheckError(health.message, health.details),
-      });
-    }
-
-    const client = await getApiClient(this.uid);
-    try {
-      await client.getProjects();
-    } catch (err: any) {
-      return Promise.reject({
-        status: 'error',
-        message: err.data?.message || 'Error connecting to resource manager.',
-        error: new HealthCheckError(err.data?.message, err.data?.details),
-      });
-    }
-    return {
-      status: 'OK',
-      message: 'Data source is working',
-    };
   }
 
   applyTemplateVariables(queryModel: BigQueryQueryNG, scopedVars: ScopedVars): QueryModel {
