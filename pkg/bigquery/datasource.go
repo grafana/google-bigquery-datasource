@@ -81,6 +81,7 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 	ds.EnableMultipleConnections = true
 	ds.Interpolator = interpolateMacros
 	ds.CustomRoutes = newResourceHandler(s).Routes()
+	ds.PostCheckHealth = s.checkHealthProjects
 
 	return ds.NewDatasource(ctx, settings)
 }
@@ -420,6 +421,30 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 	}
 
 	return appendAllowlistProjects(projects, bqSettings), nil
+}
+
+// checkHealthProjects verifies that the configured credentials can enumerate
+// GCP projects via the resource manager API. sqlds' generic CheckHealth only
+// exercises the driver's Connect/Ping path (a BigQuery dry-run query), which
+// doesn't touch the resource manager API used to populate the project picker.
+func (s *BigQueryDatasource) checkHealthProjects(ctx context.Context, req *backend.CheckHealthRequest) *backend.CheckHealthResult {
+	if _, err := s.Projects(ctx, ProjectsArgs{}); err != nil {
+		errResp, _ := ut.HandleError(ctx, err, "connecting to resource manager")
+
+		details, marshalErr := json.Marshal(map[string]string{
+			"verboseMessage": err.Error(),
+		})
+		if marshalErr != nil {
+			details = nil
+		}
+
+		return &backend.CheckHealthResult{
+			Status:      backend.HealthStatusError,
+			Message:     errResp.Message,
+			JSONDetails: details,
+		}
+	}
+	return nil
 }
 
 // appendAllowlistProjects adds the projects referenced by the additional
