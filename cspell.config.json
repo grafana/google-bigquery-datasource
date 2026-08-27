@@ -11,6 +11,7 @@
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
+    "clickhouse",
     "cloudresourcemanager",
     "codebases",
     "codecov",
@@ -84,7 +85,8 @@
     "UNIXTIME",
     "uplot",
     "uuidv",
-    "vectorator"
+    "vectorator",
+    "workloadidentitypoolprovider"
   ],
   "language": "en-US"
 }

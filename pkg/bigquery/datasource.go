@@ -31,8 +31,19 @@ import (
 
 var (
 	PluginConfigFromContext = backend.PluginConfigFromContext
-	ErrFailedToConnect      = backend.PluginError(errors.New("Failed to connect"))
 )
+
+// wrapCategorizedConnectionError classifies err and returns a downstream error
+// whose message is prefixed with the category (e.g. "[auth] ...")
+// instead of a generic "failed to connect".
+func wrapCategorizedConnectionError(logger log.Logger, err error) error {
+	if err == nil {
+		return nil
+	}
+	category := ut.CategorizeConnectionError(err)
+	logger.Warn("BigQuery connection failed", "category", string(category))
+	return fmt.Errorf("[%s] %w", category, err)
+}
 
 type BigqueryDatasourceIface interface {
 	sqlds.Driver
@@ -81,6 +92,7 @@ func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSetti
 	ds.EnableMultipleConnections = true
 	ds.Interpolator = interpolateMacros
 	ds.CustomRoutes = newResourceHandler(s).Routes()
+	ds.PostCheckHealth = s.checkHealthProjects
 
 	return ds.NewDatasource(ctx, settings)
 }
@@ -97,12 +109,12 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	loggerWithContext := s.logger.FromContext(ctx)
 	settings, err := loadSettings(&config)
 	if err != nil {
-		return nil, err
+		return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 	}
 
 	args, err := parseConnectionArgs(queryArgs)
 	if err != nil {
-		return nil, err
+		return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 	}
 
 	isQueryArgsSet := args != nil
@@ -112,7 +124,7 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	if settings.AuthenticationType == "gce" && connectionSettings.Project == "" {
 		defaultProject, err := utils.GCEDefaultProject(context.Background(), BigQueryScope)
 		if err != nil {
-			return nil, errors.WithMessage(err, "Failed to retrieve default GCE project")
+			return nil, wrapCategorizedConnectionError(loggerWithContext, errors.WithMessage(err, "Failed to retrieve default GCE project"))
 		}
 		connectionSettings.Project = defaultProject
 	}
@@ -128,13 +140,13 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	if s.getResourceManagerService(config.UID) == nil {
 		err := s.createResourceManagerService(ctx, config, settings, config.UID)
 		if err != nil {
-			return nil, err
+			return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 		}
 	}
 
 	opts, err := config.HTTPClientOptions(ctx)
 	if err != nil {
-		return nil, err
+		return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 	}
 
 	c, exists := s.connections.Load(connectionKey)
@@ -156,15 +168,14 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 	if exists {
 		dr, db, err := driver.Open(connectionSettings, aC.(*api.API).Client)
 		if err != nil {
-			return nil, ErrFailedToConnect
+			return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 		}
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
 		return db, nil
 	} else {
 		client, err := newHTTPClient(settings, opts, bigQueryRoute)
 		if err != nil {
-			loggerWithContext.Warn("Failed to get http client options", "error", err)
-			return nil, err
+			return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 		}
 
 		options := []option.ClientOption{option.WithHTTPClient(client)}
@@ -175,20 +186,19 @@ func (s *BigQueryDatasource) Connect(ctx context.Context, config backend.DataSou
 
 		bqClient, err := s.bqFactory(ctx, connectionSettings.Project, options...)
 		if err != nil {
-			loggerWithContext.Warn("Failed to create bigquery client", "error", err)
-			return nil, ErrFailedToConnect
+			return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 		}
 
 		if connectionSettings.EnableStorageAPI {
 			err = bqClient.EnableStorageReadClient(ctx, option.WithTokenSource(ut.JWTConfigFromDataSourceSettings(settings).TokenSource(ctx)))
 			if err != nil {
-				return nil, errors.WithMessage(err, "Failed to enable storage read client")
+				return nil, wrapCategorizedConnectionError(loggerWithContext, errors.WithMessage(err, "Failed to enable storage read client"))
 			}
 		}
 
 		dr, db, err := driver.Open(connectionSettings, bqClient)
 		if err != nil {
-			return nil, ErrFailedToConnect
+			return nil, wrapCategorizedConnectionError(loggerWithContext, err)
 		}
 
 		s.connections.Store(connectionKey, conn{db: db, driver: dr})
@@ -420,6 +430,31 @@ func (s *BigQueryDatasource) Projects(ctx context.Context, options ProjectsArgs)
 	}
 
 	return appendAllowlistProjects(projects, bqSettings), nil
+}
+
+// checkHealthProjects verifies that the configured credentials can enumerate
+// GCP projects via the resource manager API. sqlds' generic CheckHealth only
+// exercises the driver's Connect/Ping path (a BigQuery dry-run query), which
+// doesn't touch the resource manager API used to populate the project picker.
+func (s *BigQueryDatasource) checkHealthProjects(ctx context.Context, req *backend.CheckHealthRequest) *backend.CheckHealthResult {
+	if _, err := s.Projects(ctx, ProjectsArgs{}); err != nil {
+		category := ut.CategorizeConnectionError(err)
+		s.logger.FromContext(ctx).Warn("BigQuery resource manager check failed", "category", string(category))
+
+		details, marshalErr := json.Marshal(map[string]string{
+			"verboseMessage": err.Error(),
+		})
+		if marshalErr != nil {
+			details = nil
+		}
+
+		return &backend.CheckHealthResult{
+			Status:      backend.HealthStatusError,
+			Message:     fmt.Sprintf("[%s] Error connecting to resource manager: %s", category, err.Error()),
+			JSONDetails: details,
+		}
+	}
+	return nil
 }
 
 // appendAllowlistProjects adds the projects referenced by the additional
