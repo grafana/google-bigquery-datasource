@@ -45,7 +45,12 @@ export default defineConfig<PluginOptions>({
     // 2. Run tests in Google Chrome. Every test will start authenticated as admin user.
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'], storageState: 'playwright/.auth/admin.json' },
+      use: {
+        ...devices['Desktop Chrome'],
+        // Keyed off GRAFANA_ADMIN_USER (not a hardcoded 'admin') so auth also works against
+        // Grafana Cloud in the nightly lane, where the admin user isn't literally "admin".
+        storageState: `playwright/.auth/${process.env.GRAFANA_ADMIN_USER || 'admin'}.json`,
+      },
       dependencies: ['auth'],
     },
   ],
