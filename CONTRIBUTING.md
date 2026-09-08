@@ -66,6 +66,12 @@ Make sure you have the following dependencies installed first:
    npm run e2e
    ```
 
+   Tests in `tests/e2e/` cover the config editor and query editor against a datasource
+   provisioned from [`provisioning/datasources/bigquery.e2e.yaml`](provisioning/datasources/bigquery.e2e.yaml)
+   using placeholder (non-functional) credentials — locally and in PR CI, all query responses and
+   health checks are mocked. Tests that need a real BigQuery connection only run in the nightly
+   Cloud lane (see [`cron.yml`](.github/workflows/cron.yml)), which has real credentials.
+
 ## Submitting PR
 
 If you are creating a PR, ensure to run `npx changeset` from your branch. Provide the details accordingly. It will create `*.md` file inside `./.changeset` folder. Later during the release, based on these changesets, package version will be bumped and changelog will be generated.
@@ -78,7 +84,9 @@ To create a new release, execute `npx changeset version`. This will update the C
 
 The following workflows live under [.github/workflows](.github/workflows/).
 
-- **Plugins - CI** ([`push.yaml`](.github/workflows/push.yaml)) — Runs on every pull request and on pushes to `main`. It calls Grafana’s shared plugin CI workflow to build and validate the plugin (including Playwright), with a version suffix on PR builds.
+- **Plugins - CI** ([`push.yaml`](.github/workflows/push.yaml)) — Runs on every pull request and on pushes to `main`. It calls Grafana’s shared plugin CI workflow to build and validate the plugin (including Playwright), with a version suffix on PR builds. On `main`, it also publishes the build to the internal Plugin Catalog (dev) and deploys it to DSE2EDEV, so the nightly Cloud e2e job always tests the latest code.
+
+- **Scheduled Cloud End-to-end Tests** ([`cron.yml`](.github/workflows/cron.yml)) — Runs nightly (and can be triggered manually) against the real `BigQuery [JWT] (PDC)` managed datasource in Grafana Cloud's DSE2EDEV instance, using real credentials pulled from Vault. Posts to the `#grafana-ds-plugins-dev` Slack channel if the run fails.
 
 - **Plugins - CD** ([`publish.yaml`](.github/workflows/publish.yaml)) — Manual release/deploy workflow: pick a branch and target environment (`dev`, `ops`, or `prod`). It uses Grafana’s shared plugin CD pipeline; you can optionally publish docs only without shipping the plugin artifact.
 
