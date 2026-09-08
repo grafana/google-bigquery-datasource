@@ -24,3 +24,12 @@ export function cloudCredentials() {
     privateKey: process.env.DS_INSTANCE_PRIVATE_KEY ?? '',
   };
 }
+
+/**
+ * The Private Data Source Connect network this datasource must route through to reach real
+ * BigQuery from inside Grafana Cloud — set by cron.yml's `pdc-network-name` input (piped in as
+ * DS_PDC_NETWORK_NAME by the reusable playwright-cloud.yml workflow). Empty locally/in PR CI.
+ */
+export function cloudPdcNetworkName(): string {
+  return process.env.DS_PDC_NETWORK_NAME ?? '';
+}

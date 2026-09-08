@@ -14,6 +14,13 @@ jobs:
   # `uses:` call is evaluated before that job runs. Read it from Vault in its own job first, using
   # the data-sources-specific reader role (see docs/security/vault-secrets-for-plugins.md), and
   # pass it through as a job output.
+  #
+  # This deliberately does NOT use vault-action's `secrets:` input: that registers every value it
+  # reads as a GitHub Actions mask, and a masked value can't cross a job boundary via `outputs:`
+  # (GitHub redacts it to "***" for any downstream consumer, including needs.<job>.outputs.<name>).
+  # e2ePdcNetworkName isn't actually sensitive, so pull it via vault-action's token-export mode and
+  # a direct Vault HTTP read instead — the "pulling everything as a single JSON blob" pattern from
+  # docs/security/vault-secrets-for-plugins.md — which never registers it as a mask.
   get-pdc-network:
     name: Read PDC network name from Vault
     runs-on: ubuntu-24.04
@@ -21,10 +28,9 @@ jobs:
       contents: read
       id-token: write
     outputs:
-      pdc-network-name: ${{ steps.export.outputs.value }}
+      pdc-network-name: ${{ steps.read.outputs.value }}
     steps:
-      - name: Read e2ePdcNetworkName from Vault
-        id: vault
+      - name: Get Vault token
         uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
         with:
           url: https://vault-github-actions.grafana-ops.net
@@ -32,11 +38,18 @@ jobs:
           path: github-actions-oidc
           role: data-sources-reader-google-bigquery-datasource
           jwtGithubAudience: https://vault-github-actions.grafana-ops.net
-          secrets: |
-            ci/data/data-sources/google-bigquery-datasource/bigQueryJwt e2ePdcNetworkName | PDC_NETWORK_NAME
-      - name: Export as job output
-        id: export
-        run: echo "value=${PDC_NETWORK_NAME}" >> "$GITHUB_OUTPUT"
+          exportToken: true
+      - name: Read e2ePdcNetworkName
+        id: read
+        env:
+          VAULT_ADDR: https://vault-github-actions.grafana-ops.net
+        run: |
+          set -euo pipefail
+          value=$(curl -sS --fail \
+            -H "X-Vault-Token: $VAULT_TOKEN" \
+            "$VAULT_ADDR/v1/ci/data/data-sources/google-bigquery-datasource/bigQueryJwt" \
+            | jq -r '.data.data.e2ePdcNetworkName')
+          echo "value=$value" >> "$GITHUB_OUTPUT"
 
   playwright-cloud:
     name: Playwright (Cloud)

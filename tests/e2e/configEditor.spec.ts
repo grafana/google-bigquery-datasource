@@ -2,7 +2,7 @@ import { expect, test } from '@grafana/plugin-e2e';
 
 import type { BigQueryOptions } from '../../src/types';
 
-import { cloudCredentials, isCloudRun, PLUGIN_ID, PROVISIONING_FILENAME } from './utils';
+import { cloudCredentials, cloudPdcNetworkName, isCloudRun, PLUGIN_ID, PROVISIONING_FILENAME } from './utils';
 
 test.describe('Config editor', () => {
   test.describe('rendering', () => {
@@ -86,6 +86,24 @@ test.describe('Config editor', () => {
       // The "Private key" Field's label isn't associated with its input (an upstream
       // @grafana/google-sdk issue, not ours) — its only accessible name is the placeholder.
       await page.getByPlaceholder('Enter Private key').fill(creds.privateKey);
+
+      const pdcNetworkName = cloudPdcNetworkName();
+      if (pdcNetworkName) {
+        // Grafana Cloud can only reach this datasource's real backend through PDC, per the
+        // "Support PDC when present" pattern in docs/testing/cloud-e2e-testing.md — otherwise
+        // this test exercises a connectivity path Cloud doesn't actually use, leaving the
+        // workflow's pdc-network-name input unexercised.
+        //
+        // The "Enabled" switch is the plugin's own SecureSocksProxySettings component
+        // (@grafana/ui) and is verified against its source. The PDC network picker below it is
+        // rendered by Grafana Cloud itself (not in the open-source component), so its selector
+        // is a best-effort guess — adjust `name: /private data source connect network/i` if the
+        // nightly run shows it doesn't match the real control.
+        const secureSocksSection = page.locator('div').filter({ has: page.getByRole('heading', { name: 'Secure Socks Proxy' }) }).first();
+        await secureSocksSection.getByRole('switch', { name: 'Enabled' }).click();
+        await page.getByRole('combobox', { name: /private data source connect network/i }).click();
+        await page.getByText(pdcNetworkName, { exact: true }).click();
+      }
 
       await expect(configPage.saveAndTest()).toBeOK();
       // "Data source is working" is sqlds' default CheckHealth success message (health.go);
