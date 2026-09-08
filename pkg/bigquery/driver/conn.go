@@ -214,33 +214,29 @@ func (c *Conn) Ping(ctx context.Context) (err error) {
 	job, err := q.Run(ctx)
 
 	if err != nil {
-		// Unwrap the error to get to the root cause
-		rootErr := err
-		for rootErr != nil {
-			// If the error is a Google API error, we handle it in the HandleError function
-			if _, ok := rootErr.(*googleapi.Error); ok {
-				break
-			}
-			if unwrapped := errors.Unwrap(rootErr); unwrapped != nil {
-				rootErr = unwrapped
-			} else {
-				break
+		// Categorize the error for a consistent, actionable message. Only the
+		// category (not the raw error) is logged server-side: the raw message
+		// can carry project/dataset/service-account identifiers.
+		category := utils.CategorizeConnectionError(err)
+		logger.Warn("BigQuery connection check failed", "category", string(category), "authenticationType", c.cfg.AuthenticationType)
+
+		statusCode := 0
+		gcpMsg := ""
+		if gErr, ok := errors.AsType[*googleapi.Error](err); ok {
+			statusCode = gErr.Code
+			if gErr.Message != "" {
+				gcpMsg = ": " + gErr.Message
 			}
 		}
 
-		_, statusCode := utils.HandleError(ctx, rootErr, fmt.Sprintf("Failed to connect with authentication type: %s", c.cfg.AuthenticationType))
 		isTokenForwarding := c.cfg.AuthenticationType == "forwardOAuthIdentity" ||
 			c.cfg.AuthenticationType == "workloadIdentityFederation"
-		gcpMsg := ""
-		if gErr, ok := rootErr.(*googleapi.Error); ok && gErr.Message != "" {
-			gcpMsg = ": " + gErr.Message
-		}
 		if statusCode == 403 && isTokenForwarding {
-			return backend.DownstreamErrorf("connected to BigQuery but missing permissions to run queries%s. Verify the authenticated principal has bigquery.jobs.create on the project and bigquery.dataViewer on the dataset/table", gcpMsg)
+			return backend.DownstreamErrorf("[%s] connected to BigQuery but missing permissions to run queries%s. Verify the authenticated principal has bigquery.jobs.create on the project and bigquery.dataViewer on the dataset/table", category, gcpMsg)
 		} else if statusCode == 401 && isTokenForwarding {
-			return backend.DownstreamErrorf("unauthorized to connect to BigQuery%s. Verify the identity token is valid and not expired", gcpMsg)
+			return backend.DownstreamErrorf("[%s] unauthorized to connect to BigQuery%s. Verify the identity token is valid and not expired", category, gcpMsg)
 		}
-		return rootErr
+		return fmt.Errorf("[%s] %w", category, err)
 	}
 
 	logger.Info("Successful Ping", "status", job.LastStatus().State)

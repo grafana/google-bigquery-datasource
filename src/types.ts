@@ -15,9 +15,8 @@ import {
   QueryEditorGroupByExpression,
   QueryEditorPropertyExpression,
 } from 'expressions';
-import { applyQueryDefaults } from 'utils';
 
-import { isCloud } from './utils';
+import { applyQueryDefaults, isCloud } from './utils';
 
 export enum QueryPriority {
   Interactive = 'INTERACTIVE',

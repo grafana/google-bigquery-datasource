@@ -4,13 +4,14 @@
     "src/dashboards/arrays.json",
     "dist/**",
     "package.json",
-    "yarn.lock",
+    "package-lock.json",
     "provisioning/**",
     "jest.config.js"
   ],
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
+    "clickhouse",
     "cloudresourcemanager",
     "codebases",
     "codecov",
@@ -87,7 +88,8 @@
     "UNIXTIME",
     "uplot",
     "uuidv",
-    "vectorator"
+    "vectorator",
+    "workloadidentitypoolprovider"
   ],
   "language": "en-US"
 }

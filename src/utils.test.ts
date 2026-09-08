@@ -1,5 +1,6 @@
 import { EditorMode } from '@grafana/plugin-ui';
 import { QueryFormat } from 'types';
+
 import {
   applyQueryDefaults,
   convertToUtc,
@@ -19,7 +20,7 @@ import {
   quoteLiteral,
   replaceTimeShift,
   setDatasourceId,
-} from 'utils';
+} from './utils';
 
 describe('Utils', () => {
   test('formatBigqueryError', () => {
