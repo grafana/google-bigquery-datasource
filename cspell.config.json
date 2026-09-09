@@ -11,14 +11,17 @@
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
+    "clickhouse",
     "cloudresourcemanager",
     "codebases",
     "codecov",
     "Combobox",
     "conj",
     "Conjs",
+    "contenteditable",
     "conv",
     "COUNTIF",
+    "creds",
     "Dammam",
     "DATAPROXY",
     "datasource",
@@ -27,6 +30,7 @@
     "DATETIME",
     "doitintl",
     "dompurify",
+    "EDEV",
     "etag",
     "fillmode",
     "genproto",
@@ -85,7 +89,8 @@
     "UNIXTIME",
     "uplot",
     "uuidv",
-    "vectorator"
+    "vectorator",
+    "workloadidentitypoolprovider"
   ],
   "language": "en-US"
 }

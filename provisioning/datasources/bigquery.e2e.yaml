@@ -1,0 +1,25 @@
+# config file version
+apiVersion: 1
+
+# Used by e2e tests (tests/e2e/*.spec.ts via readProvisionedDataSource({ fileName: 'bigquery.e2e.yaml' })).
+# Credentials are placeholders, not real: locally and in PR CI, every query/health-check response
+# is mocked. Tests that need a real BigQuery connection only run in the nightly Cloud lane, which
+# tests a separately managed datasource with real credentials (see .github/workflows/cron.yml).
+deleteDatasources:
+  - name: BigQuery E2E
+    orgId: 1
+
+datasources:
+  - name: BigQuery E2E
+    type: grafana-bigquery-datasource
+    uid: bigquery-e2e
+    access: proxy
+    editable: true
+    jsonData:
+      authenticationType: jwt
+      clientEmail: e2e-test@bigquery-e2e.iam.gserviceaccount.com
+      defaultProject: bigquery-e2e-test-project
+      tokenUri: https://oauth2.googleapis.com/token
+    secureJsonData:
+      privateKey: placeholder-not-a-real-key
+    version: 1

@@ -201,6 +201,49 @@ func Test_Projects_doesNotPanicWhenResourceManagerServiceMissing(t *testing.T) {
 	})
 }
 
+func Test_checkHealthProjects(t *testing.T) {
+	origPluginConfigFromContext := PluginConfigFromContext
+	defer func() { PluginConfigFromContext = origPluginConfigFromContext }()
+
+	t.Run("returns nil when projects can be listed", func(t *testing.T) {
+		PluginConfigFromContext = func(ctx context.Context) backend.PluginContext {
+			return backend.PluginContext{
+				DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{
+					ID:       1,
+					UID:      "uid-ok",
+					JSONData: []byte(`{"authenticationType":"jwt","oauthPassThru":true,"defaultProject":"my-project"}`),
+				},
+			}
+		}
+
+		ds := newBigQueryDatasource()
+		result := ds.checkHealthProjects(t.Context(), &backend.CheckHealthRequest{})
+		assert.Nil(t, result)
+	})
+
+	t.Run("returns an error result when projects cannot be listed", func(t *testing.T) {
+		PluginConfigFromContext = func(ctx context.Context) backend.PluginContext {
+			return backend.PluginContext{
+				DataSourceInstanceSettings: &backend.DataSourceInstanceSettings{
+					ID:  1,
+					UID: "uid-bad",
+					DecryptedSecureJSONData: map[string]string{
+						"privateKey": "randomPrivateKey",
+					},
+					JSONData: []byte(`{"authenticationType":"jwt"}`),
+				},
+			}
+		}
+
+		ds := newBigQueryDatasource()
+		result := ds.checkHealthProjects(t.Context(), &backend.CheckHealthRequest{})
+		require.NotNil(t, result)
+		assert.Equal(t, backend.HealthStatusError, result.Status)
+		assert.NotEmpty(t, result.Message)
+		assert.Contains(t, string(result.JSONDetails), "verboseMessage")
+	})
+}
+
 func Test_appendAllowlistProjects(t *testing.T) {
 	accessible := []*Project{{ProjectId: "myproject", DisplayName: "My project"}}
 

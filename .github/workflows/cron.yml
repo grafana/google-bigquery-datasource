@@ -1,0 +1,101 @@
+name: Scheduled Cloud End-to-end Tests
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # Daily at 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # playwright-cloud.yml's `pdc-network-name` input must be a literal value, resolved before the
+  # reusable workflow is called — it can't reference this job's own env, since `with:` on a
+  # `uses:` call is evaluated before that job runs. Read it from Vault in its own job first, using
+  # the data-sources-specific reader role (see docs/security/vault-secrets-for-plugins.md), and
+  # pass it through as a job output.
+  #
+  # This deliberately does NOT use vault-action's `secrets:` input: that registers every value it
+  # reads as a GitHub Actions mask, and a masked value can't cross a job boundary via `outputs:`
+  # (GitHub redacts it to "***" for any downstream consumer, including needs.<job>.outputs.<name>).
+  # e2ePdcNetworkName isn't actually sensitive, so pull it via vault-action's token-export mode and
+  # a direct Vault HTTP read instead — the "pulling everything as a single JSON blob" pattern from
+  # docs/security/vault-secrets-for-plugins.md — which never registers it as a mask.
+  get-pdc-network:
+    name: Read PDC network name from Vault
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    outputs:
+      pdc-network-name: ${{ steps.read.outputs.value }}
+    steps:
+      - name: Get Vault token
+        uses: hashicorp/vault-action@892a26828f195e65540a40b4768ae4571f51ebfc # v4.0.0
+        with:
+          url: https://vault-github-actions.grafana-ops.net
+          method: jwt
+          path: github-actions-oidc
+          role: data-sources-reader-google-bigquery-datasource
+          jwtGithubAudience: https://vault-github-actions.grafana-ops.net
+          exportToken: true
+      - name: Read e2ePdcNetworkName
+        id: read
+        env:
+          VAULT_ADDR: https://vault-github-actions.grafana-ops.net
+        run: |
+          set -euo pipefail
+          value=$(curl -sS --fail \
+            -H "X-Vault-Token: $VAULT_TOKEN" \
+            "$VAULT_ADDR/v1/ci/data/data-sources/google-bigquery-datasource/bigQueryJwt" \
+            | jq -r '.data.data.e2ePdcNetworkName')
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+  playwright-cloud:
+    name: Playwright (Cloud)
+    needs: get-pdc-network
+    uses: grafana/data-sources-ci-workflows/.github/workflows/playwright-cloud.yml@main
+    secrets: inherit
+    permissions:
+      contents: read
+      id-token: write
+    with:
+      run-stage: nightly
+      pdc-network-name: ${{ needs.get-pdc-network.outputs.pdc-network-name }}
+      # Vault paths follow ci/data/data-sources/<repo>/<instance>:<field>, per
+      # docs/security/vault-secrets-for-plugins.md. `bigQueryJwt` is the standard
+      # service-account instance defined in infra/data-sources/oss-big-tent/bigquery.ts.
+      repo-secrets: |
+        DS_INSTANCE_CLIENT_EMAIL=google-bigquery-datasource/bigQueryJwt:json_clientEmail
+        DS_INSTANCE_PROJECT_ID=google-bigquery-datasource/bigQueryJwt:json_defaultProject
+        DS_INSTANCE_TOKEN_URI=google-bigquery-datasource/bigQueryJwt:json_tokenUri
+        DS_INSTANCE_PRIVATE_KEY=google-bigquery-datasource/bigQueryJwt:secure_privateKey
+
+  notify-slack:
+    name: Notify Slack on failure
+    needs: playwright-cloud
+    if: failure()
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Notify #grafana-ds-plugins-dev
+        uses: grafana/shared-workflows/actions/send-slack-message@551bc8d50017d3e95d5da3f8a4826e733a208dc0 # send-slack-message/v3.0.2
+        with:
+          method: chat.postMessage
+          payload: |
+            {
+              "channel": "C0APH909GFK",
+              "text": "Cloud E2E tests failed for ${{ github.repository }} (nightly)",
+              "blocks": [
+                { "type": "section", "text": { "type": "mrkdwn", "text": ":x: *Cloud E2E tests failed*" } },
+                { "type": "section", "fields": [
+                  { "type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}" },
+                  { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
+                  { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" },
+                  { "type": "mrkdwn", "text": "*Commit:*\n${{ github.sha }}" }
+                ] },
+                { "type": "section", "text": { "type": "mrkdwn", "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View the failed run>" } }
+              ]
+            }
