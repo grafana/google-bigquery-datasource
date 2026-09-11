@@ -86,6 +86,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           }
         >
           <Combobox
+            id="processingLocation"
             width={60}
             placeholder="Automatic location selection"
             value={jsonData.processingLocation || ''}
@@ -110,6 +111,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           }
         >
           <Input
+            id="serviceEndpoint"
             className="width-30"
             placeholder="Optional, example https://bigquery.googleapis.com/bigquery/v2/"
             type={'string'}
@@ -134,6 +136,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           }
         >
           <Input
+            id="maxBytesBilled"
             className="width-30"
             placeholder="Optional, example 5242880"
             type={'number'}
@@ -150,6 +153,7 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
           }
         >
           <Switch
+            id="restrictToAccessibleDatasets"
             value={jsonData.restrictToAccessibleDatasets || false}
             onChange={onRestrictToAccessibleDatasetsChange}
           />

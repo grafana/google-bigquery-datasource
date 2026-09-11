@@ -3,7 +3,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { QueryEditorProps } from '@grafana/data';
 import { EditorMode, Space } from '@grafana/plugin-ui';
 import { RawEditor } from 'components/query-editor-raw/RawEditor';
-import { applyQueryDefaults, isQueryValid, setDatasourceId } from 'utils';
 import { useAsync } from 'utils/hooks';
 import { haveColumns } from 'utils/sql.utils';
 
@@ -11,6 +10,7 @@ import { getApiClient } from '../api';
 import { QueryHeader } from '../components/QueryHeader';
 import { BigQueryDatasource } from '../datasource';
 import { BigQueryOptions, BigQueryQueryNG, QueryRowFilter } from '../types';
+import { applyQueryDefaults, isQueryValid, setDatasourceId } from '../utils';
 
 import { VisualEditor } from './visual-query-builder/VisualEditor';
 

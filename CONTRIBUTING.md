@@ -10,32 +10,32 @@ Make sure you have the following dependencies installed first:
 - [Go](https://golang.org/dl/) (see [go.mod](../go.mod#L3) for minimum required version)
 - [Mage](https://magefile.org/)
 - [Node.js (Long Term Support)](https://nodejs.org)
-- [Yarn](https://yarnpkg.com)
+- [npm](https://www.npmjs.com/)
 
 ## Frontend
 
 1. Install dependencies
 
    ```bash
-   yarn install
+   npm install
    ```
 
 2. Install playwright
 
    ```bash
-      yarn playwright install
+      npx playwright install
    ```
 
 3. Build plugin in development mode
 
    ```bash
-   yarn dev
+   npm run dev
    ```
 
 4. Build plugin in production mode
 
    ```bash
-   yarn build
+   npm run build
    ```
 
 ## Backend
@@ -49,7 +49,7 @@ Make sure you have the following dependencies installed first:
 2. Start Grafana in Docker
 
    ```bash
-   yarn server
+   npm run server
    ```
 
 ## Data Source Configuration Schema
@@ -116,28 +116,36 @@ likely to hit:
 1. Testing the frontend
 
    ```bash
-   yarn test
+   npm test
    ```
 
 2. Running e2e tests
 
    ```bash
-   yarn e2e
+   npm run e2e
    ```
+
+   Tests in `tests/e2e/` cover the config editor and query editor against a datasource
+   provisioned from [`provisioning/datasources/bigquery.e2e.yaml`](provisioning/datasources/bigquery.e2e.yaml)
+   using placeholder (non-functional) credentials — locally and in PR CI, all query responses and
+   health checks are mocked. Tests that need a real BigQuery connection only run in the nightly
+   Cloud lane (see [`cron.yml`](.github/workflows/cron.yml)), which has real credentials.
 
 ## Submitting PR
 
-If you are creating a PR, ensure to run `yarn changeset` from your branch. Provide the details accordingly. It will create `*.md` file inside `./.changeset` folder. Later during the release, based on these changesets, package version will be bumped and changelog will be generated.
+If you are creating a PR, ensure to run `npx changeset` from your branch. Provide the details accordingly. It will create `*.md` file inside `./.changeset` folder. Later during the release, based on these changesets, package version will be bumped and changelog will be generated.
 
 ## Releasing & Bumping version
 
-To create a new release, execute `yarn changeset version`. This will update the Changelog and bump the version in `package.json` file. Commit those changes. Run the `Plugins - CD` GitHub Action to publish the new release.
+To create a new release, execute `npx changeset version`. This will update the Changelog and bump the version in `package.json` file. Commit those changes. Run the `Plugins - CD` GitHub Action to publish the new release.
 
 ## GitHub Actions list
 
 The following workflows live under [.github/workflows](.github/workflows/).
 
-- **Plugins - CI** ([`push.yaml`](.github/workflows/push.yaml)) — Runs on every pull request and on pushes to `main`. It calls Grafana’s shared plugin CI workflow to build and validate the plugin (including Playwright), with a version suffix on PR builds.
+- **Plugins - CI** ([`push.yaml`](.github/workflows/push.yaml)) — Runs on every pull request and on pushes to `main`. It calls Grafana’s shared plugin CI workflow to build and validate the plugin (including Playwright), with a version suffix on PR builds. On `main`, it also publishes the build to the internal Plugin Catalog (dev) and deploys it to DSE2EDEV, so the nightly Cloud e2e job always tests the latest code.
+
+- **Scheduled Cloud End-to-end Tests** ([`cron.yml`](.github/workflows/cron.yml)) — Runs nightly (and can be triggered manually) against the real `BigQuery [JWT] (PDC)` managed datasource in Grafana Cloud's DSE2EDEV instance, using real credentials pulled from Vault. Posts to the `#grafana-ds-plugins-dev` Slack channel if the run fails.
 
 - **Plugins - CD** ([`publish.yaml`](.github/workflows/publish.yaml)) — Manual release/deploy workflow: pick a branch and target environment (`dev`, `ops`, or `prod`). It uses Grafana’s shared plugin CD pipeline; you can optionally publish docs only without shipping the plugin artifact.
 

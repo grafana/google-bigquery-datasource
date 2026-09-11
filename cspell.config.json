@@ -4,21 +4,24 @@
     "src/dashboards/arrays.json",
     "dist/**",
     "package.json",
-    "yarn.lock",
+    "package-lock.json",
     "provisioning/**",
     "jest.config.js"
   ],
   "words": [
     "BIGNUMERIC",
     "BYTEINT",
+    "clickhouse",
     "cloudresourcemanager",
     "codebases",
     "codecov",
     "Combobox",
     "conj",
     "Conjs",
+    "contenteditable",
     "conv",
     "COUNTIF",
+    "creds",
     "Dammam",
     "DATAPROXY",
     "datasource",
@@ -29,6 +32,7 @@
     "dsconfig",
     "behaviour",
     "dompurify",
+    "EDEV",
     "etag",
     "fillmode",
     "genproto",
@@ -88,7 +92,8 @@
     "uuidv",
     "vectorator",
     "struct",
-    "Struct"
+    "Struct",
+    "workloadidentitypoolprovider"
   ],
   "language": "en-US"
 }

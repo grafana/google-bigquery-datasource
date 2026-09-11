@@ -1,5 +1,19 @@
 # Changelog
 
+## 3.4.1
+
+⚙️ Update backend and frontend dependencies, resolving high-severity CVEs in `google.golang.org/grpc`, `golang.org/x/crypto`, `golang.org/x/mod`, and `fast-uri` ([#541](https://github.com/grafana/google-bigquery-datasource/pull/541), [#546](https://github.com/grafana/google-bigquery-datasource/pull/546), [#565](https://github.com/grafana/google-bigquery-datasource/pull/565)).
+
+## 3.4.0
+
+### Minor Changes
+
+🚀 Move Save & test health checks to the backend and add categorized, actionable errors for authentication, configuration, network, TLS, timeout, and upstream service failures ([#561](https://github.com/grafana/google-bigquery-datasource/pull/561), [#562](https://github.com/grafana/google-bigquery-datasource/pull/562)).
+
+### Patch Changes
+
+⚙️ Chore: migrate the repository from Yarn to npm and update the `@grafana/create-plugin` scaffold ([#558](https://github.com/grafana/google-bigquery-datasource/pull/558), [#560](https://github.com/grafana/google-bigquery-datasource/pull/560)).
+
 ## 3.3.1
 
 ⚙️ Updated dependencies
