@@ -29,6 +29,8 @@
     "datasourcetest",
     "DATETIME",
     "doitintl",
+    "dsconfig",
+    "behaviour",
     "dompurify",
     "EDEV",
     "etag",
@@ -89,7 +91,11 @@
     "uplot",
     "uuidv",
     "vectorator",
-    "workloadidentitypoolprovider"
+    "struct",
+    "Struct",
+    "workloadidentitypoolprovider",
+    "promlib",
+    "unparseable"
   ],
   "language": "en-US"
 }

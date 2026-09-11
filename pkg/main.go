@@ -7,6 +7,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 
 	"github.com/grafana/google-bigquery-datasource/pkg/bigquery"
+	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 	log.DefaultLogger.Info("Starting BQ plugin")
 
 	if err := datasource.Manage(
-		"grafana-bigquery-datasource",
+		types.PluginID,
 		bigquery.NewDatasource,
 		datasource.ManageOpts{},
 	); err != nil {
