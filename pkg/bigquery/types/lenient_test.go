@@ -17,7 +17,7 @@ func TestLenientBool(t *testing.T) {
 		{name: "true", raw: `true`, want: true},
 		{name: "false", raw: `false`, want: false},
 		{name: "quoted true", raw: `"true"`, want: true},
-		{name: "quoted true capitalised", raw: `"True"`, want: true},
+		{name: "quoted true capitalized", raw: `"True"`, want: true},
 		{name: "quoted false", raw: `"false"`, want: false},
 		{name: "quoted one", raw: `"1"`, want: true},
 		{name: "quoted zero", raw: `"0"`, want: false},

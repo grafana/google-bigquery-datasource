@@ -93,7 +93,9 @@
     "vectorator",
     "struct",
     "Struct",
-    "workloadidentitypoolprovider"
+    "workloadidentitypoolprovider",
+    "promlib",
+    "unparseable"
   ],
   "language": "en-US"
 }
