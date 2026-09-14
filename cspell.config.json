@@ -36,6 +36,7 @@
     "genproto",
     "getkin",
     "googleapi",
+    "gossh",
     "grafana",
     "gtime",
     "httpadapter",

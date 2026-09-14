@@ -17,7 +17,7 @@ labels:
 menuTitle: Configure
 title: Configure the Google BigQuery data source
 weight: 100
-review_date: 2026-02-11
+review_date: 2026-08-17
 ---
 
 # Configure the Google BigQuery data source
@@ -28,24 +28,41 @@ This document explains how to configure the Google BigQuery data source in Grafa
 
 Before configuring the data source, ensure you have:
 
-- **Grafana version:** 11.6.0 or later (plugin version 3.x). For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8+) or 1.x.
+- **Grafana version:** Plugin version 3.x requires Grafana 11.6.11 or later. On Grafana 12.x, the plugin also requires these minimum patch versions: 12.0.10, 12.1.7, or 12.2.5, depending on your minor release. For older Grafana versions, use plugin version 2.x (requires Grafana 10.4.8 or later) or 1.x.
 - **Grafana permissions:** `Organization administrator` role to add data sources.
 - **Google Cloud APIs enabled:** The following APIs must be enabled on each GCP project you query:
   - [BigQuery API](https://console.cloud.google.com/apis/library/bigquery.googleapis.com)
   - [Cloud Resource Manager API](https://console.cloud.google.com/apis/library/cloudresourcemanager.googleapis.com)
-- **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or access to the Google Metadata Server.
+- **Google Cloud credentials:** Depending on your authentication method, you need either a service account key file or Grafana running on Google Compute Engine with a default service account.
 - **Required GCP IAM roles:** The service account (or impersonated service account) must have the following roles on each project it accesses:
-  - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`) — read access to BigQuery data
-  - **BigQuery Job User** (`roles/bigquery.jobUser`) — permission to run BigQuery jobs
-  - **`resourcemanager.projects.get`** permission — required for the project dropdown to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
+  - **BigQuery Data Viewer** (`roles/bigquery.dataViewer`): read access to BigQuery data
+  - **BigQuery Job User** (`roles/bigquery.jobUser`): permission to run BigQuery jobs
+  - **`resourcemanager.projects.get`** permission: required for the project drop-down to populate in the query editor. This permission is included in the **Browser** role (`roles/browser`) or can be granted through a custom role.
+
+Grant **BigQuery Data Viewer** and **BigQuery Job User** at the **project** level when you can. Those project-level roles cover querying and listing datasets in that project. They aren't sufficient by themselves if you only grant access on individual datasets or tables:
+
+- The query editor dataset drop-down uses the BigQuery `datasets.list` API, which returns only datasets the caller can get. If the service account isn't a dataset [READER](https://cloud.google.com/bigquery/docs/control-access-to-resources-iam#grant_access_to_a_dataset) (or doesn't have `bigquery.datasets.get` on that dataset), the dataset doesn't appear in the drop-down. Refer to [datasets.list](https://cloud.google.com/bigquery/docs/reference/rest/v2/datasets/list).
+- **Save & test** can still succeed. For IAM details beyond these roles, refer to [BigQuery access control](https://cloud.google.com/bigquery/docs/access-control).
 
 {{< admonition type="note" >}}
 If the service account has project-level access but not dataset or table-level access, **Save & test** may succeed while individual queries return 403 errors. Ensure the service account has read access to the specific datasets and tables you intend to query.
 {{< /admonition >}}
 
 {{< admonition type="note" >}}
-Each data source instance connects to a single GCP project. To visualize data from multiple GCP projects, create one data source per project.
+The data source has a **Default project** where query jobs run. You can query datasets in other GCP projects from the same data source if the service account has the required roles on those projects. Grant `resourcemanager.projects.get` so those projects appear in the query editor drop-down.
 {{< /admonition >}}
+
+## Key concepts
+
+If you're new to Google Cloud or BigQuery, these terms appear throughout the configuration:
+
+| Term | Description |
+|------|-------------|
+| **Service account** | A Google Cloud identity used by applications. Grafana authenticates to BigQuery as this account (or impersonates another account). |
+| **Service account impersonation** | Grafana uses a low-privilege key only to mint short-lived tokens for a second service account that has BigQuery access. |
+| **Workload Identity Federation (WIF)** | Grafana Cloud exchanges the signed-in user's external identity for a short-lived Google Cloud token. Available on Grafana Cloud only. |
+| **Processing location** | The geographic location where BigQuery runs the query. Leave empty for automatic selection. |
+| **Max bytes billed** | A per-query cost cap. Queries that would scan more than this limit fail instead of running. |
 
 ## Add the data source
 
@@ -66,7 +83,15 @@ To add the Google BigQuery data source:
 
 ## Authentication
 
-Google BigQuery data source supports multiple authentication methods. Choose the method that best fits your deployment environment.
+The Google BigQuery data source supports multiple authentication methods. Choose the method that best fits your deployment environment.
+
+| Method | Best for | Grafana Cloud | Supports alerting |
+|--------|----------|---------------|-------------------|
+| **Google JWT File** | Any deployment that can store a service account key | Yes | Yes |
+| **GCE Default Service Account** | Grafana running on a Google Compute Engine VM | No | Yes |
+| **Service account impersonation** | Delegating BigQuery access without storing a high-privilege key. An option on JWT or GCE, not a standalone type | Yes | Yes |
+| **Workload Identity Federation** | Grafana Cloud users authenticating through an external OIDC provider | Yes (Cloud only) | No |
+| **Forward OAuth Identity** | Using Google OAuth login in Grafana for interactive queries | Yes | No |
 
 ### Google Service Account key
 
@@ -78,11 +103,11 @@ To configure service account authentication:
 1. Assign the following roles to the service account:
    - **BigQuery Data Viewer** - Provides read access to BigQuery data
    - **BigQuery Job User** - Allows running BigQuery jobs
-1. Create and download a JSON key file for the service account.
+1. Create and download a JSON key file for the service account. Google Cloud Console provides a `.json` key. P12 keys aren't supported.
 1. In the data source configuration, select **Google JWT File** as the authentication type.
 1. Upload the JSON key file or paste its contents.
 
-### Google Metadata Server
+### GCE default service account
 
 Use this method when running Grafana on a Google Compute Engine (GCE) virtual machine.
 
@@ -90,16 +115,16 @@ When Grafana runs on a GCE virtual machine, it can automatically retrieve the de
 
 1. Ensure your virtual machine has a service account configured as the default account.
 1. Assign the service account the **BigQuery Data Viewer** and **BigQuery Job User** roles.
-1. In the data source configuration, select **Google Metadata Server** as the authentication type.
+1. In the data source configuration, select **GCE Default Service Account** as the authentication type.
 
 ### Service account impersonation
 
-Use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation) when you need to delegate access to BigQuery without distributing service account keys with broad permissions. With impersonation, the key stored in Grafana has minimal permissions — it can only generate short-lived tokens for a separate service account that has BigQuery access. This means the stored credentials cannot directly read data, reducing risk if they are compromised. This is the recommended secure authentication method for connecting Grafana Cloud to BigQuery.
+Use [service account impersonation](https://cloud.google.com/iam/docs/service-account-impersonation) when you need to delegate access to BigQuery without distributing service account keys with broad permissions. With impersonation, the key stored in Grafana has minimal permissions. It can only generate short-lived tokens for a separate service account that has BigQuery access. This means the stored credentials cannot directly read data, reducing risk if they are compromised. This is the recommended secure authentication method for connecting Grafana Cloud to BigQuery.
 
 Service account impersonation involves two service accounts:
 
-- **Authenticating service account** — The service account whose JSON key is uploaded to Grafana. This account's only permission is to create access tokens for the impersonated account. It requires the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (`roles/iam.serviceAccountTokenCreator`).
-- **Impersonated service account** — The service account that has permissions to read data from BigQuery. Grafana assumes this account's identity to run queries. It requires the **BigQuery Data Viewer** and **BigQuery Job User** roles.
+- **Authenticating service account:** The service account whose JSON key is uploaded to Grafana. This account's only permission is to create access tokens for the impersonated account. It requires the [Service Account Token Creator role](https://cloud.google.com/iam/docs/roles-permissions/iam#iam.serviceAccountTokenCreator) (`roles/iam.serviceAccountTokenCreator`).
+- **Impersonated service account:** The service account that has permissions to read data from BigQuery. Grafana assumes this account's identity to run queries. It requires the **BigQuery Data Viewer** and **BigQuery Job User** roles.
 
 #### Configure GCP permissions
 
@@ -132,8 +157,8 @@ To configure service account impersonation in the data source settings:
 
 1. In the **Authentication** section, select **Google JWT File** as the authentication type.
 1. Upload the JSON key file for the **authenticating** service account.
-1. Enable **Service Account Impersonation**.
-1. Enter the full email address of the **impersonated** service account.
+1. Under **Service account impersonation**, turn on **Enable**.
+1. Enter the full email address of the impersonated service account in **Service account to impersonate**.
 1. Click **Save & test** to verify the connection.
 
 ### Workload Identity Federation
@@ -148,16 +173,16 @@ Configuring Workload Identity Federation involves three systems: Google Cloud, y
 
 #### In Google Cloud
 
-1. Create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC identity provider. When configuring the provider, set up attribute mappings so that `google.subject` maps to the relevant claim from your identity provider (for example, `assertion.sub` — the exact mapping depends on your provider's claim format).
+1. Create a [Workload Identity Pool and Provider](https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers) that trusts your OIDC identity provider. When configuring the provider, set up attribute mappings so that `google.subject` maps to the relevant claim from your identity provider (for example, `assertion.sub`; the exact mapping depends on your provider's claim format).
 1. Grant the BigQuery permissions needed to run queries. How you grant them depends on whether you use service account impersonation:
-   - **Without impersonation** — grant the WIF pool principal directly:
+   - **Without impersonation:** grant the WIF pool principal directly:
      - **BigQuery Data Viewer**
      - **BigQuery Job User**
-   - **With impersonation** — create a service account, grant it those same roles, then grant the WIF pool principal the **Service Account Token Creator** role on that service account.
+   - **With impersonation:** create a service account, grant it those same roles, then grant the WIF pool principal the **Service Account Token Creator** role on that service account.
 
 #### In Grafana Cloud
 
-1. Configure your Grafana Cloud stack's SSO integration against the same OIDC provider, so the signed-in user's identity is available for Grafana Cloud to exchange for a Google Cloud access token before the request reaches the plugin. Refer to [Configure OAuth2 authentication](https://grafana.com/docs/grafana/latest/setup-grafana/configure-security/configure-authentication/generic-oauth/) for setup details.
+1. Configure your Grafana Cloud stack's SSO integration against the same OIDC provider, so the signed-in user's identity is available for Grafana Cloud to exchange for a Google Cloud access token before the request reaches the plugin. Refer to [Configure OAuth2 authentication](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/configure-authentication/generic-oauth/) for setup details.
 
 #### In the data source configuration
 
@@ -170,15 +195,15 @@ Use the **project number** (a numeric ID such as `123456789`), not the project I
    {{< /admonition >}}
 
 1. If you set up service account impersonation, enter the service account email in the **Service account email** field. If you granted permissions directly to the WIF pool, leave this blank.
-1. Enter the **Default project** where your BigQuery queries will run.
+1. Enter the **Default project** where your BigQuery queries run.
 
 {{< admonition type="note" >}}
-Credentials from Workload Identity Federation are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
+Credentials from Workload Identity Federation are tied to the signed-in user's active session. There is no long-lived credential available to the Grafana backend, so features that run without a user present don't work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 ### Forward OAuth Identity
 
-Use Forward OAuth Identity when you want to use Grafana's Google OAuth authentication with BigQuery.
+Use Forward OAuth Identity when you want to use Google OAuth authentication in Grafana with BigQuery.
 
 To configure Forward OAuth Identity:
 
@@ -190,7 +215,7 @@ To configure Forward OAuth Identity:
 1. Enter the **Default project** where queries run.
 
 {{< admonition type="note" >}}
-Credentials from Forward OAuth Identity are tied to the signed-in user's active session — there is no long-lived credential available to the Grafana backend. This means any feature that runs without a user present will not work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
+Credentials from Forward OAuth Identity are tied to the signed-in user's active session. There is no long-lived credential available to the Grafana backend, so features that run without a user present don't work, including alerting, scheduled reports, and public dashboards. If you rely on these features, use a service account key (JWT) instead.
 {{< /admonition >}}
 
 ## Additional settings
@@ -255,7 +280,7 @@ datasources:
       privateKeyPath: '/etc/secrets/bigquery.pem'
 ```
 
-### Google Metadata Server
+### GCE default service account
 
 ```yaml
 apiVersion: 1
@@ -268,7 +293,7 @@ datasources:
       authenticationType: gce
 ```
 
-### Google Metadata Server with service account impersonation
+### GCE default service account with service account impersonation
 
 ```yaml
 apiVersion: 1
@@ -409,7 +434,7 @@ resource "grafana_data_source" "bigquery" {
 }
 ```
 
-### Google Metadata Server
+### GCE default service account
 
 ```hcl
 resource "grafana_data_source" "bigquery" {
