@@ -17,7 +17,7 @@ labels:
 menuTitle: Configure
 title: Configure the Google BigQuery data source
 weight: 100
-review_date: 2026-08-17
+review_date: 2026-09-15
 ---
 
 # Configure the Google BigQuery data source
@@ -166,7 +166,9 @@ To configure service account impersonation in the data source settings:
 Use [Google Cloud Workload Identity Federation](https://cloud.google.com/iam/docs/workload-identity-federation) (WIF) to let Grafana users authenticate to BigQuery with an external identity provider (such as Okta or another OIDC provider) instead of a service account key.
 
 {{< admonition type="note" >}}
-This authentication method is available on **Grafana Cloud** only. Grafana Cloud exchanges the signed-in user's external OIDC token for a short-lived Google Cloud access token before the request reaches the plugin.
+This authentication method is available on **Grafana Cloud** only. Grafana Cloud exchanges the signed-in user's OIDC ID token for a short-lived Google Cloud access token before the request reaches the plugin.
+
+Workload Identity Federation and [Forward OAuth Identity](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/#forward-oauth-identity) are different authentication types. WIF exchanges an OIDC ID token from the identity provider Grafana uses for SSO. Forward OAuth Identity forwards a Google OAuth access token and queries BigQuery as that Google user. If Grafana users sign in with [Google OAuth](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-security/configure-authentication/google/), use Forward OAuth Identity.
 {{< /admonition >}}
 
 Configuring Workload Identity Federation involves three systems: Google Cloud, your Grafana Cloud stack, and the data source itself.
