@@ -106,7 +106,6 @@ export interface BigQueryQueryNG extends DataQuery {
   convertToUTC?: boolean;
   sharded?: boolean;
   queryPriority?: QueryPriority;
-  timeShift?: string;
   editorMode?: EditorMode;
   sql?: SQLExpression;
 }
