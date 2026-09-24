@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/grafana/dsconfig/refs/tags/dsconfig/v0.0.10/dsconfig/schema.json",
+  "$schema": "https://raw.githubusercontent.com/grafana/dsconfig/refs/tags/dsconfig/v0.0.12/dsconfig/schema.json",
   "schemaVersion": "v1",
   "pluginType": "grafana-bigquery-datasource",
   "pluginName": "Google BigQuery",
@@ -77,8 +77,8 @@
       "label": "Default project",
       "valueType": "string",
       "target": "jsonData",
-      "dependsOn": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation'",
-      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
+      "dependsOn": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation' || jsonData_authenticationType == 'forwardOAuthIdentity'",
+      "requiredWhen": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'forwardOAuthIdentity'",
       "ui": {
         "component": "input"
       }
@@ -90,7 +90,7 @@
       "valueType": "string",
       "target": "jsonData",
       "dependsOn": "jsonData_authenticationType == 'jwt'",
-      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
+      "requiredWhen": "jsonData_authenticationType == 'jwt'",
       "ui": {
         "component": "input"
       }
@@ -102,7 +102,7 @@
       "valueType": "string",
       "target": "jsonData",
       "dependsOn": "jsonData_authenticationType == 'jwt'",
-      "requiredWhen": "jsonData_authenticationType == 'jwt' && jsonData_privateKeyPath == ''",
+      "requiredWhen": "jsonData_authenticationType == 'jwt'",
       "ui": {
         "component": "input"
       }

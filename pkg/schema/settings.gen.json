@@ -27,28 +27,28 @@
           "clientEmail": {
             "type": "string",
             "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
-            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt'"
           },
           "datasourceId": {
-            "description": "The numeric data source instance ID. Populated in the backend from the plugin context (pkg/bigquery/settings.go:36) rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
+            "description": "The numeric data source instance ID. Populated in the backend from the plugin context rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
             "type": "number"
           },
           "defaultProject": {
             "type": "string",
-            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation'",
-            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+            "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'gce' || jsonData_authenticationType == 'workloadIdentityFederation' || jsonData_authenticationType == 'forwardOAuthIdentity'",
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' || jsonData_authenticationType == 'forwardOAuthIdentity'"
           },
           "enableSecureSocksProxy": {
-            "description": "Connect to this data source through Grafana's secure SOCKS proxy. Read and applied by Grafana core when it builds the data source HTTP client, not by the plugin. The switch is only rendered in the configuration editor when the Grafana instance has secure_socks_datasource_proxy configured (src/components/ConfigEditor.tsx:178), but the value can always be set through provisioning.",
+            "description": "Connect to this data source through Grafana's secure SOCKS proxy. Read and applied by Grafana core when it builds the data source HTTP client, not by the plugin. The switch is only rendered in the configuration editor when the Grafana instance has secure_socks_datasource_proxy configured, but the value can always be set through provisioning.",
             "type": "boolean",
             "default": false
           },
           "flatRateProject": {
-            "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:13) but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
+            "description": "Defined in the backend Settings struct but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
             "type": "string"
           },
           "oauthPassThru": {
-            "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written by AuthConfig.tsx:73-74 as a side-effect of the auth-type radio, not by a direct UI toggle.",
+            "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written as a side-effect of the auth-type radio, not by a direct UI toggle.",
             "type": "boolean",
             "default": false
           },
@@ -107,7 +107,7 @@
             ]
           },
           "queryPriority": {
-            "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:15) as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries at src/types.ts:107 but that is a separate storage location).",
+            "description": "Defined in the backend Settings struct as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries but that is a separate storage location).",
             "type": "string",
             "enum": [
               "INTERACTIVE",
@@ -130,7 +130,7 @@
           "tokenUri": {
             "type": "string",
             "x-dsconfig-depends-on": "jsonData_authenticationType == 'jwt'",
-            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt' \u0026\u0026 jsonData_privateKeyPath == ''"
+            "x-dsconfig-required-when": "jsonData_authenticationType == 'jwt'"
           },
           "usingImpersonation": {
             "description": "Enable service account impersonation. Read more about service account impersonation here: https://cloud.google.com/iam/docs/service-account-impersonation",
