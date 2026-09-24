@@ -189,7 +189,7 @@
     {
       "id": "jsonData_oauthPassThru",
       "key": "oauthPassThru",
-      "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written by AuthConfig.tsx:73-74 as a side-effect of the auth-type radio, not by a direct UI toggle.",
+      "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written as a side-effect of the auth-type radio, not by a direct UI toggle.",
       "valueType": "boolean",
       "target": "jsonData",
       "defaultValue": false,
@@ -408,7 +408,7 @@
     {
       "id": "jsonData_flatRateProject",
       "key": "flatRateProject",
-      "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:13) but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
+      "description": "Defined in the backend Settings struct but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
       "valueType": "string",
       "target": "jsonData",
       "tags": [
@@ -419,7 +419,7 @@
     {
       "id": "jsonData_queryPriority",
       "key": "queryPriority",
-      "description": "Defined in the backend Settings struct (pkg/bigquery/types/types.go:15) as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries at src/types.ts:107 but that is a separate storage location).",
+      "description": "Defined in the backend Settings struct as the desired default query priority (INTERACTIVE / BATCH). Not read by any current code path and not exposed in the datasource configuration editor (a queryPriority also exists on individual queries but that is a separate storage location).",
       "valueType": "string",
       "target": "jsonData",
       "validations": [
@@ -465,7 +465,7 @@
       "id": "jsonData_enableSecureSocksProxy",
       "key": "enableSecureSocksProxy",
       "label": "Secure Socks Proxy enabled",
-      "description": "Connect to this data source through Grafana's secure SOCKS proxy. Read and applied by Grafana core when it builds the data source HTTP client, not by the plugin. The switch is only rendered in the configuration editor when the Grafana instance has secure_socks_datasource_proxy configured (src/components/ConfigEditor.tsx:178), but the value can always be set through provisioning.",
+      "description": "Connect to this data source through Grafana's secure SOCKS proxy. Read and applied by Grafana core when it builds the data source HTTP client, not by the plugin. The switch is only rendered in the configuration editor when the Grafana instance has secure_socks_datasource_proxy configured, but the value can always be set through provisioning.",
       "valueType": "boolean",
       "target": "jsonData",
       "defaultValue": false
@@ -473,7 +473,7 @@
     {
       "id": "jsonData_datasourceId",
       "key": "datasourceId",
-      "description": "The numeric data source instance ID. Populated in the backend from the plugin context (pkg/bigquery/settings.go:36) rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
+      "description": "The numeric data source instance ID. Populated in the backend from the plugin context rather than read from provisioned jsonData. Declared here so provisioning payloads are validated instead of silently accepting unknown keys.",
       "valueType": "number",
       "target": "jsonData",
       "tags": [
@@ -541,7 +541,7 @@
         "jsonData_usingImpersonation",
         "jsonData_serviceAccountToImpersonate"
       ],
-      "description": "Service account impersonation: setting serviceAccountToImpersonate is only effective when usingImpersonation is true (pkg/bigquery/http_client.go:53-58,73-88)"
+      "description": "Service account impersonation: setting serviceAccountToImpersonate is only effective when usingImpersonation is true"
     },
     {
       "type": "group",
@@ -554,7 +554,7 @@
   ],
   "instructions": [
     {
-      "msg": "Four authentication methods are available, selected via jsonData.authenticationType: 'jwt' (Google JWT File, the default), 'gce' (GCE Default Service Account, only works when Grafana runs on a Google Compute Engine VM), 'forwardOAuthIdentity' (Forward the caller's OAuth token to BigQuery), and 'workloadIdentityFederation' (only visible in Grafana Cloud, but the backend accepts it anywhere). Configure exactly one method; the backend switches on this discriminator (pkg/bigquery/http_client.go:51-89) and only the credentials of the selected method are used.",
+      "msg": "Four authentication methods are available, selected via jsonData.authenticationType: 'jwt' (Google JWT File, the default), 'gce' (GCE Default Service Account, only works when Grafana runs on a Google Compute Engine VM), 'forwardOAuthIdentity' (Forward the caller's OAuth token to BigQuery), and 'workloadIdentityFederation' (only visible in Grafana Cloud, but the backend accepts it anywhere). Configure exactly one method; the backend switches on this discriminator and only the credentials of the selected method are used.",
       "tags": [
         "llm",
         "auth"
@@ -575,7 +575,7 @@
       ]
     },
     {
-      "msg": "To configure Workload Identity Federation authentication, set jsonData.authenticationType to 'workloadIdentityFederation' and provide jsonData.workloadIdentityPoolProvider (mandatory; missing it makes the backend fail at pkg/bigquery/http_client.go:95). Optionally set jsonData.wifServiceAccountEmail to have the federated identity impersonate a specific service account. To configure Forward OAuth Identity, set jsonData.authenticationType to 'forwardOAuthIdentity' — no additional fields are required; the backend forwards the caller's OAuth token (jsonData.oauthPassThru is set to true as a side-effect and enables http_client.ForwardHTTPHeaders).",
+      "msg": "To configure Workload Identity Federation authentication, set jsonData.authenticationType to 'workloadIdentityFederation' and provide jsonData.workloadIdentityPoolProvider (mandatory; missing it makes the backend fail). Optionally set jsonData.wifServiceAccountEmail to have the federated identity impersonate a specific service account. To configure Forward OAuth Identity, set jsonData.authenticationType to 'forwardOAuthIdentity' — no additional fields are required; the backend forwards the caller's OAuth token (jsonData.oauthPassThru is set to true as a side-effect and enables forwarding of HTTP headers).",
       "tags": [
         "llm",
         "auth"
@@ -597,14 +597,14 @@
       ]
     },
     {
-      "msg": "Dataset access restriction: set jsonData.restrictToAccessibleDatasets to true to reject queries that reference tables outside the GCP projects the data source credentials can enumerate. Each query is dry-run first and the referenced tables BigQuery reports are checked before it executes (pkg/bigquery/driver/allowlist.go:77). The check fails closed — anything whose referenced tables cannot be determined reliably is rejected, so multi-statement scripts, EXECUTE IMMEDIATE and procedure calls are refused outright, as are queries referencing 50 or more tables (BigQuery stops reporting them past that point). jsonData.additionalAllowedDatasets is a comma-separated allowlist of datasets outside those projects that queries may still reference; it only has an effect when restrictToAccessibleDatasets is true. Example: {\"jsonData\":{\"restrictToAccessibleDatasets\":true,\"additionalAllowedDatasets\":\"bigquery-public-data.samples,shared_views\"}}",
+      "msg": "Dataset access restriction: set jsonData.restrictToAccessibleDatasets to true to reject queries that reference tables outside the GCP projects the data source credentials can enumerate. Each query is dry-run first and the referenced tables BigQuery reports are checked before it executes. The check fails closed — anything whose referenced tables cannot be determined reliably is rejected, so multi-statement scripts, EXECUTE IMMEDIATE and procedure calls are refused outright, as are queries referencing 50 or more tables (BigQuery stops reporting them past that point). jsonData.additionalAllowedDatasets is a comma-separated allowlist of datasets outside those projects that queries may still reference; it only has an effect when restrictToAccessibleDatasets is true. Example: {\"jsonData\":{\"restrictToAccessibleDatasets\":true,\"additionalAllowedDatasets\":\"bigquery-public-data.samples,shared_views\"}}",
       "tags": [
         "llm",
         "settings"
       ]
     },
     {
-      "msg": "Entries in jsonData.additionalAllowedDatasets are written either as 'project.dataset' or as a bare 'dataset', which is qualified with jsonData.defaultProject. Prefer the 'project.dataset' form: bare entries are silently ignored when the data source has no default project to qualify them with (pkg/bigquery/driver/allowlist.go:50-59). Projects named only in the allowlist are also added to the query builder's project list, and for those projects the dataset picker offers just the allowlisted datasets rather than every dataset the credentials can see. Note that with authenticationType 'forwardOAuthIdentity' or 'workloadIdentityFederation' — both of which set jsonData.oauthPassThru to true — the credentials cannot enumerate projects, so only jsonData.defaultProject counts as accessible (pkg/bigquery/datasource.go:453) and every other dataset needs an explicit allowlist entry.",
+      "msg": "Entries in jsonData.additionalAllowedDatasets are written either as 'project.dataset' or as a bare 'dataset', which is qualified with jsonData.defaultProject. Prefer the 'project.dataset' form: bare entries are silently ignored when the data source has no default project to qualify them with. Projects named only in the allowlist are also added to the query builder's project list, and for those projects the dataset picker offers just the allowlisted datasets rather than every dataset the credentials can see. Note that with authenticationType 'forwardOAuthIdentity' or 'workloadIdentityFederation' — both of which set jsonData.oauthPassThru to true — the credentials cannot enumerate projects, so only jsonData.defaultProject counts as accessible and every other dataset needs an explicit allowlist entry.",
       "tags": [
         "llm",
         "settings"
