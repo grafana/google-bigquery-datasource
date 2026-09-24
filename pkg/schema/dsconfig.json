@@ -189,12 +189,25 @@
     {
       "id": "jsonData_oauthPassThru",
       "key": "oauthPassThru",
-      "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written as a side-effect of the auth-type radio, not by a direct UI toggle.",
+      "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written as a side-effect of the auth-type radio, not by a direct UI toggle. Provisioned configurations (YAML/Terraform) bypass the editor and must set this explicitly: if left false for these two auth types, client creation fails with \"auth type ... does not use a token provider middleware\" (see pkg/bigquery/http_client.go).",
       "valueType": "boolean",
       "target": "jsonData",
       "defaultValue": false,
       "tags": [
         "editor-managed"
+      ],
+      "overrides": [
+        {
+          "when": "jsonData_authenticationType == 'forwardOAuthIdentity' || jsonData_authenticationType == 'workloadIdentityFederation'",
+          "validations": [
+            {
+              "type": "allowedValues",
+              "values": [
+                true
+              ]
+            }
+          ]
+        }
       ]
     },
     {
