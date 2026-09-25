@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.2
+
+### Patch Changes
+
+🐛 Fix security vulnerabilities (CVE-2026-84375)
+
 ## 3.4.1
 
 ⚙️ Update backend and frontend dependencies, resolving high-severity CVEs in `google.golang.org/grpc`, `golang.org/x/crypto`, `golang.org/x/mod`, and `fast-uri` ([#541](https://github.com/grafana/google-bigquery-datasource/pull/541), [#546](https://github.com/grafana/google-bigquery-datasource/pull/546), [#565](https://github.com/grafana/google-bigquery-datasource/pull/565)).
