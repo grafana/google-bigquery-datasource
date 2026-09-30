@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.3
+
+### Patch Changes
+
+🐛 added datasource config schema
+
 ## 3.4.2
 
 ### Patch Changes
