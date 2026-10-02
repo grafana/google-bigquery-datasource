@@ -61,7 +61,9 @@ test.describe('Query editor', () => {
       await expect(page.getByRole('radio', { name: 'Builder' })).toBeVisible();
       await expect(page.getByRole('radio', { name: 'Code' })).toBeVisible();
       await expect(page.getByLabel('Processing location')).toBeVisible();
-      await expect(page.getByLabel('Format')).toBeVisible();
+      // getByLabel('Format') is ambiguous on the real Cloud panel editor: it also matches the
+      // adjacent "Add transformation" button there. Match the combobox by role instead.
+      await expect(page.getByRole('combobox', { name: 'Format:' })).toBeVisible();
     });
   });
 
@@ -126,6 +128,10 @@ test.describe('Query editor', () => {
   test.describe('Code mode', () => {
     test('accepts a raw SQL query typed into the editor', async ({ panelEditPage, page }) => {
       await panelEditPage.datasource.set(DATA_SOURCE_NAME);
+      // Without an explicit visualization, the panel keeps its default type, and the Monaco
+      // editor never mounts on the real Cloud panel editor (unlike local/PR CI) — see the other
+      // Code-mode tests below, which all set one first.
+      await panelEditPage.setVisualization('Table');
       await switchToCodeMode(page);
 
       await typeQuery(page, 'SELECT 1 AS value');
