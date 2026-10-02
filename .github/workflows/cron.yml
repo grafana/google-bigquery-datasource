@@ -21,16 +21,7 @@ jobs:
       id-token: write
     with:
       run-stage: nightly
-      # Per infra/data-sources/oss-big-tent/bigquery.ts, this instance's pdcEnvironment is 'gcp'
-      # (unlike the AWS-backed repos that all share datasources-pdc-network-aws-datasourcese2e).
-      # Naming convention: datasources-pdc-network-{csp}-{stack slug}, per
-      # docs/ds-instances/development.md in grafana/data-sources.
       pdc-network-name: datasources-pdc-network-gcp-datasourcese2e
-      # Forwarded as-is to get-vault-secrets' `repo_secrets` input inside playwright-cloud.yml,
-      # which resolves against ci/data/repo/grafana/<calling-repo>/<secret path>:<field> — the
-      # repo segment is implicit from that job's own `github.repository`, so it must NOT be
-      # repeated here. `bigQueryJwt` is the standard service-account instance defined in
-      # infra/data-sources/oss-big-tent/bigquery.ts.
       repo-secrets: |
         DS_INSTANCE_CLIENT_EMAIL=bigQueryJwt:json_clientEmail
         DS_INSTANCE_PROJECT_ID=bigQueryJwt:json_defaultProject
