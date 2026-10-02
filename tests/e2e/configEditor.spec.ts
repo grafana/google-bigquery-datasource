@@ -97,7 +97,11 @@ test.describe('Config editor', () => {
         // Grafana Cloud's own PDC combobox (not the open-source SecureSocksProxySettings switch,
         // which doesn't need toggling first) — matches clickhouse-datasource's proven
         // configurePDC() helper in tests/e2e/configEditor.spec.ts, whose nightly Cloud run passes.
-        await page.getByRole('combobox', { name: 'Private data source connect' }).click();
+        // The org has ~50 PDC networks across all CSPs/stacks; the combobox filters as you type,
+        // so type the name rather than relying on it already being rendered in an unfiltered list.
+        const pdcCombobox = page.getByRole('combobox', { name: 'Private data source connect' });
+        await pdcCombobox.click();
+        await pdcCombobox.fill(pdcNetworkName);
         await page.getByText(pdcNetworkName, { exact: true }).click();
       }
 
