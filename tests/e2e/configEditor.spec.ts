@@ -40,6 +40,12 @@ test.describe('Config editor', () => {
 
   test.describe('save & test', () => {
     test('shows an error alert when the health check fails', async ({ createDataSourceConfigPage }) => {
+      // configPage.saveAndTest() waits for the classic /api/datasources/uid/<uid> REST paths,
+      // but this Grafana Cloud stack routes datasource save/health through the newer app-platform
+      // API instead (confirmed live against https://datasourcese2e.grafana-dev.net) — the save
+      // request never matches, so saveAndTest() hangs until timeout. Covered by local/PR CI,
+      // same as clickhouse-datasource's equivalent ad-hoc save & test tests.
+      test.skip(isCloudRun, 'Ad-hoc save & test is not reliable on the shared Cloud instance; covered by local/PR CI.');
       const configPage = await createDataSourceConfigPage({ type: PLUGIN_ID });
 
       // mockHealthCheckResponse(body, status) — body first, status second. A fulfill-options-style
@@ -54,6 +60,8 @@ test.describe('Config editor', () => {
     });
 
     test('shows a success alert when the health check succeeds', async ({ createDataSourceConfigPage }) => {
+      // See the skip comment on the previous test — same reason.
+      test.skip(isCloudRun, 'Ad-hoc save & test is not reliable on the shared Cloud instance; covered by local/PR CI.');
       const configPage = await createDataSourceConfigPage({ type: PLUGIN_ID });
 
       await configPage.mockHealthCheckResponse({ status: 'OK', message: 'Data source is working' }, 200);
@@ -103,7 +111,18 @@ test.describe('Config editor', () => {
         await page.getByText(pdcNetworkName).click();
       }
 
-      await expect(configPage.saveAndTest()).toBeOK();
+      // Can't use configPage.saveAndTest() here: it waits for the classic
+      // /api/datasources/uid/<uid> REST paths, but this Grafana Cloud stack routes datasource
+      // save/health through the newer app-platform API instead — PUT and GET .../health under
+      // /apis/<plugin>.datasource.grafana.app/v0alpha1/namespaces/stacks-<n>/datasources/<uid> —
+      // confirmed live against https://datasourcese2e.grafana-dev.net, and still unfixed as of
+      // @grafana/plugin-e2e@3.14.0 (the latest). Match on the UID instead of a specific path
+      // shape, so this works under either API generation.
+      const healthResponsePromise = page.waitForResponse(
+        (resp) => resp.url().includes(configPage.datasource.uid) && resp.url().includes('health')
+      );
+      await page.getByRole('button', { name: 'Save & test' }).click();
+      await expect(healthResponsePromise).toBeOK();
       // "Data source is working" is sqlds' default CheckHealth success message (health.go);
       // the BigQuery datasource doesn't override it with a custom Pre/PostCheckHealth message.
       await expect(configPage).toHaveAlert('success', { hasText: 'Data source is working' });
