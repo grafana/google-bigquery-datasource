@@ -31,8 +31,8 @@ jobs:
   notify-slack:
     name: Notify Slack on failure
     needs: playwright-cloud
-    # Manual workflow_dispatch runs (e.g. debugging this workflow itself) shouldn't page the
-    # channel — only the real nightly schedule should.
+    # TODO/TEMPORARY: skip notifying on workflow_dispatch while this workflow itself is being
+    # debugged. Revert to plain `if: failure()` before merging — manual runs should page normally.
     if: failure() && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-24.04
     permissions:
