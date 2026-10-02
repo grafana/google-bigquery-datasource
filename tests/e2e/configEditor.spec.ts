@@ -107,14 +107,13 @@ test.describe('Config editor', () => {
         // configurePDC() helper in tests/e2e/configEditor.spec.ts, whose nightly Cloud run passes.
         // Each option is rendered as "<name> (N agents connected)", so this must NOT be an exact
         // match — confirmed live against https://datasourcese2e.grafana-dev.net.
-        const pdcCombobox = page.getByRole('combobox', { name: 'Private data source connect' });
-        await pdcCombobox.click();
+        await page.getByRole('combobox', { name: 'Private data source connect' }).click();
         await page.getByText(pdcNetworkName).click();
-        // Selecting the option closes the list immediately, but the combobox's own value commits
-        // a beat later — clicking "Save & test" right away raced ahead of that commit often
-        // enough to save with no PDC network set, sending the health check straight at BigQuery
-        // instead of through the tunnel. Wait for the commit instead of assuming the click did it.
-        await expect(pdcCombobox).toHaveValue(new RegExp(pdcNetworkName));
+        // The search input's own `value` attribute stays empty even after a successful
+        // selection — confirmed live — so it can't be used to detect the commit. The selected
+        // network instead renders as its own static text once the list closes; wait for that
+        // instead of assuming the preceding click already settled before "Save & test".
+        await expect(page.getByText(pdcNetworkName)).toBeVisible();
       }
 
       // Can't use configPage.saveAndTest() here: it waits for the classic
