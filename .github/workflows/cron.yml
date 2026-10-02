@@ -21,10 +21,11 @@ jobs:
       id-token: write
     with:
       run-stage: nightly
-      # Shared PDC network for the datasourcese2e Cloud instance — same literal every other
-      # data source repo's cron.yml uses (clickhouse-datasource, grafana-cloudwatch-datasource,
-      # mqtt-datasource, etc.), not something to fetch from Vault per repo.
-      pdc-network-name: datasources-pdc-network-aws-datasourcese2e
+      # Per infra/data-sources/oss-big-tent/bigquery.ts, this instance's pdcEnvironment is 'gcp'
+      # (unlike the AWS-backed repos that all share datasources-pdc-network-aws-datasourcese2e).
+      # Naming convention: datasources-pdc-network-{csp}-{stack slug}, per
+      # docs/ds-instances/development.md in grafana/data-sources.
+      pdc-network-name: datasources-pdc-network-gcp-datasourcese2e
       # Forwarded as-is to get-vault-secrets' `repo_secrets` input inside playwright-cloud.yml,
       # which resolves against ci/data/repo/grafana/<calling-repo>/<secret path>:<field> — the
       # repo segment is implicit from that job's own `github.repository`, so it must NOT be
@@ -39,7 +40,9 @@ jobs:
   notify-slack:
     name: Notify Slack on failure
     needs: playwright-cloud
-    if: failure()
+    # Manual workflow_dispatch runs (e.g. debugging this workflow itself) shouldn't page the
+    # channel — only the real nightly schedule should.
+    if: failure() && github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-24.04
     permissions:
       contents: read
