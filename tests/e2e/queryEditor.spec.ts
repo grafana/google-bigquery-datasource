@@ -61,7 +61,9 @@ test.describe('Query editor', () => {
       await expect(page.getByRole('radio', { name: 'Builder' })).toBeVisible();
       await expect(page.getByRole('radio', { name: 'Code' })).toBeVisible();
       await expect(page.getByLabel('Processing location')).toBeVisible();
-      await expect(page.getByLabel('Format')).toBeVisible();
+      // getByLabel('Format') is ambiguous on the real Cloud panel editor: it also matches the
+      // adjacent "Add transformation" button there. Match the combobox by role instead.
+      await expect(page.getByRole('combobox', { name: 'Format:' })).toBeVisible();
     });
   });
 

@@ -94,14 +94,10 @@ test.describe('Config editor', () => {
         // this test exercises a connectivity path Cloud doesn't actually use, leaving the
         // workflow's pdc-network-name input unexercised.
         //
-        // The "Enabled" switch is the plugin's own SecureSocksProxySettings component
-        // (@grafana/ui) and is verified against its source. The PDC network picker below it is
-        // rendered by Grafana Cloud itself (not in the open-source component), so its selector
-        // is a best-effort guess — adjust `name: /private data source connect network/i` if the
-        // nightly run shows it doesn't match the real control.
-        const secureSocksSection = page.locator('div').filter({ has: page.getByRole('heading', { name: 'Secure Socks Proxy' }) }).first();
-        await secureSocksSection.getByRole('switch', { name: 'Enabled' }).click();
-        await page.getByRole('combobox', { name: /private data source connect network/i }).click();
+        // Grafana Cloud's own PDC combobox (not the open-source SecureSocksProxySettings switch,
+        // which doesn't need toggling first) — matches clickhouse-datasource's proven
+        // configurePDC() helper in tests/e2e/configEditor.spec.ts, whose nightly Cloud run passes.
+        await page.getByRole('combobox', { name: 'Private data source connect' }).click();
         await page.getByText(pdcNetworkName, { exact: true }).click();
       }
 
