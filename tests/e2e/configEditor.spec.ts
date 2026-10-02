@@ -110,10 +110,10 @@ test.describe('Config editor', () => {
         await page.getByRole('combobox', { name: 'Private data source connect' }).click();
         await page.getByText(pdcNetworkName).click();
         // The search input's own `value` attribute stays empty even after a successful
-        // selection — confirmed live — so it can't be used to detect the commit. The selected
-        // network instead renders as its own static text once the list closes; wait for that
-        // instead of assuming the preceding click already settled before "Save & test".
-        await expect(page.getByText(pdcNetworkName)).toBeVisible();
+        // selection — confirmed live — so it can't be used to detect the commit. The committed
+        // selection instead renders in the react-select "single value" node; a bare getByText
+        // is ambiguous because a lingering aria-live announcement span also contains this text.
+        await expect(page.getByTestId('pdc-network-select').getByText(pdcNetworkName)).toBeVisible();
       }
 
       // Can't use configPage.saveAndTest() here: it waits for the classic
