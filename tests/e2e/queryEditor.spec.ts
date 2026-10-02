@@ -128,6 +128,10 @@ test.describe('Query editor', () => {
   test.describe('Code mode', () => {
     test('accepts a raw SQL query typed into the editor', async ({ panelEditPage, page }) => {
       await panelEditPage.datasource.set(DATA_SOURCE_NAME);
+      // Without an explicit visualization, the panel keeps its default type, and the Monaco
+      // editor never mounts on the real Cloud panel editor (unlike local/PR CI) — see the other
+      // Code-mode tests below, which all set one first.
+      await panelEditPage.setVisualization('Table');
       await switchToCodeMode(page);
 
       await typeQuery(page, 'SELECT 1 AS value');
