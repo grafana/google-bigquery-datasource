@@ -77,13 +77,13 @@ test.describe('Config editor', () => {
     });
 
     test('passes the health check with real BigQuery credentials', async ({ createDataSourceConfigPage, page }) => {
-      // Only the nightly Cloud lane has real credentials, injected via cron.yml's repo-secrets
-      // into the Playwright process env (see cloudCredentials() in ./utils).
-      test.skip(!isCloudRun, 'Only runs in the nightly Cloud lane, where real credentials are available');
-      // Gets a genuine 400 from the real health check on Cloud, even though the identical config
-      // (same credentials, same PDC network) succeeds when done manually in the Grafana Cloud UI.
-      // See google-bigquery-datasource#575 for everything tried so far and what's still unknown.
-      test.skip(isCloudRun, 'Known issue, see google-bigquery-datasource#575');
+      // Only the nightly Cloud lane has real credentials (injected via cron.yml's repo-secrets
+      // into the Playwright process env — see cloudCredentials() in ./utils), but even there the
+      // real health check currently gets a genuine 400, even though the identical config (same
+      // credentials, same PDC network) succeeds when done manually in the Grafana Cloud UI. So
+      // this is disabled everywhere for now; see google-bigquery-datasource#575 for everything
+      // tried so far, and remove this skip once that's resolved.
+      test.skip(true, 'Known issue, see google-bigquery-datasource#575');
 
       const creds = cloudCredentials();
       const configPage = await createDataSourceConfigPage({ type: PLUGIN_ID });
