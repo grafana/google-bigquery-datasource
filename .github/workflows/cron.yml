@@ -29,15 +29,19 @@ jobs:
       # get-vault-secrets uses internally to resolve repo-secrets below, which is why this input
       # has to be a literal instead of read dynamically.
       pdc-network-name: datasources-pdc-network-aws-datasourcese2e
-      # Vault paths follow ci/data/data-sources/<repo>/<instance>:<field>, per
-      # docs/security/vault-secrets-for-plugins.md. `bigQueryJwt` is the standard
-      # service-account instance defined in infra/data-sources/oss-big-tent/bigquery.ts.
+      # get-vault-secrets' repo_secrets format already scopes each entry under
+      # ci/data/repo/grafana/<this repo>/<secretpath> using github.repository — prefixing the
+      # repo name ourselves here doubles that segment and 404s (confirmed: grafana/mqtt-datasource
+      # and grafana/yugabyte-datasource's cron.yml both do this and have been silently failing
+      # nightly for 5+ days with the exact same doubled-path error). `bigQueryJwt` alone is the
+      # secretpath; it's the standard service-account instance defined in
+      # infra/data-sources/oss-big-tent/bigquery.ts.
       repo-secrets: |
-        DS_INSTANCE_CLIENT_EMAIL=google-bigquery-datasource/bigQueryJwt:json_clientEmail
-        DS_INSTANCE_PROJECT_ID=google-bigquery-datasource/bigQueryJwt:json_defaultProject
-        DS_INSTANCE_TOKEN_URI=google-bigquery-datasource/bigQueryJwt:json_tokenUri
-        DS_INSTANCE_PRIVATE_KEY=google-bigquery-datasource/bigQueryJwt:secure_privateKey
-        DS_PDC_NETWORK_NAME=google-bigquery-datasource/bigQueryJwt:e2ePdcNetworkName
+        DS_INSTANCE_CLIENT_EMAIL=bigQueryJwt:json_clientEmail
+        DS_INSTANCE_PROJECT_ID=bigQueryJwt:json_defaultProject
+        DS_INSTANCE_TOKEN_URI=bigQueryJwt:json_tokenUri
+        DS_INSTANCE_PRIVATE_KEY=bigQueryJwt:secure_privateKey
+        DS_PDC_NETWORK_NAME=bigQueryJwt:e2ePdcNetworkName
 
   notify-slack:
     name: Notify Slack on failure
