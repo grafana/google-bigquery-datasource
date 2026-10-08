@@ -16,16 +16,24 @@ async function switchToCodeMode(page: import('@playwright/test').Page) {
   await page.getByRole('radio', { name: 'Code' }).click();
 }
 
-function sqlEditor(page: import('@playwright/test').Page) {
-  // Monaco exposes the visible content as the `value` of the hidden accessibility textarea.
-  return page.getByRole('textbox', { name: /editor content/i });
+// @grafana/ui ships two interchangeable code editor implementations (Monaco and CodeMirror) —
+// which one actually renders depends on the running Grafana version, not on anything in this
+// repo. Rather than guessing at either implementation's internal accessible-name/DOM structure,
+// use the stable, version-managed data-testid both are expected to expose on their wrapping
+// container (selectors.components.CodeEditor.container, from @grafana/e2e-selectors).
+function sqlEditorContainer(panelEditPage: import('@grafana/plugin-e2e').PanelEditPage, selectors: import('@grafana/plugin-e2e').E2ESelectorGroups) {
+  return panelEditPage.getByGrafanaSelector(selectors.components.CodeEditor.container);
 }
 
-async function typeQuery(page: import('@playwright/test').Page, sql: string) {
-  const editor = sqlEditor(page);
-  // Monaco's editor is a contenteditable div, not a real <input> — fill() does not work on it.
-  // Drive it with real keyboard events instead, per the CodeMirror/Monaco e2e pitfall.
-  await editor.click();
+async function typeQuery(
+  panelEditPage: import('@grafana/plugin-e2e').PanelEditPage,
+  page: import('@playwright/test').Page,
+  selectors: import('@grafana/plugin-e2e').E2ESelectorGroups,
+  sql: string
+) {
+  // Neither implementation is a real <input> — fill() does not work on either. Click the
+  // container to focus the editor, then drive it with real keyboard events.
+  await sqlEditorContainer(panelEditPage, selectors).click();
   await page.keyboard.press('ControlOrMeta+a');
   await page.keyboard.type(sql);
 }
@@ -60,8 +68,11 @@ test.describe('Query editor', () => {
 
       await expect(page.getByRole('radio', { name: 'Builder' })).toBeVisible();
       await expect(page.getByRole('radio', { name: 'Code' })).toBeVisible();
-      await expect(page.getByLabel('Processing location')).toBeVisible();
-      await expect(page.getByLabel('Format')).toBeVisible();
+      // getByLabel is unreliable here on newer Grafana versions, which add an aria-label to the
+      // wrapping <label> element itself and cause strict-mode violations — use the role instead,
+      // per .config/AGENTS/e2e-testing.md's Select convention.
+      await expect(page.getByRole('combobox', { name: 'Processing location' })).toBeVisible();
+      await expect(page.getByRole('combobox', { name: 'Format' })).toBeVisible();
     });
   });
 
@@ -124,23 +135,24 @@ test.describe('Query editor', () => {
   });
 
   test.describe('Code mode', () => {
-    test('accepts a raw SQL query typed into the editor', async ({ panelEditPage, page }) => {
+    test('accepts a raw SQL query typed into the editor', async ({ panelEditPage, page, selectors }) => {
       await panelEditPage.datasource.set(DATA_SOURCE_NAME);
       await switchToCodeMode(page);
 
-      await typeQuery(page, 'SELECT 1 AS value');
+      await typeQuery(panelEditPage, page, selectors, 'SELECT 1 AS value');
 
-      // Monaco keeps content in its own model, not the accessibility textarea's inner text — the
-      // textarea's `value` attribute is what reflects the typed content, so assert on that
-      // (toContainText would always fail here).
-      await expect(sqlEditor(page)).toHaveValue(/SELECT 1 AS value/);
+      // Asserting on the container's visible text works for both Monaco and CodeMirror (unlike
+      // Monaco's hidden accessibility textarea, whose `value` is the only thing that reflects
+      // typed content on that implementation specifically — the container's rendered lines are
+      // real text nodes on both).
+      await expect(sqlEditorContainer(panelEditPage, selectors)).toContainText('SELECT 1 AS value');
     });
 
-    test('runs a mocked query without an error', async ({ panelEditPage, page }) => {
+    test('runs a mocked query without an error', async ({ panelEditPage, page, selectors }) => {
       await panelEditPage.datasource.set(DATA_SOURCE_NAME);
       await panelEditPage.setVisualization('Table');
       await switchToCodeMode(page);
-      await typeQuery(page, 'SELECT 1 AS value');
+      await typeQuery(panelEditPage, page, selectors, 'SELECT 1 AS value');
 
       await panelEditPage.mockQueryDataResponse(MOCKED_QUERY_RESPONSE);
       await runQuery(panelEditPage, page);
@@ -154,7 +166,7 @@ test.describe('Query editor', () => {
     // workers don't compete for it and produce slow responses that look like failures.
     test.describe.configure({ mode: 'serial' });
 
-    test('a real SELECT query against BigQuery returns results', async ({ panelEditPage, page }) => {
+    test('a real SELECT query against BigQuery returns results', async ({ panelEditPage, page, selectors }) => {
       test.skip(!isCloudRun, 'Only runs in the nightly Cloud lane, where real credentials are available');
 
       await panelEditPage.datasource.set(DATA_SOURCE_NAME);
@@ -162,7 +174,7 @@ test.describe('Query editor', () => {
       await switchToCodeMode(page);
       // A schema-independent smoke query: proves the real connection/auth round-trip without
       // depending on the exact tables/columns seeded into the managed e2e dataset.
-      await typeQuery(page, 'SELECT 1 AS value');
+      await typeQuery(panelEditPage, page, selectors, 'SELECT 1 AS value');
 
       const response = await runQuery(panelEditPage, page, { timeout: 150_000 });
 
