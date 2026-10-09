@@ -1,3 +1,5 @@
+import type { Page, Response } from '@playwright/test';
+
 export const PLUGIN_ID = 'grafana-bigquery-datasource';
 export const PROVISIONING_FILENAME = 'bigquery.e2e.yaml';
 
@@ -32,4 +34,19 @@ export function cloudCredentials() {
  */
 export function cloudPdcNetworkName(): string {
   return process.env.DS_PDC_NETWORK_NAME ?? '';
+}
+
+// Grafana 13.3+ sends dashboard queries to the query.grafana.app API instead of /api/ds/query, which
+// is the only URL plugin-e2e's waitForQueryDataResponse/mockQueryDataResponse know about.
+const QUERY_URL_GLOBS = ['**/api/ds/query*', '**/apis/query.grafana.app/**/query*'];
+const QUERY_URL = /\/api\/ds\/query|\/apis\/query\.grafana\.app\/.*\/query/;
+
+export function waitForQueryResponse(page: Page): Promise<Response> {
+  return page.waitForResponse((r) => r.request().method() === 'POST' && QUERY_URL.test(r.url()));
+}
+
+export async function mockQueryResponse(page: Page, body: unknown) {
+  for (const glob of QUERY_URL_GLOBS) {
+    await page.route(glob, (route) => route.fulfill({ status: 200, json: body }));
+  }
 }

@@ -1,6 +1,6 @@
 import { expect, test } from '@grafana/plugin-e2e';
 
-import { DATA_SOURCE_NAME, isCloudRun } from './utils';
+import { DATA_SOURCE_NAME, isCloudRun, mockQueryResponse, waitForQueryResponse } from './utils';
 
 // Newer Grafana images (>13) default to the new dashboard layout engine, which frequently isn't
 // ready in time for these tests and causes flaky failures unrelated to anything under test here.
@@ -33,13 +33,9 @@ async function typeQuery(page: import('@playwright/test').Page, sql: string) {
 // panelEditPage.refreshPanel() looks for the refresh button scoped inside a specific panel-editor
 // "General" content region that doesn't exist in every Grafana version — it can time out even
 // though a plain, unscoped "Refresh" button is visible and working. Click it directly instead, and
-// register the response listener first per the waitForQueryDataResponse timing pitfall.
-async function runQuery(
-  panelEditPage: import('@grafana/plugin-e2e').PanelEditPage,
-  page: import('@playwright/test').Page,
-  options?: { timeout?: number }
-) {
-  const responsePromise = panelEditPage.waitForQueryDataResponse();
+// register the response listener first (see waitForQueryResponse in utils.ts).
+async function runQuery(page: import('@playwright/test').Page, options?: { timeout?: number }) {
+  const responsePromise = waitForQueryResponse(page);
   // getByRole('button', { name: 'Refresh' }) is ambiguous: it substring-matches the adjacent
   // "Auto refresh turned off..." interval-picker button too. Use its data-testid directly.
   await page.getByTestId('data-testid RefreshPicker run button').click({ timeout: options?.timeout });
@@ -112,12 +108,12 @@ test.describe('Query editor', () => {
       await page.getByRole('combobox', { name: 'Column' }).click();
       await page.getByText('mocked_column', { exact: true }).click();
 
-      await panelEditPage.mockQueryDataResponse(MOCKED_QUERY_RESPONSE);
+      await mockQueryResponse(page, MOCKED_QUERY_RESPONSE);
       // Builder-mode edits pass process=false in QueryEditor's onChange (deliberate — the user
       // builds up a query across several fields before running it), so unlike Code mode, nothing
       // auto-runs here and Grafana's global refresh only re-runs an *already-run* query. Use our
       // own "Run query" button instead.
-      const responsePromise = panelEditPage.waitForQueryDataResponse();
+      const responsePromise = waitForQueryResponse(page);
       await page.getByRole('button', { name: 'Run query' }).click();
       await responsePromise;
 
@@ -148,8 +144,8 @@ test.describe('Query editor', () => {
       await switchToCodeMode(page);
       await typeQuery(page, 'SELECT 1 AS value');
 
-      await panelEditPage.mockQueryDataResponse(MOCKED_QUERY_RESPONSE);
-      await runQuery(panelEditPage, page);
+      await mockQueryResponse(page, MOCKED_QUERY_RESPONSE);
+      await runQuery(page);
 
       await expect(panelEditPage.panel.getErrorIcon()).not.toBeVisible();
     });
@@ -170,7 +166,7 @@ test.describe('Query editor', () => {
       // depending on the exact tables/columns seeded into the managed e2e dataset.
       await typeQuery(page, 'SELECT 1 AS value');
 
-      const response = await runQuery(panelEditPage, page, { timeout: 150_000 });
+      const response = await runQuery(page, { timeout: 150_000 });
 
       expect(response.ok()).toBe(true);
       await expect(panelEditPage.panel.getErrorIcon()).not.toBeVisible();
