@@ -37,22 +37,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - name: Notify #grafana-ds-plugins-dev
-        uses: grafana/shared-workflows/actions/send-slack-message@551bc8d50017d3e95d5da3f8a4826e733a208dc0 # send-slack-message/v3.0.2
+      - name: Notify Slack on failure
+        uses: grafana/data-sources-ci-workflows/.github/actions/notify-cloud-e2e-failure@main
         with:
-          method: chat.postMessage
-          payload: |
-            {
-              "channel": "C0APH909GFK",
-              "text": "Cloud E2E tests failed for ${{ github.repository }} (nightly)",
-              "blocks": [
-                { "type": "section", "text": { "type": "mrkdwn", "text": ":x: *Cloud E2E tests failed*" } },
-                { "type": "section", "fields": [
-                  { "type": "mrkdwn", "text": "*Repository:*\n${{ github.repository }}" },
-                  { "type": "mrkdwn", "text": "*Branch:*\n${{ github.ref_name }}" },
-                  { "type": "mrkdwn", "text": "*Triggered by:*\n${{ github.actor }}" },
-                  { "type": "mrkdwn", "text": "*Commit:*\n${{ github.sha }}" }
-                ] },
-                { "type": "section", "text": { "type": "mrkdwn", "text": "<${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View the failed run>" } }
-              ]
-            }
+          repo: ${{ github.repository }}
+          run-stage: nightly
+          ref-name: ${{ github.ref_name }}
+          actor: ${{ github.actor }}
+          sha: ${{ github.sha }}
+          run-url: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
