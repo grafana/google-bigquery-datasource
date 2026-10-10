@@ -16,6 +16,8 @@ const (
 	HeaderPanelPluginId  = "X-Panel-Plugin-Id"
 	HeaderQueryGroupID   = "X-Query-Group-Id"
 	HeaderFromExpression = "X-Grafana-From-Expr"
+	// Grafana sends the signed-in user's login only when the server sets [dataproxy] send_user_header = true.
+	HeaderGrafanaUser = "X-Grafana-User"
 )
 
 // cleanStringForLabelOrValue removes invalid characters, non-alphabetic leading character,
@@ -73,7 +75,7 @@ func headerInList(header string, headersList []string) bool {
 // It returns the map of headers as labels.
 func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	labels := make(map[string]string)
-	wantedHeaders := []string{HeaderPluginID, HeaderDatasourceUID, HeaderDashboardUID, HeaderPanelID, HeaderPanelPluginId, HeaderQueryGroupID, HeaderFromExpression}
+	wantedHeaders := []string{HeaderPluginID, HeaderDatasourceUID, HeaderDashboardUID, HeaderPanelID, HeaderPanelPluginId, HeaderQueryGroupID, HeaderFromExpression, HeaderGrafanaUser}
 
 	for k, v := range c.cfg.Headers {
 		if headerInList(k, wantedHeaders) && len(v) > 0 {

@@ -78,6 +78,15 @@ func TestHeadersAsLabels(t *testing.T) {
 			},
 		},
 		{
+			"keeps the user login",
+			map[string][]string{
+				HeaderGrafanaUser: {"Jane.Doe@example.com"},
+			},
+			map[string]string{
+				"x-grafana-user": "janedoeexamplecom", //cspell:disable-line
+			},
+		},
+		{
 			"numbers are valid values",
 			map[string][]string{
 				HeaderPluginID:     {"1"},
