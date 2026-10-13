@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.4
+
+### Patch Changes
+
+🐛 Fix security vulnerabilities in `brace-expansion` (CVE-2026-102278, CVE-2026-102276)
+
 ## 3.4.3
 
 ### Patch Changes
