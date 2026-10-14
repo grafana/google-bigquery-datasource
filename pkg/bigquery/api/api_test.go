@@ -22,7 +22,7 @@ func TestToTableMetadataResponse(t *testing.T) {
 			NumRows:          14741,
 			LastModifiedTime: modified,
 			ExpirationTime:   expires,
-			Clustering:       &bq.Clustering{Fields: []string{"channel_id", "sfdc_account_id"}},
+			Clustering:       &bq.Clustering{Fields: []string{"channel_id", "account_id"}},
 			Schema:           bq.Schema{{Name: "channel_id", Type: bq.StringFieldType, Description: "Slack channel id"}},
 		})
 		require.NoError(t, err)
@@ -34,7 +34,7 @@ func TestToTableMetadataResponse(t *testing.T) {
 		assert.True(t, modified.Equal(result.LastModifiedTime), "got %s", result.LastModifiedTime)
 		assert.True(t, expires.Equal(result.ExpirationTime), "got %s", result.ExpirationTime)
 		require.NotNil(t, result.Clustering)
-		assert.Equal(t, []string{"channel_id", "sfdc_account_id"}, result.Clustering.Fields)
+		assert.Equal(t, []string{"channel_id", "account_id"}, result.Clustering.Fields)
 		require.Len(t, result.Schema, 1)
 		assert.Equal(t, "Slack channel id", result.Schema[0].Description)
 	})
