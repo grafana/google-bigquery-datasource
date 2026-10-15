@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.5
+
+### Patch Changes
+
+🐛 Mark null time values and unsorted time series errors as downstream errors
+
 ## 3.4.4
 
 ### Patch Changes
