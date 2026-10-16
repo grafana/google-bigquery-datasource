@@ -589,7 +589,9 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 
 // MutateQueryError marks BigQuery errors as downstream errors
 func (s *BigQueryDatasource) MutateQueryError(err error) backend.ErrorWithSource {
-	if errors.Is(err, sqlds.ErrorQuery) {
+	if errors.Is(err, sqlds.ErrorQuery) ||
+		errors.Is(err, data.ErrorNullTimeValues) ||
+		errors.Is(err, data.ErrorSeriesUnsorted) {
 		return backend.NewErrorWithSource(err, backend.ErrorSourceDownstream)
 	}
 	return backend.NewErrorWithSource(err, backend.DefaultErrorSource)
