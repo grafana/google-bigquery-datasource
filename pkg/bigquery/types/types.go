@@ -98,9 +98,34 @@ type RangePartitioning struct {
 	Range *bq.RangePartitioningRange `json:"range,omitempty"`
 }
 
+type Clustering struct {
+	// The clustering columns, in order.
+	Fields []string `json:"fields,omitempty"`
+}
+
 type TableMetadataResponse struct {
 	Schema                 TableSchema       `json:"schema,omitempty"`
 	TimePartitioning       TimePartitioning  `json:"timePartitioning,omitempty"`
 	RangePartitioning      RangePartitioning `json:"rangePartitioning,omitempty"`
 	RequirePartitionFilter bool              `json:"requirePartitionFilter,omitempty"`
+
+	// The fields below are descriptive metadata. They are all omitted when the
+	// table has no value for them, so existing clients see the same response
+	// shape as before for tables that set none of them.
+
+	// A user-provided description of the table.
+	Description string `json:"description,omitempty"`
+	// The kind of table: TABLE, VIEW, EXTERNAL, MATERIALIZED_VIEW or SNAPSHOT.
+	Type bq.TableType `json:"type,omitempty"`
+	// User-provided labels on the table.
+	Labels map[string]string `json:"labels,omitempty"`
+	// The number of rows, not including data still in the streaming buffer.
+	NumRows uint64 `json:"numRows,omitempty"`
+	// When the table was last modified. Any metadata edit, including a
+	// description change, also updates it, so it can overstate data freshness.
+	LastModifiedTime time.Time `json:"lastModifiedTime,omitzero"`
+	// When the table expires and is deleted, if an expiration is set.
+	ExpirationTime time.Time `json:"expirationTime,omitzero"`
+	// The clustering columns, if the table is clustered.
+	Clustering *Clustering `json:"clustering,omitempty"`
 }
