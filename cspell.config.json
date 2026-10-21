@@ -9,6 +9,8 @@
     "jest.config.js"
   ],
   "words": [
+    "golangci",
+    "GOPATH",
     "BIGNUMERIC",
     "BYTEINT",
     "clickhouse",
