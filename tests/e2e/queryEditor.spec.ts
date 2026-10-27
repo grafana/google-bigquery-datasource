@@ -2,10 +2,6 @@ import { expect, test } from '@grafana/plugin-e2e';
 
 import { DATA_SOURCE_NAME, isCloudRun } from './utils';
 
-// Newer Grafana images (>13) default to the new dashboard layout engine, which frequently isn't
-// ready in time for these tests and causes flaky failures unrelated to anything under test here.
-test.use({ featureToggles: { dashboardNewLayouts: false } });
-
 const MOCKED_QUERY_RESPONSE = {
   results: {
     A: { status: 200, frames: [{ schema: { fields: [{ name: 'value' }] }, data: { values: [[1]] } }] },
