@@ -1,32 +1,26 @@
 # Changelog
 
-## 3.4.6
+## 3.4.7
 
-### Patch Changes
+⚙️ Updated dependencies
+
+## 3.4.6
 
 ⚙️ Pin golangci-lint to 2.15.0 in development dependencies and CI/CD pipelines
 
 ## 3.4.5
 
-### Patch Changes
-
 🐛 Mark null time values and unsorted time series errors as downstream errors
 
 ## 3.4.4
-
-### Patch Changes
 
 🐛 Fix security vulnerabilities in `brace-expansion` (CVE-2026-102278, CVE-2026-102276)
 
 ## 3.4.3
 
-### Patch Changes
-
 🐛 added datasource config schema
 
 ## 3.4.2
-
-### Patch Changes
 
 🐛 Fix security vulnerabilities (CVE-2026-84375)
 
@@ -36,11 +30,7 @@
 
 ## 3.4.0
 
-### Minor Changes
-
 🚀 Move Save & test health checks to the backend and add categorized, actionable errors for authentication, configuration, network, TLS, timeout, and upstream service failures ([#561](https://github.com/grafana/google-bigquery-datasource/pull/561), [#562](https://github.com/grafana/google-bigquery-datasource/pull/562)).
-
-### Patch Changes
 
 ⚙️ Chore: migrate the repository from Yarn to npm and update the `@grafana/create-plugin` scaffold ([#558](https://github.com/grafana/google-bigquery-datasource/pull/558), [#560](https://github.com/grafana/google-bigquery-datasource/pull/560)).
 
