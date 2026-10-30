@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.8
+
+🐛 Fix security vulnerabilities in `dompurify` (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr), `source-map-js` (CVE-2026-93749) and `zod` (CVE-2023-54404)
+
 ## 3.4.7
 
 ⚙️ Updated dependencies

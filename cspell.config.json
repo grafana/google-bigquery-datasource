@@ -39,6 +39,7 @@
     "fillmode",
     "genproto",
     "getkin",
+    "GHSA",
     "googleapi",
     "gossh",
     "grafana",
