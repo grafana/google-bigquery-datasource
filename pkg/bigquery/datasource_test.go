@@ -4,6 +4,8 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -13,6 +15,7 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/datasource"
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
+	"github.com/grafana/grafana-plugin-sdk-go/data"
 	"github.com/grafana/grafana-plugin-sdk-go/experimental/datasourcetest"
 	"github.com/grafana/sqlds/v5"
 	"github.com/stretchr/testify/assert"
@@ -522,4 +525,13 @@ func newTestCallResourceResponseSender() *testCallResourceResponseSender {
 
 func (s *testCallResourceResponseSender) Send(_ *backend.CallResourceResponse) error {
 	return nil
+}
+
+func TestMutateQueryError_TimeSeriesErrorsAreDownstream(t *testing.T) {
+	ds := &BigQueryDatasource{}
+	for _, e := range []error{data.ErrorNullTimeValues, data.ErrorSeriesUnsorted} {
+		got := ds.MutateQueryError(fmt.Errorf("%w: Could not process SQL results", e))
+		assert.Equal(t, backend.ErrorSourceDownstream, got.ErrorSource())
+	}
+	assert.Equal(t, backend.DefaultErrorSource, ds.MutateQueryError(errors.New("other")).ErrorSource())
 }

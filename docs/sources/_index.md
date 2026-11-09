@@ -14,12 +14,14 @@ labels:
     - enterprise
     - oss
 weight: 300
-review_date: 2026-02-11
+review_date: 2026-08-17
 ---
 
 # Google BigQuery data source
 
 The Google BigQuery data source allows you to query and visualize data from [Google BigQuery](https://cloud.google.com/bigquery), Google's fully managed, serverless data warehouse.
+
+{{< docs/play title="Google BigQuery data source" url="https://play.grafana.org/d/play-bigquery-1/" >}}
 
 ## Supported features
 
@@ -39,7 +41,7 @@ The following Google APIs must be enabled in your GCP project:
 
 ## Get started
 
-The following documents help you get started with the Google BigQuery data source:
+Install the plugin from **Administration** > **Plugins and data** > **Plugins**, or from the [Grafana plugin catalog](https://grafana.com/grafana/plugins/grafana-bigquery-datasource/). After the plugin is installed, the following documents help you get started:
 
 - [Configure the BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/) - Set up authentication and connect to BigQuery.
 - [BigQuery query editor](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/query-editor/) - Create and edit SQL and visual queries.
@@ -73,11 +75,31 @@ To import a pre-built dashboard:
 
 ## Plugin updates
 
-Ensure your plugin version is up-to-date so you have access to all current features and improvements. Navigate to **Plugins and data** > **Plugins** to check for updates.
+Always ensure that your plugin version is up-to-date so you have access to all current features and improvements. Navigate to **Administration** > **Plugins and data** > **Plugins** to check for updates.
 
 {{< admonition type="note" >}}
-Plugins are automatically updated in Grafana Cloud.
+On Grafana Cloud, the Google BigQuery plugin is managed by Grafana and updates automatically. On self-managed Grafana, you must update the plugin manually. Refer to [Version and upgrade guidance](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/#version-and-upgrade-guidance).
 {{< /admonition >}}
+
+{{< docs/shared source="grafana" lookup="datasources/query-with-gcx.md" version="latest" >}}
+
+For example, to query your BigQuery data source, use `gcx datasources bigquery`:
+
+```sh
+# Run a SQL query
+gcx datasources bigquery query -d <DATASOURCE_UID> 'SELECT count(*) FROM `my_dataset.events`'
+
+# List datasets in the default project
+gcx datasources bigquery list-datasets -d <DATASOURCE_UID>
+
+# List tables in a dataset
+gcx datasources bigquery list-tables -d <DATASOURCE_UID> --dataset my_dataset
+
+# Show a table's column schema
+gcx datasources bigquery describe-table my_dataset.events -d <DATASOURCE_UID>
+```
+
+Replace _`<DATASOURCE_UID>`_ with the UID of your BigQuery data source. The `query` command accepts GoogleSQL with server-side macros such as `$__timeFilter`; `list-datasets`, `list-tables`, and `describe-table` let you explore schema, and `--dataset` targets a specific dataset.
 
 ## Related resources
 
