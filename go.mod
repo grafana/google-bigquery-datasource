@@ -12,7 +12,7 @@ require (
 	github.com/grafana/sqlds/v5 v5.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/oauth2 v0.38.0
 	google.golang.org/api v0.311.0
 	google.golang.org/grpc v1.85.0
 )
