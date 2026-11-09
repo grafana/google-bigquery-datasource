@@ -1,16 +1,40 @@
 # Changelog
 
+## 3.4.8
+
+🐛 Fix security vulnerabilities in `dompurify` (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr), `source-map-js` (CVE-2026-93749) and `zod` (CVE-2023-54404)
+
+## 3.4.7
+
+⚙️ Updated dependencies
+
+## 3.4.6
+
+⚙️ Pin golangci-lint to 2.15.0 in development dependencies and CI/CD pipelines
+
+## 3.4.5
+
+🐛 Mark null time values and unsorted time series errors as downstream errors
+
+## 3.4.4
+
+🐛 Fix security vulnerabilities in `brace-expansion` (CVE-2026-102278, CVE-2026-102276)
+
+## 3.4.3
+
+🐛 added datasource config schema
+
+## 3.4.2
+
+🐛 Fix security vulnerabilities (CVE-2026-84375)
+
 ## 3.4.1
 
 ⚙️ Update backend and frontend dependencies, resolving high-severity CVEs in `google.golang.org/grpc`, `golang.org/x/crypto`, `golang.org/x/mod`, and `fast-uri` ([#541](https://github.com/grafana/google-bigquery-datasource/pull/541), [#546](https://github.com/grafana/google-bigquery-datasource/pull/546), [#565](https://github.com/grafana/google-bigquery-datasource/pull/565)).
 
 ## 3.4.0
 
-### Minor Changes
-
 🚀 Move Save & test health checks to the backend and add categorized, actionable errors for authentication, configuration, network, TLS, timeout, and upstream service failures ([#561](https://github.com/grafana/google-bigquery-datasource/pull/561), [#562](https://github.com/grafana/google-bigquery-datasource/pull/562)).
-
-### Patch Changes
 
 ⚙️ Chore: migrate the repository from Yarn to npm and update the `@grafana/create-plugin` scaffold ([#558](https://github.com/grafana/google-bigquery-datasource/pull/558), [#560](https://github.com/grafana/google-bigquery-datasource/pull/560)).
 

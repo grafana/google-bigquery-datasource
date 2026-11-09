@@ -9,6 +9,8 @@
     "jest.config.js"
   ],
   "words": [
+    "golangci",
+    "GOPATH",
     "BIGNUMERIC",
     "BYTEINT",
     "clickhouse",
@@ -29,13 +31,17 @@
     "datasourcetest",
     "DATETIME",
     "doitintl",
+    "dsconfig",
+    "behaviour",
     "dompurify",
     "EDEV",
     "etag",
     "fillmode",
     "genproto",
     "getkin",
+    "GHSA",
     "googleapi",
+    "gossh",
     "grafana",
     "gtime",
     "httpadapter",
@@ -89,7 +95,11 @@
     "uplot",
     "uuidv",
     "vectorator",
-    "workloadidentitypoolprovider"
+    "struct",
+    "Struct",
+    "workloadidentitypoolprovider",
+    "promlib",
+    "unparseable"
   ],
   "language": "en-US"
 }

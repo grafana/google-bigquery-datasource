@@ -17,7 +17,7 @@ labels:
 menuTitle: Query editor
 title: Google BigQuery query editor
 weight: 200
-review_date: 2026-02-11
+review_date: 2026-08-17
 ---
 
 # Google BigQuery query editor
@@ -30,6 +30,17 @@ Before using the query editor:
 
 - [Configure the Google BigQuery data source](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/configure/).
 - Verify your credentials have appropriate permissions to query the datasets you need.
+
+## Key concepts
+
+If you're new to BigQuery queries in Grafana, these terms appear in the editor:
+
+| Term | Description |
+|------|-------------|
+| **Standard SQL** | BigQuery's SQL dialect. The query editor doesn't support Legacy SQL. |
+| **Macros** | Tokens such as `$__timeFilter` that Grafana expands from the dashboard time range before sending the query. |
+| **Storage API** | An optional BigQuery API for reading large result sets more efficiently than the standard query API. |
+| **Partitioned table** | A table split by a time or ingestion column so queries can scan less data. |
 
 ## Query editor modes
 
@@ -45,14 +56,14 @@ The query editor header includes the following options:
 | Option                         | Description                                                      |
 | ------------------------------ | ---------------------------------------------------------------- |
 | **Processing location**        | Override the data source processing location for this query.     |
-| **Format**                     | Select the output format: **Time series** or **Table**.          |
+| **Format**                     | Select the output format: **Time series** or **Table**. The default is **Table**. |
 | **Use Storage API**            | Enable the BigQuery Storage API for this query (Code mode only). |
 | **Filter/Group/Order/Preview** | Toggle sections in the Visual query editor (Builder mode only).  |
 | **Builder/Code**               | Switch between Visual query builder and SQL code editor.         |
 
 ## Query with Grafana Assistant
 
-When [Grafana Assistant](https://grafana.com/docs/grafana-cloud/machine-learning/assistant/) is available in your Grafana instance, the query editor header displays a **Query with Assistant** button. Use it to build and refine BigQuery queries with AI assistance instead of writing SQL by hand.
+When [Grafana Assistant](https://grafana.com/docs/grafana-cloud/platform/grafana-assistant/) is available in your Grafana instance, the query editor header displays a **Query with Assistant** button. Use it to build and refine BigQuery queries with AI assistance instead of writing SQL by hand.
 
 The Assistant uses the current query and the data source connection as context. It discovers the projects, datasets, and tables available to your data source to suggest relevant queries against your data. You can then run the generated query or continue editing it in Builder or Code mode.
 
@@ -119,20 +130,28 @@ The Visual query editor supports the following sections (toggle visibility using
 | **Select**  | Choose columns and apply aggregation functions.                          |
 | **Filter**  | Add `WHERE` conditions to filter data by column values.                  |
 | **Group**   | Group results by one or more columns (required when using aggregations). |
-| **Order**   | Sort results by column values in ascending or descending order.          |
+| **Order**   | Sort results by column values in ascending or descending order. Optional **Limit** defaults to `50`. |
 | **Preview** | View the generated SQL query.                                            |
 
 ### Aggregation functions
 
-The following aggregation functions are available:
+The Visual query builder offers the following aggregation functions:
 
-- `AVG` - Average value
-- `COUNT` - Count of rows
-- `MIN` - Minimum value
-- `MAX` - Maximum value
-- `SUM` - Sum of values
-- `STDDEV` - Standard deviation
-- `VARIANCE` - Variance
+- `ANY_VALUE`
+- `ARRAY_AGG`
+- `ARRAY_CONCAT_AGG`
+- `AVG`
+- `BIT_AND`
+- `BIT_OR`
+- `BIT_XOR`
+- `COUNT`
+- `COUNTIF`
+- `LOGICAL_AND`
+- `LOGICAL_OR`
+- `MAX`
+- `MIN`
+- `STRING_AGG`
+- `SUM`
 
 The Visual query editor validates your query as you build it, similar to the SQL query editor.
 
@@ -193,14 +212,22 @@ LIMIT 100
 
 ## Macros
 
-Macros simplify queries by providing dynamic values based on the dashboard context. Use macros to filter data by the dashboard time range without hardcoding dates.
+Macros simplify queries by providing dynamic values based on the dashboard context. Use macros to filter data by the dashboard time range without putting dates in the query.
 
-| Macro                            | Description                                           | Example output                                                                         |
-| -------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `$__timeFilter(column)`          | Filters results to the dashboard time range           | `column BETWEEN TIMESTAMP('2024-01-01 00:00:00') AND TIMESTAMP('2024-01-02 00:00:00')` |
-| `$__timeFrom()`                  | Returns the start of the dashboard time range         | `TIMESTAMP('2024-01-01 00:00:00')`                                                     |
-| `$__timeTo()`                    | Returns the end of the dashboard time range           | `TIMESTAMP('2024-01-02 00:00:00')`                                                     |
-| `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY` | `TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(column), 300000) * 300000)`                          |
+The plugin expands macros before sending the query to BigQuery. Macros inside SQL comments (`--`, `#`, and `/* */`) aren't expanded, and those comments are stripped from the query that BigQuery receives.
+
+| Macro                            | Description                                                                                          | Example output                                                                |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `$__timeFilter(column)`          | Filters results to the dashboard time range                                                          | `column >= '2024-01-01T00:00:00Z' AND column <= '2024-01-02T00:00:00Z'`       |
+| `$__timeFrom()`                  | Returns the start of the dashboard time range as a timestamp value                                   | `TIMESTAMP('2024-01-01T00:00:00Z')`                                           |
+| `$__timeFrom(column)`            | Lower-bound filter on `column`                                                                       | `column >= '2024-01-01T00:00:00Z'`                                            |
+| `$__timeTo()`                    | Returns the end of the dashboard time range as a timestamp value                                     | `TIMESTAMP('2024-01-02T00:00:00Z')`                                           |
+| `$__timeTo(column)`              | Upper-bound filter on `column`                                                                       | `column <= '2024-01-02T00:00:00Z'`                                            |
+| `$__timeGroup(column, interval)` | Groups results by time interval for use in `GROUP BY`. Month intervals such as `3M`, `6M`, and `12M` create N-month buckets aligned to the calendar year. | `TIMESTAMP_MILLIS(DIV(UNIX_MILLIS(column), 300000) * 300000)` |
+| `$__interval`                    | The dashboard interval, formatted for BigQuery (for example, `5m` or `1d`)                           | `5m`                                                                          |
+| `$__interval_ms`                 | The dashboard interval in milliseconds                                                               | `300000`                                                                      |
+
+The `$__column` and `$__table` macros aren't supported. Using them returns an error.
 
 ### Macro examples
 
@@ -234,7 +261,7 @@ ORDER BY time
 
 #### Use time boundaries
 
-Use `$__timeFrom()` and `$__timeTo()` when you need explicit time boundaries:
+Use `$__timeFrom()` and `$__timeTo()` when you need explicit time boundaries. Pass a column name (`$__timeFrom(column)` / `$__timeTo(column)`) when you want a one-sided filter instead of a timestamp value.
 
 ```sql
 SELECT
@@ -299,4 +326,4 @@ In Builder mode, expand the **Options** section at the bottom of the query edito
 
 - [Use template variables](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/template-variables/) to create dynamic dashboards
 - Add [Transformations](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/panels-visualizations/query-transform-data/transform-data/) to manipulate query results
-- Set up [Alerting](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/alerting/) rules based on your BigQuery data
+- Set up [Alerting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/alerting/) rules based on your BigQuery data

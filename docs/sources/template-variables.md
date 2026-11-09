@@ -16,7 +16,7 @@ labels:
 menuTitle: Template variables
 title: Google BigQuery template variables
 weight: 300
-review_date: 2026-02-11
+review_date: 2026-08-17
 ---
 
 # Google BigQuery template variables
@@ -176,7 +176,7 @@ The data source handles variable quoting differently based on the variable confi
 | Multi-select (multiple values) | Auto-quoted, comma-separated | `region IN ($var)` | `region IN ('us-east1','us-west1')` |
 
 {{< admonition type="warning" >}}
-Using `'$var'` with a multi-select variable causes double quoting: `''us-east1''` — which is invalid SQL.
+Using `'$var'` with a multi-select variable causes double quoting: `''us-east1''`, which is invalid SQL.
 {{< /admonition >}}
 
 ### Pattern matching with LIKE
