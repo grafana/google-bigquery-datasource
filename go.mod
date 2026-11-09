@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	cloud.google.com/go v0.123.0
-	cloud.google.com/go/bigquery v1.86.1
+	cloud.google.com/go/bigquery v1.86.2
 	github.com/grafana/dsconfig/schema v0.0.13
 	github.com/grafana/grafana-google-sdk-go v0.4.2
 	github.com/grafana/grafana-plugin-sdk-go v0.298.0
@@ -13,13 +13,13 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/oauth2 v0.37.0
-	google.golang.org/api v0.310.0
+	google.golang.org/api v0.311.0
 	google.golang.org/grpc v1.85.0
 )
 
 require (
 	cloud.google.com/go/auth v0.24.1 // indirect
-	cloud.google.com/go/auth/oauth2adapt v0.3.0 // indirect
+	cloud.google.com/go/auth/oauth2adapt v0.3.1 // indirect
 	cloud.google.com/go/compute/metadata v0.10.0 // indirect
 	cloud.google.com/go/iam v1.15.0 // indirect
 	github.com/BurntSushi/toml v1.6.0 // indirect
@@ -130,7 +130,7 @@ require (
 	golang.org/x/xerrors v0.0.0-20240903120638-7835f813f4da // indirect
 	google.golang.org/genproto v0.0.0-20261019180522-ce908d29299b // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20261019180522-ce908d29299b // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261019180522-ce908d29299b // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261026165753-2ffab32bce7e // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/fsnotify/fsnotify.v1 v1.4.7 // indirect
 	k8s.io/kube-openapi v0.0.0-20261014044854-ca3452a79603 // indirect
