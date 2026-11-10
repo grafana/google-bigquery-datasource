@@ -91,6 +91,27 @@
     "webpack-subresource-integrity": "5.1.0",
     "webpack-virtual-modules": "0.6.2"
   },
+  "overrides": {
+    "@jest/reporters": {
+      "glob": "14.0.4"
+    },
+    "@trivago/prettier-plugin-sort-imports": {
+      "minimatch": "11.0.5"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.5"
+    },
+    "jest-config": {
+      "glob": "14.0.4"
+    },
+    "jest-runtime": {
+      "glob": "14.0.4"
+    },
+    "test-exclude": {
+      "glob": "14.0.4",
+      "minimatch": "11.0.5"
+    }
+  },
   "packageManager": "npm@11.19.1",
   "engines": {
     "node": ">=24",
