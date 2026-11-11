@@ -277,6 +277,17 @@ func (c *Conn) queryContext(ctx context.Context, query string) (driver.Rows, err
 	if err := status.Err(); err != nil {
 		return nil, err
 	}
+	// Surface the executed job's real cost (bytes billed/processed) for the query inspector; keyed
+	// by the SQL so the response mutator can match it to the frame's ExecutedQueryString.
+	if status.Statistics != nil {
+		stat := QueryStat{BytesProcessed: status.Statistics.TotalBytesProcessed}
+		if qs, ok := status.Statistics.Details.(*bq.QueryStatistics); ok {
+			stat.BytesBilled = qs.TotalBytesBilled
+			stat.BytesProcessed = qs.TotalBytesProcessed
+			stat.CacheHit = qs.CacheHit
+		}
+		RecordQueryStat(ctx, query, stat)
+	}
 	rowsIterator, err := job.Read(ctx)
 	if err != nil {
 		return nil, backend.DownstreamError(err)

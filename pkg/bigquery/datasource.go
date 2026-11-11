@@ -243,6 +243,33 @@ func (s *BigQueryDatasource) Converters() (sc []sqlutil.Converter) {
 	return sc
 }
 
+// MutateQueryData seeds a per-request sink (sqlds QueryDataMutator) so each executed query can
+// report its real scan cost. The same ctx reaches both the driver (which records) and
+// MutateResponse (which reads), so no global state is needed.
+func (s *BigQueryDatasource) MutateQueryData(ctx context.Context, req *backend.QueryDataRequest) (context.Context, *backend.QueryDataRequest) {
+	return driver.WithQueryStats(ctx), req
+}
+
+// MutateResponse annotates each frame with the executed query's bytes billed/processed (sqlds
+// ResponseMutator), matched by the SQL sqlds stores as ExecutedQueryString. Executed queries carry
+// no job stats through database/sql, so this bridges them onto the frame for the query inspector.
+func (s *BigQueryDatasource) MutateResponse(ctx context.Context, frames data.Frames) (data.Frames, error) {
+	for _, frame := range frames {
+		if frame == nil || frame.Meta == nil || frame.Meta.ExecutedQueryString == "" {
+			continue
+		}
+		stat, ok := driver.QueryStatForSQL(ctx, frame.Meta.ExecutedQueryString)
+		if !ok {
+			continue
+		}
+		frame.Meta.Stats = append(frame.Meta.Stats,
+			data.QueryStat{FieldConfig: data.FieldConfig{DisplayName: "Bytes billed", Unit: "bytes"}, Value: float64(stat.BytesBilled)},
+			data.QueryStat{FieldConfig: data.FieldConfig{DisplayName: "Bytes processed", Unit: "bytes"}, Value: float64(stat.BytesProcessed)},
+		)
+	}
+	return frames, nil
+}
+
 func (s *BigQueryDatasource) FillMode() *data.FillMissing {
 	return &data.FillMissing{
 		Mode: data.FillModeNull,
