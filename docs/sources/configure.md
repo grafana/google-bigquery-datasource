@@ -238,6 +238,25 @@ When **Restrict to accessible datasets** is enabled, some statements are rejecte
 With Forward OAuth Identity the plugin cannot list the projects the signed-in user has access to, so only the default project counts as accessible. Any other dataset needs an entry in **Additional allowed datasets**.
 {{< /admonition >}}
 
+## BigQuery job labels
+
+The data source adds [labels](https://cloud.google.com/bigquery/docs/labels-intro) to every BigQuery job it runs, so you can attribute cost and usage in `INFORMATION_SCHEMA.JOBS` or in billing exports:
+
+| Label                 | Value                                                               |
+| --------------------- | ------------------------------------------------------------------- |
+| `x-plugin-id`         | The plugin ID                                                       |
+| `x-datasource-uid`    | The data source UID                                                 |
+| `x-dashboard-uid`     | The dashboard UID, for queries from a panel                         |
+| `x-panel-id`          | The panel ID, for queries from a panel                              |
+| `x-panel-plugin-id`   | The panel plugin ID, for queries from a panel                       |
+| `x-query-group-id`    | An ID that Grafana sets to correlate related requests, when present |
+| `x-grafana-from-expr` | `true` when the query feeds an expression                           |
+| `x-grafana-user`      | The login of the user who ran the query                             |
+
+Grafana sends the user's login only when the server sets `send_user_header = true` in the `[dataproxy]` section of the [configuration](https://grafana.com/docs/grafana/<GRAFANA_VERSION>/setup-grafana/configure-grafana/#send_user_header). Anyone who can list jobs in the BigQuery project can read the label. Queries from anonymous users and from alert rule evaluations have no `x-grafana-user` label.
+
+Label values contain only lowercase letters, numbers, underscores and hyphens, and at most 63 characters. Other characters are removed, so `jane.doe@example.com` becomes `janedoeexamplecom`. <!-- cspell:disable-line -->
+
 ## Verify the connection
 
 Click **Save & test** to verify the connection. A successful test displays the message "Data source is working". If you encounter errors, refer to [Troubleshooting](https://grafana.com/docs/plugins/grafana-bigquery-datasource/latest/troubleshooting/).
