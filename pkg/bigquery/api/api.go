@@ -88,11 +88,27 @@ func (a *API) GetTableSchema(ctx context.Context, dataset, table string) (*types
 		return nil, errors.WithMessage(err, fmt.Sprintf("Failed to retrieve %s table metadata", table))
 	}
 
-	response, _ := json.Marshal(tableMeta)
-	result := &types.TableMetadataResponse{}
-
-	if err := json.Unmarshal(response, result); err != nil {
+	result, err := toTableMetadataResponse(tableMeta)
+	if err != nil {
 		return nil, errors.WithMessage(err, fmt.Sprintf("Failed to parse %s table metadata", table))
+	}
+
+	return result, nil
+}
+
+// toTableMetadataResponse narrows BigQuery's table metadata to the fields the
+// resource returns. bq.TableMetadata has no JSON tags, so it marshals under its
+// Go field names and relies on encoding/json matching them to the response's
+// tags case-insensitively.
+func toTableMetadataResponse(tableMeta *bq.TableMetadata) (*types.TableMetadataResponse, error) {
+	response, err := json.Marshal(tableMeta)
+	if err != nil {
+		return nil, err
+	}
+
+	result := &types.TableMetadataResponse{}
+	if err := json.Unmarshal(response, result); err != nil {
+		return nil, err
 	}
 
 	return result, nil
