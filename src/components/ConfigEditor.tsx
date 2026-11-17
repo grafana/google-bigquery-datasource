@@ -3,6 +3,7 @@ import React from 'react';
 import {
     DataSourcePluginOptionsEditorProps,
     onUpdateDatasourceJsonDataOption,
+    onUpdateDatasourceJsonDataOptionChecked,
     onUpdateDatasourceJsonDataOptionSelect
 } from '@grafana/data';
 import { AuthConfig, GoogleAuthType } from '@grafana/google-sdk';
@@ -178,6 +179,21 @@ export const BigQueryConfigEditor: React.FC<BigQueryConfigEditorProps> = (props)
             />
           </Field>
         )}
+        <Field
+          label="Label jobs with the user"
+          description={
+            <span>
+              Add the login of the signed-in user to each BigQuery job as the <code>x-grafana-user</code> label. Anyone
+              who can list jobs in the project can read the label.
+            </span>
+          }
+        >
+          <Switch
+            id="jobLabelUser"
+            value={jsonData.jobLabelUser || false}
+            onChange={onUpdateDatasourceJsonDataOptionChecked(props, 'jobLabelUser')}
+          />
+        </Field>
 
         {config.secureSocksDSProxyEnabled && (
           <SecureSocksProxySettings options={options} onOptionsChange={onOptionsChange} />

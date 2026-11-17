@@ -20,6 +20,7 @@ type BigQuerySettings struct {
 	MaxBytesBilled               int64  `json:"MaxBytesBilled,omitempty"`
 	RestrictToAccessibleDatasets bool   `json:"restrictToAccessibleDatasets,omitempty"`
 	AdditionalAllowedDatasets    string `json:"additionalAllowedDatasets,omitempty"`
+	JobLabelUser                 bool   `json:"jobLabelUser,omitempty"`
 	// EnableSecureSocksProxy is written by Grafana's SecureSocksProxySettings
 	// editor and consumed by core when it builds the datasource HTTP client, not
 	// by this plugin. Declared so the settings model covers every jsonData key,
@@ -49,6 +50,7 @@ type ConnectionSettings struct {
 	Dataset            string
 	MaxBytesBilled     int64
 	EnableStorageAPI   bool
+	JobLabelUser       bool
 
 	RestrictToAccessibleDatasets bool
 	AdditionalAllowedDatasets    []string

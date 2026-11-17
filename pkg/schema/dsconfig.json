@@ -475,6 +475,18 @@
       }
     },
     {
+      "id": "jsonData_jobLabelUser",
+      "key": "jobLabelUser",
+      "label": "Label jobs with the user",
+      "description": "Add the login of the signed-in user to each BigQuery job as the x-grafana-user label. Anyone who can list jobs in the project can read the label.",
+      "valueType": "boolean",
+      "target": "jsonData",
+      "defaultValue": false,
+      "ui": {
+        "component": "switch"
+      }
+    },
+    {
       "id": "jsonData_enableSecureSocksProxy",
       "key": "enableSecureSocksProxy",
       "label": "Secure Socks Proxy enabled",
@@ -524,7 +536,8 @@
         "jsonData_serviceEndpoint",
         "jsonData_MaxBytesBilled",
         "jsonData_restrictToAccessibleDatasets",
-        "jsonData_additionalAllowedDatasets"
+        "jsonData_additionalAllowedDatasets",
+        "jsonData_jobLabelUser"
       ]
     }
   ],
@@ -611,6 +624,13 @@
     },
     {
       "msg": "Dataset access restriction: set jsonData.restrictToAccessibleDatasets to true to reject queries that reference tables outside the GCP projects the data source credentials can enumerate. Each query is dry-run first and the referenced tables BigQuery reports are checked before it executes. The check fails closed — anything whose referenced tables cannot be determined reliably is rejected, so multi-statement scripts, EXECUTE IMMEDIATE and procedure calls are refused outright, as are queries referencing 50 or more tables (BigQuery stops reporting them past that point). jsonData.additionalAllowedDatasets is a comma-separated allowlist of datasets outside those projects that queries may still reference; it only has an effect when restrictToAccessibleDatasets is true. Example: {\"jsonData\":{\"restrictToAccessibleDatasets\":true,\"additionalAllowedDatasets\":\"bigquery-public-data.samples,shared_views\"}}",
+      "tags": [
+        "llm",
+        "settings"
+      ]
+    },
+    {
+      "msg": "User job label: set jsonData.jobLabelUser to true to add the login of the signed-in user to each BigQuery job as the x-grafana-user label. Anyone who can list jobs in the BigQuery project can read the label.",
       "tags": [
         "llm",
         "settings"
