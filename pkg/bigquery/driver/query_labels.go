@@ -67,6 +67,7 @@ func WithHeaders(ctx context.Context, headers http.Header) context.Context {
 // that are present in the wanted header list. The keys in the map are cleaned and formatted
 // as per the requirements specified in the BigQuery documentation.
 // The values in the map are the corresponding cleaned and formatted header values.
+// It also adds the plugin ID and, when JobLabelUser is set, the user login from the request context.
 func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	labels := make(map[string]string)
 	wantedHeaders := []string{HeaderPluginID, HeaderDatasourceUID, HeaderDashboardUID, HeaderPanelID, HeaderPanelPluginId, HeaderQueryGroupID, HeaderFromExpression}
@@ -81,6 +82,10 @@ func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	pluginContext := backend.PluginConfigFromContext(ctx)
 	if pluginContext.PluginID != "" {
 		labels[cleanStringForLabelOrValue(HeaderPluginID, true)] = pluginContext.PluginID
+	}
+	// The user comes from the plugin context, so the label does not need the server-wide send_user_header setting.
+	if user := backend.UserFromContext(ctx); c.cfg.JobLabelUser && user != nil && user.Login != "" {
+		labels["x-grafana-user"] = cleanStringForLabelOrValue(user.Login, false)
 	}
 	return labels
 }

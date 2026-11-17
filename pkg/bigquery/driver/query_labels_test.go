@@ -7,6 +7,7 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
 func TestHeadersAsLabels(t *testing.T) {
@@ -108,5 +109,33 @@ func TestHeadersAsLabelsPerRequest(t *testing.T) {
 		if got := conn.headersAsLabels(ctx)["x-panel-id"]; got != panel {
 			t.Errorf("x-panel-id = %q, want %q", got, panel)
 		}
+	}
+}
+
+func TestHeadersAsLabelsUser(t *testing.T) {
+	jane := &backend.User{Login: "Jane.Doe@example.com"}
+	tests := []struct {
+		name         string
+		user         *backend.User
+		jobLabelUser bool
+		want         map[string]string
+	}{
+		{"drops the user login by default", jane, false, map[string]string{}},
+		{"labels the plugin context user, not the header, when the data source opts in", jane, true, map[string]string{"x-grafana-user": "janedoeexamplecom"}}, //cspell:disable-line
+		{"omits the label without a user", nil, true, map[string]string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := t.Context()
+			if tt.user != nil {
+				ctx = backend.WithUser(ctx, tt.user)
+			}
+			ctx = WithHeaders(ctx, http.Header{"X-Grafana-User": {"header.user"}})
+			conn := &Conn{cfg: &types.ConnectionSettings{JobLabelUser: tt.jobLabelUser}}
+			if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
