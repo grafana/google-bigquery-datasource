@@ -1,6 +1,7 @@
 package driver
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
 
@@ -11,7 +12,7 @@ import (
 func TestHeadersAsLabels(t *testing.T) {
 	tests := []struct {
 		name    string
-		headers map[string][]string
+		headers http.Header
 		want    map[string]string
 	}{
 		{
@@ -92,15 +93,20 @@ func TestHeadersAsLabels(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			conn := &Conn{
-				cfg: &types.ConnectionSettings{
-					Headers: tt.headers,
-				},
-				client: &bigquery.Client{},
-			}
-			if got := conn.headersAsLabels(t.Context()); !reflect.DeepEqual(got, tt.want) {
+			conn := &Conn{cfg: &types.ConnectionSettings{}, client: &bigquery.Client{}}
+			if got := conn.headersAsLabels(WithHeaders(t.Context(), tt.headers)); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestHeadersAsLabelsPerRequest(t *testing.T) {
+	conn := &Conn{cfg: &types.ConnectionSettings{}}
+	for _, panel := range []string{"1", "2"} {
+		ctx := WithHeaders(t.Context(), http.Header{HeaderPanelID: {panel}})
+		if got := conn.headersAsLabels(ctx)["x-panel-id"]; got != panel {
+			t.Errorf("x-panel-id = %q, want %q", got, panel)
+		}
 	}
 }

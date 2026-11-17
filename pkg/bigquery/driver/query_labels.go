@@ -2,6 +2,7 @@ package driver
 
 import (
 	"context"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -55,29 +56,26 @@ func cleanStringForLabelOrValue(s string, isKey bool) string {
 	return result
 }
 
-// headerInList checks if the given `header` is present in the `headersList`.
-// It returns `true` if the header is found, otherwise it returns `false`.
-func headerInList(header string, headersList []string) bool {
-	for _, h := range headersList {
-		if h == header {
-			return true
-		}
-	}
-	return false
+type headersKey struct{}
+
+// WithHeaders attaches the HTTP headers of the current request, which headersAsLabels reads.
+func WithHeaders(ctx context.Context, headers http.Header) context.Context {
+	return context.WithValue(ctx, headersKey{}, headers)
 }
 
-// headersAsLabels returns a map of headers from the ConnectionSettings configuration
+// headersAsLabels returns a map of the request headers attached by WithHeaders
 // that are present in the wanted header list. The keys in the map are cleaned and formatted
 // as per the requirements specified in the BigQuery documentation.
-// The values in the map are the corresponding cleaned and formatted values from the configuration.
-// It returns the map of headers as labels.
+// The values in the map are the corresponding cleaned and formatted header values.
 func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	labels := make(map[string]string)
 	wantedHeaders := []string{HeaderPluginID, HeaderDatasourceUID, HeaderDashboardUID, HeaderPanelID, HeaderPanelPluginId, HeaderQueryGroupID, HeaderFromExpression}
 
-	for k, v := range c.cfg.Headers {
-		if headerInList(k, wantedHeaders) && len(v) > 0 {
-			labels[cleanStringForLabelOrValue(k, true)] = cleanStringForLabelOrValue(v[0], false)
+	// The connection is cached across requests, so the per-request headers come from ctx.
+	headers, _ := ctx.Value(headersKey{}).(http.Header)
+	for _, h := range wantedHeaders {
+		if v := headers.Values(h); len(v) > 0 {
+			labels[cleanStringForLabelOrValue(h, true)] = cleanStringForLabelOrValue(v[0], false)
 		}
 	}
 	pluginContext := backend.PluginConfigFromContext(ctx)

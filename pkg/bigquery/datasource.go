@@ -78,11 +78,10 @@ type accessibleProjectsEntry struct {
 const accessibleProjectsCacheTTL = 5 * time.Minute
 
 type ConnectionArgs struct {
-	Dataset          string              `json:"dataset,omitempty"`
-	Table            string              `json:"table,omitempty"`
-	Location         string              `json:"location,omitempty"`
-	EnableStorageAPI bool                `json:"enableStorageAPI,omitempty"`
-	Headers          map[string][]string `json:"grafana-http-headers,omitempty"`
+	Dataset          string `json:"dataset,omitempty"`
+	Table            string `json:"table,omitempty"`
+	Location         string `json:"location,omitempty"`
+	EnableStorageAPI bool   `json:"enableStorageAPI,omitempty"`
 }
 
 func NewDatasource(ctx context.Context, settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
@@ -254,7 +253,6 @@ func (s *BigQueryDatasource) Settings(_ context.Context, _ backend.DataSourceIns
 		FillMode: &data.FillMissing{
 			Mode: data.FillModeNull,
 		},
-		ForwardHeaders: true,
 	}
 }
 
@@ -585,6 +583,13 @@ func (s *BigQueryDatasource) ValidateQuery(ctx context.Context, options Validate
 	}
 
 	return response, nil
+}
+
+var _ sqlds.QueryDataMutator = (*BigQueryDatasource)(nil)
+
+// MutateQueryData gives the job labels the headers of this request. sqlds passes the context down to the driver.
+func (s *BigQueryDatasource) MutateQueryData(ctx context.Context, req *backend.QueryDataRequest) (context.Context, *backend.QueryDataRequest) {
+	return driver.WithHeaders(ctx, req.GetHTTPHeaders()), req
 }
 
 // MutateQueryError marks BigQuery errors as downstream errors
