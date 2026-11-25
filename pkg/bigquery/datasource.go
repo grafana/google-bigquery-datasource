@@ -230,6 +230,14 @@ func (s *BigQueryDatasource) Settings(_ context.Context, _ backend.DataSourceIns
 	}
 }
 
+var _ sqlds.QueryDataMutator = (*BigQueryDatasource)(nil)
+
+// MutateQueryData puts the request's label headers on ctx, so job labels follow the
+// request that runs the query rather than the one that opened the shared connection.
+func (s *BigQueryDatasource) MutateQueryData(ctx context.Context, req *backend.QueryDataRequest) (context.Context, *backend.QueryDataRequest) {
+	return driver.ContextWithHeaders(ctx, req.GetHTTPHeaders()), req
+}
+
 type DatasetsArgs struct {
 	Project  string `json:"project"`
 	Location string `json:"location"`

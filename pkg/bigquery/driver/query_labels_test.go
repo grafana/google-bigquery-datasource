@@ -1,11 +1,14 @@
 package driver
 
 import (
+	"context"
+	"net/http"
 	"reflect"
 	"testing"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
 func TestHeadersAsLabels(t *testing.T) {
@@ -93,14 +96,47 @@ func TestHeadersAsLabels(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			conn := &Conn{
-				cfg: &types.ConnectionSettings{
-					Headers: tt.headers,
-				},
+				cfg:    &types.ConnectionSettings{},
 				client: &bigquery.Client{},
 			}
-			if got := conn.headersAsLabels(t.Context()); !reflect.DeepEqual(got, tt.want) {
+			ctx := ContextWithHeaders(t.Context(), http.Header(tt.headers))
+			if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
 			}
 		})
 	}
+}
+
+func TestHeadersAsLabelsSource(t *testing.T) {
+	t.Run("ignores headers stored on the connection", func(t *testing.T) {
+		conn := &Conn{
+			cfg:    &types.ConnectionSettings{Headers: map[string][]string{HeaderDashboardUID: {"stale"}}},
+			client: &bigquery.Client{},
+		}
+		ctx := ContextWithHeaders(t.Context(), http.Header{HeaderDashboardUID: {"fresh"}})
+		want := map[string]string{"x-dashboard-uid": "fresh"}
+		if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, want) {
+			t.Errorf("Conn.headersAsLabels() = %v, want %v", got, want)
+		}
+		if got := conn.headersAsLabels(t.Context()); len(got) != 0 {
+			t.Errorf("Conn.headersAsLabels() without request headers = %v, want empty", got)
+		}
+	})
+
+	t.Run("no request headers keeps plugin id", func(t *testing.T) {
+		conn := &Conn{cfg: &types.ConnectionSettings{}, client: &bigquery.Client{}}
+		ctx := backend.WithPluginContext(context.Background(), backend.PluginContext{PluginID: "grafana-bigquery-datasource"})
+		want := map[string]string{"x-plugin-id": "grafana-bigquery-datasource"}
+		if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, want) {
+			t.Errorf("Conn.headersAsLabels() = %v, want %v", got, want)
+		}
+	})
+
+	t.Run("does not keep unwanted headers on the context", func(t *testing.T) {
+		ctx := ContextWithHeaders(t.Context(), http.Header{"Authorization": {"Bearer x"}, HeaderPanelID: {"4"}})
+		want := http.Header{HeaderPanelID: {"4"}}
+		if got := headersFromContext(ctx); !reflect.DeepEqual(got, want) {
+			t.Errorf("headersFromContext() = %v, want %v", got, want)
+		}
+	})
 }
