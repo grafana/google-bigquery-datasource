@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.5
+
+🐛 Fix: Take BigQuery job labels (dashboard, panel, data source) from the request running the query instead of the first request that opened the connection
+
 ## 3.1.4
 
 🚀 Feature: Add Grafana Assistant support
