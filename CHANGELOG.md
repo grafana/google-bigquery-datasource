@@ -1,5 +1,14 @@
 # Changelog
 
+## 3.5.0
+
+🚀 Add the "Label jobs with the user" setting, which labels BigQuery jobs with the signed-in user's login (`x-grafana-user`)
+🐛 Fix a connection freeze between Grafana and the plugin under heavy query load by updating google.golang.org/grpc to v1.85.0 ([grpc/grpc-go#9330](https://github.com/grpc/grpc-go/issues/9330))
+🐛 Security: bump moment and fast-uri to patched versions, and pin `@grafana/*` packages to 13.1.9
+🐛 Resource requests now go through the datasource client so they follow Grafana's datasource API routing
+🐛 Fix BigQuery job labels that showed the dashboard and panel of an earlier query
+⚙️ Chore: Update dependencies
+
 ## 3.4.8
 
 🐛 Fix security vulnerabilities in `dompurify` (GHSA-cg2g-xh64-v4q7, GHSA-mrv2-3pqr-j5jr), `source-map-js` (CVE-2026-93749) and `zod` (CVE-2023-54404)

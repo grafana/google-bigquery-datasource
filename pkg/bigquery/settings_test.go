@@ -59,3 +59,9 @@ func TestGetConnectionSettingsDatasetRestriction(t *testing.T) {
 	assert.True(t, connectionSettings.RestrictToAccessibleDatasets)
 	assert.Equal(t, []string{"sales", "other-project.analytics"}, connectionSettings.AdditionalAllowedDatasets)
 }
+
+func TestGetConnectionSettingsJobLabelUser(t *testing.T) {
+	connectionSettings := getConnectionSettings(types.BigQuerySettings{JobLabelUser: true}, &ConnectionArgs{}, false)
+
+	assert.True(t, connectionSettings.JobLabelUser)
+}

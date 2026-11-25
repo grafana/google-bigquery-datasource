@@ -1,6 +1,5 @@
 import { TimeRange } from '@grafana/data';
-import { getBackendSrv, getTemplateSrv } from '@grafana/runtime';
-import { lastValueFrom } from 'rxjs';
+import { DataSourceWithBackend, getDataSourceSrv, getTemplateSrv } from '@grafana/runtime';
 import { BigQueryQueryNG } from 'types';
 
 import { interpolateVariable } from './utils/interpolateVariable';
@@ -57,7 +56,6 @@ export interface BigQueryAPI {
 
 class BigQueryAPIClient implements BigQueryAPI {
   private RESULTS_CACHE = new Map<string, any>();
-  private resourcesUrl: string;
   private datasourceUid: string;
   private lastValidation: ValidationResults | null = null;
 
@@ -66,8 +64,17 @@ class BigQueryAPIClient implements BigQueryAPI {
     private defaultProject: string
   ) {
     this.datasourceUid = datasourceUid;
-    this.resourcesUrl = `/api/datasources/uid/${datasourceUid}/resources`;
   }
+
+  // Resolved lazily so that a failure to load the datasource surfaces on the individual resource call
+  // (see getApiClient) rather than preventing the client from being created.
+  private getDatasource = async (): Promise<DataSourceWithBackend> => {
+    return (await getDataSourceSrv().get({ uid: this.datasourceUid })) as DataSourceWithBackend;
+  };
+
+  private postResource = async <T>(path: string, body: unknown): Promise<T> => {
+    return (await this.getDatasource()).postResource<T>(path, body as any);
+  };
 
   getDefaultProject() {
     return this.defaultProject;
@@ -78,14 +85,14 @@ class BigQueryAPIClient implements BigQueryAPI {
   };
 
   private _getDatasets = async (location: string, project: string): Promise<string[]> => {
-    return await getBackendSrv().post(this.resourcesUrl + '/datasets', {
+    return await this.postResource<any>('datasets', {
       project,
       location,
     });
   };
 
   private _getProjects = async (): Promise<GCPProject[]> => {
-    return await getBackendSrv().post(this.resourcesUrl + '/projects', {
+    return await this.postResource<any>('projects', {
       datasourceUid: this.datasourceUid,
     });
   };
@@ -99,7 +106,7 @@ class BigQueryAPIClient implements BigQueryAPI {
   };
 
   private _getTables = async (project: string, location: string, dataset: string): Promise<string[]> => {
-    return await getBackendSrv().post(this.resourcesUrl + '/tables', {
+    return await this.postResource<any>('tables', {
       project,
       location,
       dataset,
@@ -135,7 +142,7 @@ class BigQueryAPIClient implements BigQueryAPI {
       return this.lastValidation;
     }
 
-    const validationResults = await getBackendSrv().post(this.resourcesUrl + '/validateQuery', {
+    const validationResults = await this.postResource<any>('validateQuery', {
       project: this.defaultProject,
       location: query.location,
       query: {
@@ -171,7 +178,7 @@ class BigQueryAPIClient implements BigQueryAPI {
     table: string,
     isOrderable?: boolean
   ): Promise<string[]> => {
-    return await getBackendSrv().post(this.resourcesUrl + '/columns', {
+    return await this.postResource<any>('columns', {
       project,
       location,
       dataset,
@@ -190,22 +197,17 @@ class BigQueryAPIClient implements BigQueryAPI {
     dataset: string,
     table: string
   ): Promise<TableSchema> => {
-    const result = await lastValueFrom(
-      getBackendSrv().fetch<TableSchema>({
-        method: 'POST',
-        showErrorAlert: false,
-        showSuccessAlert: false,
-        url: this.resourcesUrl + '/dataset/table/schema',
-        data: {
-          project,
-          location,
-          dataset,
-          table,
-        },
-      })
+    const ds = await this.getDatasource();
+    return await ds.postResource<TableSchema>(
+      'dataset/table/schema',
+      {
+        project,
+        location,
+        dataset,
+        table,
+      },
+      { showErrorAlert: false, showSuccessAlert: false }
     );
-
-    return result.data;
   };
 
   private fromCache =
@@ -237,7 +239,8 @@ export async function getApiClient(datasourceUid: string) {
   if (!apis.has(datasourceUid)) {
     let defaultProject = '';
     try {
-      defaultProject = await getBackendSrv().post(`/api/datasources/uid/${datasourceUid}/resources/defaultProjects`, {});
+      const ds = (await getDataSourceSrv().get({ uid: datasourceUid })) as DataSourceWithBackend;
+      defaultProject = await ds.postResource<string>('defaultProjects', {});
     } catch (e) {
       // Couldn't resolve the default project (e.g. a data source auth/WIF failure).
       // Return a client anyway so the query editor still renders — the project,

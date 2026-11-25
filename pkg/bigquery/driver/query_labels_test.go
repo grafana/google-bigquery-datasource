@@ -1,17 +1,19 @@
 package driver
 
 import (
+	"net/http"
 	"reflect"
 	"testing"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/grafana/google-bigquery-datasource/pkg/bigquery/types"
+	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
 func TestHeadersAsLabels(t *testing.T) {
 	tests := []struct {
 		name    string
-		headers map[string][]string
+		headers http.Header
 		want    map[string]string
 	}{
 		{
@@ -92,13 +94,46 @@ func TestHeadersAsLabels(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			conn := &Conn{
-				cfg: &types.ConnectionSettings{
-					Headers: tt.headers,
-				},
-				client: &bigquery.Client{},
+			conn := &Conn{cfg: &types.ConnectionSettings{}, client: &bigquery.Client{}}
+			if got := conn.headersAsLabels(WithHeaders(t.Context(), tt.headers)); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
 			}
-			if got := conn.headersAsLabels(t.Context()); !reflect.DeepEqual(got, tt.want) {
+		})
+	}
+}
+
+func TestHeadersAsLabelsPerRequest(t *testing.T) {
+	conn := &Conn{cfg: &types.ConnectionSettings{}}
+	for _, panel := range []string{"1", "2"} {
+		ctx := WithHeaders(t.Context(), http.Header{HeaderPanelID: {panel}})
+		if got := conn.headersAsLabels(ctx)["x-panel-id"]; got != panel {
+			t.Errorf("x-panel-id = %q, want %q", got, panel)
+		}
+	}
+}
+
+func TestHeadersAsLabelsUser(t *testing.T) {
+	jane := &backend.User{Login: "Jane.Doe@example.com"}
+	tests := []struct {
+		name         string
+		user         *backend.User
+		jobLabelUser bool
+		want         map[string]string
+	}{
+		{"drops the user login by default", jane, false, map[string]string{}},
+		{"labels the plugin context user, not the header, when the data source opts in", jane, true, map[string]string{"x-grafana-user": "janedoeexamplecom"}}, //cspell:disable-line
+		{"omits the label without a user", nil, true, map[string]string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := t.Context()
+			if tt.user != nil {
+				ctx = backend.WithUser(ctx, tt.user)
+			}
+			ctx = WithHeaders(ctx, http.Header{"X-Grafana-User": {"header.user"}})
+			conn := &Conn{cfg: &types.ConnectionSettings{JobLabelUser: tt.jobLabelUser}}
+			if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
 			}
 		})

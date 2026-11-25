@@ -38,6 +38,7 @@ export interface BigQueryOptions extends DataSourceOptions {
   MaxBytesBilled?: number;
   restrictToAccessibleDatasets?: boolean;
   additionalAllowedDatasets?: string;
+  jobLabelUser?: boolean;
   serviceEndpoint?: string;
   oauthPassThru?: boolean;
 }

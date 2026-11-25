@@ -45,6 +45,7 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 		Location:           settings.ProcessingLocation,
 		AuthenticationType: settings.AuthenticationType,
 		MaxBytesBilled:     settings.MaxBytesBilled,
+		JobLabelUser:       settings.JobLabelUser,
 
 		RestrictToAccessibleDatasets: settings.RestrictToAccessibleDatasets,
 		AdditionalAllowedDatasets:    parseAllowedDatasets(settings.AdditionalAllowedDatasets),
@@ -57,10 +58,6 @@ func getConnectionSettings(settings types.BigQuerySettings, queryArgs *Connectio
 
 	if queryArgs.Dataset != "" {
 		connectionSettings.Dataset = queryArgs.Dataset
-	}
-
-	if queryArgs.Headers != nil {
-		connectionSettings.Headers = queryArgs.Headers
 	}
 
 	if queryArgs.EnableStorageAPI {

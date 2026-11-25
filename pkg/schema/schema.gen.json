@@ -49,6 +49,11 @@
               "description": "Defined in the backend Settings struct but not read by any current code path and not exposed in the configuration editor. Kept in the schema so provisioning payloads are validated instead of silently accepting unknown keys.",
               "type": "string"
             },
+            "jobLabelUser": {
+              "description": "Add the login of the signed-in user to each BigQuery job as the x-grafana-user label. Anyone who can list jobs in the project can read the label.",
+              "type": "boolean",
+              "default": false
+            },
             "oauthPassThru": {
               "description": "Automatically set to true when authenticationType is 'forwardOAuthIdentity' or 'workloadIdentityFederation'; otherwise false. Written as a side-effect of the auth-type radio, not by a direct UI toggle. Provisioned configurations (YAML/Terraform) bypass the editor and must set this explicitly: if left false for these two auth types, client creation fails with \"auth type ... does not use a token provider middleware\" (see pkg/bigquery/http_client.go).",
               "type": "boolean",

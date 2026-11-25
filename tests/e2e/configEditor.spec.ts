@@ -21,6 +21,7 @@ test.describe('Config editor', () => {
       await expect(page.getByLabel('Service endpoint')).toBeVisible();
       await expect(page.getByLabel('Max bytes billed')).toBeVisible();
       await expect(page.getByLabel('Restrict to accessible datasets')).toBeVisible();
+      await expect(page.getByLabel('Label jobs with the user')).toBeVisible();
     });
   });
 
