@@ -9,6 +9,10 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
 
+// LabelNamespace labels jobs with the Grafana namespace that ran the query:
+// "default" for org 1, "org-<id>" for other orgs, "stacks-<id>" on Grafana Cloud.
+const LabelNamespace = "x-grafana-namespace"
+
 const (
 	HeaderPluginID       = "X-Plugin-Id"
 	HeaderDatasourceUID  = "X-Datasource-Uid"
@@ -82,6 +86,9 @@ func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	pluginContext := backend.PluginConfigFromContext(ctx)
 	if pluginContext.PluginID != "" {
 		labels[cleanStringForLabelOrValue(HeaderPluginID, true)] = pluginContext.PluginID
+	}
+	if v := cleanStringForLabelOrValue(pluginContext.Namespace, false); v != "" {
+		labels[LabelNamespace] = v
 	}
 	// The user comes from the plugin context, so the label does not need the server-wide send_user_header setting.
 	if user := backend.UserFromContext(ctx); c.cfg.JobLabelUser && user != nil && user.Login != "" {

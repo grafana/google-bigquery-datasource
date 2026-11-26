@@ -139,3 +139,27 @@ func TestHeadersAsLabelsUser(t *testing.T) {
 		})
 	}
 }
+
+func TestHeadersAsLabelsNamespace(t *testing.T) {
+	tests := []struct {
+		name      string
+		namespace string
+		want      map[string]string
+	}{
+		{"labels the default org namespace", "default", map[string]string{"x-grafana-namespace": "default"}},
+		{"labels another org namespace", "org-42", map[string]string{"x-grafana-namespace": "org-42"}},
+		{"labels a Grafana Cloud stack namespace", "stacks-123", map[string]string{"x-grafana-namespace": "stacks-123"}},
+		{"cleans the namespace", "Org_42.x", map[string]string{"x-grafana-namespace": "org_42x"}},
+		{"omits the label without a namespace", "", map[string]string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := backend.WithPluginContext(t.Context(), backend.PluginContext{Namespace: tt.namespace})
+			conn := &Conn{cfg: &types.ConnectionSettings{}}
+			if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

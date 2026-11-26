@@ -7,6 +7,13 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/log"
 )
 
+// database/sql only falls back to the deprecated Query/Exec methods, which have no
+// request context and so no job labels, when these interfaces are missing.
+var (
+	_ driver.StmtQueryContext = (*stmt)(nil)
+	_ driver.StmtExecContext  = (*stmt)(nil)
+)
+
 type stmt struct {
 	query string
 	c     *Conn

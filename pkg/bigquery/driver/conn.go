@@ -108,6 +108,13 @@ func prepareQuery(query string, args []driver.Value) (out string, err error) {
 	return
 }
 
+// database/sql only falls back to the deprecated Query/Exec methods, which have no
+// request context and so no job labels, when these interfaces are missing.
+var (
+	_ driver.QueryerContext = (*Conn)(nil)
+	_ driver.ExecerContext  = (*Conn)(nil)
+)
+
 // Deprecated: Drivers should implement ExecerContext instead.
 func (c *Conn) Exec(query string, args []driver.Value) (res driver.Result, err error) {
 	return c.execContext(context.Background(), query, args)

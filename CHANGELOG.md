@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.6.0
+
+🚀 Label BigQuery jobs with the Grafana namespace (`x-grafana-namespace`), which identifies the organization or Grafana Cloud stack
+🐛 Fix a data race when concurrent queries open BigQuery connections, which could also make the plugin replace and leak a working connection pool
+
 ## 3.5.0
 
 🚀 Add the "Label jobs with the user" setting, which labels BigQuery jobs with the signed-in user's login (`x-grafana-user`)
