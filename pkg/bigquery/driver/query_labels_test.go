@@ -139,3 +139,24 @@ func TestHeadersAsLabelsUser(t *testing.T) {
 		})
 	}
 }
+
+func TestHeadersAsLabelsOrg(t *testing.T) {
+	tests := []struct {
+		name  string
+		orgID int64
+		want  map[string]string
+	}{
+		{"labels the org of the plugin context", 42, map[string]string{"x-grafana-org-id": "42"}},
+		{"omits the label without an org", 0, map[string]string{}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := backend.WithPluginContext(t.Context(), backend.PluginContext{OrgID: tt.orgID})
+			conn := &Conn{cfg: &types.ConnectionSettings{}}
+			if got := conn.headersAsLabels(ctx); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Conn.headersAsLabels() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

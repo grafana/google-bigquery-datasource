@@ -4,10 +4,14 @@ import (
 	"context"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/grafana/grafana-plugin-sdk-go/backend"
 )
+
+// LabelOrgID labels jobs with the Grafana org that ran the query.
+const LabelOrgID = "x-grafana-org-id"
 
 const (
 	HeaderPluginID       = "X-Plugin-Id"
@@ -82,6 +86,9 @@ func (c *Conn) headersAsLabels(ctx context.Context) map[string]string {
 	pluginContext := backend.PluginConfigFromContext(ctx)
 	if pluginContext.PluginID != "" {
 		labels[cleanStringForLabelOrValue(HeaderPluginID, true)] = pluginContext.PluginID
+	}
+	if pluginContext.OrgID > 0 {
+		labels[LabelOrgID] = strconv.FormatInt(pluginContext.OrgID, 10)
 	}
 	// The user comes from the plugin context, so the label does not need the server-wide send_user_header setting.
 	if user := backend.UserFromContext(ctx); c.cfg.JobLabelUser && user != nil && user.Login != "" {
