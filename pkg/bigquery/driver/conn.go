@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	bq "cloud.google.com/go/bigquery"
@@ -179,11 +180,11 @@ func NewConn(ctx context.Context, cfg types.ConnectionSettings, client *bq.Clien
 }
 
 type BigQueryConnector struct {
-	Info       map[string]string
-	Client     *bq.Client
-	settings   types.ConnectionSettings
-	connection *Conn
-	bqClient   *bq.Client
+	Info     map[string]string
+	Client   *bq.Client
+	settings types.ConnectionSettings
+	bqClient *bq.Client
+	closed   atomic.Bool
 }
 
 func NewConnector(settings types.ConnectionSettings, client *bq.Client) *BigQueryConnector {
@@ -196,9 +197,14 @@ func (c *BigQueryConnector) Connect(ctx context.Context) (driver.Conn, error) {
 	if err != nil {
 		return nil, err
 	}
-	c.connection = conn
 
 	return conn, nil
+}
+
+// Close is called by database/sql when the *sql.DB opened with this connector is closed.
+func (c *BigQueryConnector) Close() error {
+	c.closed.Store(true)
+	return nil
 }
 
 func (c *BigQueryConnector) Driver() driver.Driver {
