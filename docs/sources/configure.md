@@ -252,7 +252,7 @@ The data source adds [labels](https://cloud.google.com/bigquery/docs/labels-intr
 | `x-panel-plugin-id`   | The panel plugin ID, for queries from a panel                       |
 | `x-query-group-id`    | An ID that Grafana sets to correlate related requests, when present |
 | `x-grafana-from-expr` | `true` when the query feeds an expression                           |
-| `x-grafana-org-id`    | The ID of the Grafana organization that ran the query               |
+| `x-grafana-namespace` | The Grafana namespace: `default`, `org-<id>` or `stacks-<id>`       |
 | `x-grafana-user`      | The login of the user who ran the query, when enabled               |
 
 Turn on **Label jobs with the user** on the data source to add the `x-grafana-user` label. Anyone who can list jobs in the BigQuery project can read the label. Queries without a signed-in user have no `x-grafana-user` label.

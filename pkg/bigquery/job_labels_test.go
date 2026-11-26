@@ -185,7 +185,7 @@ func Test_jobLabelsFollowRequestHeaders(t *testing.T) {
 		require.NoError(t, err)
 		qd := inst.(*sqlds.SQLDatasource)
 
-		pluginCtx := backend.PluginContext{OrgID: 3, DataSourceInstanceSettings: &settings}
+		pluginCtx := backend.PluginContext{Namespace: "org-3", DataSourceInstanceSettings: &settings}
 		for _, dash := range []string{"dash-a", "dash-b"} {
 			// The SDK middleware puts the plugin context on ctx before QueryData runs.
 			_, err := qd.QueryData(backend.WithPluginContext(context.Background(), pluginCtx), &backend.QueryDataRequest{
@@ -205,7 +205,7 @@ func Test_jobLabelsFollowRequestHeaders(t *testing.T) {
 			require.Equal(t, "SELECT '"+dash+"'", jobs[i].query)
 			require.Equal(t, dash, jobs[i].labels["x-dashboard-uid"])
 			require.Equal(t, "7", jobs[i].labels["x-panel-id"])
-			require.Equal(t, "3", jobs[i].labels["x-grafana-org-id"])
+			require.Equal(t, "org-3", jobs[i].labels["x-grafana-namespace"])
 		}
 	})
 }
