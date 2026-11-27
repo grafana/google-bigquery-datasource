@@ -1,3 +1,5 @@
+import type { Page, Response } from '@playwright/test';
+
 export const PLUGIN_ID = 'grafana-bigquery-datasource';
 export const PROVISIONING_FILENAME = 'bigquery.e2e.yaml';
 
@@ -32,4 +34,19 @@ export function cloudCredentials() {
  */
 export function cloudPdcNetworkName(): string {
   return process.env.DS_PDC_NETWORK_NAME ?? '';
+}
+
+// Grafana can send these queries to /apis/<group>/<version>/namespaces/<ns>/query (query.grafana.app or
+// datasource.grafana.app) instead of /api/ds/query, the only URL the plugin-e2e query helpers match.
+const QUERY_URL_GLOBS = ['**/api/ds/query*', '**/apis/*/*/namespaces/*/query*'];
+const QUERY_URL = /\/api\/ds\/query|\/apis\/[^/]+\/[^/]+\/namespaces\/[^/]+\/query(\?|$)/;
+
+export function waitForQueryResponse(page: Page): Promise<Response> {
+  return page.waitForResponse((r) => r.request().method() === 'POST' && QUERY_URL.test(r.url()));
+}
+
+export async function mockQueryResponse(page: Page, body: unknown) {
+  for (const glob of QUERY_URL_GLOBS) {
+    await page.route(glob, (route) => route.fulfill({ status: 200, json: body }));
+  }
 }
