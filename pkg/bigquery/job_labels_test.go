@@ -137,19 +137,6 @@ func Test_jobLabelsFollowRequestHeaders(t *testing.T) {
 		require.NoError(t, err)
 
 		const n = 20
-		// Open the pool's driver connections up front: concurrent Driver.Open has a
-		// separate, pre-existing data race on Driver.connector.
-		db.SetMaxIdleConns(n)
-		var warm []*sql.Conn
-		for range n {
-			c, err := db.Conn(context.Background())
-			require.NoError(t, err)
-			warm = append(warm, c)
-		}
-		for _, c := range warm {
-			require.NoError(t, c.Close())
-		}
-
 		var wg sync.WaitGroup
 		for i := range n {
 			wg.Add(1)
